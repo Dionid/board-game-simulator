@@ -37,11 +37,41 @@ export const Entity = {
   },
 };
 
-export type EntityStorage<E extends Entity<any>> = {
+export type EntityStorage<E extends Entity<any> = Entity<any>> = {
   entitiesById: {
-    [key: string]: E;
+    [key: string]: E | undefined;
   };
   entitiesByComponentName: {
-    [key: string]: E[];
+    [key: string]: E[] | undefined;
   };
+};
+
+export const EntityStorage = {
+  findByComponentName: (es: EntityStorage, componentName: string): Entity<any>[] | undefined => {
+    return es.entitiesByComponentName[componentName];
+  },
+  addEntity: (es: EntityStorage, e: Entity<any>): EntityStorage => {
+    const { entitiesByComponentName } = es;
+    const componentNames = Object.keys(e.componentsByName);
+
+    return {
+      entitiesById: {
+        ...es.entitiesById,
+        [e.id]: e,
+      },
+      entitiesByComponentName: {
+        ...es.entitiesByComponentName,
+        ...componentNames.reduce<any>((acc, name) => {
+          const comps = entitiesByComponentName[name];
+          if (comps) {
+            acc[name] = [...comps, e];
+          } else {
+            acc[name] = [e];
+          }
+
+          return acc;
+        }, {}),
+      },
+    };
+  },
 };

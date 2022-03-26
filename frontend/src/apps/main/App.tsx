@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useState } from 'react';
 import { Layer, Stage, Transformer, Image } from 'react-konva';
 import CssBaseline from '@mui/material/CssBaseline';
 import Konva from 'konva';
@@ -8,6 +8,8 @@ import FileCopyIcon from '@mui/icons-material/FileCopyOutlined';
 import SaveIcon from '@mui/icons-material/Save';
 import PrintIcon from '@mui/icons-material/Print';
 import ShareIcon from '@mui/icons-material/Share';
+import { BgsEntityStorage, GameBoardEntity } from '../../libs/bgs';
+import { EntityStorage } from '../../libs/ecs';
 
 const CustomImage = (
   props: { url: string; isSelected: boolean; onSelect: () => void } & Omit<Konva.ImageConfig, 'image'>
@@ -84,8 +86,22 @@ function App() {
     }
   };
 
+  const [entityStorage, setEntityStorage] = useState<BgsEntityStorage>({
+    entitiesByComponentName: {},
+    entitiesById: {},
+  });
+
   const actions = [
-    { icon: <FileCopyIcon />, name: 'Copy' },
+    {
+      icon: <FileCopyIcon />,
+      name: 'Add map',
+      onClick: () => {
+        const gameBoard = GameBoardEntity.new(
+          'https://downloader.disk.yandex.ru/preview/dfe66cd35d8feabf8ce64c40339d342e3f91b6c2e70db5c0046745aee0fc7b0a/623f62e7/HTA3saKP7S9n3UVUFPbneRLOs38Aexzy74peiw68-Bqu1Ghp-2pZ66iNDKp7lyv_THLyuC5YhZtrQDywSWC10Q%3D%3D?uid=0&filename=Screenshot%202022-03-26%20at%2018.00.35.png&disposition=inline&hash=&limit=0&content_type=image%2Fpng&owner_uid=0&tknv=v2&size=2878x1478'
+        );
+        setEntityStorage(EntityStorage.addEntity(entityStorage, gameBoard));
+      },
+    },
     { icon: <SaveIcon />, name: 'Save' },
     { icon: <PrintIcon />, name: 'Print' },
     { icon: <ShareIcon />, name: 'Share' },
@@ -102,17 +118,23 @@ function App() {
         onTouchStart={checkDeselect}
       >
         <Layer>
-          <CustomImage
-            url={
-              'https://downloader.disk.yandex.ru/preview/dfe66cd35d8feabf8ce64c40339d342e3f91b6c2e70db5c0046745aee0fc7b0a/623f62e7/HTA3saKP7S9n3UVUFPbneRLOs38Aexzy74peiw68-Bqu1Ghp-2pZ66iNDKp7lyv_THLyuC5YhZtrQDywSWC10Q%3D%3D?uid=0&filename=Screenshot%202022-03-26%20at%2018.00.35.png&disposition=inline&hash=&limit=0&content_type=image%2Fpng&owner_uid=0&tknv=v2&size=2878x1478'
-            }
-            isSelected={'map' === selectedId}
-            onSelect={() => {
-              selectShape('map');
-            }}
-            width={700}
-            height={450}
-          />
+          {EntityStorage.findByComponentName(entityStorage, 'GameMapComponent')?.map((entity) => {
+            const { componentsByName } = entity;
+            return (
+              <CustomImage
+                key={entity.id}
+                url={componentsByName['ImageComponent'].url}
+                isSelected={entity.id === selectedId}
+                onSelect={() => {
+                  selectShape(entity.id);
+                }}
+                width={componentsByName['SizeComponent'].width}
+                height={componentsByName['SizeComponent'].height}
+                x={componentsByName['PositionComponent'].x}
+                y={componentsByName['PositionComponent'].y}
+              />
+            );
+          })}
         </Layer>
         <Layer>
           <CustomImage
@@ -134,7 +156,7 @@ function App() {
         icon={<SpeedDialIcon />}
       >
         {actions.map((action) => (
-          <SpeedDialAction key={action.name} icon={action.icon} tooltipTitle={action.name} />
+          <SpeedDialAction key={action.name} icon={action.icon} tooltipTitle={action.name} onClick={action.onClick} />
         ))}
       </SpeedDial>
     </div>

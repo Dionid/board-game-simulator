@@ -1,4 +1,4 @@
-import { Entity } from '../ecs';
+import { Entity, EntityStorage } from '../ecs';
 import { UUID } from '../branded-types';
 
 export type PositionComponent = {
@@ -12,6 +12,10 @@ export type PositionComponent = {
 export type ImageComponent = {
   name: 'ImageComponent';
   url: string;
+};
+
+export type SizeComponent = {
+  name: 'SizeComponent';
   width: number;
   height: number;
 };
@@ -24,8 +28,45 @@ export type GameMapComponent = {
   mapName: string;
 };
 
-export type GameBoardEntityComponents = GameMapComponent | PositionComponent | ImageComponent;
+export type GameBoardEntityComponents = GameMapComponent | PositionComponent | ImageComponent | SizeComponent;
 export type GameBoardEntity = Entity<GameBoardEntityComponents>;
+
+export const GameBoardEntity = {
+  empty: (): GameBoardEntity => {
+    return {
+      id: UUID.new(),
+      componentsList: [],
+      componentsByName: {},
+    };
+  },
+  new: (url: string): GameBoardEntity => {
+    let entity = GameBoardEntity.empty();
+
+    entity = Entity.addComponent(entity, {
+      name: 'GameMapComponent',
+      serverId: UUID.new(),
+      mapName: 'First map',
+    });
+    entity = Entity.addComponent(entity, {
+      name: 'PositionComponent',
+      x: 100,
+      y: 100,
+      z: 0,
+      locked: false,
+    });
+    entity = Entity.addComponent(entity, {
+      name: 'ImageComponent',
+      url,
+    });
+    entity = Entity.addComponent(entity, {
+      name: 'SizeComponent',
+      width: 700,
+      height: 450,
+    });
+
+    return entity;
+  },
+};
 
 // . CARD
 
@@ -51,19 +92,5 @@ export type DeckComponent = {
 export type DeckEntityComponents = DeckComponent | PositionComponent | ImageComponent;
 export type DeckEntity = Entity<DeckEntityComponents>;
 
-// const gbe: GameBoardEntity = {
-// 	id: UUID.new(),
-// 	componentsList: [],
-// 	componentsByName: {}
-// }
-//
-// Entity.addComponent(gbe, {
-// 	name: "GameMapComponent",
-// })
-// Entity.addComponent(gbe, {
-// 	name: "PositionComponent",
-// 	x: 10,
-// 	y: 10,
-// 	z: 0,
-// 	locked: false,
-// })
+export type BgsEntities = DeckEntity | CardEntity | GameBoardEntity;
+export type BgsEntityStorage = EntityStorage<BgsEntities>;
