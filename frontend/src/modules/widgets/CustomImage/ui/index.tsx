@@ -2,9 +2,10 @@ import Konva from 'konva';
 import { useImage } from '../../../../libs/react/hooks/use-image';
 import React, { Fragment } from 'react';
 import { Image, Transformer } from 'react-konva';
+import { KonvaNodeEvents } from 'react-konva/ReactKonvaCore';
 
 export const CustomImage = (
-  props: { url: string; isSelected: boolean; onSelect: () => void } & Omit<Konva.ImageConfig, 'image'>
+  props: { url: string; isSelected: boolean; onSelect: () => void } & KonvaNodeEvents & Omit<Konva.ImageConfig, 'image'>
 ) => {
   const { url, isSelected, onSelect } = props;
 

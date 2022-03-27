@@ -1,8 +1,8 @@
-import { Component, ComponentId, ComponentsPool } from '../../ecs/component';
-import { System } from '../../ecs/system';
-import { World } from '../../ecs/world';
-import { EntityId } from '../../ecs/entity';
-import { Ignitor } from '../../ecs/ignitor';
+import { Component, ComponentId, ComponentsPool } from '../component';
+import { System } from '../system';
+import { World } from '../world';
+import { EntityId } from '../entity';
+import { Ignitor } from '../ignitor';
 
 export type PositionComponent = Component<
   'PositionComponent',

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useReducer } from 'react';
 import { Layer, Stage } from 'react-konva';
 import CssBaseline from '@mui/material/CssBaseline';
 import Konva from 'konva';
@@ -8,52 +8,12 @@ import SaveIcon from '@mui/icons-material/Save';
 import PrintIcon from '@mui/icons-material/Print';
 import ShareIcon from '@mui/icons-material/Share';
 import { CustomImage } from '../../modules/widgets/CustomImage/ui';
-import { World } from '../../libs/ecs/world';
-import {
-  BgsIgnitor,
-  CreateReactMapComponent,
-  ImageComponent,
-  PositionComponent,
-  SpawnGameMapComponent,
-  SpawnGameMapSystem,
-} from '../../libs/bgs/ecs-test';
-import { ComponentId, ComponentsPool } from '../../libs/ecs/component';
-import { Ignitor } from '../../libs/ecs/ignitor';
-import { EntityId } from '../../libs/ecs/entity';
-
-const CustomImageEntity = (props: {
-  ignitor: BgsIgnitor;
-  setIgnitor: (i: BgsIgnitor) => void;
-  entityId: EntityId;
-  component: CreateReactMapComponent;
-}) => {
-  const { entityId, ignitor } = props;
-
-  const imageComponentPool = World.getPool<ImageComponent>(ignitor.world, 'ImageComponent');
-  if (!imageComponentPool) {
-    throw new Error(`...`);
-  }
-  const imageComp = ComponentsPool.getByEntityId(imageComponentPool, entityId);
-
-  const positionComponentPool = World.getPool<PositionComponent>(ignitor.world, 'PositionComponent');
-  if (!positionComponentPool) {
-    throw new Error(`...`);
-  }
-  const positionComponent = ComponentsPool.getByEntityId(positionComponentPool, entityId);
-
-  return (
-    <CustomImage
-      key={entityId}
-      url={imageComp.data.url}
-      isSelected={false}
-      onSelect={() => {}}
-      x={positionComponent.data.x}
-      y={positionComponent.data.y}
-      // width={componentsByName['SizeComponent'].width}
-      // height={componentsByName['SizeComponent'].height}
-    />
-  );
-};
+import { rootReducer } from '../../libs/bgs/redux';
+import { gameMapEntityAdapter, gameMapEntitySlice } from '../../libs/bgs/redux/game-map-entity';
+import { Component, ComponentId, Entity, EntityId } from '../../libs/bgs/core/esc';
+import { UUID } from '../../libs/branded-types';
+import { fighterEntityAdapter, fighterEntitySlice } from '../../libs/bgs/redux/fighter-entity';
+import { FighterEntity } from '../../libs/bgs/core/entities/figter';
 
 function App() {
   const surfaceWidth = window.innerWidth;
@@ -68,9 +28,9 @@ function App() {
     }
   };
 
-  const [ignitor, setIgnitor] = useState<BgsIgnitor>({
-    world: { pools: {} },
-    systems: [SpawnGameMapSystem()],
+  const [entityStore, dispatch] = useReducer(rootReducer, {
+    gameMapEntity: gameMapEntityAdapter.getInitialState(),
+    fighterEntity: fighterEntityAdapter.getInitialState(),
   });
 
   const actions = [
@@ -78,87 +38,231 @@ function App() {
       icon: <FileCopyIcon />,
       name: 'Add map',
       onClick: async () => {
-        const [spawnComponentPool, newWorld] = World.getOrAddPool<SpawnGameMapComponent>(
-          ignitor.world,
-          'SpawnGameMapComponent'
-        );
-        const newWorldS = World.addPool(
-          newWorld,
-          ComponentsPool.addComponent<SpawnGameMapComponent>(spawnComponentPool, EntityId.new(), {
-            name: 'SpawnGameMapComponent',
-            id: ComponentId.new(),
-            data: {
-              url: 'https://downloader.disk.yandex.ru/preview/dfe66cd35d8feabf8ce64c40339d342e3f91b6c2e70db5c0046745aee0fc7b0a/623f62e7/HTA3saKP7S9n3UVUFPbneRLOs38Aexzy74peiw68-Bqu1Ghp-2pZ66iNDKp7lyv_THLyuC5YhZtrQDywSWC10Q%3D%3D?uid=0&filename=Screenshot%202022-03-26%20at%2018.00.35.png&disposition=inline&hash=&limit=0&content_type=image%2Fpng&owner_uid=0&tknv=v2&size=2878x1478',
-              name: 'Default name',
+        console.log('ON CLICK');
+        dispatch(
+          gameMapEntitySlice.actions.addOne({
+            id: EntityId.new(),
+            name: 'GameMapEntity',
+            components: {
+              GameMapComponent: {
+                name: 'GameMapComponent',
+                id: ComponentId.new(),
+                data: {
+                  serverId: UUID.new(),
+                  mapName: 'Some map',
+                },
+              },
+              PositionComponent: {
+                name: 'PositionComponent',
+                id: ComponentId.new(),
+                data: {
+                  x: 100,
+                  y: 100,
+                  z: 0,
+                },
+              },
+              ImageComponent: {
+                name: 'ImageComponent',
+                id: ComponentId.new(),
+                data: {
+                  url: 'https://downloader.disk.yandex.ru/preview/dfe66cd35d8feabf8ce64c40339d342e3f91b6c2e70db5c0046745aee0fc7b0a/623f62e7/HTA3saKP7S9n3UVUFPbneRLOs38Aexzy74peiw68-Bqu1Ghp-2pZ66iNDKp7lyv_THLyuC5YhZtrQDywSWC10Q%3D%3D?uid=0&filename=Screenshot%202022-03-26%20at%2018.00.35.png&disposition=inline&hash=&limit=0&content_type=image%2Fpng&owner_uid=0&tknv=v2&size=2878x1478',
+                },
+              },
+              SizeComponent: {
+                name: 'SizeComponent',
+                id: ComponentId.new(),
+                data: {
+                  width: 750,
+                  height: 500,
+                },
+              },
+              DraggableComponent: {
+                name: 'DraggableComponent',
+                id: ComponentId.new(),
+                data: {
+                  draggable: true,
+                  isDragging: false,
+                },
+              },
             },
           })
         );
-
-        const newIgnitor = await Ignitor.update({
-          ...ignitor,
-          world: newWorldS,
-        });
-        setIgnitor(newIgnitor);
       },
     },
-    { icon: <SaveIcon />, name: 'Save' },
+    {
+      icon: <SaveIcon />,
+      name: 'Save',
+      onClick: async () => {
+        console.log('ON CLICK');
+        dispatch(
+          fighterEntitySlice.actions.addOne(
+            FighterEntity.new(
+              'https://downloader.disk.yandex.ru/preview/161897aa02b8194c76d656eef6457102eb834eaf8f5ae87bd6a187bb82cdb4fd/623f6aaa/UD-u8vK1z1fLXA14AVIV7W9G13sooEQOAswJRV651SmGSoZFp5wTl-y7PHaF0ne9Z3yDPVHa8Xri9lPONPSPaA%3D%3D?uid=0&filename=Screenshot%202022-03-26%20at%2018.33.34.png&disposition=inline&hash=&limit=0&content_type=image%2Fpng&owner_uid=0&tknv=v2&size=2048x2048'
+            )
+          )
+        );
+      },
+    },
     { icon: <PrintIcon />, name: 'Print' },
     { icon: <ShareIcon />, name: 'Share' },
   ];
-
-  const createReactMapComponentPool = World.getPool<CreateReactMapComponent>(ignitor.world, 'CreateReactMapComponent');
 
   return (
     <div>
       <CssBaseline />
       <Stage width={surfaceWidth} height={surfaceHeight} onMouseDown={checkDeselect} onTouchStart={checkDeselect}>
         <Layer>
-          {createReactMapComponentPool?.components.map((component) => {
-            return (
-              <CustomImageEntity
-                key={component.id}
-                ignitor={ignitor}
-                setIgnitor={setIgnitor}
-                entityId={createReactMapComponentPool?.byComponentId[component.id]}
-                component={component}
-                // width={componentsByName['SizeComponent'].width}
-                // height={componentsByName['SizeComponent'].height}
-                // x={componentsByName['PositionComponent'].x}
-                // y={componentsByName['PositionComponent'].y}
-              />
-            );
-          })}
-          {/*{World.getPool<CreateReactMapComponent>(ignitor.world, 'CreateReactMapComponent')?.components.map(*/}
-          {/*  (component) => {*/}
-          {/*    return (*/}
-          {/*      <CustomImage*/}
-          {/*        key={component.id}*/}
-          {/*        url={component.data.url}*/}
-          {/*        isSelected={selectedId === component.id}*/}
-          {/*        onSelect={() => {*/}
-          {/*          selectShape(component.id);*/}
-          {/*        }}*/}
-          {/*        // width={componentsByName['SizeComponent'].width}*/}
-          {/*        // height={componentsByName['SizeComponent'].height}*/}
-          {/*        // x={componentsByName['PositionComponent'].x}*/}
-          {/*        // y={componentsByName['PositionComponent'].y}*/}
-          {/*      />*/}
-          {/*    );*/}
-          {/*  }*/}
-          {/*)}*/}
+          {gameMapEntityAdapter
+            .getSelectors()
+            .selectAll(entityStore.gameMapEntity)
+            .map((entity) => {
+              return (
+                <CustomImage
+                  key={entity.id}
+                  url={entity.components.ImageComponent.data.url}
+                  isSelected={entity.id === selectedId}
+                  onSelect={() => {
+                    selectShape(entity.id);
+                  }}
+                  width={entity.components.SizeComponent.data.width}
+                  height={entity.components.SizeComponent.data.height}
+                  draggable={entity.components.DraggableComponent.data.draggable}
+                  x={entity.components.PositionComponent.data.x}
+                  y={entity.components.PositionComponent.data.y}
+                  onDragMove={(evt) => {
+                    dispatch(
+                      gameMapEntitySlice.actions.updateOne({
+                        id: entity.id,
+                        changes: Entity.updateComponent(
+                          entity,
+                          Component.update(entity.components.PositionComponent, {
+                            x: evt.target.x(),
+                            y: evt.target.y(),
+                          })
+                        ),
+                      })
+                    );
+                  }}
+                  onDragStart={() => {
+                    dispatch(
+                      gameMapEntitySlice.actions.updateOne({
+                        id: entity.id,
+                        changes: Entity.updateComponent(
+                          entity,
+                          Component.update(entity.components.DraggableComponent, {
+                            isDragging: true,
+                          })
+                        ),
+                      })
+                    );
+                  }}
+                  onDragEnd={(evt) => {
+                    dispatch(
+                      gameMapEntitySlice.actions.updateOne({
+                        id: entity.id,
+                        changes: Entity.updateComponents(entity, {
+                          DraggableComponent: Component.update(entity.components.DraggableComponent, {
+                            isDragging: false,
+                          }),
+                          PositionComponent: Component.update(entity.components.PositionComponent, {
+                            x: evt.target.x(),
+                            y: evt.target.y(),
+                          }),
+                        }),
+                      })
+                    );
+                  }}
+                />
+              );
+            })}
         </Layer>
         <Layer>
-          <CustomImage
-            url={
-              'https://downloader.disk.yandex.ru/preview/161897aa02b8194c76d656eef6457102eb834eaf8f5ae87bd6a187bb82cdb4fd/623f6aaa/UD-u8vK1z1fLXA14AVIV7W9G13sooEQOAswJRV651SmGSoZFp5wTl-y7PHaF0ne9Z3yDPVHa8Xri9lPONPSPaA%3D%3D?uid=0&filename=Screenshot%202022-03-26%20at%2018.33.34.png&disposition=inline&hash=&limit=0&content_type=image%2Fpng&owner_uid=0&tknv=v2&size=2048x2048'
-            }
-            isSelected={'champ' === selectedId}
-            onSelect={() => {
-              selectShape('champ');
-            }}
-            width={60}
-            height={100}
-          />
+          {fighterEntityAdapter
+            .getSelectors()
+            .selectAll(entityStore.fighterEntity)
+            .map((entity) => {
+              return (
+                <CustomImage
+                  key={entity.id}
+                  url={entity.components.ImageComponent.data.url}
+                  isSelected={entity.id === selectedId}
+                  onSelect={() => {
+                    selectShape(entity.id);
+                  }}
+                  width={entity.components.SizeComponent.data.width}
+                  height={entity.components.SizeComponent.data.height}
+                  draggable={entity.components.DraggableComponent.data.draggable}
+                  x={entity.components.PositionComponent.data.x}
+                  y={entity.components.PositionComponent.data.y}
+                  onDragMove={(evt) => {
+                    dispatch(
+                      fighterEntitySlice.actions.updateOne({
+                        id: entity.id,
+                        changes: {
+                          components: {
+                            ...entity.components,
+                            PositionComponent: {
+                              ...entity.components.PositionComponent,
+                              data: {
+                                ...entity.components.PositionComponent.data,
+                                x: evt.target.x(),
+                                y: evt.target.y(),
+                              },
+                            },
+                          },
+                        },
+                      })
+                    );
+                  }}
+                  onDragStart={() => {
+                    dispatch(
+                      fighterEntitySlice.actions.updateOne({
+                        id: entity.id,
+                        changes: {
+                          components: {
+                            ...entity.components,
+                            DraggableComponent: {
+                              ...entity.components.DraggableComponent,
+                              data: {
+                                ...entity.components.DraggableComponent.data,
+                                isDragging: true,
+                              },
+                            },
+                          },
+                        },
+                      })
+                    );
+                  }}
+                  onDragEnd={(evt) => {
+                    dispatch(
+                      fighterEntitySlice.actions.updateOne({
+                        id: entity.id,
+                        changes: {
+                          components: {
+                            ...entity.components,
+                            DraggableComponent: {
+                              ...entity.components.DraggableComponent,
+                              data: {
+                                ...entity.components.DraggableComponent.data,
+                                isDragging: false,
+                              },
+                            },
+                            PositionComponent: {
+                              ...entity.components.PositionComponent,
+                              data: {
+                                ...entity.components.PositionComponent.data,
+                                x: evt.target.x(),
+                                y: evt.target.y(),
+                              },
+                            },
+                          },
+                        },
+                      })
+                    );
+                  }}
+                />
+              );
+            })}
         </Layer>
       </Stage>
       <SpeedDial

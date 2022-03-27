@@ -1,4 +1,4 @@
-import { Component } from '../esc';
+import { Component, ComponentId } from '../esc';
 
 export type PositionComponent = Component<
   'PositionComponent',
@@ -8,6 +8,20 @@ export type PositionComponent = Component<
     z: number;
   }
 >;
+
+export const PositionComponent = {
+  new: (id: ComponentId, x: number, y: number, z: number): PositionComponent => {
+    return {
+      name: 'PositionComponent',
+      id,
+      data: {
+        x,
+        y,
+        z,
+      },
+    };
+  },
+};
 
 export type DraggableComponent = Component<
   'DraggableComponent',
@@ -29,5 +43,12 @@ export type SizeComponent = Component<
   {
     width: number;
     height: number;
+  }
+>;
+
+export type OwnerComponent = Component<
+  'OwnerComponent',
+  {
+    playerId: string;
   }
 >;

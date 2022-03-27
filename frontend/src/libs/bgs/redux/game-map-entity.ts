@@ -1,8 +1,26 @@
 import { createEntityAdapter, createSlice } from '@reduxjs/toolkit';
 import { GameMapEntity } from '../core/entities/game-map';
 
+// export const gameMapEntitySlice = createSlice<
+//   EntityStorage<GameMapEntity>,
+//   SliceCaseReducers<EntityStorage<GameMapEntity>>,
+//   "gameMapEntity"
+// >({
+//   name: 'gameMapEntity',
+//   initialState: {
+//     byId: {},
+//     allIds: [],
+//   },
+//   reducers: {
+//     addEntity: (state, action: PayloadAction<{entity: GameMapEntity}>) => {
+//       const {entity} = action.payload
+//       state.byId[entity.id] = entity
+//       state.allIds.push(entity.id)
+//     }
+//   },
+// });
+
 export const gameMapEntityAdapter = createEntityAdapter<GameMapEntity>({
-  // Assume IDs are stored in a field other than `message.id`
   selectId: (message) => message.id,
 });
 
@@ -10,8 +28,6 @@ export const gameMapEntitySlice = createSlice({
   name: 'gameMapEntity',
   initialState: gameMapEntityAdapter.getInitialState(),
   reducers: {
-    // Can pass adapter functions directly as case reducers.  Because we're passing this
-    // as a value, `createSlice` will auto-generate the `messageAdded` action type / creator
     addOne: gameMapEntityAdapter.addOne,
     addMany: gameMapEntityAdapter.addMany,
     setAll: gameMapEntityAdapter.setAll,
