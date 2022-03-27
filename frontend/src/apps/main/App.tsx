@@ -18,9 +18,9 @@ import { SpawnGameMapSystem } from '../../libs/bgs/ecs/systems/spawn-game-map-sy
 import { ChangeReactSizeSystem } from '../../libs/bgs/ecs/systems/change-react-size';
 import { ECSCustomImage } from '../../modules/widgets/CustomImage/ui/ecs';
 import { SpawnHeroSystem } from '../../libs/bgs/ecs/systems/spawn-hero-system';
-import { Sleep } from '../../libs/sleep';
 import { MouseInputSystem } from '../../libs/bgs/ecs/systems/mouse-input';
 import { PlayerSystem } from '../../libs/bgs/ecs/systems/player';
+import { DragSystem } from '../../libs/bgs/ecs/systems/drag';
 
 const ignitor: BgsIgnitor = {
   world: {
@@ -32,6 +32,9 @@ const ignitor: BgsIgnitor = {
 
     // INPUT
     MouseInputSystem(),
+
+    // INTERACTION
+    DragSystem(),
 
     // SPAWN
     SpawnGameMapSystem(),
@@ -48,10 +51,7 @@ const initIgnitor = async () => {
   await Ignitor.init(ignitor);
 
   const run = async () => {
-    console.log('FRAME');
     await Ignitor.run(ignitor);
-    await Sleep.run(2000);
-    console.log(ignitor);
     requestAnimationFrame(run);
   };
   requestAnimationFrame(run);
@@ -74,7 +74,7 @@ function App() {
     initIgnitor();
     setInterval(() => {
       selectShape(Math.random() + '');
-    }, 5000);
+    }, 1000);
   }, []);
 
   console.log('RERENDER');

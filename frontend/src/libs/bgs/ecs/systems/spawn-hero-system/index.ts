@@ -8,6 +8,7 @@ import {
   SpawnHeroComponent,
   ReactHeroComponent,
   SizeComponent,
+  DraggableComponent,
 } from '../../components';
 
 export const SpawnHeroSystem = (): System<{
@@ -16,6 +17,7 @@ export const SpawnHeroSystem = (): System<{
   ImageComponent: ImageComponent;
   PositionComponent: PositionComponent;
   SizeComponent: SizeComponent;
+  DraggableComponent: DraggableComponent;
 }> => ({
   run: async (world) => {
     const entities = World.filter(world, ['SpawnHeroComponent']);
@@ -28,6 +30,7 @@ export const SpawnHeroSystem = (): System<{
     const imageComponentPool = World.getOrAddPool(world, 'ImageComponent');
     const positionComponentPool = World.getOrAddPool(world, 'PositionComponent');
     const sizeComponentPool = World.getOrAddPool(world, 'SizeComponent');
+    const draggableComponentPool = World.getOrAddPool(world, 'DraggableComponent');
 
     for (const entity of entities) {
       const spawnComponent = Pool.get(spawnHeroComponentPool, entity);
@@ -61,6 +64,11 @@ export const SpawnHeroSystem = (): System<{
           width: 60,
           height: 100,
         },
+      });
+      Pool.add(draggableComponentPool, heroEntity, {
+        id: ComponentId.new(),
+        name: 'DraggableComponent',
+        data: {},
       });
       // . Destroy component
       Pool.delete(spawnHeroComponentPool, entity);

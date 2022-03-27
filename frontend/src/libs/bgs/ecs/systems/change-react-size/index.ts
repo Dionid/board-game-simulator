@@ -23,7 +23,6 @@ export const ChangeReactSizeSystem = (): System<{
         reactSizeComponent.data.state.width !== sizeComponent.data.width ||
         reactSizeComponent.data.state.height !== sizeComponent.data.height
       ) {
-        console.log('Not identical reactSizeComponent');
         reactSizeComponent.data.setState({ width: sizeComponent.data.width, height: sizeComponent.data.height });
       }
     });

@@ -35,14 +35,9 @@ export type PositionComponent = Component<
   }
 >;
 
-export type DraggableComponent = Component<
-  'DraggableComponent',
-  {
-    isDragging: boolean;
-    draggable: boolean;
-    locked: boolean;
-  }
->;
+export type DraggableComponent = Component<'DraggableComponent', {}>;
+
+export type IsDraggingComponent = Component<'IsDraggingComponent', {}>;
 
 export type ImageComponent = Component<
   'ImageComponent',

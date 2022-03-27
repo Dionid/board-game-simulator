@@ -23,7 +23,6 @@ export const ChangeReactPositionSystem = (): System<{
         reactPositionComponent.data.state.x !== positionComponent.data.x ||
         reactPositionComponent.data.state.y !== positionComponent.data.y
       ) {
-        console.log('Not identical reactPositionComponent');
         reactPositionComponent.data.setState({ x: positionComponent.data.x, y: positionComponent.data.y });
       }
     });
