@@ -19,7 +19,13 @@ export const ChangeReactPositionSystem = (): System<{
     entities.forEach((entity) => {
       const positionComponent = Pool.get(positionPool, entity);
       const reactPositionComponent = Pool.get(reactPositionPool, entity);
-      reactPositionComponent.data.setState({ x: positionComponent.data.x, y: positionComponent.data.y });
+      if (
+        reactPositionComponent.data.state.x !== positionComponent.data.x ||
+        reactPositionComponent.data.state.y !== positionComponent.data.y
+      ) {
+        console.log('Not identical reactPositionComponent');
+        reactPositionComponent.data.setState({ x: positionComponent.data.x, y: positionComponent.data.y });
+      }
     });
   },
 });

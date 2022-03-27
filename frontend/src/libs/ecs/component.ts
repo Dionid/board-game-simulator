@@ -38,9 +38,7 @@ export const Pool = {
     pool.data[entityId] = component;
   },
   delete: <C extends Component<any, any>>(pool: Pool<C>, entityId: EntityId) => {
-    console.log('delete', pool);
     const { [entityId]: omit, ...newData } = pool.data;
-    console.log('delete', newData);
     pool.data = newData;
   },
 };

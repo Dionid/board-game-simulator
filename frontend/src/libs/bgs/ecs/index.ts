@@ -4,25 +4,31 @@ import {
   ImageComponent,
   PositionComponent,
   ReactGameMapComponent,
+  ReactHeroComponent,
   ReactImageComponent,
   ReactPositionComponent,
   ReactSizeComponent,
   SizeComponent,
   SpawnGameMapComponent,
+  SpawnHeroComponent,
 } from './components';
 
 // REACT
 
 export type BgsWorld = World<{
-  ReactGameMapComponent: ReactGameMapComponent;
+  // GAME
   SpawnGameMapComponent: SpawnGameMapComponent;
+  SpawnHeroComponent: SpawnHeroComponent;
   ImageComponent: ImageComponent;
   PositionComponent: PositionComponent;
   SizeComponent: SizeComponent;
-  // REACT
+
+  // REACT COMPONENTS
   ReactPositionComponent: ReactPositionComponent;
   ReactImageComponent: ReactImageComponent;
   ReactSizeComponent: ReactSizeComponent;
+  ReactGameMapComponent: ReactGameMapComponent;
+  ReactHeroComponent: ReactHeroComponent;
 }>;
 
 export type BgsIgnitor = Ignitor<BgsWorld>;

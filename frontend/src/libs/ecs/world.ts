@@ -44,21 +44,23 @@ export const World = {
       const compName = componentNames[i];
       const pool = world.pools[compName];
       if (!pool) {
-        continue;
+        return [];
       }
+
+      // debugger
 
       if (i === 0) {
         // TODO. Fix types
         const ids = Object.keys(pool.data) as EntityId[];
         for (let j = 0; j < ids.length; j++) {
-          const id = ids[i];
+          const id = ids[j];
           entityIds[id] = true;
         }
       } else {
         // TODO. Fix types
         const ids = Object.keys(entityIds) as EntityId[];
         for (let j = 0; j < ids.length; j++) {
-          const id = ids[i];
+          const id = ids[j];
           if (!pool.data[id]) {
             delete entityIds[id];
           }

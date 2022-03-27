@@ -34,6 +34,20 @@ export type SizeComponent = Component<
   }
 >;
 
+export type SpawnGameMapComponent = Component<
+  'SpawnGameMapComponent',
+  {
+    url: string;
+  }
+>;
+
+export type SpawnHeroComponent = Component<
+  'SpawnHeroComponent',
+  {
+    url: string;
+  }
+>;
+
 export type ReactPositionComponentData = { x: number; y: number };
 export type ReactPositionComponent = ReactComponent<'ReactPositionComponent', ReactPositionComponentData>;
 
@@ -43,10 +57,5 @@ export type ReactSizeComponent = ReactComponent<'ReactSizeComponent', ReactSizeC
 export type ReactImageComponentData = { url: string };
 export type ReactImageComponent = ReactComponent<'ReactImageComponent', ReactImageComponentData>;
 
-export type SpawnGameMapComponent = Component<
-  'SpawnGameMapComponent',
-  {
-    url: string;
-  }
->;
 export type ReactGameMapComponent = Component<'ReactGameMapComponent', {}>;
+export type ReactHeroComponent = Component<'ReactHeroComponent', {}>;

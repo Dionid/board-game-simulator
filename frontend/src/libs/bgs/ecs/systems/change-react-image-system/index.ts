@@ -19,7 +19,10 @@ export const ChangeReactImageSystem = (): System<{
     entities.forEach((entity) => {
       const imageComponent = Pool.get(imagePool, entity);
       const reactImageComponent = Pool.get(reactImagePool, entity);
-      reactImageComponent.data.setState({ url: imageComponent.data.url });
+      if (imageComponent.data.url !== reactImageComponent.data.state.url) {
+        console.log('Not identical imageComponent');
+        reactImageComponent.data.setState({ url: imageComponent.data.url });
+      }
     });
   },
 });

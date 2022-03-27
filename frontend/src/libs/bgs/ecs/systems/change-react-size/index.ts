@@ -19,7 +19,13 @@ export const ChangeReactSizeSystem = (): System<{
     entities.forEach((entity) => {
       const sizeComponent = Pool.get(sizePool, entity);
       const reactSizeComponent = Pool.get(reactSizePool, entity);
-      reactSizeComponent.data.setState({ width: sizeComponent.data.width, height: sizeComponent.data.height });
+      if (
+        reactSizeComponent.data.state.width !== sizeComponent.data.width ||
+        reactSizeComponent.data.state.height !== sizeComponent.data.height
+      ) {
+        console.log('Not identical reactSizeComponent');
+        reactSizeComponent.data.setState({ width: sizeComponent.data.width, height: sizeComponent.data.height });
+      }
     });
   },
 });

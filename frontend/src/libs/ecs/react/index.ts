@@ -12,19 +12,17 @@ export type ReactComponent<N extends string, D extends Record<any, any>> = Compo
   }
 >;
 
-// TODO. fix types on CN
 export const useEcsComponent = <S, CR extends Record<CN, ReactComponent<CN, S>>, CN extends keyof CR & string>(
   entity: EntityId,
   initialState: S,
   componentName: CN,
-  ignitor: Ignitor<World<CR>>,
-  setIgnitor: (i: Ignitor) => void
+  ignitor: Ignitor<World<CR>>
 ): S => {
   const [state, setState] = useState<S>(initialState);
 
   useEffect(() => {
-    const reactComp = World.getOrAddPool(ignitor.world, componentName);
-    Pool.add<ReactComponent<CN, S>>(reactComp, entity, {
+    const reactCompPool = World.getOrAddPool(ignitor.world, componentName);
+    Pool.add<ReactComponent<CN, S>>(reactCompPool, entity, {
       id: ComponentId.new(),
       name: componentName,
       data: {
@@ -32,12 +30,7 @@ export const useEcsComponent = <S, CR extends Record<CN, ReactComponent<CN, S>>,
         setState,
       },
     });
-    (async () => {
-      console.log('REFRESH');
-      await Ignitor.run(ignitor);
-      setIgnitor({ ...ignitor });
-    })();
-  }, []);
+  }, [state]);
 
   return state;
 };
