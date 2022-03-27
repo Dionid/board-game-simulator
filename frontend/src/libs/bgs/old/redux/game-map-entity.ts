@@ -1,5 +1,5 @@
 import { createEntityAdapter, createSlice } from '@reduxjs/toolkit';
-import { GameMapEntity } from '../core/entities/game-map';
+import { GameMapEntity } from '../entities/game-map';
 
 // export const gameMapEntitySlice = createSlice<
 //   EntityStorage<GameMapEntity>,

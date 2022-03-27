@@ -1,5 +1,5 @@
 import { createEntityAdapter, createSlice } from '@reduxjs/toolkit';
-import { FighterEntity } from '../core/entities/figter';
+import { FighterEntity } from '../entities/figter';
 
 export const fighterEntityAdapter = createEntityAdapter<FighterEntity>({
   selectId: (message) => message.id,
