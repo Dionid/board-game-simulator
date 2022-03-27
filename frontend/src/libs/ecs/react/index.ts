@@ -37,7 +37,7 @@ export const useEcsComponent = <S, CR extends Record<CN, ReactComponent<CN, S>>,
       await Ignitor.run(ignitor);
       setIgnitor({ ...ignitor });
     })();
-  });
+  }, []);
 
   return state;
 };

@@ -2,13 +2,20 @@ import { System } from '../../../../ecs/system';
 import { World } from '../../../../ecs/world';
 import { ComponentId, Pool } from '../../../../ecs/component';
 import { EntityId } from '../../../../ecs/entity';
-import { ImageComponent, PositionComponent, SpawnGameMapComponent, ReactGameMapComponent } from '../../components';
+import {
+  ImageComponent,
+  PositionComponent,
+  SpawnGameMapComponent,
+  ReactGameMapComponent,
+  SizeComponent,
+} from '../../components';
 
 export const SpawnGameMapSystem = (): System<{
   SpawnGameMapComponent: SpawnGameMapComponent;
   ReactGameMapComponent: ReactGameMapComponent;
   ImageComponent: ImageComponent;
   PositionComponent: PositionComponent;
+  SizeComponent: SizeComponent;
 }> => ({
   run: async (world) => {
     const entities = World.filter(world, ['SpawnGameMapComponent']);
@@ -20,6 +27,7 @@ export const SpawnGameMapSystem = (): System<{
     const reactGameMapComponentPool = World.getOrAddPool(world, 'ReactGameMapComponent');
     const imageComponentPool = World.getOrAddPool(world, 'ImageComponent');
     const positionComponentPool = World.getOrAddPool(world, 'PositionComponent');
+    const sizeComponentPool = World.getOrAddPool(world, 'SizeComponent');
 
     for (const entity of entities) {
       const spawnComponent = Pool.get(spawnGameMapComponentPool, entity);
@@ -44,6 +52,14 @@ export const SpawnGameMapSystem = (): System<{
           x: 100,
           y: 100,
           z: 100,
+        },
+      });
+      Pool.add(sizeComponentPool, mapEntity, {
+        id: ComponentId.new(),
+        name: 'SizeComponent',
+        data: {
+          width: 750,
+          height: 500,
         },
       });
       // . Destroy component

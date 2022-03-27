@@ -6,6 +6,8 @@ import {
   ReactGameMapComponent,
   ReactImageComponent,
   ReactPositionComponent,
+  ReactSizeComponent,
+  SizeComponent,
   SpawnGameMapComponent,
 } from './components';
 
@@ -16,8 +18,11 @@ export type BgsWorld = World<{
   SpawnGameMapComponent: SpawnGameMapComponent;
   ImageComponent: ImageComponent;
   PositionComponent: PositionComponent;
+  SizeComponent: SizeComponent;
+  // REACT
   ReactPositionComponent: ReactPositionComponent;
   ReactImageComponent: ReactImageComponent;
+  ReactSizeComponent: ReactSizeComponent;
 }>;
 
 export type BgsIgnitor = Ignitor<BgsWorld>;

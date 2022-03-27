@@ -21,15 +21,26 @@ import { useEcsComponent } from '../../libs/ecs/react';
 import { ChangeReactPositionSystem } from '../../libs/bgs/ecs/systems/change-react-position-system';
 import { ChangeReactImageSystem } from '../../libs/bgs/ecs/systems/change-react-image-system';
 import { SpawnGameMapSystem } from '../../libs/bgs/ecs/systems/spawn-game-map-system';
+import { ChangeReactSizeSystem } from '../../libs/bgs/ecs/systems/change-react-size';
 
 const ECSCustomImage = (props: { entity: EntityId; ignitor: BgsIgnitor; setIgnitor: (s: BgsIgnitor) => void }) => {
   const { entity, ignitor, setIgnitor } = props;
 
   const image = useEcsComponent(entity, { url: '' }, 'ReactImageComponent', ignitor, setIgnitor);
   const position = useEcsComponent(entity, { x: 0, y: 0 }, 'ReactPositionComponent', ignitor, setIgnitor);
+  const size = useEcsComponent(entity, { width: 0, height: 0 }, 'ReactSizeComponent', ignitor, setIgnitor);
 
   return (
-    <CustomImage key={entity} isSelected={false} onSelect={() => {}} url={image.url} x={position.x} y={position.y} />
+    <CustomImage
+      key={entity}
+      isSelected={false}
+      onSelect={() => {}}
+      url={image.url}
+      width={size.width}
+      height={size.height}
+      x={position.x}
+      y={position.y}
+    />
   );
 };
 
@@ -50,7 +61,7 @@ function App() {
     world: {
       pools: {},
     },
-    systems: [SpawnGameMapSystem(), ChangeReactPositionSystem(), ChangeReactImageSystem()],
+    systems: [SpawnGameMapSystem(), ChangeReactPositionSystem(), ChangeReactImageSystem(), ChangeReactSizeSystem()],
   });
 
   const [entityStore, dispatch] = useReducer(rootReducer, {
@@ -108,69 +119,6 @@ function App() {
               <ECSCustomImage key={entity} entity={entity as EntityId} ignitor={ignitor} setIgnitor={setIgnitor} />
             );
           })}
-          {/*{gameMapEntityAdapter
-            .getSelectors()
-            .selectAll(entityStore.gameMapEntity)
-            .map((entity) => {
-              return (
-                <CustomImage
-                  key={entity.id}
-                  url={entity.components.ImageComponent.data.url}
-                  isSelected={entity.id === selectedId}
-                  onSelect={() => {
-                    selectShape(entity.id);
-                  }}
-                  width={entity.components.SizeComponent.data.width}
-                  height={entity.components.SizeComponent.data.height}
-                  draggable={entity.components.DraggableComponent.data.draggable}
-                  x={entity.components.PositionComponent.data.x}
-                  y={entity.components.PositionComponent.data.y}
-                  onDragMove={(evt) => {
-                    dispatch(
-                      gameMapEntitySlice.actions.updateOne({
-                        id: entity.id,
-                        changes: Entity.updateComponent(
-                          entity,
-                          Component.update(entity.components.PositionComponent, {
-                            x: evt.target.x(),
-                            y: evt.target.y(),
-                          })
-                        ),
-                      })
-                    );
-                  }}
-                  onDragStart={() => {
-                    dispatch(
-                      gameMapEntitySlice.actions.updateOne({
-                        id: entity.id,
-                        changes: Entity.updateComponent(
-                          entity,
-                          Component.update(entity.components.DraggableComponent, {
-                            isDragging: true,
-                          })
-                        ),
-                      })
-                    );
-                  }}
-                  onDragEnd={(evt) => {
-                    dispatch(
-                      gameMapEntitySlice.actions.updateOne({
-                        id: entity.id,
-                        changes: Entity.updateComponents(entity, {
-                          DraggableComponent: Component.update(entity.components.DraggableComponent, {
-                            isDragging: false,
-                          }),
-                          PositionComponent: Component.update(entity.components.PositionComponent, {
-                            x: evt.target.x(),
-                            y: evt.target.y(),
-                          }),
-                        }),
-                      })
-                    );
-                  }}
-                />
-              );
-            })}*/}
         </Layer>
         <Layer>
           {fighterEntityAdapter

@@ -26,8 +26,19 @@ export type ImageComponent = Component<
   }
 >;
 
+export type SizeComponent = Component<
+  'SizeComponent',
+  {
+    width: number;
+    height: number;
+  }
+>;
+
 export type ReactPositionComponentData = { x: number; y: number };
 export type ReactPositionComponent = ReactComponent<'ReactPositionComponent', ReactPositionComponentData>;
+
+export type ReactSizeComponentData = { width: number; height: number };
+export type ReactSizeComponent = ReactComponent<'ReactSizeComponent', ReactSizeComponentData>;
 
 export type ReactImageComponentData = { url: string };
 export type ReactImageComponent = ReactComponent<'ReactImageComponent', ReactImageComponentData>;
