@@ -57,7 +57,7 @@ export const SpawnGameMapSystem = (): System<{
         data: {
           x: 100,
           y: 100,
-          z: 100,
+          z: 0,
         },
       });
       Pool.add(sizeComponentPool, mapEntity, {

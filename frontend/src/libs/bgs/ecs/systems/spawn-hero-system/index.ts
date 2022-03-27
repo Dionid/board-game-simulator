@@ -57,7 +57,7 @@ export const SpawnHeroSystem = (): System<{
         data: {
           x: 100,
           y: 100,
-          z: 100,
+          z: 1,
         },
       });
       Pool.add(sizeComponentPool, heroEntity, {
