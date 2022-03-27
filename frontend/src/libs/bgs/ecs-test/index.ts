@@ -22,6 +22,13 @@ export type DraggableComponent = Component<
   }
 >;
 
+export type ImageComponent = Component<
+  'ImageComponent',
+  {
+    url: string;
+  }
+>;
+
 export type SpawnGameMapComponent = Component<
   'SpawnGameMapComponent',
   {
@@ -57,8 +64,11 @@ export const SpawnGameMapSystem = (): System<{
       'CreateReactMapComponent'
     );
 
-    console.log(createReactMapComponentPool);
+    let [imageComponentPool, newImCWorld] = World.getOrAddPool<ImageComponent>(newWorld, 'ImageComponent');
 
+    let [positionComponentPool, newImWorld3] = World.getOrAddPool<PositionComponent>(newImCWorld, 'PositionComponent');
+
+    console.log(createReactMapComponentPool);
     for (const poolElement of pool.components) {
       const component: CreateReactMapComponent = {
         name: 'CreateReactMapComponent',
@@ -70,19 +80,39 @@ export const SpawnGameMapSystem = (): System<{
           name: poolElement.data.name,
         },
       };
-      newWorld = World.addPool(
-        world,
-        ComponentsPool.addComponent(createReactMapComponentPool, EntityId.new(), component)
+      const entity = EntityId.new();
+      newImWorld3 = World.addPool(
+        World.addPool(
+          World.addPool(world, ComponentsPool.addComponent(createReactMapComponentPool, entity, component)),
+          ComponentsPool.addComponent(imageComponentPool, entity, {
+            name: 'ImageComponent',
+            id: ComponentId.new(),
+            data: {
+              url: poolElement.data.url,
+            },
+          })
+        ),
+        ComponentsPool.addComponent(positionComponentPool, entity, {
+          name: 'PositionComponent',
+          id: ComponentId.new(),
+          data: {
+            x: 100,
+            y: 100,
+            z: 100,
+          },
+        })
       );
     }
 
-    return newWorld;
+    return newImWorld3;
   },
 });
 
 export type BgsWorld = World<{
   CreateReactMapComponent: CreateReactMapComponent;
   SpawnGameMapComponent: SpawnGameMapComponent;
+  ImageComponent: ImageComponent;
+  PositionComponent: PositionComponent;
 }>;
 
 export type BgsIgnitor = Ignitor<BgsWorld>;

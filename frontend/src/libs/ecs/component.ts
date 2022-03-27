@@ -29,8 +29,12 @@ export type ComponentsPool<C extends Component<any, any> = Component<any, any>> 
 }>;
 
 export const ComponentsPool = {
-  getByEntityId: <C extends Component<any, any>>(pool: ComponentsPool<C>, entityId: EntityId): C | undefined => {
-    return pool.byEntityId[entityId];
+  getByEntityId: <C extends Component<any, any>>(pool: ComponentsPool<C>, entityId: EntityId): C => {
+    const comp = pool.byEntityId[entityId];
+    if (!comp) {
+      throw new Error(`...`);
+    }
+    return comp;
   },
   addComponent: <C extends Component<any, any>>(
     pool: ComponentsPool<C>,

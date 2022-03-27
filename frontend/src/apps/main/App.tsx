@@ -12,12 +12,48 @@ import { World } from '../../libs/ecs/world';
 import {
   BgsIgnitor,
   CreateReactMapComponent,
+  ImageComponent,
+  PositionComponent,
   SpawnGameMapComponent,
   SpawnGameMapSystem,
 } from '../../libs/bgs/ecs-test';
 import { ComponentId, ComponentsPool } from '../../libs/ecs/component';
 import { Ignitor } from '../../libs/ecs/ignitor';
 import { EntityId } from '../../libs/ecs/entity';
+
+const CustomImageEntity = (props: {
+  ignitor: BgsIgnitor;
+  setIgnitor: (i: BgsIgnitor) => void;
+  entityId: EntityId;
+  component: CreateReactMapComponent;
+}) => {
+  const { entityId, ignitor } = props;
+
+  const imageComponentPool = World.getPool<ImageComponent>(ignitor.world, 'ImageComponent');
+  if (!imageComponentPool) {
+    throw new Error(`...`);
+  }
+  const imageComp = ComponentsPool.getByEntityId(imageComponentPool, entityId);
+
+  const positionComponentPool = World.getPool<PositionComponent>(ignitor.world, 'PositionComponent');
+  if (!positionComponentPool) {
+    throw new Error(`...`);
+  }
+  const positionComponent = ComponentsPool.getByEntityId(positionComponentPool, entityId);
+
+  return (
+    <CustomImage
+      key={entityId}
+      url={imageComp.data.url}
+      isSelected={false}
+      onSelect={() => {}}
+      x={positionComponent.data.x}
+      y={positionComponent.data.y}
+      // width={componentsByName['SizeComponent'].width}
+      // height={componentsByName['SizeComponent'].height}
+    />
+  );
+};
 
 function App() {
   const surfaceWidth = window.innerWidth;
@@ -70,29 +106,46 @@ function App() {
     { icon: <ShareIcon />, name: 'Share' },
   ];
 
+  const createReactMapComponentPool = World.getPool<CreateReactMapComponent>(ignitor.world, 'CreateReactMapComponent');
+
   return (
     <div>
       <CssBaseline />
       <Stage width={surfaceWidth} height={surfaceHeight} onMouseDown={checkDeselect} onTouchStart={checkDeselect}>
         <Layer>
-          {World.getPool<CreateReactMapComponent>(ignitor.world, 'CreateReactMapComponent')?.components.map(
-            (component) => {
-              return (
-                <CustomImage
-                  key={component.id}
-                  url={component.data.url}
-                  isSelected={selectedId === component.id}
-                  onSelect={() => {
-                    selectShape(component.id);
-                  }}
-                  // width={componentsByName['SizeComponent'].width}
-                  // height={componentsByName['SizeComponent'].height}
-                  // x={componentsByName['PositionComponent'].x}
-                  // y={componentsByName['PositionComponent'].y}
-                />
-              );
-            }
-          )}
+          {createReactMapComponentPool?.components.map((component) => {
+            return (
+              <CustomImageEntity
+                key={component.id}
+                ignitor={ignitor}
+                setIgnitor={setIgnitor}
+                entityId={createReactMapComponentPool?.byComponentId[component.id]}
+                component={component}
+                // width={componentsByName['SizeComponent'].width}
+                // height={componentsByName['SizeComponent'].height}
+                // x={componentsByName['PositionComponent'].x}
+                // y={componentsByName['PositionComponent'].y}
+              />
+            );
+          })}
+          {/*{World.getPool<CreateReactMapComponent>(ignitor.world, 'CreateReactMapComponent')?.components.map(*/}
+          {/*  (component) => {*/}
+          {/*    return (*/}
+          {/*      <CustomImage*/}
+          {/*        key={component.id}*/}
+          {/*        url={component.data.url}*/}
+          {/*        isSelected={selectedId === component.id}*/}
+          {/*        onSelect={() => {*/}
+          {/*          selectShape(component.id);*/}
+          {/*        }}*/}
+          {/*        // width={componentsByName['SizeComponent'].width}*/}
+          {/*        // height={componentsByName['SizeComponent'].height}*/}
+          {/*        // x={componentsByName['PositionComponent'].x}*/}
+          {/*        // y={componentsByName['PositionComponent'].y}*/}
+          {/*      />*/}
+          {/*    );*/}
+          {/*  }*/}
+          {/*)}*/}
         </Layer>
         <Layer>
           <CustomImage
