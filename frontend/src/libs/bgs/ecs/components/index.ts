@@ -1,5 +1,30 @@
 import { Component } from '../../../ecs/component';
 import { ReactComponent } from '../../../ecs/react';
+import { UUID } from '../../../branded-types';
+
+// INTERACTIONS
+
+export type HandComponent = Component<
+  'HandComponent',
+  {
+    x: number;
+    y: number;
+    down: boolean;
+  }
+>;
+
+// ACCESS
+
+export type PlayerComponent = Component<
+  'PlayerComponent',
+  {
+    id: UUID;
+  }
+>;
+
+export type OwnerComponent = Component<'OwnerComponent', {}>;
+
+// OBJECTS
 
 export type PositionComponent = Component<
   'PositionComponent',

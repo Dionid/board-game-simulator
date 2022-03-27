@@ -19,12 +19,20 @@ import { ChangeReactSizeSystem } from '../../libs/bgs/ecs/systems/change-react-s
 import { ECSCustomImage } from '../../modules/widgets/CustomImage/ui/ecs';
 import { SpawnHeroSystem } from '../../libs/bgs/ecs/systems/spawn-hero-system';
 import { Sleep } from '../../libs/sleep';
+import { MouseInputSystem } from '../../libs/bgs/ecs/systems/mouse-input';
+import { PlayerSystem } from '../../libs/bgs/ecs/systems/player';
 
 const ignitor: BgsIgnitor = {
   world: {
     pools: {},
   },
   systems: [
+    // INIT
+    PlayerSystem(),
+
+    // INPUT
+    MouseInputSystem(),
+
     // SPAWN
     SpawnGameMapSystem(),
     SpawnHeroSystem(),
@@ -42,7 +50,8 @@ const initIgnitor = async () => {
   const run = async () => {
     console.log('FRAME');
     await Ignitor.run(ignitor);
-    await Sleep.run(1000);
+    await Sleep.run(2000);
+    console.log(ignitor);
     requestAnimationFrame(run);
   };
   requestAnimationFrame(run);
