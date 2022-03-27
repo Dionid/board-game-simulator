@@ -17,49 +17,30 @@ export type Component<N extends string, D extends Record<any, any>> = {
   data: D;
 };
 
-export type ComponentsPool<C extends Component<any, any> = Component<any, any>> = Readonly<{
-  name: C['name'];
-  byEntityId: Readonly<{
-    [key: EntityId]: C;
-  }>;
-  byComponentId: Readonly<{
-    [key: ComponentId]: EntityId;
-  }>;
-  components: C[];
-}>;
+// COMPONENTS POOL
 
-export const ComponentsPool = {
-  getByEntityId: <C extends Component<any, any>>(pool: ComponentsPool<C>, entityId: EntityId): C => {
-    const comp = pool.byEntityId[entityId];
+export type Pool<C extends Component<any, any> = Component<any, any>> = {
+  name: C['name'];
+  data: {
+    [key: EntityId]: C | undefined;
+  };
+};
+
+export const Pool = {
+  get: <C extends Component<any, any>>(pool: Pool<C>, entityId: EntityId): C => {
+    const comp = pool.data[entityId];
     if (!comp) {
       throw new Error(`...`);
     }
     return comp;
   },
-  addComponent: <C extends Component<any, any>>(
-    pool: ComponentsPool<C>,
-    entityId: EntityId,
-    component: C
-  ): ComponentsPool<C> => {
-    return {
-      name: pool.name,
-      byEntityId: {
-        ...pool.byEntityId,
-        [entityId]: component,
-      },
-      byComponentId: {
-        ...pool.byComponentId,
-        [component.id]: entityId,
-      },
-      components: [...pool.components.filter((c) => c.id !== component.id), component],
-    };
+  add: <C extends Component<any, any>>(pool: Pool<C>, entityId: EntityId, component: C): void => {
+    pool.data[entityId] = component;
   },
-  default: <C extends Component<any, any>>(poolName: C['name']): ComponentsPool<C> => {
-    return {
-      name: poolName,
-      byEntityId: {},
-      byComponentId: {},
-      components: [],
-    };
+  delete: <C extends Component<any, any>>(pool: Pool<C>, entityId: EntityId) => {
+    console.log('delete', pool);
+    const { [entityId]: omit, ...newData } = pool.data;
+    console.log('delete', newData);
+    pool.data = newData;
   },
 };

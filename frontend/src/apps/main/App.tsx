@@ -1,4 +1,4 @@
-import React, { useReducer } from 'react';
+import React, { useReducer, useState } from 'react';
 import { Layer, Stage } from 'react-konva';
 import CssBaseline from '@mui/material/CssBaseline';
 import Konva from 'konva';
@@ -9,11 +9,27 @@ import PrintIcon from '@mui/icons-material/Print';
 import ShareIcon from '@mui/icons-material/Share';
 import { CustomImage } from '../../modules/widgets/CustomImage/ui';
 import { rootReducer } from '../../libs/bgs/redux';
-import { gameMapEntityAdapter, gameMapEntitySlice } from '../../libs/bgs/redux/game-map-entity';
-import { Component, ComponentId, Entity, EntityId } from '../../libs/bgs/core/esc';
-import { UUID } from '../../libs/branded-types';
+import { gameMapEntityAdapter } from '../../libs/bgs/redux/game-map-entity';
 import { fighterEntityAdapter, fighterEntitySlice } from '../../libs/bgs/redux/fighter-entity';
 import { FighterEntity } from '../../libs/bgs/core/entities/figter';
+import { BgsIgnitor, ChangeReactImageSystem, ChangeReactPositionSystem, SpawnGameMapSystem } from '../../libs/bgs/ecs';
+import { Ignitor } from '../../libs/ecs/ignitor';
+import { World } from '../../libs/ecs/world';
+import { ComponentId, Pool } from '../../libs/ecs/component';
+import { EntityId } from '../../libs/ecs/entity';
+import { useEcsComponent } from '../../libs/ecs/react';
+
+const ECSCustomImage = (props: { entity: EntityId; ignitor: BgsIgnitor; setIgnitor: (s: BgsIgnitor) => void }) => {
+  const { entity, ignitor, setIgnitor } = props;
+
+  const image = useEcsComponent(entity, { url: '' }, 'ReactImageComponent', ignitor, setIgnitor);
+
+  const position = useEcsComponent(entity, { x: 0, y: 0 }, 'ReactPositionComponent', ignitor, setIgnitor);
+
+  return (
+    <CustomImage key={entity} isSelected={false} onSelect={() => {}} url={image.url} x={position.x} y={position.y} />
+  );
+};
 
 function App() {
   const surfaceWidth = window.innerWidth;
@@ -28,6 +44,13 @@ function App() {
     }
   };
 
+  const [ignitor, setIgnitor] = useState<BgsIgnitor>({
+    world: {
+      pools: {},
+    },
+    systems: [SpawnGameMapSystem(), ChangeReactPositionSystem(), ChangeReactImageSystem()],
+  });
+
   const [entityStore, dispatch] = useReducer(rootReducer, {
     gameMapEntity: gameMapEntityAdapter.getInitialState(),
     fighterEntity: fighterEntityAdapter.getInitialState(),
@@ -38,55 +61,67 @@ function App() {
       icon: <FileCopyIcon />,
       name: 'Add map',
       onClick: async () => {
-        console.log('ON CLICK');
-        dispatch(
-          gameMapEntitySlice.actions.addOne({
-            id: EntityId.new(),
-            name: 'GameMapEntity',
-            components: {
-              GameMapComponent: {
-                name: 'GameMapComponent',
-                id: ComponentId.new(),
-                data: {
-                  serverId: UUID.new(),
-                  mapName: 'Some map',
-                },
-              },
-              PositionComponent: {
-                name: 'PositionComponent',
-                id: ComponentId.new(),
-                data: {
-                  x: 100,
-                  y: 100,
-                  z: 0,
-                },
-              },
-              ImageComponent: {
-                name: 'ImageComponent',
-                id: ComponentId.new(),
-                data: {
-                  url: 'https://downloader.disk.yandex.ru/preview/dfe66cd35d8feabf8ce64c40339d342e3f91b6c2e70db5c0046745aee0fc7b0a/623f62e7/HTA3saKP7S9n3UVUFPbneRLOs38Aexzy74peiw68-Bqu1Ghp-2pZ66iNDKp7lyv_THLyuC5YhZtrQDywSWC10Q%3D%3D?uid=0&filename=Screenshot%202022-03-26%20at%2018.00.35.png&disposition=inline&hash=&limit=0&content_type=image%2Fpng&owner_uid=0&tknv=v2&size=2878x1478',
-                },
-              },
-              SizeComponent: {
-                name: 'SizeComponent',
-                id: ComponentId.new(),
-                data: {
-                  width: 750,
-                  height: 500,
-                },
-              },
-              DraggableComponent: {
-                name: 'DraggableComponent',
-                id: ComponentId.new(),
-                data: {
-                  draggable: true,
-                  isDragging: false,
-                },
-              },
-            },
-          })
-        );
+        const spawnGameMapComponentPool = World.getOrAddPool(ignitor.world, 'SpawnGameMapComponent');
+        Pool.add(spawnGameMapComponentPool, EntityId.new(), {
+          name: 'SpawnGameMapComponent',
+          id: ComponentId.new(),
+          data: {
+            url: 'https://downloader.disk.yandex.ru/preview/dfe66cd35d8feabf8ce64c40339d342e3f91b6c2e70db5c0046745aee0fc7b0a/623f62e7/HTA3saKP7S9n3UVUFPbneRLOs38Aexzy74peiw68-Bqu1Ghp-2pZ66iNDKp7lyv_THLyuC5YhZtrQDywSWC10Q%3D%3D?uid=0&filename=Screenshot%202022-03-26%20at%2018.00.35.png&disposition=inline&hash=&limit=0&content_type=image%2Fpng&owner_uid=0&tknv=v2&size=2878x1478',
+          },
+        });
+        await Ignitor.run(ignitor);
+        setIgnitor({
+          ...ignitor,
+        });
+
+        // dispatch(
+        //   gameMapEntitySlice.actions.addOne({
+        //     id: EntityId.new(),
+        //     name: 'GameMapEntity',
+        //     components: {
+        //       GameMapComponent: {
+        //         name: 'GameMapComponent',
+        //         id: ComponentId.new(),
+        //         data: {
+        //           serverId: UUID.new(),
+        //           mapName: 'Some map',
+        //         },
+        //       },
+        //       PositionComponent: {
+        //         name: 'PositionComponent',
+        //         id: ComponentId.new(),
+        //         data: {
+        //           x: 100,
+        //           y: 100,
+        //           z: 0,
+        //         },
+        //       },
+        //       ImageComponent: {
+        //         name: 'ImageComponent',
+        //         id: ComponentId.new(),
+        //         data: {
+        //           url: 'https://downloader.disk.yandex.ru/preview/dfe66cd35d8feabf8ce64c40339d342e3f91b6c2e70db5c0046745aee0fc7b0a/623f62e7/HTA3saKP7S9n3UVUFPbneRLOs38Aexzy74peiw68-Bqu1Ghp-2pZ66iNDKp7lyv_THLyuC5YhZtrQDywSWC10Q%3D%3D?uid=0&filename=Screenshot%202022-03-26%20at%2018.00.35.png&disposition=inline&hash=&limit=0&content_type=image%2Fpng&owner_uid=0&tknv=v2&size=2878x1478',
+        //         },
+        //       },
+        //       SizeComponent: {
+        //         name: 'SizeComponent',
+        //         id: ComponentId.new(),
+        //         data: {
+        //           width: 750,
+        //           height: 500,
+        //         },
+        //       },
+        //       DraggableComponent: {
+        //         name: 'DraggableComponent',
+        //         id: ComponentId.new(),
+        //         data: {
+        //           draggable: true,
+        //           isDragging: false,
+        //         },
+        //       },
+        //     },
+        //   })
+        // );
       },
     },
     {
@@ -107,12 +142,20 @@ function App() {
     { icon: <ShareIcon />, name: 'Share' },
   ];
 
+  const reactGameMapComponentPool = World.getOrAddPool(ignitor.world, 'ReactGameMapComponent');
+
   return (
     <div>
       <CssBaseline />
       <Stage width={surfaceWidth} height={surfaceHeight} onMouseDown={checkDeselect} onTouchStart={checkDeselect}>
         <Layer>
-          {gameMapEntityAdapter
+          {Object.keys(reactGameMapComponentPool.data).map((entity) => {
+            console.log('ENTITY', entity);
+            return (
+              <ECSCustomImage key={entity} entity={entity as EntityId} ignitor={ignitor} setIgnitor={setIgnitor} />
+            );
+          })}
+          {/*{gameMapEntityAdapter
             .getSelectors()
             .selectAll(entityStore.gameMapEntity)
             .map((entity) => {
@@ -174,7 +217,7 @@ function App() {
                   }}
                 />
               );
-            })}
+            })}*/}
         </Layer>
         <Layer>
           {fighterEntityAdapter

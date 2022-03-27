@@ -7,19 +7,10 @@ export type Ignitor<W extends World = World> = {
 };
 
 export const Ignitor = {
-  addSystem: (ignitor: Ignitor, system: System): Ignitor => {
-    // return () => Ignitor.destroySystem(ignitor, system);
-    return {
-      world: ignitor.world,
-      systems: [...ignitor.systems, system],
-    };
-  },
-  update: async (ignitor: Ignitor): Promise<Ignitor> => {
-    return {
-      systems: ignitor.systems,
-      world: await ignitor.systems.reduce(async (acc, cur) => {
-        return cur.run(await acc);
-      }, Promise.resolve(ignitor.world)),
-    };
+  run: async (ignitor: Ignitor): Promise<void> => {
+    for (let i = 0; i < ignitor.systems.length; i++) {
+      const system = ignitor.systems[i];
+      await system.run(ignitor.world);
+    }
   },
 };
