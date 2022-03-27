@@ -32,7 +32,7 @@ export const ComponentsPool = {
   getByEntityId: <C extends Component<any, any>>(pool: ComponentsPool<C>, entityId: EntityId): C | undefined => {
     return pool.byEntityId[entityId];
   },
-  add: <C extends Component<any, any>>(
+  addComponent: <C extends Component<any, any>>(
     pool: ComponentsPool<C>,
     entityId: EntityId,
     component: C

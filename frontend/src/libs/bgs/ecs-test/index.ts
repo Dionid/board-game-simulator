@@ -2,6 +2,7 @@ import { Component, ComponentId, ComponentsPool } from '../../ecs/component';
 import { System } from '../../ecs/system';
 import { World } from '../../ecs/world';
 import { EntityId } from '../../ecs/entity';
+import { Ignitor } from '../../ecs/ignitor';
 
 export type PositionComponent = Component<
   'PositionComponent',
@@ -48,10 +49,13 @@ export const SpawnGameMapSystem = (): System<{
 
     const pool = World.getPool<SpawnGameMapComponent>(world, 'SpawnGameMapComponent');
     if (!pool) {
-      return;
+      return world;
     }
 
-    const createReactMapComponentPool = World.getOrAddPool<CreateReactMapComponent>(world, 'CreateReactMapComponent');
+    let [createReactMapComponentPool, newWorld] = World.getOrAddPool<CreateReactMapComponent>(
+      world,
+      'CreateReactMapComponent'
+    );
 
     console.log(createReactMapComponentPool);
 
@@ -66,9 +70,19 @@ export const SpawnGameMapSystem = (): System<{
           name: poolElement.data.name,
         },
       };
-      World.addPool(world, ComponentsPool.add(createReactMapComponentPool, EntityId.new(), component));
+      newWorld = World.addPool(
+        world,
+        ComponentsPool.addComponent(createReactMapComponentPool, EntityId.new(), component)
+      );
     }
 
-    console.log('SpawnGameMapSystem end', world);
+    return newWorld;
   },
 });
+
+export type BgsWorld = World<{
+  CreateReactMapComponent: CreateReactMapComponent;
+  SpawnGameMapComponent: SpawnGameMapComponent;
+}>;
+
+export type BgsIgnitor = Ignitor<BgsWorld>;

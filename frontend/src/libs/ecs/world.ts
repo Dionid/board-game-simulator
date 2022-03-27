@@ -13,19 +13,23 @@ export const World = {
   ): ComponentsPool<C> | undefined => {
     return world.pools[poolName];
   },
-  addPool: (world: World, pool: ComponentsPool): void => {
-    world.pools[pool.name] = pool;
+  addPool: (world: World, pool: ComponentsPool): World => {
+    return {
+      pools: {
+        ...world.pools,
+        [pool.name]: pool,
+      },
+    };
   },
   getOrAddPool: <C extends Component<any, any>>(
     world: World<Record<C['name'], C>>,
     poolName: C['name']
-  ): ComponentsPool<C> => {
+  ): [ComponentsPool<C>, World] => {
     const pool = World.getPool<C>(world, poolName);
     if (!pool) {
       const newPool = ComponentsPool.default(poolName);
-      World.addPool(world, newPool);
-      return newPool;
+      return [newPool, World.addPool(world, newPool)];
     }
-    return pool;
+    return [pool, world];
   },
 };

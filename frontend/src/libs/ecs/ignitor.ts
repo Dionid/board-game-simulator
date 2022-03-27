@@ -1,30 +1,25 @@
 import { System } from './system';
 import { World } from './world';
 
-export type Ignitor = {
-  world: World;
+export type Ignitor<W extends World = World> = {
+  world: W;
   systems: System[];
 };
 
 export const Ignitor = {
-  addSystem: (ignitor: Ignitor, system: System) => {
-    ignitor.systems.push(system);
-    return () => Ignitor.destroySystem(ignitor, system);
+  addSystem: (ignitor: Ignitor, system: System): Ignitor => {
+    // return () => Ignitor.destroySystem(ignitor, system);
+    return {
+      world: ignitor.world,
+      systems: [...ignitor.systems, system],
+    };
   },
-  init: async (ignitor: Ignitor) => {
-    for (let i = 0; i < ignitor.systems.length; i++) {
-      const system = ignitor.systems[i];
-      if (system.init) await system.init(ignitor.world);
-    }
-  },
-  update: async (ignitor: Ignitor) => {
-    for (let i = 0; i < ignitor.systems.length; i++) {
-      await ignitor.systems[i].run(ignitor.world);
-    }
-  },
-  destroySystem: async (ignitor: Ignitor, system: System) => {
-    if (system.destroy) await system.destroy(ignitor.world);
-    ignitor.systems = ignitor.systems.filter((sys) => sys !== system);
-    if (system.postDestroy) await system.postDestroy(ignitor.world);
+  update: async (ignitor: Ignitor): Promise<Ignitor> => {
+    return {
+      systems: ignitor.systems,
+      world: await ignitor.systems.reduce(async (acc, cur) => {
+        return cur.run(await acc);
+      }, Promise.resolve(ignitor.world)),
+    };
   },
 };
