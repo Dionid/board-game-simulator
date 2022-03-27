@@ -7,9 +7,16 @@ import { UUID } from '../../../branded-types';
 export type HandComponent = Component<
   'HandComponent',
   {
-    x: number;
-    y: number;
-    down: boolean;
+    current: {
+      x: number;
+      y: number;
+      down: boolean;
+    };
+    previous: {
+      x: number;
+      y: number;
+      down: boolean;
+    };
   }
 >;
 
@@ -38,6 +45,10 @@ export type PositionComponent = Component<
 export type DraggableComponent = Component<'DraggableComponent', {}>;
 
 export type IsDraggingComponent = Component<'IsDraggingComponent', {}>;
+
+export type SelectableComponent = Component<'SelectableComponent', {}>;
+
+export type IsSelectedComponent = Component<'IsSelectedComponent', {}>;
 
 export type ImageComponent = Component<
   'ImageComponent',

@@ -9,6 +9,7 @@ import {
   ReactGameMapComponent,
   SizeComponent,
   DraggableComponent,
+  SelectableComponent,
 } from '../../components';
 
 export const SpawnGameMapSystem = (): System<{
@@ -18,6 +19,7 @@ export const SpawnGameMapSystem = (): System<{
   PositionComponent: PositionComponent;
   SizeComponent: SizeComponent;
   DraggableComponent: DraggableComponent;
+  SelectableComponent: SelectableComponent;
 }> => ({
   run: async (world) => {
     const entities = World.filter(world, ['SpawnGameMapComponent']);
@@ -31,6 +33,7 @@ export const SpawnGameMapSystem = (): System<{
     const positionComponentPool = World.getOrAddPool(world, 'PositionComponent');
     const sizeComponentPool = World.getOrAddPool(world, 'SizeComponent');
     const draggableComponentPool = World.getOrAddPool(world, 'DraggableComponent');
+    const selectableComponentPool = World.getOrAddPool(world, 'SelectableComponent');
 
     for (const entity of entities) {
       const spawnComponent = Pool.get(spawnGameMapComponentPool, entity);
@@ -68,6 +71,11 @@ export const SpawnGameMapSystem = (): System<{
       Pool.add(draggableComponentPool, mapEntity, {
         id: ComponentId.new(),
         name: 'DraggableComponent',
+        data: {},
+      });
+      Pool.add(selectableComponentPool, mapEntity, {
+        id: ComponentId.new(),
+        name: 'SelectableComponent',
         data: {},
       });
       // . Destroy component

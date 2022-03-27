@@ -1,13 +1,17 @@
 import { World } from '../../ecs/world';
 import { Ignitor } from '../../ecs/ignitor';
 import {
+  DraggableComponent,
   ImageComponent,
+  IsDraggingComponent,
+  IsSelectedComponent,
   PositionComponent,
   ReactGameMapComponent,
   ReactHeroComponent,
   ReactImageComponent,
   ReactPositionComponent,
   ReactSizeComponent,
+  SelectableComponent,
   SizeComponent,
   SpawnGameMapComponent,
   SpawnHeroComponent,
@@ -22,6 +26,10 @@ export type BgsWorld = World<{
   ImageComponent: ImageComponent;
   PositionComponent: PositionComponent;
   SizeComponent: SizeComponent;
+  SelectableComponent: SelectableComponent;
+  IsSelectedComponent: IsSelectedComponent;
+  DraggableComponent: DraggableComponent;
+  IsDraggingComponent: IsDraggingComponent;
 
   // REACT COMPONENTS
   ReactPositionComponent: ReactPositionComponent;

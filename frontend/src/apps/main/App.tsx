@@ -21,6 +21,7 @@ import { SpawnHeroSystem } from '../../libs/bgs/ecs/systems/spawn-hero-system';
 import { MouseInputSystem } from '../../libs/bgs/ecs/systems/mouse-input';
 import { PlayerSystem } from '../../libs/bgs/ecs/systems/player';
 import { DragSystem } from '../../libs/bgs/ecs/systems/drag';
+import { SelectSystem } from '../../libs/bgs/ecs/systems/select';
 
 const ignitor: BgsIgnitor = {
   world: {
@@ -34,6 +35,7 @@ const ignitor: BgsIgnitor = {
     MouseInputSystem(),
 
     // INTERACTION
+    SelectSystem(),
     DragSystem(),
 
     // SPAWN

@@ -8,7 +8,7 @@ export const MouseInputSystem = (): System<{
   PlayerComponent: PlayerComponent;
   OwnerComponent: OwnerComponent;
 }> => {
-  const mouseData = {
+  const lastMouseData = {
     x: 0,
     y: 0,
     down: false,
@@ -24,23 +24,30 @@ export const MouseInputSystem = (): System<{
           id: ComponentId.new(),
           name: 'HandComponent',
           data: {
-            x: 0,
-            y: 0,
-            down: false,
+            current: {
+              x: 0,
+              y: 0,
+              down: false,
+            },
+            previous: {
+              x: 0,
+              y: 0,
+              down: false,
+            },
           },
         });
       });
 
       document.body.onmousedown = () => {
-        mouseData.down = true;
+        lastMouseData.down = true;
       };
       document.body.onmouseup = () => {
-        mouseData.down = false;
+        lastMouseData.down = false;
       };
 
       document.onmousemove = (event) => {
-        mouseData.x = event.pageX;
-        mouseData.y = event.pageY;
+        lastMouseData.x = event.pageX;
+        lastMouseData.y = event.pageY;
       };
     },
     run: async (world) => {
@@ -50,9 +57,12 @@ export const MouseInputSystem = (): System<{
 
       entities.forEach((entity) => {
         const component = Pool.get(mousePool, entity);
-        component.data.x = mouseData.x;
-        component.data.y = mouseData.y;
-        component.data.down = mouseData.down;
+        component.data.previous = component.data.current;
+        component.data.current = {
+          x: lastMouseData.x,
+          y: lastMouseData.y,
+          down: lastMouseData.down,
+        };
       });
     },
   };
