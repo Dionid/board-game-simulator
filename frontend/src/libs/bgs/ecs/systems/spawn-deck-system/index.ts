@@ -1,10 +1,11 @@
 import { System } from '../../../../ecs/system';
 import { World } from '../../../../ecs/world';
 import { ComponentId, Pool } from '../../../../ecs/component';
-import { SpawnDeckEventComponent, SpawnGameObjectEventComponent } from '../../components';
+import { DeckComponent, SpawnDeckEventComponent, SpawnGameObjectEventComponent } from '../../components';
 
 export const SpawnDeckEventSystem = (): System<{
   SpawnDeckEventComponent: SpawnDeckEventComponent;
+  DeckComponent: DeckComponent;
   SpawnGameObjectEventComponent: SpawnGameObjectEventComponent;
 }> => {
   return {
@@ -15,6 +16,7 @@ export const SpawnDeckEventSystem = (): System<{
       }
 
       const spawnDeckComponentPool = World.getOrAddPool(world, 'SpawnDeckEventComponent');
+      const deckComponentPool = World.getOrAddPool(world, 'DeckComponent');
       const spawnGameObjectComponentPool = World.getOrAddPool(world, 'SpawnGameObjectEventComponent');
 
       for (const deckEntity of entities) {
@@ -33,6 +35,14 @@ export const SpawnDeckEventSystem = (): System<{
             height: 140,
             draggable: true,
             selectable: true,
+          },
+        });
+
+        Pool.add(deckComponentPool, deckEntity, {
+          id: ComponentId.new(),
+          name: 'DeckComponent',
+          data: {
+            deckId: spawnComponent.data.deckId,
           },
         });
 

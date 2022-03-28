@@ -1,5 +1,15 @@
 import { UUID } from '../../../branded-types';
 
+export type MapId = UUID & { readonly MapId: unique symbol };
+export const MapId = {
+  ofString: (value: string): MapId => {
+    return UUID.ofString(value) as MapId;
+  },
+  new: (): MapId => {
+    return MapId.ofString(UUID.new());
+  },
+};
+
 export type SidekickId = UUID & { readonly SidekickId: unique symbol };
 export const SidekickId = {
   ofString: (value: string): SidekickId => {

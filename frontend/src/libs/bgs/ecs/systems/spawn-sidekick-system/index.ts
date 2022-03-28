@@ -1,10 +1,11 @@
 import { System } from '../../../../ecs/system';
 import { World } from '../../../../ecs/world';
 import { ComponentId, Pool } from '../../../../ecs/component';
-import { SpawnSideKickEventComponent, SpawnGameObjectEventComponent } from '../../components';
+import { SpawnSideKickEventComponent, SpawnGameObjectEventComponent, SidekickComponent } from '../../components';
 
 export const SpawnSidekickEventSystem = (): System<{
   SpawnSideKickEventComponent: SpawnSideKickEventComponent;
+  SidekickComponent: SidekickComponent;
   SpawnGameObjectEventComponent: SpawnGameObjectEventComponent;
 }> => {
   return {
@@ -15,6 +16,7 @@ export const SpawnSidekickEventSystem = (): System<{
       }
 
       const spawnSidekickComponentPool = World.getOrAddPool(world, 'SpawnSideKickEventComponent');
+      const sidekickComponentPool = World.getOrAddPool(world, 'SidekickComponent');
       const spawnGameObjectComponentPool = World.getOrAddPool(world, 'SpawnGameObjectEventComponent');
 
       for (const sidekickEntity of entities) {
@@ -33,6 +35,14 @@ export const SpawnSidekickEventSystem = (): System<{
             height: 90,
             draggable: true,
             selectable: true,
+          },
+        });
+
+        Pool.add(sidekickComponentPool, sidekickEntity, {
+          id: ComponentId.new(),
+          name: 'SidekickComponent',
+          data: {
+            sidekickId: spawnComponent.data.sidekickId,
           },
         });
 

@@ -13,10 +13,15 @@
 2. Flip side
 3. Remove entities
 4. Depth system
-5. Authorization
-6. Cards shown
-7. Persistence and collaboration
-8. Move on map
+5. Deck actions
+   1. Get card
+   2. Shuffle
+6. Card actions
+   1. Put in deck
+7. Authorization
+8. Cards shown
+9. Persistence and collaboration
+10. Move on map
 
 ## Second
 

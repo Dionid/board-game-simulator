@@ -1,11 +1,12 @@
 import { System } from '../../../../ecs/system';
 import { World } from '../../../../ecs/world';
 import { ComponentId, Pool } from '../../../../ecs/component';
-import { SpawnHeroComponent, SpawnGameObjectEventComponent } from '../../components';
+import { SpawnHeroComponent, SpawnGameObjectEventComponent, HeroComponent } from '../../components';
 
 export const SpawnHeroSystem = (): System<{
   SpawnHeroComponent: SpawnHeroComponent;
   SpawnGameObjectEventComponent: SpawnGameObjectEventComponent;
+  HeroComponent: HeroComponent;
 }> => {
   return {
     run: async ({ world }) => {
@@ -16,6 +17,7 @@ export const SpawnHeroSystem = (): System<{
 
       const spawnHeroComponentPool = World.getOrAddPool(world, 'SpawnHeroComponent');
       const spawnGameObjectComponentPool = World.getOrAddPool(world, 'SpawnGameObjectEventComponent');
+      const heroComponentPool = World.getOrAddPool(world, 'HeroComponent');
 
       for (const heroEntity of entities) {
         const spawnComponent = Pool.get(spawnHeroComponentPool, heroEntity);
@@ -33,6 +35,14 @@ export const SpawnHeroSystem = (): System<{
             height: 100,
             draggable: true,
             selectable: true,
+          },
+        });
+
+        Pool.add(heroComponentPool, heroEntity, {
+          id: ComponentId.new(),
+          name: 'HeroComponent',
+          data: {
+            heroId: spawnComponent.data.heroId,
           },
         });
 

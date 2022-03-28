@@ -1,7 +1,7 @@
 import { Component } from '../../../ecs/component';
 import { ReactComponent } from '../../../ecs/react';
 import { UUID } from '../../../branded-types';
-import { SetId } from '../../games/unmatched';
+import { DeckId, HeroId, MapId, SetId, SidekickId } from '../../games/unmatched';
 
 // INTERACTIONS
 
@@ -68,12 +68,50 @@ export type SizeComponent = Component<
   }
 >;
 
+// UNMATCHED COMPONENTS
+
+export type GameMapComponent = Component<
+  'GameMapComponent',
+  {
+    mapId: MapId;
+  }
+>;
+
+export type HeroComponent = Component<
+  'HeroComponent',
+  {
+    heroId: HeroId;
+  }
+>;
+
+export type SidekickComponent = Component<
+  'SidekickComponent',
+  {
+    sidekickId: SidekickId;
+  }
+>;
+
+export type DeckComponent = Component<
+  'DeckComponent',
+  {
+    deckId: DeckId;
+  }
+>;
+
+export type HeroSetComponent = Component<
+  'HeroSetComponent',
+  {
+    setId: SetId;
+  }
+>;
+
 // SPAWN EVENTS
 
 export type SpawnGameMapComponent = Component<
   'SpawnGameMapComponent',
   {
     url: string;
+    mapId: MapId;
   }
 >;
 
@@ -81,6 +119,7 @@ export type SpawnHeroComponent = Component<
   'SpawnHeroComponent',
   {
     url: string;
+    heroId: HeroId;
   }
 >;
 
@@ -88,6 +127,7 @@ export type SpawnSideKickEventComponent = Component<
   'SpawnSideKickEventComponent',
   {
     url: string;
+    sidekickId: SidekickId;
   }
 >;
 
@@ -95,6 +135,7 @@ export type SpawnDeckEventComponent = Component<
   'SpawnDeckEventComponent',
   {
     url: string;
+    deckId: DeckId;
   }
 >;
 

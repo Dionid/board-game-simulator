@@ -1,10 +1,11 @@
 import { System } from '../../../../ecs/system';
 import { World } from '../../../../ecs/world';
 import { ComponentId, Pool } from '../../../../ecs/component';
-import { SpawnGameMapComponent, SpawnGameObjectEventComponent } from '../../components';
+import { GameMapComponent, SpawnGameMapComponent, SpawnGameObjectEventComponent } from '../../components';
 
 export const SpawnGameMapSystem = (): System<{
   SpawnGameMapComponent: SpawnGameMapComponent;
+  GameMapComponent: GameMapComponent;
   SpawnGameObjectEventComponent: SpawnGameObjectEventComponent;
 }> => ({
   run: async ({ world }) => {
@@ -15,6 +16,7 @@ export const SpawnGameMapSystem = (): System<{
 
     const spawnGameMapComponentPool = World.getOrAddPool(world, 'SpawnGameMapComponent');
     const spawnGameObjectComponentPool = World.getOrAddPool(world, 'SpawnGameObjectEventComponent');
+    const gameMapComponentPool = World.getOrAddPool(world, 'GameMapComponent');
 
     for (const mapEntity of entities) {
       const spawnComponent = Pool.get(spawnGameMapComponentPool, mapEntity);
@@ -31,6 +33,14 @@ export const SpawnGameMapSystem = (): System<{
           height: 500,
           draggable: true,
           selectable: true,
+        },
+      });
+
+      Pool.add(gameMapComponentPool, mapEntity, {
+        id: ComponentId.new(),
+        name: 'GameMapComponent',
+        data: {
+          mapId: spawnComponent.data.mapId,
         },
       });
 

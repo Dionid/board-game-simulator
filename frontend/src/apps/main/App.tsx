@@ -20,7 +20,7 @@ import { PlayerSystem } from '../../libs/bgs/ecs/systems/player';
 import { DragSystem } from '../../libs/bgs/ecs/systems/drag';
 import { SelectSystem } from '../../libs/bgs/ecs/systems/select';
 import { useForceUpdate } from '../../libs/react/hooks/use-force-update';
-import { HeroSets, SetId } from '../../libs/bgs/games/unmatched';
+import { HeroSets, MapId, SetId } from '../../libs/bgs/games/unmatched';
 import { PersonAdd } from '@mui/icons-material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { SpawnHeroSetSystem } from '../../libs/bgs/ecs/systems/spawn-hero-set-system';
@@ -102,6 +102,7 @@ const MainMenu = ({ heroSets, ignitor }: { heroSets: HeroSets; ignitor: BgsIgnit
       id: ComponentId.new(),
       data: {
         url: 'https://downloader.disk.yandex.ru/preview/5eb0ed2aa9f0ab459cd4e05b30dcc1f9321e62aed7e33972ea87b739dc4e0a5d/62424a88/HTA3saKP7S9n3UVUFPbneRLOs38Aexzy74peiw68-Bqu1Ghp-2pZ66iNDKp7lyv_THLyuC5YhZtrQDywSWC10Q%3D%3D?uid=0&filename=Screenshot%202022-03-26%20at%2018.00.35.png&disposition=inline&hash=&limit=0&content_type=image%2Fpng&owner_uid=0&tknv=v2&size=2048x2048',
+        mapId: MapId.new(),
       },
     });
   };

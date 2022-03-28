@@ -48,6 +48,7 @@ export const SpawnHeroSetSystem = (): System<
               id: ComponentId.new(),
               data: {
                 url: hero.frontImageUrl,
+                heroId: hero.id,
               },
             });
           }
@@ -61,6 +62,7 @@ export const SpawnHeroSetSystem = (): System<
               id: ComponentId.new(),
               data: {
                 url: sidekick.frontImageUrl,
+                sidekickId: sidekick.id,
               },
             });
           }
@@ -69,10 +71,11 @@ export const SpawnHeroSetSystem = (): System<
         heroSet.decks.forEach((deck) => {
           // . Create new sidekick component
           Pool.add(spawnDeckEventComponentPool, EntityId.new(), {
-            name: 'SidekickEventComponent',
+            name: 'SpawnDeckEventComponent',
             id: ComponentId.new(),
             data: {
               url: deck.frontImageUrl,
+              deckId: deck.id,
             },
           });
         });
