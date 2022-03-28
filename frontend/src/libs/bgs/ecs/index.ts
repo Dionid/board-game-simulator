@@ -17,6 +17,7 @@ import {
   SpawnGameObjectEventComponent,
   SpawnHeroComponent,
   SpawnHeroSetComponent,
+  SpawnSideKickEventComponent,
 } from './components';
 import { HeroSets } from '../games/unmatched';
 
@@ -41,6 +42,7 @@ export type BgsIgnitorComponents = {
   SpawnGameMapComponent: SpawnGameMapComponent;
   SpawnHeroComponent: SpawnHeroComponent;
   SpawnHeroSetComponent: SpawnHeroSetComponent;
+  SpawnSideKickEventComponent: SpawnSideKickEventComponent;
 
   GameObjectComponent: GameObjectComponent;
   SpawnGameObjectEventComponent: SpawnGameObjectEventComponent;

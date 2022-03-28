@@ -25,6 +25,7 @@ import { PersonAdd } from '@mui/icons-material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { SpawnHeroSetSystem } from '../../libs/bgs/ecs/systems/spawn-hero-set-system';
 import { SpawnGameObjectSystem } from '../../libs/bgs/ecs/systems/spawn-game-object';
+import { SpawnSidekickEventSystem } from '../../libs/bgs/ecs/systems/spawn-sidekick-system';
 
 const ignitor: BgsIgnitor = {
   world: {
@@ -43,9 +44,10 @@ const ignitor: BgsIgnitor = {
     DragSystem(),
 
     // SPAWN
-    SpawnHeroSetSystem(),
     SpawnGameMapSystem(),
+    SpawnHeroSetSystem(),
     SpawnHeroSystem(),
+    SpawnSidekickEventSystem(),
 
     // SPAWN GAME OBJECT
     SpawnGameObjectSystem(),

@@ -1,28 +1,28 @@
 import { System } from '../../../../ecs/system';
 import { World } from '../../../../ecs/world';
 import { ComponentId, Pool } from '../../../../ecs/component';
-import { SpawnHeroComponent, SpawnGameObjectEventComponent } from '../../components';
+import { SpawnSideKickEventComponent, SpawnGameObjectEventComponent } from '../../components';
 
-export const SpawnHeroSystem = (): System<{
-  SpawnHeroComponent: SpawnHeroComponent;
+export const SpawnSidekickEventSystem = (): System<{
+  SpawnSideKickEventComponent: SpawnSideKickEventComponent;
   SpawnGameObjectEventComponent: SpawnGameObjectEventComponent;
 }> => {
   return {
     run: async ({ world }) => {
-      const entities = World.filter(world, ['SpawnHeroComponent']);
+      const entities = World.filter(world, ['SpawnSideKickEventComponent']);
       if (entities.length === 0) {
         return;
       }
 
-      const spawnHeroComponentPool = World.getOrAddPool(world, 'SpawnHeroComponent');
+      const spawnSidekickComponentPool = World.getOrAddPool(world, 'SpawnSideKickEventComponent');
       const spawnGameObjectComponentPool = World.getOrAddPool(world, 'SpawnGameObjectEventComponent');
 
-      for (const heroEntity of entities) {
-        const spawnComponent = Pool.get(spawnHeroComponentPool, heroEntity);
+      for (const sidekickEntity of entities) {
+        const spawnComponent = Pool.get(spawnSidekickComponentPool, sidekickEntity);
 
         // TODO. Think about entity id: must be new or the same
-        // . Create hero spawn event
-        Pool.add(spawnGameObjectComponentPool, heroEntity, {
+        // . Create sidekick spawn event
+        Pool.add(spawnGameObjectComponentPool, sidekickEntity, {
           id: ComponentId.new(),
           name: 'SpawnGameObjectEventComponent',
           data: {
@@ -37,7 +37,7 @@ export const SpawnHeroSystem = (): System<{
         });
 
         // Destroy event
-        Pool.delete(spawnHeroComponentPool, heroEntity);
+        Pool.delete(spawnSidekickComponentPool, sidekickEntity);
       }
     },
   };

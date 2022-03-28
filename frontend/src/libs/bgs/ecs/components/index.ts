@@ -32,7 +32,9 @@ export type PlayerComponent = Component<
 
 export type OwnerComponent = Component<'OwnerComponent', {}>;
 
-// OBJECTS
+// GAME OBJECT
+
+export type GameObjectComponent = Component<'GameObjectComponent', {}>;
 
 export type PositionComponent = Component<
   'PositionComponent',
@@ -66,6 +68,8 @@ export type SizeComponent = Component<
   }
 >;
 
+// SPAWN EVENTS
+
 export type SpawnGameMapComponent = Component<
   'SpawnGameMapComponent',
   {
@@ -80,14 +84,19 @@ export type SpawnHeroComponent = Component<
   }
 >;
 
+export type SpawnSideKickEventComponent = Component<
+  'SpawnSideKickEventComponent',
+  {
+    url: string;
+  }
+>;
+
 export type SpawnHeroSetComponent = Component<
   'SpawnHeroSetComponent',
   {
     setId: SetId;
   }
 >;
-
-export type GameObjectComponent = Component<'GameObjectComponent', {}>;
 
 export type SpawnGameObjectEventComponent = Component<
   'SpawnGameObjectEventComponent',
@@ -101,6 +110,8 @@ export type SpawnGameObjectEventComponent = Component<
     imageUrl: string;
   }
 >;
+
+// REACT COMPONENTS
 
 export type ReactPositionComponentData = { x: number; y: number };
 export type ReactPositionComponent = ReactComponent<'ReactPositionComponent', ReactPositionComponentData>;
