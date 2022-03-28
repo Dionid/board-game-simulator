@@ -306,3 +306,5 @@ export const LambdielHeroSet = {
 export const HeroSets = {
   [LambdielHeroSet.id]: LambdielHeroSet,
 };
+
+export type HeroSets = typeof HeroSets;

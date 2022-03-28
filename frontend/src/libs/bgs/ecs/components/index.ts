@@ -1,6 +1,7 @@
 import { Component } from '../../../ecs/component';
 import { ReactComponent } from '../../../ecs/react';
 import { UUID } from '../../../branded-types';
+import { SetId } from '../../games/unmatched';
 
 // INTERACTIONS
 
@@ -76,6 +77,28 @@ export type SpawnHeroComponent = Component<
   'SpawnHeroComponent',
   {
     url: string;
+  }
+>;
+
+export type SpawnHeroSetComponent = Component<
+  'SpawnHeroSetComponent',
+  {
+    setId: SetId;
+  }
+>;
+
+export type GameObjectComponent = Component<'GameObjectComponent', {}>;
+
+export type SpawnGameObjectEventComponent = Component<
+  'SpawnGameObjectEventComponent',
+  {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    draggable: boolean;
+    selectable: boolean;
+    imageUrl: string;
   }
 >;
 

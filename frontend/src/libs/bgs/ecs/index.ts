@@ -1,6 +1,7 @@
 import { Ignitor } from '../../ecs/ignitor';
 import {
   DraggableComponent,
+  GameObjectComponent,
   ImageComponent,
   IsDraggingComponent,
   IsSelectedComponent,
@@ -13,7 +14,9 @@ import {
   SelectableComponent,
   SizeComponent,
   SpawnGameMapComponent,
+  SpawnGameObjectEventComponent,
   SpawnHeroComponent,
+  SpawnHeroSetComponent,
 } from './components';
 import { HeroSets } from '../games/unmatched';
 
@@ -27,8 +30,6 @@ export type BgsIgnitorCtx = {
 
 export type BgsIgnitorComponents = {
   // GAME
-  SpawnGameMapComponent: SpawnGameMapComponent;
-  SpawnHeroComponent: SpawnHeroComponent;
   ImageComponent: ImageComponent;
   PositionComponent: PositionComponent;
   SizeComponent: SizeComponent;
@@ -36,6 +37,13 @@ export type BgsIgnitorComponents = {
   IsSelectedComponent: IsSelectedComponent;
   DraggableComponent: DraggableComponent;
   IsDraggingComponent: IsDraggingComponent;
+
+  SpawnGameMapComponent: SpawnGameMapComponent;
+  SpawnHeroComponent: SpawnHeroComponent;
+  SpawnHeroSetComponent: SpawnHeroSetComponent;
+
+  GameObjectComponent: GameObjectComponent;
+  SpawnGameObjectEventComponent: SpawnGameObjectEventComponent;
 
   // REACT COMPONENTS
   ReactPositionComponent: ReactPositionComponent;
