@@ -12,11 +12,16 @@ export type ReactComponent<N extends string, D extends Record<any, any>> = Compo
   }
 >;
 
-export const useEcsComponent = <S, CR extends Record<CN, ReactComponent<CN, S>>, CN extends keyof CR & string>(
+export const useEcsComponent = <
+  S,
+  CR extends Record<CN, ReactComponent<CN, S>>,
+  CN extends keyof CR & string,
+  Ctx extends Record<any, any>
+>(
   entity: EntityId,
   initialState: S,
   componentName: CN,
-  ignitor: Ignitor<World<CR>>
+  ignitor: Ignitor<CR, Ctx>
 ): S => {
   const [state, setState] = useState<S>(initialState);
 

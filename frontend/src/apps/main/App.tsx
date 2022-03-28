@@ -7,7 +7,7 @@ import FileCopyIcon from '@mui/icons-material/FileCopyOutlined';
 import SaveIcon from '@mui/icons-material/Save';
 import PrintIcon from '@mui/icons-material/Print';
 import ShareIcon from '@mui/icons-material/Share';
-import { BgsIgnitor } from '../../libs/bgs/ecs';
+import { BgsIgnitor, BgsIgnitorCtx } from '../../libs/bgs/ecs';
 import { Ignitor } from '../../libs/ecs/ignitor';
 import { World } from '../../libs/ecs/world';
 import { ComponentId, Pool } from '../../libs/ecs/component';
@@ -23,11 +23,13 @@ import { PlayerSystem } from '../../libs/bgs/ecs/systems/player';
 import { DragSystem } from '../../libs/bgs/ecs/systems/drag';
 import { SelectSystem } from '../../libs/bgs/ecs/systems/select';
 import { useForceUpdate } from '../../libs/react/hooks/use-force-update';
+import { HeroSets } from '../../libs/bgs/games/unmatched';
 
 const ignitor: BgsIgnitor = {
   world: {
     pools: {},
   },
+  ctx: {} as BgsIgnitorCtx,
   systems: [
     // INIT
     PlayerSystem(),
@@ -53,10 +55,14 @@ const ignitor: BgsIgnitor = {
 const initIgnitor = async () => {
   await Ignitor.init(ignitor);
 
+  let lastTimeStamp = new Date();
   const run = async () => {
-    await Ignitor.run(ignitor);
+    const newTimeStamp = new Date();
+    await Ignitor.run(ignitor, newTimeStamp.getMilliseconds() - lastTimeStamp.getMilliseconds());
+    lastTimeStamp = newTimeStamp;
     requestAnimationFrame(run);
   };
+
   requestAnimationFrame(run);
 };
 
@@ -65,6 +71,7 @@ function App() {
   const surfaceHeight = window.innerHeight;
 
   const forceUpdate = useForceUpdate();
+  const [heroSets] = useState(HeroSets);
   const [, selectShape] = useState<string | null>(null);
 
   const checkDeselect = (e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => {
@@ -73,6 +80,10 @@ function App() {
       selectShape(null);
     }
   };
+
+  useEffect(() => {
+    Ignitor.addToCtx(ignitor, 'heroSets', heroSets);
+  }, [heroSets]);
 
   useEffect(() => {
     initIgnitor();

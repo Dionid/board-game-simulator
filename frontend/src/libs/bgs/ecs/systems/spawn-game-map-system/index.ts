@@ -21,7 +21,7 @@ export const SpawnGameMapSystem = (): System<{
   DraggableComponent: DraggableComponent;
   SelectableComponent: SelectableComponent;
 }> => ({
-  run: async (world) => {
+  run: async ({ world }) => {
     const entities = World.filter(world, ['SpawnGameMapComponent']);
     if (entities.length === 0) {
       return;

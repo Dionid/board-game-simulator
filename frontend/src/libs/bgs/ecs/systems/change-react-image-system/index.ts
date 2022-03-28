@@ -7,7 +7,7 @@ export const ChangeReactImageSystem = (): System<{
   ReactImageComponent: ReactImageComponent;
   ImageComponent: ImageComponent;
 }> => ({
-  run: async (world) => {
+  run: async ({ world }) => {
     const entities = World.filter(world, ['ReactImageComponent', 'ImageComponent']);
     if (entities.length === 0) {
       return;

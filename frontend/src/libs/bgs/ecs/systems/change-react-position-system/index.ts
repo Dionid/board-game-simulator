@@ -7,7 +7,7 @@ export const ChangeReactPositionSystem = (): System<{
   ReactPositionComponent: ReactPositionComponent;
   PositionComponent: PositionComponent;
 }> => ({
-  run: async (world) => {
+  run: async ({ world }) => {
     const entities = World.filter(world, ['ReactPositionComponent', 'PositionComponent']);
     if (entities.length === 0) {
       return;

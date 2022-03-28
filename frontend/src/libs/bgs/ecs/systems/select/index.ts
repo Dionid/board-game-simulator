@@ -22,7 +22,7 @@ export const SelectSystem = (): System<{
   SizeComponent: SizeComponent;
 }> => {
   return {
-    run: async (world) => {
+    run: async ({ world }) => {
       const selectableEntities = World.filter(world, ['SelectableComponent', 'PositionComponent', 'SizeComponent']);
 
       if (selectableEntities.length === 0) {

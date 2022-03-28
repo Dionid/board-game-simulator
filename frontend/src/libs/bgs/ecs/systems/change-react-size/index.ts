@@ -7,7 +7,7 @@ export const ChangeReactSizeSystem = (): System<{
   ReactSizeComponent: ReactSizeComponent;
   SizeComponent: SizeComponent;
 }> => ({
-  run: async (world) => {
+  run: async ({ world }) => {
     const entities = World.filter(world, ['ReactSizeComponent', 'SizeComponent']);
     if (entities.length === 0) {
       return;

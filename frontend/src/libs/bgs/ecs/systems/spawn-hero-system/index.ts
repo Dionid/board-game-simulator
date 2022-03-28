@@ -24,7 +24,7 @@ export const SpawnHeroSystem = (): System<{
   let lastZ = 1;
 
   return {
-    run: async (world) => {
+    run: async ({ world }) => {
       const entities = World.filter(world, ['SpawnHeroComponent']);
       if (entities.length === 0) {
         return;

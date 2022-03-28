@@ -1,4 +1,3 @@
-import { World } from '../../ecs/world';
 import { Ignitor } from '../../ecs/ignitor';
 import {
   DraggableComponent,
@@ -16,10 +15,17 @@ import {
   SpawnGameMapComponent,
   SpawnHeroComponent,
 } from './components';
+import { HeroSets } from '../games/unmatched';
 
 // REACT
 
-export type BgsWorld = World<{
+// export type BgsWorld = World<>;
+
+export type BgsIgnitorCtx = {
+  heroSets: typeof HeroSets;
+};
+
+export type BgsIgnitorComponents = {
   // GAME
   SpawnGameMapComponent: SpawnGameMapComponent;
   SpawnHeroComponent: SpawnHeroComponent;
@@ -37,6 +43,6 @@ export type BgsWorld = World<{
   ReactSizeComponent: ReactSizeComponent;
   ReactGameMapComponent: ReactGameMapComponent;
   ReactHeroComponent: ReactHeroComponent;
-}>;
+};
 
-export type BgsIgnitor = Ignitor<BgsWorld>;
+export type BgsIgnitor = Ignitor<BgsIgnitorComponents, BgsIgnitorCtx>;
