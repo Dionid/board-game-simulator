@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Layer, Stage } from 'react-konva';
 import CssBaseline from '@mui/material/CssBaseline';
 import Konva from 'konva';
@@ -22,6 +22,7 @@ import { MouseInputSystem } from '../../libs/bgs/ecs/systems/mouse-input';
 import { PlayerSystem } from '../../libs/bgs/ecs/systems/player';
 import { DragSystem } from '../../libs/bgs/ecs/systems/drag';
 import { SelectSystem } from '../../libs/bgs/ecs/systems/select';
+import { useForceUpdate } from '../../libs/react/hooks/use-force-update';
 
 const ignitor: BgsIgnitor = {
   world: {
@@ -63,7 +64,8 @@ function App() {
   const surfaceWidth = window.innerWidth;
   const surfaceHeight = window.innerHeight;
 
-  const [, selectShape] = React.useState<string | null>(null);
+  const forceUpdate = useForceUpdate();
+  const [, selectShape] = useState<string | null>(null);
 
   const checkDeselect = (e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => {
     const clickedOnEmpty = e.target === e.target.getStage();
@@ -75,7 +77,7 @@ function App() {
   useEffect(() => {
     initIgnitor();
     setInterval(() => {
-      selectShape(Math.random() + '');
+      forceUpdate();
     }, 1000);
   }, []);
 
@@ -91,9 +93,10 @@ function App() {
           name: 'SpawnGameMapComponent',
           id: ComponentId.new(),
           data: {
-            url: 'https://downloader.disk.yandex.ru/preview/dfe66cd35d8feabf8ce64c40339d342e3f91b6c2e70db5c0046745aee0fc7b0a/623f62e7/HTA3saKP7S9n3UVUFPbneRLOs38Aexzy74peiw68-Bqu1Ghp-2pZ66iNDKp7lyv_THLyuC5YhZtrQDywSWC10Q%3D%3D?uid=0&filename=Screenshot%202022-03-26%20at%2018.00.35.png&disposition=inline&hash=&limit=0&content_type=image%2Fpng&owner_uid=0&tknv=v2&size=2878x1478',
+            url: 'https://downloader.disk.yandex.ru/preview/5eb0ed2aa9f0ab459cd4e05b30dcc1f9321e62aed7e33972ea87b739dc4e0a5d/62424a88/HTA3saKP7S9n3UVUFPbneRLOs38Aexzy74peiw68-Bqu1Ghp-2pZ66iNDKp7lyv_THLyuC5YhZtrQDywSWC10Q%3D%3D?uid=0&filename=Screenshot%202022-03-26%20at%2018.00.35.png&disposition=inline&hash=&limit=0&content_type=image%2Fpng&owner_uid=0&tknv=v2&size=2048x2048',
           },
         });
+        // forceUpdate(v4())
       },
     },
     {
@@ -108,6 +111,7 @@ function App() {
             url: 'https://downloader.disk.yandex.ru/preview/161897aa02b8194c76d656eef6457102eb834eaf8f5ae87bd6a187bb82cdb4fd/623f6aaa/UD-u8vK1z1fLXA14AVIV7W9G13sooEQOAswJRV651SmGSoZFp5wTl-y7PHaF0ne9Z3yDPVHa8Xri9lPONPSPaA%3D%3D?uid=0&filename=Screenshot%202022-03-26%20at%2018.33.34.png&disposition=inline&hash=&limit=0&content_type=image%2Fpng&owner_uid=0&tknv=v2&size=2048x2048',
           },
         });
+        // forceUpdate(v4())
       },
     },
     { icon: <PrintIcon />, name: 'Print' },
@@ -125,8 +129,6 @@ function App() {
           {Object.keys(reactGameMapComponentPool.data).map((entity) => {
             return <ECSCustomImage key={entity} entity={entity as EntityId} ignitor={ignitor} />;
           })}
-        </Layer>
-        <Layer>
           {Object.keys(reactHeroComponentPool.data).map((entity) => {
             return <ECSCustomImage key={entity} entity={entity as EntityId} ignitor={ignitor} />;
           })}

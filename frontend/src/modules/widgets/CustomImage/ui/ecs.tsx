@@ -11,8 +11,6 @@ export const ECSCustomImage = React.memo((props: { entity: EntityId; ignitor: Bg
   const position = useEcsComponent(entity, { x: 0, y: 0 }, 'ReactPositionComponent', ignitor);
   const size = useEcsComponent(entity, { width: 0, height: 0 }, 'ReactSizeComponent', ignitor);
 
-  console.log(`image, position, size,`, image, position, size);
-
   return (
     <CustomImage
       key={entity}
