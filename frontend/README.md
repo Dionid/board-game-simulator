@@ -7,26 +7,39 @@
 1. Add Hero Set
    1. ~~Hero~~
    2. ~~Sidekick~~
-   3. Deck
+   3. ~~Deck~~
    4. Cards
    5. Health meter
-2. Flip side
-3. Remove entities
-4. Depth system
-5. Deck actions
+2. Add one more champion
+3. Add set id to all entities
+4. Deck actions
    1. Get card
    2. Shuffle
-6. Card actions
+5. Card actions
    1. Put in deck
-7. Authorization
-8. Cards shown
-9. Persistence and collaboration
-10. Move on map
+   2. Flip
+6. Hero actions
+   1. Flip
+7. Map actions
+   1. Lock
+8. Health meter actions
+   1. Increase & Decrease
+9. Move map
+10. Depth system based on y axis
+11. Authorization
+12. Cards shown
+13. Persistence and collaboration
+    1. Room
+    2. Player cursor
+    3. Player actions
+14. Refactor SelectSystem
+15. Remove entities
 
 ## Second
 
 1. How to rerender on changes
 2. More `World.filter` operations (`in`, `notIn`, etc.)
+3. Mobile version
 
 ## Additional
 

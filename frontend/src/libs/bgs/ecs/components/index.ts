@@ -3,7 +3,7 @@ import { ReactComponent } from '../../../ecs/react';
 import { UUID } from '../../../branded-types';
 import { DeckId, HeroId, MapId, SetId, SidekickId } from '../../games/unmatched';
 
-// INTERACTIONS
+// . INPUT
 
 export type HandComponent = Component<
   'HandComponent',
@@ -21,7 +21,7 @@ export type HandComponent = Component<
   }
 >;
 
-// ACCESS
+// . ACCESS
 
 export type PlayerComponent = Component<
   'PlayerComponent',
@@ -32,7 +32,7 @@ export type PlayerComponent = Component<
 
 export type OwnerComponent = Component<'OwnerComponent', {}>;
 
-// GAME OBJECT
+// . GAME OBJECT
 
 export type GameObjectComponent = Component<'GameObjectComponent', {}>;
 
@@ -44,14 +44,6 @@ export type PositionComponent = Component<
     z: number;
   }
 >;
-
-export type DraggableComponent = Component<'DraggableComponent', {}>;
-
-export type IsDraggingComponent = Component<'IsDraggingComponent', {}>;
-
-export type SelectableComponent = Component<'SelectableComponent', {}>;
-
-export type IsSelectedComponent = Component<'IsSelectedComponent', {}>;
 
 export type ImageComponent = Component<
   'ImageComponent',
@@ -68,7 +60,34 @@ export type SizeComponent = Component<
   }
 >;
 
-// UNMATCHED COMPONENTS
+export type SelectableComponent = Component<'SelectableComponent', {}>;
+
+export type IsSelectedComponent = Component<'IsSelectedComponent', {}>;
+
+export type LockableComponent = Component<'LockableComponent', {}>;
+
+export type IsLockedComponent = Component<'IsLockedComponent', {}>;
+
+export type DraggableComponent = Component<'DraggableComponent', {}>;
+
+export type IsDraggingComponent = Component<'IsDraggingComponent', {}>;
+
+// .. SPAWN EVENTS
+
+export type SpawnGameObjectEventComponent = Component<
+  'SpawnGameObjectEventComponent',
+  {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    draggable: boolean;
+    selectable: boolean;
+    imageUrl: string;
+  }
+>;
+
+// . UNMATCHED COMPONENTS
 
 export type GameMapComponent = Component<
   'GameMapComponent',
@@ -105,7 +124,7 @@ export type HeroSetComponent = Component<
   }
 >;
 
-// SPAWN EVENTS
+// .. SPAWN EVENTS
 
 export type SpawnGameMapComponent = Component<
   'SpawnGameMapComponent',
@@ -146,20 +165,7 @@ export type SpawnHeroSetComponent = Component<
   }
 >;
 
-export type SpawnGameObjectEventComponent = Component<
-  'SpawnGameObjectEventComponent',
-  {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-    draggable: boolean;
-    selectable: boolean;
-    imageUrl: string;
-  }
->;
-
-// REACT COMPONENTS
+// . REACT COMPONENTS
 
 export type ReactPositionComponentData = { x: number; y: number };
 export type ReactPositionComponent = ReactComponent<'ReactPositionComponent', ReactPositionComponentData>;
