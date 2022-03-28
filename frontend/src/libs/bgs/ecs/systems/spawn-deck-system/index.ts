@@ -1,43 +1,43 @@
 import { System } from '../../../../ecs/system';
 import { World } from '../../../../ecs/world';
 import { ComponentId, Pool } from '../../../../ecs/component';
-import { SpawnSideKickEventComponent, SpawnGameObjectEventComponent } from '../../components';
+import { SpawnDeckEventComponent, SpawnGameObjectEventComponent } from '../../components';
 
-export const SpawnSidekickEventSystem = (): System<{
-  SpawnSideKickEventComponent: SpawnSideKickEventComponent;
+export const SpawnDeckEventSystem = (): System<{
+  SpawnDeckEventComponent: SpawnDeckEventComponent;
   SpawnGameObjectEventComponent: SpawnGameObjectEventComponent;
 }> => {
   return {
     run: async ({ world }) => {
-      const entities = World.filter(world, ['SpawnSideKickEventComponent']);
+      const entities = World.filter(world, ['SpawnDeckEventComponent']);
       if (entities.length === 0) {
         return;
       }
 
-      const spawnSidekickComponentPool = World.getOrAddPool(world, 'SpawnSideKickEventComponent');
+      const spawnDeckComponentPool = World.getOrAddPool(world, 'SpawnDeckEventComponent');
       const spawnGameObjectComponentPool = World.getOrAddPool(world, 'SpawnGameObjectEventComponent');
 
-      for (const sidekickEntity of entities) {
-        const spawnComponent = Pool.get(spawnSidekickComponentPool, sidekickEntity);
+      for (const deckEntity of entities) {
+        const spawnComponent = Pool.get(spawnDeckComponentPool, deckEntity);
 
         // TODO. Think about entity id: must be new or the same
-        // . Create sidekick spawn event
-        Pool.add(spawnGameObjectComponentPool, sidekickEntity, {
+        // . Create deck spawn event
+        Pool.add(spawnGameObjectComponentPool, deckEntity, {
           id: ComponentId.new(),
           name: 'SpawnGameObjectEventComponent',
           data: {
             imageUrl: spawnComponent.data.url,
             x: 100,
             y: 100,
-            width: 50,
-            height: 90,
+            width: 100,
+            height: 140,
             draggable: true,
             selectable: true,
           },
         });
 
         // Destroy event
-        Pool.delete(spawnSidekickComponentPool, sidekickEntity);
+        Pool.delete(spawnDeckComponentPool, deckEntity);
       }
     },
   };

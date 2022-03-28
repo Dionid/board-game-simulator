@@ -2,7 +2,12 @@ import { System } from '../../../../ecs/system';
 import { World } from '../../../../ecs/world';
 import { ComponentId, Pool } from '../../../../ecs/component';
 import { EntityId } from '../../../../ecs/entity';
-import { SpawnHeroComponent, SpawnHeroSetComponent, SpawnSideKickEventComponent } from '../../components';
+import {
+  SpawnDeckEventComponent,
+  SpawnHeroComponent,
+  SpawnHeroSetComponent,
+  SpawnSideKickEventComponent,
+} from '../../components';
 import { HeroSets } from '../../../games/unmatched';
 
 export const SpawnHeroSetSystem = (): System<
@@ -10,6 +15,7 @@ export const SpawnHeroSetSystem = (): System<
     SpawnHeroSetComponent: SpawnHeroSetComponent;
     SpawnHeroComponent: SpawnHeroComponent;
     SpawnSideKickEventComponent: SpawnSideKickEventComponent;
+    SpawnDeckEventComponent: SpawnDeckEventComponent;
   },
   {
     heroSets: HeroSets;
@@ -25,6 +31,7 @@ export const SpawnHeroSetSystem = (): System<
       const spawnHeroSetComponentPool = World.getOrAddPool(world, 'SpawnHeroSetComponent');
       const spawnHeroComponentPool = World.getOrAddPool(world, 'SpawnHeroComponent');
       const spawnSidekickEventComponentPool = World.getOrAddPool(world, 'SpawnSideKickEventComponent');
+      const spawnDeckEventComponentPool = World.getOrAddPool(world, 'SpawnDeckEventComponent');
 
       const heroSets = ctx.heroSets;
 
@@ -57,6 +64,17 @@ export const SpawnHeroSetSystem = (): System<
               },
             });
           }
+        });
+
+        heroSet.decks.forEach((deck) => {
+          // . Create new sidekick component
+          Pool.add(spawnDeckEventComponentPool, EntityId.new(), {
+            name: 'SidekickEventComponent',
+            id: ComponentId.new(),
+            data: {
+              url: deck.frontImageUrl,
+            },
+          });
         });
 
         // . Destroy event

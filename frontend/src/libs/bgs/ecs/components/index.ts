@@ -91,6 +91,13 @@ export type SpawnSideKickEventComponent = Component<
   }
 >;
 
+export type SpawnDeckEventComponent = Component<
+  'SpawnDeckEventComponent',
+  {
+    url: string;
+  }
+>;
+
 export type SpawnHeroSetComponent = Component<
   'SpawnHeroSetComponent',
   {

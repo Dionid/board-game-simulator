@@ -200,7 +200,7 @@ export const LambdielHeroSet = {
       frontImageUrl:
         'https://1.downloader.disk.yandex.ru/preview/37390fb98a64f2f98082c32fd132f4ab4c897b5ccd4d10b4dc68046facc0adf3/inf/KAEda6woVVVeLHoolibA7Vd3t7TVYISu9rngedVYTdTwSBs90oNow4xR4VgdExdt9J7L-zJOP7Km-j5ic924SQ%3D%3D?uid=59003057&filename=Screenshot%202022-03-29%20at%2001.36.09.png&disposition=inline&hash=&limit=0&content_type=image%2Fpng&owner_uid=59003057&tknv=v2&size=2878x1592',
       backImageUrl:
-        'https://downloader.disk.yandex.ru/preview/161897aa02b8194c76d656eef6457102eb834eaf8f5ae87bd6a187bb82cdb4fd/623f6aaa/UD-u8vK1z1fLXA14AVIV7W9G13sooEQOAswJRV651SmGSoZFp5wTl-y7PHaF0ne9Z3yDPVHa8Xri9lPONPSPaA%3D%3D?uid=0&filename=Screenshot%202022-03-26%20at%2018.33.34.png&disposition=inline&hash=&limit=0&content_type=image%2Fpng&owner_uid=0&tknv=v2&size=2048x2048',
+        'https://1.downloader.disk.yandex.ru/preview/37390fb98a64f2f98082c32fd132f4ab4c897b5ccd4d10b4dc68046facc0adf3/inf/KAEda6woVVVeLHoolibA7Vd3t7TVYISu9rngedVYTdTwSBs90oNow4xR4VgdExdt9J7L-zJOP7Km-j5ic924SQ%3D%3D?uid=59003057&filename=Screenshot%202022-03-29%20at%2001.36.09.png&disposition=inline&hash=&limit=0&content_type=image%2Fpng&owner_uid=59003057&tknv=v2&size=2878x1592',
       qty: 1,
     },
   ],
@@ -209,9 +209,9 @@ export const LambdielHeroSet = {
       id: SidekickId.ofString('15ad2da8-e752-4d7a-992a-2bdf5a04a50f'),
       name: 'Illusion',
       frontImageUrl:
-        'https://downloader.disk.yandex.ru/preview/161897aa02b8194c76d656eef6457102eb834eaf8f5ae87bd6a187bb82cdb4fd/623f6aaa/UD-u8vK1z1fLXA14AVIV7W9G13sooEQOAswJRV651SmGSoZFp5wTl-y7PHaF0ne9Z3yDPVHa8Xri9lPONPSPaA%3D%3D?uid=0&filename=Screenshot%202022-03-26%20at%2018.33.34.png&disposition=inline&hash=&limit=0&content_type=image%2Fpng&owner_uid=0&tknv=v2&size=2048x2048',
+        'https://1.downloader.disk.yandex.ru/preview/37390fb98a64f2f98082c32fd132f4ab4c897b5ccd4d10b4dc68046facc0adf3/inf/KAEda6woVVVeLHoolibA7Vd3t7TVYISu9rngedVYTdTwSBs90oNow4xR4VgdExdt9J7L-zJOP7Km-j5ic924SQ%3D%3D?uid=59003057&filename=Screenshot%202022-03-29%20at%2001.36.09.png&disposition=inline&hash=&limit=0&content_type=image%2Fpng&owner_uid=59003057&tknv=v2&size=2878x1592',
       backImageUrl:
-        'https://downloader.disk.yandex.ru/preview/161897aa02b8194c76d656eef6457102eb834eaf8f5ae87bd6a187bb82cdb4fd/623f6aaa/UD-u8vK1z1fLXA14AVIV7W9G13sooEQOAswJRV651SmGSoZFp5wTl-y7PHaF0ne9Z3yDPVHa8Xri9lPONPSPaA%3D%3D?uid=0&filename=Screenshot%202022-03-26%20at%2018.33.34.png&disposition=inline&hash=&limit=0&content_type=image%2Fpng&owner_uid=0&tknv=v2&size=2048x2048',
+        'https://1.downloader.disk.yandex.ru/preview/37390fb98a64f2f98082c32fd132f4ab4c897b5ccd4d10b4dc68046facc0adf3/inf/KAEda6woVVVeLHoolibA7Vd3t7TVYISu9rngedVYTdTwSBs90oNow4xR4VgdExdt9J7L-zJOP7Km-j5ic924SQ%3D%3D?uid=59003057&filename=Screenshot%202022-03-29%20at%2001.36.09.png&disposition=inline&hash=&limit=0&content_type=image%2Fpng&owner_uid=59003057&tknv=v2&size=2878x1592',
       qty: 4,
     },
   ],

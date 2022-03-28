@@ -26,6 +26,7 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { SpawnHeroSetSystem } from '../../libs/bgs/ecs/systems/spawn-hero-set-system';
 import { SpawnGameObjectSystem } from '../../libs/bgs/ecs/systems/spawn-game-object';
 import { SpawnSidekickEventSystem } from '../../libs/bgs/ecs/systems/spawn-sidekick-system';
+import { SpawnDeckEventSystem } from '../../libs/bgs/ecs/systems/spawn-deck-system';
 
 const ignitor: BgsIgnitor = {
   world: {
@@ -48,6 +49,7 @@ const ignitor: BgsIgnitor = {
     SpawnHeroSetSystem(),
     SpawnHeroSystem(),
     SpawnSidekickEventSystem(),
+    SpawnDeckEventSystem(),
 
     // SPAWN GAME OBJECT
     SpawnGameObjectSystem(),
@@ -124,7 +126,7 @@ const MainMenu = ({ heroSets, ignitor }: { heroSets: HeroSets; ignitor: BgsIgnit
           <IconButton
             onClick={handleClick}
             size="large"
-            sx={{ ml: 2, backgroundColor: '#eee' }}
+            sx={{ ml: 2, backgroundColor: '#bdbdbd' }}
             aria-controls={open ? 'account-menu' : undefined}
             aria-haspopup="true"
             aria-expanded={open ? 'true' : undefined}
@@ -209,7 +211,13 @@ function App() {
   return (
     <div>
       <CssBaseline />
-      <Stage width={surfaceWidth} height={surfaceHeight} onMouseDown={checkDeselect} onTouchStart={checkDeselect}>
+      <Stage
+        style={{ backgroundColor: '#e1e1e1' }}
+        width={surfaceWidth}
+        height={surfaceHeight}
+        onMouseDown={checkDeselect}
+        onTouchStart={checkDeselect}
+      >
         <Layer>
           {Object.keys(gameObjectComponentPool.data).map((entity) => {
             return <ECSCustomImage key={entity} entity={entity as EntityId} ignitor={ignitor} />;
