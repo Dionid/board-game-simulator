@@ -246,8 +246,149 @@ export const LamdielHeroSet = {
   ],
 };
 
+// DEKU
+
+const DekuCards = [
+  {
+    id: CardId.ofString('867e90cd-c757-4855-be51-36da33970b0f'),
+    name: 'Controlled Smash',
+    frontImageUrl: '/hero-sets/deku/deck/Controlled Smash.png',
+    backImageUrl: '/hero-sets/deku/deck-front-image.png',
+    qty: 2,
+  },
+  {
+    id: CardId.ofString('5e91a1ff-34a9-42b9-a820-a3db13694a9c'),
+    name: 'Delaware Detroit Smash',
+    frontImageUrl: '/hero-sets/deku/deck/Delaware Detroit Smash.png',
+    backImageUrl: '/hero-sets/deku/deck-front-image.png',
+    qty: 2,
+  },
+  {
+    id: CardId.ofString('1f30b5b7-46d9-44b5-809b-14cd9bff778a'),
+    name: 'Delaware Smash',
+    frontImageUrl: '/hero-sets/deku/deck/Delaware Smash.png',
+    backImageUrl: '/hero-sets/deku/deck-front-image.png',
+    qty: 2,
+  },
+  {
+    id: CardId.ofString('2afe96f3-e4d6-419a-ad6a-fc966d7ab3bb'),
+    name: 'Detroit Smash',
+    frontImageUrl: '/hero-sets/deku/deck/Detroit Smash.png',
+    backImageUrl: '/hero-sets/deku/deck-front-image.png',
+    qty: 2,
+  },
+  {
+    id: CardId.ofString('957baffb-f569-4ebb-84e2-a6187fee6787'),
+    name: 'Feint',
+    frontImageUrl: '/hero-sets/deku/deck/Feint.png',
+    backImageUrl: '/hero-sets/deku/deck-front-image.png',
+    qty: 3,
+  },
+  {
+    id: CardId.ofString('f3ccb855-b60f-4c80-8e85-3407e76c400b'),
+    name: 'Heroic Grit',
+    frontImageUrl: '/hero-sets/deku/deck/Heroic Grit.png',
+    backImageUrl: '/hero-sets/deku/deck-front-image.png',
+    qty: 3,
+  },
+  {
+    id: CardId.ofString('feb71b5b-ce58-409f-b126-b1a2c5af27b0'),
+    name: 'Heroic Spirit',
+    frontImageUrl: '/hero-sets/deku/deck/Heroic Spirit.png',
+    backImageUrl: '/hero-sets/deku/deck-front-image.png',
+    qty: 2,
+  },
+  {
+    id: CardId.ofString('de40a645-eeb6-4ea1-8239-d7c7a8cba828'),
+    name: 'Heroic Struggle',
+    frontImageUrl: '/hero-sets/deku/deck/Heroic Struggle.png',
+    backImageUrl: '/hero-sets/deku/deck-front-image.png',
+    qty: 3,
+  },
+  {
+    id: CardId.ofString('39b4e4c5-7ef3-4edf-a099-74dc884ece41'),
+    name: 'Jet Set Run',
+    frontImageUrl: '/hero-sets/deku/deck/Jet Set Run.png',
+    backImageUrl: '/hero-sets/deku/deck-front-image.png',
+    qty: 2,
+  },
+  {
+    id: CardId.ofString('bebc4605-7291-4004-8fd3-7d991913a396'),
+    name: 'Momentous Shift',
+    frontImageUrl: '/hero-sets/deku/deck/Momentous Shift.png',
+    backImageUrl: '/hero-sets/deku/deck-front-image.png',
+    qty: 2,
+  },
+  {
+    id: CardId.ofString('8c395dee-0f78-4298-959a-bf755a4811b6'),
+    name: 'Plus Ultra',
+    frontImageUrl: '/hero-sets/deku/deck/Plus Ultra.png',
+    backImageUrl: '/hero-sets/deku/deck-front-image.png',
+    qty: 2,
+  },
+  {
+    id: CardId.ofString('6b6a817b-2d04-4aba-a638-2ed45cf81ea3'),
+    name: 'Shoot Style',
+    frontImageUrl: '/hero-sets/deku/deck/Shoot Style.png',
+    backImageUrl: '/hero-sets/deku/deck-front-image.png',
+    qty: 2,
+  },
+  {
+    id: CardId.ofString('ecee361c-7896-495e-886a-85206fa9791b'),
+    name: 'Skirmish',
+    frontImageUrl: '/hero-sets/deku/deck/Skirmish.png',
+    backImageUrl: '/hero-sets/deku/deck-front-image.png',
+    qty: 2,
+  },
+];
+
+export const DekuHeroSet = {
+  id: SetId.ofString('4fb0503c-7266-4cce-a65e-214661188b37'),
+  name: 'Deku',
+  heroes: [
+    {
+      id: HeroId.ofString('1cab25fa-e29f-43fe-84d0-adf787589fe5'),
+      name: 'Deku',
+      frontImageUrl: '/hero-sets/deku/hero-front-image.png',
+      backImageUrl: '/hero-sets/deku/hero-front-image.png',
+      qty: 1,
+    },
+  ],
+  sidekicks: [],
+  extraCards: [],
+  healthMeters: [
+    {
+      id: HealthMeterId.ofString('a59652ab-a4fb-49cf-8d8d-dd31223bc000'),
+      maxValue: 14,
+      frontImageUrl: '/hero-sets/deku/health-meter-front-image.png',
+      backImageUrl: '/hero-sets/deku/health-meter-front-image.png',
+    },
+  ],
+  ruleCards: [
+    {
+      id: RuleCardId.ofString('3d95497c-6143-4f0c-b952-7e94c052aa11'),
+      frontImageUrl: '/hero-sets/deku/characters/Deku.png',
+      backImageUrl: '/hero-sets/deku/deck-front-image.png',
+    },
+    {
+      id: RuleCardId.ofString('d2dd2f67-5007-4c8f-b11a-84dfd05835b8'),
+      frontImageUrl: '/hero-sets/deku/rules/Rule card 1.png',
+      backImageUrl: '/hero-sets/deku/deck-front-image.png',
+    },
+  ],
+  cards: DekuCards,
+  decks: [
+    {
+      id: DeckId.ofString('aff8de89-8c93-4fae-8969-b839da72c09e'),
+      frontImageUrl: '/hero-sets/deku/deck-front-image.png',
+      cardIds: DekuCards.map((card) => card.id),
+    },
+  ],
+};
+
 export const HeroSets = {
   [LamdielHeroSet.id]: LamdielHeroSet,
+  [DekuHeroSet.id]: DekuHeroSet,
 };
 
 export type HeroSets = typeof HeroSets;
