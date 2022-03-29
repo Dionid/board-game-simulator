@@ -1,5 +1,7 @@
 import { Ignitor } from '../../ecs/ignitor';
 import {
+  CameraComponent,
+  CameraComponentName,
   CardComponent,
   DeckComponent,
   DeletableComponent,
@@ -45,6 +47,7 @@ export type BgsIgnitorCtx = {
 };
 
 export type BgsIgnitorComponents = {
+  [CameraComponentName]: CameraComponent;
   // GAME
   ImageComponent: ImageComponent;
   PositionComponent: PositionComponent;

@@ -2,20 +2,27 @@ import { Component } from '../../../ecs/component';
 import { ReactComponent } from '../../../ecs/react';
 import { UUID } from '../../../branded-types';
 import { CardId, DeckId, HealthMeterId, HeroId, MapId, RuleCardId, SetId, SidekickId } from '../../games/unmatched';
+import { Size, Square, Vector2, Vector3 } from '../../../math';
+
+// . BOARD
+
+export const BoardComponentName = 'BoardComponent' as const;
+export type BoardComponent = Component<typeof BoardComponentName, Size>;
+
+// . CAMERA
+
+export const CameraComponentName = 'CameraComponent' as const;
+export type CameraComponent = Component<typeof CameraComponentName, Square>;
 
 // . INPUT
 
 export type HandComponent = Component<
   'HandComponent',
   {
-    current: {
-      x: number;
-      y: number;
+    current: Vector2 & {
       down: boolean;
     };
-    previous: {
-      x: number;
-      y: number;
+    previous: Vector2 & {
       down: boolean;
     };
   }
@@ -23,8 +30,9 @@ export type HandComponent = Component<
 
 // . ACCESS
 
+export const PlayerComponentName = 'PlayerComponent' as const;
 export type PlayerComponent = Component<
-  'PlayerComponent',
+  typeof PlayerComponentName,
   {
     id: UUID;
   }
@@ -36,14 +44,7 @@ export type OwnerComponent = Component<'OwnerComponent', {}>;
 
 export type GameObjectComponent = Component<'GameObjectComponent', {}>;
 
-export type PositionComponent = Component<
-  'PositionComponent',
-  {
-    x: number;
-    y: number;
-    z: number;
-  }
->;
+export type PositionComponent = Component<'PositionComponent', Vector3>;
 
 export type ImageComponent = Component<
   'ImageComponent',
@@ -52,13 +53,7 @@ export type ImageComponent = Component<
   }
 >;
 
-export type SizeComponent = Component<
-  'SizeComponent',
-  {
-    width: number;
-    height: number;
-  }
->;
+export type SizeComponent = Component<'SizeComponent', Size>;
 
 export type SelectableComponent = Component<'SelectableComponent', {}>;
 
@@ -78,11 +73,7 @@ export type DeletableComponent = Component<'DeletableComponent', {}>;
 
 export type SpawnGameObjectEventComponent = Component<
   'SpawnGameObjectEventComponent',
-  {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
+  Square & {
     draggable: boolean;
     selectable: boolean;
     lockable: boolean;
@@ -216,10 +207,10 @@ export type SpawnHeroSetComponent = Component<
 
 // . REACT COMPONENTS
 
-export type ReactPositionComponentData = { x: number; y: number };
+export type ReactPositionComponentData = Vector2;
 export type ReactPositionComponent = ReactComponent<'ReactPositionComponent', ReactPositionComponentData>;
 
-export type ReactSizeComponentData = { width: number; height: number };
+export type ReactSizeComponentData = Size;
 export type ReactSizeComponent = ReactComponent<'ReactSizeComponent', ReactSizeComponentData>;
 
 export type ReactImageComponentData = { url: string };

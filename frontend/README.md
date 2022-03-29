@@ -16,7 +16,7 @@
    1. ~~Lock~~
    2. ~~Delete~~
 4. ~~Add "DeletableComponent"~~
-5. Move map
+5. Move Camera on Board
 6. Deck actions
    1. Get card
    2. Shuffle

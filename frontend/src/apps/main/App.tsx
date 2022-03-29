@@ -27,6 +27,7 @@ import { SpawnHealthMeterEventSystem } from '../../libs/bgs/ecs/systems/spawn-he
 import { SpawnRuleCardEventSystem } from '../../libs/bgs/ecs/systems/spawn-rule-card-system';
 import { MainMenu } from '../../modules/widgets/MainMenu';
 import { ContextMenu } from '../../modules/widgets/ContextMenu';
+import { CameraSystem } from '../../libs/bgs/ecs/systems/camera';
 
 const ignitor: BgsIgnitor = {
   world: {
@@ -36,6 +37,9 @@ const ignitor: BgsIgnitor = {
   systems: [
     // INIT
     PlayerSystem(),
+
+    // CAMERA
+    CameraSystem(),
 
     // INPUT
     MouseInputSystem(),

@@ -5,6 +5,7 @@ import { World } from '../../../libs/ecs/world';
 import { ComponentId, Pool } from '../../../libs/ecs/component';
 import { MenuItem } from '@mui/material';
 import { BgsIgnitor } from '../../../libs/bgs/ecs';
+import { v4 } from 'uuid';
 
 export const ContextMenu: FC<{ ignitor: BgsIgnitor }> = (props) => {
   const { children, ignitor } = props;
@@ -36,7 +37,7 @@ export const ContextMenu: FC<{ ignitor: BgsIgnitor }> = (props) => {
 
   const contextMenuActions = () => {
     const actions: JSX.Element[] = [];
-    const emptyActions = [<MenuItem>No actions</MenuItem>];
+    const emptyActions = [<MenuItem key={v4()}>No actions</MenuItem>];
 
     if (!contextMenu) {
       return emptyActions;
