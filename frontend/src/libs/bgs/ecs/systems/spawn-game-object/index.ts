@@ -8,6 +8,7 @@ import {
   SelectableComponent,
   GameObjectComponent,
   LockableComponent,
+  DeletableComponent,
 } from '../../components';
 import { World } from '../../../../ecs/world';
 import { ComponentId, Pool } from '../../../../ecs/component';
@@ -21,6 +22,7 @@ export const SpawnGameObjectSystem = (): System<{
   SelectableComponent: SelectableComponent;
   LockableComponent: LockableComponent;
   GameObjectComponent: GameObjectComponent;
+  DeletableComponent: DeletableComponent;
 }> => {
   let lastZ = 1;
 
@@ -39,6 +41,7 @@ export const SpawnGameObjectSystem = (): System<{
       const draggableComponentPool = World.getOrAddPool(world, 'DraggableComponent');
       const selectableComponentPool = World.getOrAddPool(world, 'SelectableComponent');
       const lockableComponentPool = World.getOrAddPool(world, 'LockableComponent');
+      const deletableComponentPool = World.getOrAddPool(world, 'DeletableComponent');
       const gameObjectComponentPool = World.getOrAddPool(world, 'GameObjectComponent');
 
       for (const gameObjectEntity of entities) {
@@ -98,6 +101,14 @@ export const SpawnGameObjectSystem = (): System<{
           Pool.add(lockableComponentPool, gameObjectEntity, {
             id: ComponentId.new(),
             name: 'LockableComponent',
+            data: {},
+          });
+        }
+
+        if (spawnComponent.data.deletable) {
+          Pool.add(deletableComponentPool, gameObjectEntity, {
+            id: ComponentId.new(),
+            name: 'DeletableComponent',
             data: {},
           });
         }

@@ -12,37 +12,41 @@
    5. ~~Health meter~~
    6. ~~Rule cards~~
 2. ~~Add one more Hero Set~~
-3. Map actions
-   1. Lock
-   2. Delete
-4. Deck actions
+3. ~~Map actions~~
+   1. ~~Lock~~
+   2. ~~Delete~~
+4. ~~Add "DeletableComponent"~~
+5. Move map
+6. Deck actions
    1. Get card
    2. Shuffle
-5. Card actions
+7. Card actions
    1. Put in deck
    2. Flip
-6. Hero actions
+8. Hero actions
    1. Flip
-7. Health Meter actions
+9. Health Meter actions
    1. Increase & Decrease
-8. Hero Set actions
-   1. Delete set
-9. Move map
-10. Depth system based on y axis
-11. Authorization
-12. Cards shown
-13. Persistence and collaboration
+10. Hero Set actions
+    1. Delete set
+11. Depth system based on y axis
+12. Authorization
+13. Cards shown
+14. Persistence and collaboration
     1. Room
     2. Player cursor
     3. Player actions
-14. Refactor SelectSystem
-15. Remove entities
+15. Refactor SelectSystem
+16. Remove entities
 
 ## Second
 
 1. How to rerender on changes
 2. More `World.filter` operations (`in`, `notIn`, etc.)
 3. Mobile version
+4. Rename Systems to "Input" and "Output"
+5. Rename SpawnComponents to "SpawnEventComponents"
+6. Make component names as constants
 
 ## Additional
 

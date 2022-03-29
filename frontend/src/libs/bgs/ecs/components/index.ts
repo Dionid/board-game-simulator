@@ -72,6 +72,8 @@ export type DraggableComponent = Component<'DraggableComponent', {}>;
 
 export type IsDraggingComponent = Component<'IsDraggingComponent', {}>;
 
+export type DeletableComponent = Component<'DeletableComponent', {}>;
+
 // .. SPAWN EVENTS
 
 export type SpawnGameObjectEventComponent = Component<
@@ -85,6 +87,7 @@ export type SpawnGameObjectEventComponent = Component<
     selectable: boolean;
     lockable: boolean;
     imageUrl: string;
+    deletable: boolean;
   }
 >;
 

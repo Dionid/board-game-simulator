@@ -36,9 +36,10 @@ export const ContextMenu: FC<{ ignitor: BgsIgnitor }> = (props) => {
 
   const contextMenuActions = () => {
     const actions: JSX.Element[] = [];
+    const emptyActions = [<MenuItem>No actions</MenuItem>];
 
     if (!contextMenu) {
-      return actions;
+      return emptyActions;
     }
 
     const positionEntities = World.filter(ignitor.world, ['PositionComponent', 'SizeComponent']);
@@ -61,7 +62,7 @@ export const ContextMenu: FC<{ ignitor: BgsIgnitor }> = (props) => {
     });
 
     if (mouseOnEntities.length === 0) {
-      return actions;
+      return emptyActions;
     }
 
     let lastZIndex = 0;
@@ -78,18 +79,23 @@ export const ContextMenu: FC<{ ignitor: BgsIgnitor }> = (props) => {
     });
 
     if (maxZPositionEntity) {
-      actions.push(
-        <MenuItem
-          key={maxZPositionEntity + ':delete_button'}
-          onClick={() => {
-            handleClose();
-            World.destroyEntity(ignitor.world, maxZPositionEntity);
-          }}
-        >
-          Delete
-        </MenuItem>
-      );
+      const deletableCP = World.getOrAddPool(ignitor.world, 'DeletableComponent');
+      if (Pool.tryGet(deletableCP, maxZPositionEntity)) {
+        // . DELETE BUTTON
+        actions.push(
+          <MenuItem
+            key={maxZPositionEntity + ':delete_button'}
+            onClick={() => {
+              handleClose();
+              World.destroyEntity(ignitor.world, maxZPositionEntity);
+            }}
+          >
+            Delete
+          </MenuItem>
+        );
+      }
 
+      // . (UN)LOCK BUTTON
       const lockableComponentPool = World.getOrAddPool(ignitor.world, 'LockableComponent');
       const lockableComponent = Pool.tryGet(lockableComponentPool, maxZPositionEntity);
 

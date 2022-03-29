@@ -36,6 +36,7 @@ export const SpawnRuleCardEventSystem = (): System<{
             draggable: true,
             selectable: true,
             lockable: true,
+            deletable: false,
           },
         });
 

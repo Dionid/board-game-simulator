@@ -34,6 +34,7 @@ export const SpawnGameMapSystem = (): System<{
           draggable: true,
           selectable: true,
           lockable: true,
+          deletable: true,
         },
       });
 

@@ -2,6 +2,7 @@ import { Ignitor } from '../../ecs/ignitor';
 import {
   CardComponent,
   DeckComponent,
+  DeletableComponent,
   DraggableComponent,
   GameMapComponent,
   GameObjectComponent,
@@ -54,6 +55,7 @@ export type BgsIgnitorComponents = {
   IsDraggingComponent: IsDraggingComponent;
   LockableComponent: LockableComponent;
   IsLockedComponent: IsLockedComponent;
+  DeletableComponent: DeletableComponent;
 
   GameMapComponent: GameMapComponent;
   HeroComponent: HeroComponent;
