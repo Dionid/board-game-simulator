@@ -3,6 +3,7 @@ import { World } from '../../../../ecs/world';
 import { ComponentId, Pool } from '../../../../ecs/component';
 import { EntityId } from '../../../../ecs/entity';
 import {
+  SpawnCardEventComponent,
   SpawnDeckEventComponent,
   SpawnHeroComponent,
   SpawnHeroSetComponent,
@@ -16,6 +17,7 @@ export const SpawnHeroSetSystem = (): System<
     SpawnHeroComponent: SpawnHeroComponent;
     SpawnSideKickEventComponent: SpawnSideKickEventComponent;
     SpawnDeckEventComponent: SpawnDeckEventComponent;
+    SpawnCardEventComponent: SpawnCardEventComponent;
   },
   {
     heroSets: HeroSets;
@@ -32,6 +34,7 @@ export const SpawnHeroSetSystem = (): System<
       const spawnHeroComponentPool = World.getOrAddPool(world, 'SpawnHeroComponent');
       const spawnSidekickEventComponentPool = World.getOrAddPool(world, 'SpawnSideKickEventComponent');
       const spawnDeckEventComponentPool = World.getOrAddPool(world, 'SpawnDeckEventComponent');
+      // const spawnCardEventComponentPool = World.getOrAddPool(world, 'SpawnCardEventComponent');
 
       const heroSets = ctx.heroSets;
 
@@ -79,6 +82,28 @@ export const SpawnHeroSetSystem = (): System<
             },
           });
         });
+
+        // // TODO. Remove after deck get card action
+        // for (let i = 0; i < heroSet.cards[0].qty; i++) {
+        //   Pool.add(spawnCardEventComponentPool, EntityId.new(), {
+        //     name: 'SpawnCardEventComponent',
+        //     id: ComponentId.new(),
+        //     data: {
+        //       url: heroSet.cards[0].frontImageUrl,
+        //       cardId: heroSet.cards[0].id,
+        //     },
+        //   });
+        // }
+        // for (let i = 0; i < heroSet.cards[1].qty; i++) {
+        //   Pool.add(spawnCardEventComponentPool, EntityId.new(), {
+        //     name: 'SpawnCardEventComponent',
+        //     id: ComponentId.new(),
+        //     data: {
+        //       url: heroSet.cards[1].frontImageUrl,
+        //       cardId: heroSet.cards[1].id,
+        //     },
+        //   });
+        // }
 
         // . Destroy event
         Pool.delete(spawnHeroSetComponentPool, entity);

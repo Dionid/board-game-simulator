@@ -1,5 +1,6 @@
 import { Ignitor } from '../../ecs/ignitor';
 import {
+  CardComponent,
   DeckComponent,
   DraggableComponent,
   GameMapComponent,
@@ -18,6 +19,8 @@ import {
   SelectableComponent,
   SidekickComponent,
   SizeComponent,
+  SpawnCardEventComponent,
+  SpawnDeckEventComponent,
   SpawnGameMapComponent,
   SpawnGameObjectEventComponent,
   SpawnHeroComponent,
@@ -48,12 +51,15 @@ export type BgsIgnitorComponents = {
   HeroComponent: HeroComponent;
   SidekickComponent: SidekickComponent;
   DeckComponent: DeckComponent;
+  CardComponent: CardComponent;
   HeroSetComponent: HeroSetComponent;
 
   SpawnGameMapComponent: SpawnGameMapComponent;
   SpawnHeroComponent: SpawnHeroComponent;
-  SpawnHeroSetComponent: SpawnHeroSetComponent;
   SpawnSideKickEventComponent: SpawnSideKickEventComponent;
+  SpawnDeckEventComponent: SpawnDeckEventComponent;
+  SpawnCardEventComponent: SpawnCardEventComponent;
+  SpawnHeroSetComponent: SpawnHeroSetComponent;
 
   GameObjectComponent: GameObjectComponent;
   SpawnGameObjectEventComponent: SpawnGameObjectEventComponent;

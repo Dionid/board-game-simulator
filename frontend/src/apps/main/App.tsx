@@ -27,6 +27,7 @@ import { SpawnHeroSetSystem } from '../../libs/bgs/ecs/systems/spawn-hero-set-sy
 import { SpawnGameObjectSystem } from '../../libs/bgs/ecs/systems/spawn-game-object';
 import { SpawnSidekickEventSystem } from '../../libs/bgs/ecs/systems/spawn-sidekick-system';
 import { SpawnDeckEventSystem } from '../../libs/bgs/ecs/systems/spawn-deck-system';
+import { SpawnCardEventSystem } from '../../libs/bgs/ecs/systems/spawn-card-system';
 
 const ignitor: BgsIgnitor = {
   world: {
@@ -50,6 +51,7 @@ const ignitor: BgsIgnitor = {
     SpawnHeroSystem(),
     SpawnSidekickEventSystem(),
     SpawnDeckEventSystem(),
+    SpawnCardEventSystem(),
 
     // SPAWN GAME OBJECT
     SpawnGameObjectSystem(),

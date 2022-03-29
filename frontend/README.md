@@ -8,10 +8,10 @@
    1. ~~Hero~~
    2. ~~Sidekick~~
    3. ~~Deck~~
-   4. Cards
+   4. ~~Cards~~
    5. Health meter
-2. Add one more champion
-3. Add set id to all entities
+2. Add one more Hero Set
+3. Add SetId to all entities
 4. Deck actions
    1. Get card
    2. Shuffle
