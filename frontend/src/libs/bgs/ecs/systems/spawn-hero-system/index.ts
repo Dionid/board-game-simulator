@@ -35,6 +35,7 @@ export const SpawnHeroSystem = (): System<{
             height: 100,
             draggable: true,
             selectable: true,
+            lockable: true,
           },
         });
 

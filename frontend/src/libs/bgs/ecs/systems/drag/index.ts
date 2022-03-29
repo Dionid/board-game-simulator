@@ -3,6 +3,7 @@ import {
   DraggableComponent,
   HandComponent,
   IsDraggingComponent,
+  IsLockedComponent,
   IsSelectedComponent,
   OwnerComponent,
   PlayerComponent,
@@ -19,17 +20,26 @@ export const DragSystem = (): System<{
   PositionComponent: PositionComponent;
   IsDraggingComponent: IsDraggingComponent;
   IsSelectedComponent: IsSelectedComponent;
+  IsLockedComponent: IsLockedComponent;
 }> => {
   return {
     run: async (props) => {
       const { world } = props;
 
       const playerMouseEntities = World.filter(world, ['PlayerComponent', 'OwnerComponent', 'HandComponent']);
-      const selectedAndDraggableEntities = World.filter(world, [
+      let selectedAndDraggableEntities = World.filter(world, [
         'DraggableComponent',
         'PositionComponent',
         'IsSelectedComponent',
       ]);
+
+      // . Filter out locked entities
+      const isLockedEntities = World.filter(world, ['IsLockedComponent']);
+      selectedAndDraggableEntities = selectedAndDraggableEntities.filter((id) => isLockedEntities.indexOf(id) === -1);
+
+      if (selectedAndDraggableEntities.length === 0) {
+        return;
+      }
 
       const handPool = World.getOrAddPool(world, 'HandComponent');
 

@@ -87,23 +87,6 @@ export const SelectSystem = (): System<{
             name: 'IsSelectedComponent',
             data: {},
           });
-
-          // selectableEntities.forEach((selectableEntity) => {
-          //   const positionC = Pool.get(positionCP, selectableEntity);
-          //   const sizeC = Pool.get(sizeCP, selectableEntity);
-          // if (
-          //   playerMouseComponent.data.current.x > positionC.data.x &&
-          //   playerMouseComponent.data.current.x < positionC.data.x + sizeC.data.width &&
-          //   playerMouseComponent.data.current.y > positionC.data.y &&
-          //   playerMouseComponent.data.current.y < positionC.data.y + sizeC.data.height
-          // ) {
-          //   Pool.add(isSelectedComponentsPool, maxZPositionEntity, {
-          //     id: ComponentId.new(),
-          //     name: 'IsSelectedComponent',
-          //     data: {},
-          //   });
-          // }
-          // });
         }
       });
     },

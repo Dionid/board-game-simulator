@@ -35,6 +35,7 @@ export const SpawnSidekickEventSystem = (): System<{
             height: 90,
             draggable: true,
             selectable: true,
+            lockable: true,
           },
         });
 

@@ -2,7 +2,7 @@ import { EntityId } from '../../../libs/ecs/entity';
 import Menu from '@mui/material/Menu';
 import React, { FC } from 'react';
 import { World } from '../../../libs/ecs/world';
-import { Pool } from '../../../libs/ecs/component';
+import { ComponentId, Pool } from '../../../libs/ecs/component';
 import { MenuItem } from '@mui/material';
 import { BgsIgnitor } from '../../../libs/bgs/ecs';
 
@@ -89,6 +89,44 @@ export const ContextMenu: FC<{ ignitor: BgsIgnitor }> = (props) => {
           Delete
         </MenuItem>
       );
+
+      const lockableComponentPool = World.getOrAddPool(ignitor.world, 'LockableComponent');
+      const lockableComponent = Pool.tryGet(lockableComponentPool, maxZPositionEntity);
+
+      if (lockableComponent) {
+        const isLockedComponentPool = World.getOrAddPool(ignitor.world, 'IsLockedComponent');
+        const isLockedComponent = Pool.tryGet(isLockedComponentPool, maxZPositionEntity);
+
+        if (isLockedComponent) {
+          actions.push(
+            <MenuItem
+              key={maxZPositionEntity + ':lock_button'}
+              onClick={() => {
+                handleClose();
+                Pool.delete(isLockedComponentPool, maxZPositionEntity);
+              }}
+            >
+              Unlock
+            </MenuItem>
+          );
+        } else {
+          actions.push(
+            <MenuItem
+              key={maxZPositionEntity + ':lock_button'}
+              onClick={() => {
+                handleClose();
+                Pool.add(isLockedComponentPool, maxZPositionEntity, {
+                  id: ComponentId.new(),
+                  name: 'IsLockedComponent',
+                  data: {},
+                });
+              }}
+            >
+              Lock
+            </MenuItem>
+          );
+        }
+      }
     }
 
     return actions;

@@ -10,7 +10,9 @@ import {
   HeroSetComponent,
   ImageComponent,
   IsDraggingComponent,
+  IsLockedComponent,
   IsSelectedComponent,
+  LockableComponent,
   PositionComponent,
   ReactGameMapComponent,
   ReactHeroComponent,
@@ -50,6 +52,8 @@ export type BgsIgnitorComponents = {
   IsSelectedComponent: IsSelectedComponent;
   DraggableComponent: DraggableComponent;
   IsDraggingComponent: IsDraggingComponent;
+  LockableComponent: LockableComponent;
+  IsLockedComponent: IsLockedComponent;
 
   GameMapComponent: GameMapComponent;
   HeroComponent: HeroComponent;

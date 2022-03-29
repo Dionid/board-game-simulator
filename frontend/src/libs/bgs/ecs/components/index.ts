@@ -83,6 +83,7 @@ export type SpawnGameObjectEventComponent = Component<
     height: number;
     draggable: boolean;
     selectable: boolean;
+    lockable: boolean;
     imageUrl: string;
   }
 >;

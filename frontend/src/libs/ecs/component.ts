@@ -27,6 +27,9 @@ export type Pool<C extends Component<any, any> = Component<any, any>> = {
 };
 
 export const Pool = {
+  tryGet: <C extends Component<any, any>>(pool: Pool<C>, entityId: EntityId): C | undefined => {
+    return pool.data[entityId];
+  },
   get: <C extends Component<any, any>>(pool: Pool<C>, entityId: EntityId): C => {
     const comp = pool.data[entityId];
     if (!comp) {

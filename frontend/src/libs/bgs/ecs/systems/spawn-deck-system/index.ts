@@ -35,6 +35,7 @@ export const SpawnDeckEventSystem = (): System<{
             height: 140,
             draggable: true,
             selectable: true,
+            lockable: true,
           },
         });
 
