@@ -1,4 +1,4 @@
-export const LambdielUMDBData = {
+export const LamdielUMDBData = {
   hero: {
     name: 'Lamdiel',
     isRanged: true,
@@ -225,5 +225,5 @@ export const LambdielUMDBData = {
 };
 
 export const UMDB = {
-  BA_w: LambdielUMDBData,
+  BA_w: LamdielUMDBData,
 };

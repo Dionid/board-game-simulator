@@ -9,7 +9,8 @@
    2. ~~Sidekick~~
    3. ~~Deck~~
    4. ~~Cards~~
-   5. Health meter
+   5. ~~Health meter~~
+   6. Rule cards
 2. Add one more Hero Set
 3. Add SetId to all entities
 4. Deck actions
