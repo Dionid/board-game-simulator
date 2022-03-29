@@ -16,15 +16,15 @@ export const SpawnCardEventSystem = (): System<{
       }
 
       const spawnCardComponentPool = World.getOrAddPool(world, 'SpawnCardEventComponent');
-      const deckComponentPool = World.getOrAddPool(world, 'CardComponent');
+      const cardComponentPool = World.getOrAddPool(world, 'CardComponent');
       const spawnGameObjectComponentPool = World.getOrAddPool(world, 'SpawnGameObjectEventComponent');
 
-      for (const deckEntity of entities) {
-        const spawnComponent = Pool.get(spawnCardComponentPool, deckEntity);
+      for (const cardEntity of entities) {
+        const spawnComponent = Pool.get(spawnCardComponentPool, cardEntity);
 
         // TODO. Think about entity id: must be new or the same
-        // . Create deck spawn event
-        Pool.add(spawnGameObjectComponentPool, deckEntity, {
+        // . Create card spawn event
+        Pool.add(spawnGameObjectComponentPool, cardEntity, {
           id: ComponentId.new(),
           name: 'SpawnGameObjectEventComponent',
           data: {
@@ -38,7 +38,7 @@ export const SpawnCardEventSystem = (): System<{
           },
         });
 
-        Pool.add(deckComponentPool, deckEntity, {
+        Pool.add(cardComponentPool, cardEntity, {
           id: ComponentId.new(),
           name: 'CardComponent',
           data: {
@@ -47,7 +47,7 @@ export const SpawnCardEventSystem = (): System<{
         });
 
         // Destroy event
-        Pool.delete(spawnCardComponentPool, deckEntity);
+        Pool.delete(spawnCardComponentPool, cardEntity);
       }
     },
   };

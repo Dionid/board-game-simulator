@@ -8,6 +8,7 @@ import {
   SpawnHealthMeterEventComponent,
   SpawnHeroComponent,
   SpawnHeroSetComponent,
+  SpawnRuleCardEventComponent,
   SpawnSideKickEventComponent,
 } from '../../components';
 import { HeroSets } from '../../../games/unmatched';
@@ -20,6 +21,7 @@ export const SpawnHeroSetSystem = (): System<
     SpawnDeckEventComponent: SpawnDeckEventComponent;
     SpawnCardEventComponent: SpawnCardEventComponent;
     SpawnHealthMeterEventComponent: SpawnHealthMeterEventComponent;
+    SpawnRuleCardEventComponent: SpawnRuleCardEventComponent;
   },
   {
     heroSets: HeroSets;
@@ -37,6 +39,7 @@ export const SpawnHeroSetSystem = (): System<
       const spawnSidekickEventComponentPool = World.getOrAddPool(world, 'SpawnSideKickEventComponent');
       const spawnDeckEventComponentPool = World.getOrAddPool(world, 'SpawnDeckEventComponent');
       // const spawnCardEventComponentPool = World.getOrAddPool(world, 'SpawnCardEventComponent');
+      const spawnRuleCardEventComponentPool = World.getOrAddPool(world, 'SpawnRuleCardEventComponent');
       const spawnHealthMeterEventComponentPool = World.getOrAddPool(world, 'SpawnHealthMeterEventComponent');
 
       const heroSets = ctx.heroSets;
@@ -94,6 +97,18 @@ export const SpawnHeroSetSystem = (): System<
             data: {
               url: healthMeter.frontImageUrl,
               healthMeterId: healthMeter.id,
+            },
+          });
+        });
+
+        heroSet.ruleCards.forEach((ruleCard) => {
+          // . Create new sidekick component
+          Pool.add(spawnRuleCardEventComponentPool, EntityId.new(), {
+            name: 'SpawnRuleCardEventComponentPool',
+            id: ComponentId.new(),
+            data: {
+              url: ruleCard.frontImageUrl,
+              ruleCardId: ruleCard.id,
             },
           });
         });

@@ -17,6 +17,7 @@ import {
   ReactImageComponent,
   ReactPositionComponent,
   ReactSizeComponent,
+  RuleCardComponent,
   SelectableComponent,
   SidekickComponent,
   SizeComponent,
@@ -27,6 +28,7 @@ import {
   SpawnHealthMeterEventComponent,
   SpawnHeroComponent,
   SpawnHeroSetComponent,
+  SpawnRuleCardEventComponent,
   SpawnSideKickEventComponent,
 } from './components';
 import { HeroSets } from '../games/unmatched';
@@ -54,6 +56,7 @@ export type BgsIgnitorComponents = {
   SidekickComponent: SidekickComponent;
   DeckComponent: DeckComponent;
   CardComponent: CardComponent;
+  RuleCardComponent: RuleCardComponent;
   HeroSetComponent: HeroSetComponent;
   HealthMeterComponent: HealthMeterComponent;
 
@@ -62,6 +65,7 @@ export type BgsIgnitorComponents = {
   SpawnSideKickEventComponent: SpawnSideKickEventComponent;
   SpawnDeckEventComponent: SpawnDeckEventComponent;
   SpawnCardEventComponent: SpawnCardEventComponent;
+  SpawnRuleCardEventComponent: SpawnRuleCardEventComponent;
   SpawnHealthMeterEventComponent: SpawnHealthMeterEventComponent;
   SpawnHeroSetComponent: SpawnHeroSetComponent;
 
