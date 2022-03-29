@@ -15,7 +15,7 @@ export const MouseInputSystem = (): System<{
   };
 
   return {
-    init: async (world) => {
+    init: async ({ world }) => {
       const entities = World.filter(world, ['PlayerComponent']);
 
       entities.forEach((entity) => {
@@ -50,7 +50,7 @@ export const MouseInputSystem = (): System<{
         lastMouseData.y = event.pageY;
       };
     },
-    run: async (world) => {
+    run: async ({ world }) => {
       const entities = World.filter(world, ['HandComponent', 'PlayerComponent', 'OwnerComponent']);
 
       const mousePool = World.getOrAddPool(world, 'HandComponent');

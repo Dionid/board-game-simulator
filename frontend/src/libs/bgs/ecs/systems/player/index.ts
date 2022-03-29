@@ -10,7 +10,7 @@ export const PlayerSystem = (): System<{
   OwnerComponent: OwnerComponent;
 }> => {
   return {
-    init: async (world) => {
+    init: async ({ world }) => {
       const playerEntity = EntityId.new();
 
       const playerPool = World.getOrAddPool(world, 'PlayerComponent');
@@ -29,6 +29,6 @@ export const PlayerSystem = (): System<{
         data: {},
       });
     },
-    run: async (world) => {},
+    run: async ({ world }) => {},
   };
 };

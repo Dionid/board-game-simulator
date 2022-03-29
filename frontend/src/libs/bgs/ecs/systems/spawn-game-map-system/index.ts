@@ -1,85 +1,53 @@
 import { System } from '../../../../ecs/system';
 import { World } from '../../../../ecs/world';
 import { ComponentId, Pool } from '../../../../ecs/component';
-import { EntityId } from '../../../../ecs/entity';
-import {
-  ImageComponent,
-  PositionComponent,
-  SpawnGameMapComponent,
-  ReactGameMapComponent,
-  SizeComponent,
-  DraggableComponent,
-  SelectableComponent,
-} from '../../components';
+import { GameMapComponent, SpawnGameMapComponent, SpawnGameObjectEventComponent } from '../../components';
 
 export const SpawnGameMapSystem = (): System<{
   SpawnGameMapComponent: SpawnGameMapComponent;
-  ReactGameMapComponent: ReactGameMapComponent;
-  ImageComponent: ImageComponent;
-  PositionComponent: PositionComponent;
-  SizeComponent: SizeComponent;
-  DraggableComponent: DraggableComponent;
-  SelectableComponent: SelectableComponent;
+  GameMapComponent: GameMapComponent;
+  SpawnGameObjectEventComponent: SpawnGameObjectEventComponent;
 }> => ({
-  run: async (world) => {
+  run: async ({ world }) => {
     const entities = World.filter(world, ['SpawnGameMapComponent']);
     if (entities.length === 0) {
       return;
     }
 
     const spawnGameMapComponentPool = World.getOrAddPool(world, 'SpawnGameMapComponent');
-    const reactGameMapComponentPool = World.getOrAddPool(world, 'ReactGameMapComponent');
-    const imageComponentPool = World.getOrAddPool(world, 'ImageComponent');
-    const positionComponentPool = World.getOrAddPool(world, 'PositionComponent');
-    const sizeComponentPool = World.getOrAddPool(world, 'SizeComponent');
-    const draggableComponentPool = World.getOrAddPool(world, 'DraggableComponent');
-    const selectableComponentPool = World.getOrAddPool(world, 'SelectableComponent');
+    const spawnGameObjectComponentPool = World.getOrAddPool(world, 'SpawnGameObjectEventComponent');
+    const gameMapComponentPool = World.getOrAddPool(world, 'GameMapComponent');
 
-    for (const entity of entities) {
-      const spawnComponent = Pool.get(spawnGameMapComponentPool, entity);
-      const mapEntity = EntityId.new();
+    for (const mapEntity of entities) {
+      const spawnComponent = Pool.get(spawnGameMapComponentPool, mapEntity);
+
       // . Create react game map
-      Pool.add(reactGameMapComponentPool, mapEntity, {
+      Pool.add(spawnGameObjectComponentPool, mapEntity, {
         id: ComponentId.new(),
-        name: 'ReactGameMapComponent',
-        data: {},
-      });
-      Pool.add(imageComponentPool, mapEntity, {
-        id: ComponentId.new(),
-        name: 'ImageComponent',
+        name: 'SpawnGameObjectEventComponent',
         data: {
-          url: spawnComponent.data.url,
-        },
-      });
-      Pool.add(positionComponentPool, mapEntity, {
-        id: ComponentId.new(),
-        name: 'PositionComponent',
-        data: {
+          imageUrl: spawnComponent.data.url,
           x: 100,
           y: 100,
-          z: 0,
-        },
-      });
-      Pool.add(sizeComponentPool, mapEntity, {
-        id: ComponentId.new(),
-        name: 'SizeComponent',
-        data: {
           width: 750,
           height: 500,
+          draggable: true,
+          selectable: true,
+          lockable: true,
+          deletable: true,
         },
       });
-      Pool.add(draggableComponentPool, mapEntity, {
+
+      Pool.add(gameMapComponentPool, mapEntity, {
         id: ComponentId.new(),
-        name: 'DraggableComponent',
-        data: {},
+        name: 'GameMapComponent',
+        data: {
+          mapId: spawnComponent.data.mapId,
+        },
       });
-      Pool.add(selectableComponentPool, mapEntity, {
-        id: ComponentId.new(),
-        name: 'SelectableComponent',
-        data: {},
-      });
-      // . Destroy component
-      Pool.delete(spawnGameMapComponentPool, entity);
+
+      // . Destroy event
+      Pool.delete(spawnGameMapComponentPool, mapEntity);
     }
   },
 });

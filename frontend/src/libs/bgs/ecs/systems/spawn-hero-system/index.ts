@@ -1,89 +1,55 @@
 import { System } from '../../../../ecs/system';
 import { World } from '../../../../ecs/world';
 import { ComponentId, Pool } from '../../../../ecs/component';
-import { EntityId } from '../../../../ecs/entity';
-import {
-  ImageComponent,
-  PositionComponent,
-  SpawnHeroComponent,
-  ReactHeroComponent,
-  SizeComponent,
-  DraggableComponent,
-  SelectableComponent,
-} from '../../components';
+import { SpawnHeroComponent, SpawnGameObjectEventComponent, HeroComponent } from '../../components';
 
 export const SpawnHeroSystem = (): System<{
   SpawnHeroComponent: SpawnHeroComponent;
-  ReactHeroComponent: ReactHeroComponent;
-  ImageComponent: ImageComponent;
-  PositionComponent: PositionComponent;
-  SizeComponent: SizeComponent;
-  DraggableComponent: DraggableComponent;
-  SelectableComponent: SelectableComponent;
+  SpawnGameObjectEventComponent: SpawnGameObjectEventComponent;
+  HeroComponent: HeroComponent;
 }> => {
-  let lastZ = 1;
-
   return {
-    run: async (world) => {
+    run: async ({ world }) => {
       const entities = World.filter(world, ['SpawnHeroComponent']);
       if (entities.length === 0) {
         return;
       }
 
       const spawnHeroComponentPool = World.getOrAddPool(world, 'SpawnHeroComponent');
-      const reactHeroComponentPool = World.getOrAddPool(world, 'ReactHeroComponent');
-      const imageComponentPool = World.getOrAddPool(world, 'ImageComponent');
-      const positionComponentPool = World.getOrAddPool(world, 'PositionComponent');
-      const sizeComponentPool = World.getOrAddPool(world, 'SizeComponent');
-      const draggableComponentPool = World.getOrAddPool(world, 'DraggableComponent');
-      const selectableComponentPool = World.getOrAddPool(world, 'SelectableComponent');
+      const spawnGameObjectComponentPool = World.getOrAddPool(world, 'SpawnGameObjectEventComponent');
+      const heroComponentPool = World.getOrAddPool(world, 'HeroComponent');
 
-      for (const entity of entities) {
-        const spawnComponent = Pool.get(spawnHeroComponentPool, entity);
-        const heroEntity = EntityId.new();
-        // . Create react game map
-        Pool.add(reactHeroComponentPool, heroEntity, {
+      for (const heroEntity of entities) {
+        const spawnComponent = Pool.get(spawnHeroComponentPool, heroEntity);
+
+        // TODO. Think about entity id: must be new or the same
+        // . Create hero spawn event
+        Pool.add(spawnGameObjectComponentPool, heroEntity, {
           id: ComponentId.new(),
-          name: 'ReactHeroComponent',
-          data: {},
-        });
-        Pool.add(imageComponentPool, heroEntity, {
-          id: ComponentId.new(),
-          name: 'ImageComponent',
+          name: 'SpawnGameObjectEventComponent',
           data: {
-            url: spawnComponent.data.url,
-          },
-        });
-        Pool.add(positionComponentPool, heroEntity, {
-          id: ComponentId.new(),
-          name: 'PositionComponent',
-          data: {
+            imageUrl: spawnComponent.data.url,
             x: 100,
             y: 100,
-            z: lastZ + 1,
-          },
-        });
-        Pool.add(sizeComponentPool, heroEntity, {
-          id: ComponentId.new(),
-          name: 'SizeComponent',
-          data: {
             width: 60,
             height: 100,
+            draggable: true,
+            selectable: true,
+            lockable: true,
+            deletable: false,
           },
         });
-        Pool.add(draggableComponentPool, heroEntity, {
+
+        Pool.add(heroComponentPool, heroEntity, {
           id: ComponentId.new(),
-          name: 'DraggableComponent',
-          data: {},
+          name: 'HeroComponent',
+          data: {
+            heroId: spawnComponent.data.heroId,
+          },
         });
-        Pool.add(selectableComponentPool, heroEntity, {
-          id: ComponentId.new(),
-          name: 'SelectableComponent',
-          data: {},
-        });
-        // . Destroy component
-        Pool.delete(spawnHeroComponentPool, entity);
-        lastZ += 1;
+
+        // Destroy event
+        Pool.delete(spawnHeroComponentPool, heroEntity);
       }
     },
   };

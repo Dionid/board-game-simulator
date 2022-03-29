@@ -1,8 +1,9 @@
 import { Component } from '../../../ecs/component';
 import { ReactComponent } from '../../../ecs/react';
 import { UUID } from '../../../branded-types';
+import { CardId, DeckId, HealthMeterId, HeroId, MapId, RuleCardId, SetId, SidekickId } from '../../games/unmatched';
 
-// INTERACTIONS
+// . INPUT
 
 export type HandComponent = Component<
   'HandComponent',
@@ -20,7 +21,7 @@ export type HandComponent = Component<
   }
 >;
 
-// ACCESS
+// . ACCESS
 
 export type PlayerComponent = Component<
   'PlayerComponent',
@@ -31,7 +32,9 @@ export type PlayerComponent = Component<
 
 export type OwnerComponent = Component<'OwnerComponent', {}>;
 
-// OBJECTS
+// . GAME OBJECT
+
+export type GameObjectComponent = Component<'GameObjectComponent', {}>;
 
 export type PositionComponent = Component<
   'PositionComponent',
@@ -41,14 +44,6 @@ export type PositionComponent = Component<
     z: number;
   }
 >;
-
-export type DraggableComponent = Component<'DraggableComponent', {}>;
-
-export type IsDraggingComponent = Component<'IsDraggingComponent', {}>;
-
-export type SelectableComponent = Component<'SelectableComponent', {}>;
-
-export type IsSelectedComponent = Component<'IsSelectedComponent', {}>;
 
 export type ImageComponent = Component<
   'ImageComponent',
@@ -65,10 +60,102 @@ export type SizeComponent = Component<
   }
 >;
 
+export type SelectableComponent = Component<'SelectableComponent', {}>;
+
+export type IsSelectedComponent = Component<'IsSelectedComponent', {}>;
+
+export type LockableComponent = Component<'LockableComponent', {}>;
+
+export type IsLockedComponent = Component<'IsLockedComponent', {}>;
+
+export type DraggableComponent = Component<'DraggableComponent', {}>;
+
+export type IsDraggingComponent = Component<'IsDraggingComponent', {}>;
+
+export type DeletableComponent = Component<'DeletableComponent', {}>;
+
+// .. SPAWN EVENTS
+
+export type SpawnGameObjectEventComponent = Component<
+  'SpawnGameObjectEventComponent',
+  {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    draggable: boolean;
+    selectable: boolean;
+    lockable: boolean;
+    imageUrl: string;
+    deletable: boolean;
+  }
+>;
+
+// . UNMATCHED COMPONENTS
+
+export type GameMapComponent = Component<
+  'GameMapComponent',
+  {
+    mapId: MapId;
+  }
+>;
+
+export type HeroComponent = Component<
+  'HeroComponent',
+  {
+    heroId: HeroId;
+  }
+>;
+
+export type SidekickComponent = Component<
+  'SidekickComponent',
+  {
+    sidekickId: SidekickId;
+  }
+>;
+
+export type DeckComponent = Component<
+  'DeckComponent',
+  {
+    deckId: DeckId;
+  }
+>;
+
+export type CardComponent = Component<
+  'CardComponent',
+  {
+    cardId: CardId;
+  }
+>;
+
+export type RuleCardComponent = Component<
+  'RuleCardComponent',
+  {
+    ruleCardId: RuleCardId;
+  }
+>;
+
+export type HealthMeterComponent = Component<
+  'HealthMeterComponent',
+  {
+    healthMeterId: HealthMeterId;
+  }
+>;
+
+export type HeroSetComponent = Component<
+  'HeroSetComponent',
+  {
+    setId: SetId;
+  }
+>;
+
+// .. SPAWN EVENTS
+
 export type SpawnGameMapComponent = Component<
   'SpawnGameMapComponent',
   {
     url: string;
+    mapId: MapId;
   }
 >;
 
@@ -76,8 +163,58 @@ export type SpawnHeroComponent = Component<
   'SpawnHeroComponent',
   {
     url: string;
+    heroId: HeroId;
   }
 >;
+
+export type SpawnSideKickEventComponent = Component<
+  'SpawnSideKickEventComponent',
+  {
+    url: string;
+    sidekickId: SidekickId;
+  }
+>;
+
+export type SpawnDeckEventComponent = Component<
+  'SpawnDeckEventComponent',
+  {
+    url: string;
+    deckId: DeckId;
+  }
+>;
+
+export type SpawnCardEventComponent = Component<
+  'SpawnCardEventComponent',
+  {
+    url: string;
+    cardId: CardId;
+  }
+>;
+
+export type SpawnRuleCardEventComponent = Component<
+  'SpawnRuleCardEventComponent',
+  {
+    url: string;
+    ruleCardId: RuleCardId;
+  }
+>;
+
+export type SpawnHealthMeterEventComponent = Component<
+  'SpawnHealthMeterEventComponent',
+  {
+    url: string;
+    healthMeterId: HealthMeterId;
+  }
+>;
+
+export type SpawnHeroSetComponent = Component<
+  'SpawnHeroSetComponent',
+  {
+    setId: SetId;
+  }
+>;
+
+// . REACT COMPONENTS
 
 export type ReactPositionComponentData = { x: number; y: number };
 export type ReactPositionComponent = ReactComponent<'ReactPositionComponent', ReactPositionComponentData>;
