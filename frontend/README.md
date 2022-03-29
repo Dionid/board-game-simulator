@@ -10,9 +10,11 @@
    3. ~~Deck~~
    4. ~~Cards~~
    5. ~~Health meter~~
-   6. Rule cards
+   6. ~~Rule cards~~
 2. ~~Add one more Hero Set~~
-3. Add SetId to all entities
+3. Map actions
+   1. Lock
+   2. Delete
 4. Deck actions
    1. Get card
    2. Shuffle
@@ -21,10 +23,10 @@
    2. Flip
 6. Hero actions
    1. Flip
-7. Map actions
-   1. Lock
-8. Health meter actions
+7. Health Meter actions
    1. Increase & Decrease
+8. Hero Set actions
+   1. Delete set
 9. Move map
 10. Depth system based on y axis
 11. Authorization

@@ -7,6 +7,11 @@ export type World<C extends Record<string, Component<any, any>> = Record<string,
   };
 };
 
+type EntityWithComponents = {
+  id: EntityId;
+  components: Component<any, any>[];
+};
+
 export const World = {
   getPool: <CR extends Record<string, Component<any, any>>, K extends keyof CR>(
     world: World<CR>,
@@ -69,5 +74,46 @@ export const World = {
     }
 
     return Object.keys(entityIds) as EntityId[];
+  },
+
+  getEntity: <CR extends Record<string, Component<any, any>>>(
+    world: World<CR>,
+    entityId: EntityId
+  ): EntityWithComponents | undefined => {
+    const res = Object.keys(world.pools).reduce<EntityWithComponents>(
+      (acc, poolName) => {
+        const pool = world.pools[poolName];
+        if (!pool) {
+          return acc;
+        }
+
+        const component = pool.data[entityId];
+
+        if (component) {
+          acc.components.push(component);
+        }
+
+        return acc;
+      },
+      { id: entityId, components: [] }
+    );
+
+    if (res.components.length === 0) {
+      return undefined;
+    } else {
+      return res;
+    }
+  },
+
+  destroyEntity: <CR extends Record<string, Component<any, any>>>(world: World<CR>, entityId: EntityId): void => {
+    Object.keys(world.pools).forEach((poolName) => {
+      const pool = world.pools[poolName];
+      if (!pool) {
+        return;
+      }
+
+      const { [entityId]: omit, ...newData } = pool.data;
+      pool.data = newData;
+    });
   },
 };

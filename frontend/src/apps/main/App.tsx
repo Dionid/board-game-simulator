@@ -74,6 +74,8 @@ const ignitor: BgsIgnitor = {
 window.ignitor = ignitor;
 // @ts-ignore
 window.Ignitor = Ignitor;
+// @ts-ignore
+window.World = World;
 
 const initIgnitor = async () => {
   await Ignitor.init(ignitor);
@@ -107,7 +109,7 @@ const MainMenu = ({ heroSets, ignitor }: { heroSets: HeroSets; ignitor: BgsIgnit
       name: 'SpawnGameMapComponent',
       id: ComponentId.new(),
       data: {
-        url: 'https://downloader.disk.yandex.ru/preview/5eb0ed2aa9f0ab459cd4e05b30dcc1f9321e62aed7e33972ea87b739dc4e0a5d/62424a88/HTA3saKP7S9n3UVUFPbneRLOs38Aexzy74peiw68-Bqu1Ghp-2pZ66iNDKp7lyv_THLyuC5YhZtrQDywSWC10Q%3D%3D?uid=0&filename=Screenshot%202022-03-26%20at%2018.00.35.png&disposition=inline&hash=&limit=0&content_type=image%2Fpng&owner_uid=0&tknv=v2&size=2048x2048',
+        url: '/maps/soho.png',
         mapId: MapId.new(),
       },
     });
@@ -215,22 +217,113 @@ function App() {
 
   const gameObjectComponentPool = World.getOrAddPool(ignitor.world, 'GameObjectComponent');
 
+  // CONTEXT MENU
+  const [contextMenu, setContextMenu] = React.useState<{
+    mouseX: number;
+    mouseY: number;
+  } | null>(null);
+
+  const handleContextMenu = (event: React.MouseEvent) => {
+    event.preventDefault();
+    setContextMenu(
+      contextMenu === null
+        ? {
+            mouseX: event.clientX - 2,
+            mouseY: event.clientY - 4,
+          }
+        : // repeated contextmenu when it is already open closes it with Chrome 84 on Ubuntu
+          // Other native context menus might behave different.
+          // With this behavior we prevent contextmenu from the backdrop to re-locale existing context menus.
+          null
+    );
+  };
+
+  const handleClose = () => {
+    setContextMenu(null);
+  };
+
+  const contextMenuActions = () => {
+    const actions: JSX.Element[] = [];
+
+    if (!contextMenu) {
+      return actions;
+    }
+
+    const positionEntities = World.filter(ignitor.world, ['PositionComponent', 'SizeComponent']);
+    const positionComponentPool = World.getOrAddPool(ignitor.world, 'PositionComponent');
+    const sizeComponentPool = World.getOrAddPool(ignitor.world, 'SizeComponent');
+
+    const mouseOnEntities: EntityId[] = [];
+
+    positionEntities.forEach((entity) => {
+      const positionComponent = Pool.get(positionComponentPool, entity);
+      const sizeComponent = Pool.get(sizeComponentPool, entity);
+      if (
+        contextMenu.mouseX > positionComponent.data.x &&
+        contextMenu.mouseX < positionComponent.data.x + sizeComponent.data.width &&
+        contextMenu.mouseY > positionComponent.data.y &&
+        contextMenu.mouseY < positionComponent.data.y + sizeComponent.data.height
+      ) {
+        mouseOnEntities.push(entity);
+      }
+    });
+
+    let lastZIndex = 0;
+    const maxZPositionEntity = mouseOnEntities.reduce((prev, cur) => {
+      const positionC = Pool.get(positionComponentPool, cur);
+
+      if (positionC.data.z > lastZIndex) {
+        lastZIndex = positionC.data.z;
+        return cur;
+      }
+
+      lastZIndex = positionC.data.z;
+      return prev;
+    });
+
+    if (maxZPositionEntity) {
+      actions.push(
+        <MenuItem
+          key={maxZPositionEntity + ':delete_button'}
+          onClick={() => {
+            handleClose();
+            World.destroyEntity(ignitor.world, maxZPositionEntity);
+          }}
+        >
+          Delete
+        </MenuItem>
+      );
+    }
+
+    return actions;
+  };
+
   return (
     <div>
       <CssBaseline />
-      <Stage
-        style={{ backgroundColor: '#e1e1e1' }}
-        width={surfaceWidth}
-        height={surfaceHeight}
-        onMouseDown={checkDeselect}
-        onTouchStart={checkDeselect}
-      >
-        <Layer>
-          {Object.keys(gameObjectComponentPool.data).map((entity) => {
-            return <ECSCustomImage key={entity} entity={entity as EntityId} ignitor={ignitor} />;
-          })}
-        </Layer>
-      </Stage>
+      <div onContextMenu={handleContextMenu}>
+        <Stage
+          style={{ backgroundColor: '#e1e1e1' }}
+          width={surfaceWidth}
+          height={surfaceHeight}
+          onMouseDown={checkDeselect}
+          onTouchStart={checkDeselect}
+        >
+          <Layer>
+            {Object.keys(gameObjectComponentPool.data).map((entity) => {
+              return <ECSCustomImage key={entity} entity={entity as EntityId} ignitor={ignitor} />;
+            })}
+          </Layer>
+        </Stage>
+        <Menu
+          open={contextMenu !== null}
+          onClose={handleClose}
+          anchorReference="anchorPosition"
+          anchorPosition={contextMenu !== null ? { top: contextMenu.mouseY, left: contextMenu.mouseX } : undefined}
+        >
+          {contextMenuActions()}
+        </Menu>
+      </div>
       <MainMenu ignitor={ignitor} heroSets={heroSets} />
     </div>
   );
