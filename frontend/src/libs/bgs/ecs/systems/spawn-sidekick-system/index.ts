@@ -1,12 +1,23 @@
 import { System } from '../../../../ecs/system';
 import { World } from '../../../../ecs/world';
 import { ComponentId, Pool } from '../../../../ecs/component';
-import { SpawnSideKickEventComponent, SpawnGameObjectEventComponent, SidekickComponent } from '../../components';
+import {
+  SpawnSideKickEventComponent,
+  SpawnGameObjectEventComponent,
+  SidekickComponent,
+  CameraComponentName,
+  CameraComponent,
+  PlayerComponentName,
+  PlayerComponent,
+} from '../../components';
+import { Camera } from '../../../../game-engine';
 
 export const SpawnSidekickEventSystem = (): System<{
   SpawnSideKickEventComponent: SpawnSideKickEventComponent;
   SidekickComponent: SidekickComponent;
   SpawnGameObjectEventComponent: SpawnGameObjectEventComponent;
+  [CameraComponentName]: CameraComponent;
+  [PlayerComponentName]: PlayerComponent;
 }> => {
   return {
     run: async ({ world }) => {
@@ -14,6 +25,13 @@ export const SpawnSidekickEventSystem = (): System<{
       if (entities.length === 0) {
         return;
       }
+
+      const playerEntities = World.filter(world, ['PlayerComponent', 'CameraComponent']);
+      const cameraComponentPool = World.getOrAddPool(world, 'CameraComponent');
+
+      // TODO. Refactor for collaboration
+      const playerEntity = playerEntities[0];
+      const cameraC = Pool.get(cameraComponentPool, playerEntity);
 
       const spawnSidekickComponentPool = World.getOrAddPool(world, 'SpawnSideKickEventComponent');
       const sidekickComponentPool = World.getOrAddPool(world, 'SidekickComponent');
@@ -24,19 +42,24 @@ export const SpawnSidekickEventSystem = (): System<{
 
         // TODO. Think about entity id: must be new or the same
         // . Create sidekick spawn event
+        const size = {
+          width: 50,
+          height: 90,
+        };
         Pool.add(spawnGameObjectComponentPool, sidekickEntity, {
           id: ComponentId.new(),
           name: 'SpawnGameObjectEventComponent',
           data: {
             imageUrl: spawnComponent.data.url,
-            x: 100,
-            y: 100,
-            width: 50,
-            height: 90,
             draggable: true,
             selectable: true,
             lockable: true,
             deletable: false,
+            ...size,
+            ...Camera.inCameraView(cameraC.data, {
+              x: cameraC.data.width / 2 - size.width / 2,
+              y: cameraC.data.height / 2 - size.height / 2,
+            }),
           },
         });
 

@@ -3,7 +3,7 @@ import { HandComponent, OwnerComponent, PlayerComponent } from '../../components
 import { World } from '../../../../ecs/world';
 import { ComponentId, Pool } from '../../../../ecs/component';
 
-export const MouseInputSystem = (): System<{
+export const HandInputSystem = (): System<{
   HandComponent: HandComponent;
   PlayerComponent: PlayerComponent;
   OwnerComponent: OwnerComponent;
@@ -17,21 +17,21 @@ export const MouseInputSystem = (): System<{
   return {
     init: async ({ world }) => {
       const entities = World.filter(world, ['PlayerComponent']);
+      const mousePool = World.getOrAddPool(world, 'HandComponent');
 
       entities.forEach((entity) => {
-        const mousePool = World.getOrAddPool(world, 'HandComponent');
         Pool.add(mousePool, entity, {
           id: ComponentId.new(),
           name: 'HandComponent',
           data: {
             current: {
-              x: 0,
-              y: 0,
+              x: window.innerWidth / 2,
+              y: window.innerHeight / 2,
               down: false,
             },
             previous: {
-              x: 0,
-              y: 0,
+              x: window.innerWidth / 2,
+              y: window.innerHeight / 2,
               down: false,
             },
           },

@@ -3,6 +3,7 @@ import { ReactComponent } from '../../../ecs/react';
 import { UUID } from '../../../branded-types';
 import { CardId, DeckId, HealthMeterId, HeroId, MapId, RuleCardId, SetId, SidekickId } from '../../games/unmatched';
 import { Size, Square, Vector2, Vector3 } from '../../../math';
+import { Camera } from '../../../game-engine';
 
 // . BOARD
 
@@ -12,7 +13,7 @@ export type BoardComponent = Component<typeof BoardComponentName, Size>;
 // . CAMERA
 
 export const CameraComponentName = 'CameraComponent' as const;
-export type CameraComponent = Component<typeof CameraComponentName, Square>;
+export type CameraComponent = Component<typeof CameraComponentName, Camera>;
 
 // . INPUT
 

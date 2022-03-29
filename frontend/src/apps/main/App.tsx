@@ -12,7 +12,7 @@ import { SpawnGameMapSystem } from '../../libs/bgs/ecs/systems/spawn-game-map-sy
 import { ChangeReactSizeSystem } from '../../libs/bgs/ecs/systems/change-react-size';
 import { ECSCustomImage } from '../../modules/widgets/CustomImage/ui/ecs';
 import { SpawnHeroSystem } from '../../libs/bgs/ecs/systems/spawn-hero-system';
-import { MouseInputSystem } from '../../libs/bgs/ecs/systems/mouse-input';
+import { HandInputSystem } from '../../libs/bgs/ecs/systems/mouse-input';
 import { PlayerSystem } from '../../libs/bgs/ecs/systems/player';
 import { DragSystem } from '../../libs/bgs/ecs/systems/drag';
 import { SelectSystem } from '../../libs/bgs/ecs/systems/select';
@@ -28,6 +28,7 @@ import { SpawnRuleCardEventSystem } from '../../libs/bgs/ecs/systems/spawn-rule-
 import { MainMenu } from '../../modules/widgets/MainMenu';
 import { ContextMenu } from '../../modules/widgets/ContextMenu';
 import { CameraSystem } from '../../libs/bgs/ecs/systems/camera';
+import { BoardSystem } from '../../libs/bgs/ecs/systems/board';
 
 const ignitor: BgsIgnitor = {
   world: {
@@ -38,11 +39,12 @@ const ignitor: BgsIgnitor = {
     // INIT
     PlayerSystem(),
 
-    // CAMERA
-    CameraSystem(),
-
     // INPUT
-    MouseInputSystem(),
+    HandInputSystem(),
+
+    // CAMERA
+    BoardSystem(),
+    CameraSystem(),
 
     // INTERACTION
     SelectSystem(),
@@ -84,7 +86,8 @@ const initIgnitor = async () => {
   let lastTimeStamp = new Date();
   const run = async () => {
     const newTimeStamp = new Date();
-    await Ignitor.run(ignitor, newTimeStamp.getMilliseconds() - lastTimeStamp.getMilliseconds());
+    const timeDelta = newTimeStamp.getMilliseconds() - lastTimeStamp.getMilliseconds();
+    await Ignitor.run(ignitor, timeDelta < 0 ? 0 : timeDelta);
     lastTimeStamp = newTimeStamp;
     requestAnimationFrame(run);
   };
@@ -118,7 +121,7 @@ function App() {
     }, 1000);
   }, []);
 
-  console.log('RERENDER');
+  // console.log('RERENDER');
 
   const gameObjectComponentPool = World.getOrAddPool(ignitor.world, 'GameObjectComponent');
 
