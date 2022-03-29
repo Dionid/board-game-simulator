@@ -40,13 +40,13 @@ export const RuleCardId = {
   },
 };
 
-export type LifeBarId = UUID & { readonly LifeBarId: unique symbol };
-export const LifeBarId = {
-  ofString: (value: string): LifeBarId => {
-    return UUID.ofString(value) as LifeBarId;
+export type HealthMeterId = UUID & { readonly HealthMeterId: unique symbol };
+export const HealthMeterId = {
+  ofString: (value: string): HealthMeterId => {
+    return UUID.ofString(value) as HealthMeterId;
   },
-  new: (): LifeBarId => {
-    return LifeBarId.ofString(UUID.new());
+  new: (): HealthMeterId => {
+    return HealthMeterId.ofString(UUID.new());
   },
 };
 
@@ -226,12 +226,12 @@ export const LambdielHeroSet = {
     },
   ],
   extraCards: [],
-  lifebars: [
+  healthMeters: [
     {
-      id: LifeBarId.ofString('6e6cbf65-8258-4e0c-9f24-16c23d2fac65'),
+      id: HealthMeterId.ofString('6e6cbf65-8258-4e0c-9f24-16c23d2fac65'),
       maxValue: 15,
       frontImageUrl:
-        'https://downloader.disk.yandex.ru/preview/eaaf6f0f97eb29498dde09218a2cfa33cde5379be35ea6868120f1c83602ff66/6242518d/mtLG3-4v8KsjMTLuY917am6T0cxJlNOF5iM_WxFTaoxmkmmRc9VWW0dtof-TaM84W6Nunxb_LB4bAfsB1BqORA%3D%3D?uid=0&filename=Screenshot%202022-03-28%20at%2023.23.24.png&disposition=inline&hash=&limit=0&content_type=image%2Fpng&owner_uid=0&tknv=v2&size=2048x2048',
+        'https://1.downloader.disk.yandex.ru/preview/6d015a6bc8387cf00708a42bdbf18f09de8233d82f5ea80b20d05daf85a1a96d/inf/mtLG3-4v8KsjMTLuY917am6T0cxJlNOF5iM_WxFTaoxmkmmRc9VWW0dtof-TaM84W6Nunxb_LB4bAfsB1BqORA%3D%3D?uid=59003057&filename=Screenshot%202022-03-28%20at%2023.23.24.png&disposition=inline&hash=&limit=0&content_type=image%2Fpng&owner_uid=59003057&tknv=v2&size=2878x1592',
       backImageUrl:
         'https://downloader.disk.yandex.ru/preview/eaaf6f0f97eb29498dde09218a2cfa33cde5379be35ea6868120f1c83602ff66/6242518d/mtLG3-4v8KsjMTLuY917am6T0cxJlNOF5iM_WxFTaoxmkmmRc9VWW0dtof-TaM84W6Nunxb_LB4bAfsB1BqORA%3D%3D?uid=0&filename=Screenshot%202022-03-28%20at%2023.23.24.png&disposition=inline&hash=&limit=0&content_type=image%2Fpng&owner_uid=0&tknv=v2&size=2048x2048',
     },

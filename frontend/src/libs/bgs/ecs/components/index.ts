@@ -1,7 +1,7 @@
 import { Component } from '../../../ecs/component';
 import { ReactComponent } from '../../../ecs/react';
 import { UUID } from '../../../branded-types';
-import { CardId, DeckId, HeroId, MapId, SetId, SidekickId } from '../../games/unmatched';
+import { CardId, DeckId, HealthMeterId, HeroId, MapId, SetId, SidekickId } from '../../games/unmatched';
 
 // . INPUT
 
@@ -124,6 +124,13 @@ export type CardComponent = Component<
   }
 >;
 
+export type HealthMeterComponent = Component<
+  'HealthMeterComponent',
+  {
+    healthMeterId: HealthMeterId;
+  }
+>;
+
 export type HeroSetComponent = Component<
   'HeroSetComponent',
   {
@@ -170,6 +177,14 @@ export type SpawnCardEventComponent = Component<
   {
     url: string;
     cardId: CardId;
+  }
+>;
+
+export type SpawnHealthMeterEventComponent = Component<
+  'SpawnHealthMeterEventComponent',
+  {
+    url: string;
+    healthMeterId: HealthMeterId;
   }
 >;
 

@@ -5,6 +5,7 @@ import {
   DraggableComponent,
   GameMapComponent,
   GameObjectComponent,
+  HealthMeterComponent,
   HeroComponent,
   HeroSetComponent,
   ImageComponent,
@@ -23,6 +24,7 @@ import {
   SpawnDeckEventComponent,
   SpawnGameMapComponent,
   SpawnGameObjectEventComponent,
+  SpawnHealthMeterEventComponent,
   SpawnHeroComponent,
   SpawnHeroSetComponent,
   SpawnSideKickEventComponent,
@@ -53,12 +55,14 @@ export type BgsIgnitorComponents = {
   DeckComponent: DeckComponent;
   CardComponent: CardComponent;
   HeroSetComponent: HeroSetComponent;
+  HealthMeterComponent: HealthMeterComponent;
 
   SpawnGameMapComponent: SpawnGameMapComponent;
   SpawnHeroComponent: SpawnHeroComponent;
   SpawnSideKickEventComponent: SpawnSideKickEventComponent;
   SpawnDeckEventComponent: SpawnDeckEventComponent;
   SpawnCardEventComponent: SpawnCardEventComponent;
+  SpawnHealthMeterEventComponent: SpawnHealthMeterEventComponent;
   SpawnHeroSetComponent: SpawnHeroSetComponent;
 
   GameObjectComponent: GameObjectComponent;

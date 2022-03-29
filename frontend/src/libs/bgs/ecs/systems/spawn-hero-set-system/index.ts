@@ -5,6 +5,7 @@ import { EntityId } from '../../../../ecs/entity';
 import {
   SpawnCardEventComponent,
   SpawnDeckEventComponent,
+  SpawnHealthMeterEventComponent,
   SpawnHeroComponent,
   SpawnHeroSetComponent,
   SpawnSideKickEventComponent,
@@ -18,6 +19,7 @@ export const SpawnHeroSetSystem = (): System<
     SpawnSideKickEventComponent: SpawnSideKickEventComponent;
     SpawnDeckEventComponent: SpawnDeckEventComponent;
     SpawnCardEventComponent: SpawnCardEventComponent;
+    SpawnHealthMeterEventComponent: SpawnHealthMeterEventComponent;
   },
   {
     heroSets: HeroSets;
@@ -35,6 +37,7 @@ export const SpawnHeroSetSystem = (): System<
       const spawnSidekickEventComponentPool = World.getOrAddPool(world, 'SpawnSideKickEventComponent');
       const spawnDeckEventComponentPool = World.getOrAddPool(world, 'SpawnDeckEventComponent');
       // const spawnCardEventComponentPool = World.getOrAddPool(world, 'SpawnCardEventComponent');
+      const spawnHealthMeterEventComponentPool = World.getOrAddPool(world, 'SpawnHealthMeterEventComponent');
 
       const heroSets = ctx.heroSets;
 
@@ -79,6 +82,18 @@ export const SpawnHeroSetSystem = (): System<
             data: {
               url: deck.frontImageUrl,
               deckId: deck.id,
+            },
+          });
+        });
+
+        heroSet.healthMeters.forEach((healthMeter) => {
+          // . Create new sidekick component
+          Pool.add(spawnHealthMeterEventComponentPool, EntityId.new(), {
+            name: 'SpawnHealthMeterEventComponent',
+            id: ComponentId.new(),
+            data: {
+              url: healthMeter.frontImageUrl,
+              healthMeterId: healthMeter.id,
             },
           });
         });

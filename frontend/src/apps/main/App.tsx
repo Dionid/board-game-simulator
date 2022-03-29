@@ -28,6 +28,7 @@ import { SpawnGameObjectSystem } from '../../libs/bgs/ecs/systems/spawn-game-obj
 import { SpawnSidekickEventSystem } from '../../libs/bgs/ecs/systems/spawn-sidekick-system';
 import { SpawnDeckEventSystem } from '../../libs/bgs/ecs/systems/spawn-deck-system';
 import { SpawnCardEventSystem } from '../../libs/bgs/ecs/systems/spawn-card-system';
+import { SpawnHealthMeterEventSystem } from '../../libs/bgs/ecs/systems/spawn-health-meter-system';
 
 const ignitor: BgsIgnitor = {
   world: {
@@ -52,6 +53,7 @@ const ignitor: BgsIgnitor = {
     SpawnSidekickEventSystem(),
     SpawnDeckEventSystem(),
     SpawnCardEventSystem(),
+    SpawnHealthMeterEventSystem(),
 
     // SPAWN GAME OBJECT
     SpawnGameObjectSystem(),

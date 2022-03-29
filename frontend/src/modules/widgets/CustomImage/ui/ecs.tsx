@@ -37,8 +37,8 @@ export const ECSCustomImage = React.memo((props: { entity: EntityId; ignitor: Bg
         height={size.height}
         x={position.x}
         y={position.y}
-        stroke={'#fff'}
-        strokeWidth={3}
+        // stroke={'#fff'}
+        // strokeWidth={3}
       />
     </Group>
   );
