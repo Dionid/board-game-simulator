@@ -9,6 +9,7 @@ import Menu from '@mui/material/Menu';
 import { PersonAdd } from '@mui/icons-material';
 import AddIcon from '@mui/icons-material/Add';
 import PanToolIcon from '@mui/icons-material/PanTool';
+import { useEventListener } from '../../../libs/react/hooks/use-event-listener';
 
 export const MainMenu = memo(({ heroSets, ignitor }: { heroSets: HeroSets; ignitor: BgsIgnitor }) => {
   const [mode, setMode] = useState<'pan' | null>(null);
@@ -52,6 +53,14 @@ export const MainMenu = memo(({ heroSets, ignitor }: { heroSets: HeroSets; ignit
       });
     }
   };
+
+  const handler = ({ key }: WindowEventMap['keydown']) => {
+    if (key === 'p') {
+      handlePanIconButtonClick();
+    }
+  };
+
+  useEventListener('keydown', handler);
 
   const spawnHeroSet = (setId: SetId) => {
     const spawnHeroSetComponentPool = World.getOrAddPool(ignitor.world, 'SpawnHeroSetComponent');

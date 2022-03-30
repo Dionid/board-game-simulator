@@ -30,8 +30,8 @@ import { GameStage } from '../../modules/widgets/GameStage';
 
 // TODO. Move
 const boardSize = {
-  width: 7000,
-  height: 5000,
+  width: 5000,
+  height: 3000,
 };
 function App() {
   const [forceUpdateState, forceUpdate] = useForceUpdate();

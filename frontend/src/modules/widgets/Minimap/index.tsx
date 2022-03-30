@@ -4,7 +4,7 @@ import { Size } from '../../../libs/math';
 import { memo } from 'react';
 import { EntityId } from '../../../libs/ecs/entity';
 
-const coef = 57;
+const coef = 30;
 
 export const Minimap = memo((props: { ignitor: BgsIgnitor; playerEntity: EntityId; boardSize: Size }) => {
   const { ignitor, playerEntity, boardSize } = props;

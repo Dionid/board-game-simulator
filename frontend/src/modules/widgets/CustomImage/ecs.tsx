@@ -1,6 +1,6 @@
-import { EntityId } from '../../../../libs/ecs/entity';
-import { BgsIgnitor } from '../../../../libs/bgs/ecs';
-import { useEcsComponent } from '../../../../libs/ecs/react';
+import { EntityId } from '../../../libs/ecs/entity';
+import { BgsIgnitor } from '../../../libs/bgs/ecs';
+import { useEcsComponent } from '../../../libs/ecs/react';
 import { CustomImage } from './index';
 import React from 'react';
 import { Group } from 'react-konva';

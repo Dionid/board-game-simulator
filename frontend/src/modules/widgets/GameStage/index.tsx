@@ -1,5 +1,5 @@
 import { Layer, Stage } from 'react-konva';
-import { ECSCustomImage } from '../CustomImage/ui/ecs';
+import { ECSCustomImage } from '../CustomImage/ecs';
 import { EntityId } from '../../../libs/ecs/entity';
 import React, { memo } from 'react';
 import { BgsIgnitor } from '../../../libs/bgs/ecs';

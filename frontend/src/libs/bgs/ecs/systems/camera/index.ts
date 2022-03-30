@@ -35,30 +35,37 @@ export const CameraSystem = (): System<{
       const sizeComponentPool = World.getOrAddPool(world, 'SizeComponent');
       const playerEntityId = World.filter(world, ['PlayerComponent']);
 
+      const boardEntity = World.filter(world, ['BoardComponent']);
+      const boardComponentPool = World.getOrAddPool(world, 'BoardComponent');
+
+      // TODO. Singleton entities
+      const boardC = Pool.get(boardComponentPool, boardEntity[0]);
+
       playerEntityId.forEach((playerEntityId) => {
         const cameraComponent = {
           name: 'CameraComponent',
           id: ComponentId.new(),
           data: {},
         };
+        const cameraSize = {
+          // TODO. move somewhere (as deps or ctx)
+          width: window.innerWidth,
+          height: window.innerHeight,
+        };
         Pool.add(cameraComponentPool, playerEntityId, cameraComponent);
         const positionComponent = {
           name: 'PositionComponent',
           id: ComponentId.new(),
           data: {
-            x: 0,
-            y: 0,
+            x: boardC.data.width / 2 - cameraSize.width / 2,
+            y: boardC.data.height / 2 - cameraSize.height / 2,
           },
         };
         Pool.add(positionComponentPool, playerEntityId, positionComponent);
         const sizeComponent = {
           name: 'SizeComponent',
           id: ComponentId.new(),
-          data: {
-            // TODO. move somewhere (as deps or ctx)
-            width: window.innerWidth,
-            height: window.innerHeight,
-          },
+          data: cameraSize,
         };
         Pool.add(sizeComponentPool, playerEntityId, sizeComponent);
         // TODO. Move somewhere (as deps or ctx)
@@ -92,7 +99,7 @@ export const CameraSystem = (): System<{
           y: positionC.data.y,
         };
 
-        // Pan mode
+        // . Pan mode
         if (panModeEntities.length > 0) {
           if (handC.data.click.current.down) {
             const delta = Vector2.compareAndChange(
@@ -103,22 +110,23 @@ export const CameraSystem = (): System<{
             newPosition.y -= delta.y;
           }
         } else {
-          const margin = 20;
-          const velocity = timeDelta * 0.5;
-          // . Check that camera position is more than 0 and less than board size
-          if (handC.data.onCameraPosition.current.x > sizeC.data.width - margin) {
-            // console.log('RIGHT');
-            newPosition.x += velocity;
-          } else if (handC.data.onCameraPosition.current.x < margin) {
-            // console.log('LEFT');
-            newPosition.x -= velocity;
-          } else if (handC.data.onCameraPosition.current.y < margin) {
-            // console.log('TOP');
-            newPosition.y -= velocity;
-          } else if (handC.data.onCameraPosition.current.y > sizeC.data.height - margin) {
-            // console.log('DOWN');
-            newPosition.y += velocity;
-          }
+          // // . Hand near border feature
+          // const margin = 20;
+          // const velocity = timeDelta * 0.5;
+          // // . Check that camera position is more than 0 and less than board size
+          // if (handC.data.onCameraPosition.current.x > sizeC.data.width - margin) {
+          //   // console.log('RIGHT');
+          //   newPosition.x += velocity;
+          // } else if (handC.data.onCameraPosition.current.x < margin) {
+          //   // console.log('LEFT');
+          //   newPosition.x -= velocity;
+          // } else if (handC.data.onCameraPosition.current.y < margin) {
+          //   // console.log('TOP');
+          //   newPosition.y -= velocity;
+          // } else if (handC.data.onCameraPosition.current.y > sizeC.data.height - margin) {
+          //   // console.log('DOWN');
+          //   newPosition.y += velocity;
+          // }
         }
 
         // . Restrict
