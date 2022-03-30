@@ -28,7 +28,8 @@ import { MainMenu } from '../../modules/widgets/MainMenu';
 import { ContextMenu } from '../../modules/widgets/ContextMenu';
 import { CameraSystem } from '../../libs/bgs/ecs/systems/camera';
 import { BoardSystem } from '../../libs/bgs/ecs/systems/board';
-import { Pool } from '../../libs/ecs/component';
+import { useEcsComponent } from '../../libs/ecs/react';
+import { useForceUpdate } from '../../libs/react/hooks/use-force-update';
 
 const ignitor: BgsIgnitor = {
   world: {
@@ -99,7 +100,7 @@ function App() {
   const surfaceWidth = window.innerWidth;
   const surfaceHeight = window.innerHeight;
 
-  // const forceUpdate = useForceUpdate();
+  const forceUpdate = useForceUpdate();
   const [heroSets] = useState(HeroSets);
   const [, selectShape] = useState<string | null>(null);
 
@@ -122,20 +123,20 @@ function App() {
     //   requestAnimationFrame(run);
     // }
     // requestAnimationFrame(run);
-    // setInterval(() => {
-    //   forceUpdate();
-    // }, 100);
+    setInterval(() => {
+      forceUpdate();
+    }, 1000);
   }, []);
-
-  // console.log('RERENDER');
 
   const gameObjectComponentPool = World.getOrAddPool(ignitor.world, 'GameObjectComponent');
 
   const playerEntities = World.filter(ignitor.world, ['PlayerComponent', 'CameraComponent']);
-  const cameraComponentPool = World.getOrAddPool(ignitor.world, 'CameraComponent');
   // TODO. Refactor for collaboration
   const playerEntity = playerEntities[0];
-  const cameraC = Pool.tryGet(cameraComponentPool, playerEntity);
+  // const cameraC = Pool.tryGet(cameraComponentPool, playerEntity);
+  const position = useEcsComponent(playerEntity, { x: 0, y: 0 }, 'ReactPositionComponent', ignitor);
+
+  // console.log('RERENDER', playerEntities, playerEntity);
 
   return (
     <div>
@@ -148,7 +149,7 @@ function App() {
           onMouseDown={checkDeselect}
           onTouchStart={checkDeselect}
         >
-          <Layer x={cameraC ? -cameraC.data.x : 0} y={cameraC ? -cameraC.data.y : 0}>
+          <Layer x={-position.x} y={-position.y}>
             {Object.keys(gameObjectComponentPool.data).map((entity) => {
               return <ECSCustomImage key={entity} entity={entity as EntityId} ignitor={ignitor} />;
             })}

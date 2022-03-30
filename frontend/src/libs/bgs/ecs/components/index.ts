@@ -3,7 +3,6 @@ import { ReactComponent } from '../../../ecs/react';
 import { UUID } from '../../../branded-types';
 import { CardId, DeckId, HealthMeterId, HeroId, MapId, RuleCardId, SetId, SidekickId } from '../../games/unmatched';
 import { Size, Square, Vector2, Vector3 } from '../../../math';
-import { Camera } from '../../../game-engine';
 
 // . BOARD
 
@@ -13,7 +12,7 @@ export type BoardComponent = Component<typeof BoardComponentName, Size>;
 // . CAMERA
 
 export const CameraComponentName = 'CameraComponent' as const;
-export type CameraComponent = Component<typeof CameraComponentName, Camera>;
+export type CameraComponent = Component<typeof CameraComponentName, {}>;
 
 // . INPUT
 
@@ -45,7 +44,8 @@ export type OwnerComponent = Component<'OwnerComponent', {}>;
 
 export type GameObjectComponent = Component<'GameObjectComponent', {}>;
 
-export type PositionComponent = Component<'PositionComponent', Vector3>;
+export const PositionComponentName = 'PositionComponent';
+export type PositionComponent = Component<typeof PositionComponentName, Vector3>;
 
 export type ImageComponent = Component<
   'ImageComponent',
@@ -54,7 +54,8 @@ export type ImageComponent = Component<
   }
 >;
 
-export type SizeComponent = Component<'SizeComponent', Size>;
+export const SizeComponentName = 'SizeComponent';
+export type SizeComponent = Component<typeof SizeComponentName, Size>;
 
 export type SelectableComponent = Component<'SelectableComponent', {}>;
 

@@ -7,12 +7,18 @@ import {
   HandComponent,
   PlayerComponent,
   PlayerComponentName,
+  PositionComponent,
+  PositionComponentName,
+  SizeComponent,
+  SizeComponentName,
 } from '../../components';
 import { World } from '../../../../ecs/world';
 import { ComponentId, Pool } from '../../../../ecs/component';
 
 export const CameraSystem = (): System<{
   [CameraComponentName]: CameraComponent;
+  [PositionComponentName]: PositionComponent;
+  [SizeComponentName]: SizeComponent;
   [PlayerComponentName]: PlayerComponent;
   [BoardComponentName]: BoardComponent;
   HandComponent: HandComponent;
@@ -20,68 +26,87 @@ export const CameraSystem = (): System<{
   return {
     init: async ({ world }) => {
       const cameraComponentPool = World.getOrAddPool(world, 'CameraComponent');
+      const positionComponentPool = World.getOrAddPool(world, 'PositionComponent');
+      const sizeComponentPool = World.getOrAddPool(world, 'SizeComponent');
       const playerEntityId = World.filter(world, ['PlayerComponent']);
 
       playerEntityId.forEach((playerEntityId) => {
         const cameraComponent = {
           name: 'CameraComponent',
           id: ComponentId.new(),
+          data: {},
+        };
+        Pool.add(cameraComponentPool, playerEntityId, cameraComponent);
+        const positionComponent = {
+          name: 'PositionComponent',
+          id: ComponentId.new(),
           data: {
             x: 0,
             y: 0,
+          },
+        };
+        Pool.add(positionComponentPool, playerEntityId, positionComponent);
+        const sizeComponent = {
+          name: 'SizeComponent',
+          id: ComponentId.new(),
+          data: {
             // TODO. move somewhere (as deps or ctx)
             width: window.innerWidth,
             height: window.innerHeight,
           },
         };
-        Pool.add(cameraComponentPool, playerEntityId, cameraComponent);
+        Pool.add(sizeComponentPool, playerEntityId, sizeComponent);
         // TODO. Move somewhere (as deps or ctx)
         window.addEventListener('resize', () => {
-          cameraComponent.data.width = window.innerWidth;
-          cameraComponent.data.height = window.innerHeight;
+          sizeComponent.data.width = window.innerWidth;
+          sizeComponent.data.height = window.innerHeight;
         });
       });
     },
     run: async ({ world, timeDelta }) => {
       const entities = World.filter(world, ['PlayerComponent', 'HandComponent', 'CameraComponent']);
-      const cameraComponentPool = World.getOrAddPool(world, 'CameraComponent');
+      const positionComponentPool = World.getOrAddPool(world, 'PositionComponent');
+      const sizeComponentPool = World.getOrAddPool(world, 'SizeComponent');
       const handPool = World.getOrAddPool(world, 'HandComponent');
 
       const boardEntity = World.filter(world, ['BoardComponent']);
       const boardComponentPool = World.getOrAddPool(world, 'BoardComponent');
 
+      // TODO. Singleton entities
       const boardC = Pool.get(boardComponentPool, boardEntity[0]);
 
-      // TODO. Filter only out players move
+      // TODO. Filter only cyrrent player move
       entities.forEach((playerEntityId) => {
         const handC = Pool.get(handPool, playerEntityId);
-        const cameraC = Pool.get(cameraComponentPool, playerEntityId);
+        const positionC = Pool.get(positionComponentPool, playerEntityId);
+        const sizeC = Pool.get(sizeComponentPool, playerEntityId);
+
         const margin = 20;
         const velocity = timeDelta * 0.5;
         // . Check that camera position is more than 0 and less than board size
-        if (handC.data.current.x > cameraC.data.width - margin) {
-          const newX = cameraC.data.x + velocity;
-          if (newX + cameraC.data.width < boardC.data.width) {
+        if (handC.data.current.x > sizeC.data.width - margin) {
+          const newX = positionC.data.x + velocity;
+          if (newX + sizeC.data.width < boardC.data.width) {
             console.log('RIGHT');
-            cameraC.data.x = newX;
+            positionC.data.x = newX;
           }
         } else if (handC.data.current.x < margin) {
-          const newX = cameraC.data.x - velocity;
+          const newX = positionC.data.x - velocity;
           if (newX > 0) {
             console.log('LEFT');
-            cameraC.data.x = newX;
+            positionC.data.x = newX;
           }
         } else if (handC.data.current.y < margin) {
-          const newY = cameraC.data.y - velocity;
+          const newY = positionC.data.y - velocity;
           if (newY > 0) {
             console.log('TOP');
-            cameraC.data.y = newY;
+            positionC.data.y = newY;
           }
-        } else if (handC.data.current.y > cameraC.data.height - margin) {
-          const newY = cameraC.data.y + velocity;
-          if (newY + cameraC.data.height < boardC.data.height) {
+        } else if (handC.data.current.y > sizeC.data.height - margin) {
+          const newY = positionC.data.y + velocity;
+          if (newY + sizeC.data.height < boardC.data.height) {
             console.log('DOWN');
-            cameraC.data.y = newY;
+            positionC.data.y = newY;
           }
         }
       });

@@ -3,6 +3,15 @@ export type Vector2 = {
   y: number;
 };
 
+export const Vector2 = {
+  sum: (a: Vector2, b: Vector2): Vector2 => {
+    return {
+      x: a.x + b.x,
+      y: a.y + b.y,
+    };
+  },
+};
+
 export type Vector3 = {
   x: number;
   y: number;

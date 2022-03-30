@@ -35,7 +35,7 @@ export const useEcsComponent = <
         setState,
       },
     });
-  }, [state]);
+  }, [state, entity]);
 
   return state;
 };

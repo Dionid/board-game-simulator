@@ -7,11 +7,14 @@ import {
   DeckComponent,
   PlayerComponent,
   PlayerComponentName,
+  PositionComponent,
+  PositionComponentName,
+  SizeComponent,
+  SizeComponentName,
   SpawnDeckEventComponent,
   SpawnGameObjectEventComponent,
 } from '../../components';
-import { Camera } from '../../../../game-engine';
-import { Size } from '../../../../math';
+import { Size, Vector2 } from '../../../../math';
 
 export const SpawnDeckEventSystem = (): System<{
   SpawnDeckEventComponent: SpawnDeckEventComponent;
@@ -19,6 +22,8 @@ export const SpawnDeckEventSystem = (): System<{
   SpawnGameObjectEventComponent: SpawnGameObjectEventComponent;
   [CameraComponentName]: CameraComponent;
   [PlayerComponentName]: PlayerComponent;
+  [PositionComponentName]: PositionComponent;
+  [SizeComponentName]: SizeComponent;
 }> => {
   return {
     run: async ({ world }) => {
@@ -28,11 +33,13 @@ export const SpawnDeckEventSystem = (): System<{
       }
 
       const playerEntities = World.filter(world, ['PlayerComponent', 'CameraComponent']);
-      const cameraComponentPool = World.getOrAddPool(world, 'CameraComponent');
+      const cameraPositionComponentPool = World.getOrAddPool(world, 'PositionComponent');
+      const cameraSizeComponentPool = World.getOrAddPool(world, 'SizeComponent');
 
       // TODO. Refactor for collaboration
       const playerEntity = playerEntities[0];
-      const cameraC = Pool.get(cameraComponentPool, playerEntity);
+      const cameraPositionC = Pool.get(cameraPositionComponentPool, playerEntity);
+      const cameraSizeC = Pool.get(cameraSizeComponentPool, playerEntity);
 
       const spawnDeckComponentPool = World.getOrAddPool(world, 'SpawnDeckEventComponent');
       const deckComponentPool = World.getOrAddPool(world, 'DeckComponent');
@@ -57,9 +64,9 @@ export const SpawnDeckEventSystem = (): System<{
             lockable: true,
             deletable: false,
             ...size,
-            ...Camera.inCameraView(cameraC.data, {
-              x: cameraC.data.width / 2 - size.width / 2,
-              y: cameraC.data.height / 2 - size.height / 2,
+            ...Vector2.sum(cameraPositionC.data, {
+              x: cameraSizeC.data.width / 2 - size.width / 2,
+              y: cameraSizeC.data.height / 2 - size.height / 2,
             }),
           },
         });
