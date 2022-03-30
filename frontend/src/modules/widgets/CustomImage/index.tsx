@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { useImage } from '../../../../libs/react/hooks/use-image';
+import { useImage } from '../../../libs/react/hooks/use-image';
 import React, { Fragment } from 'react';
 import { Image, Transformer } from 'react-konva';
 import { KonvaNodeEvents } from 'react-konva/ReactKonvaCore';

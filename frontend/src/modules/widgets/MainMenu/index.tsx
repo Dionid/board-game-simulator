@@ -1,23 +1,26 @@
 import { HeroSets, MapId, SetId } from '../../../libs/bgs/games/unmatched';
 import { BgsIgnitor } from '../../../libs/bgs/ecs';
-import React from 'react';
+import React, { memo, useState } from 'react';
 import { World } from '../../../libs/ecs/world';
 import { ComponentId, Pool } from '../../../libs/ecs/component';
 import { EntityId } from '../../../libs/ecs/entity';
 import { Box, IconButton, ListItemIcon, MenuItem, Tooltip } from '@mui/material';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
 import Menu from '@mui/material/Menu';
 import { PersonAdd } from '@mui/icons-material';
+import AddIcon from '@mui/icons-material/Add';
+import PanToolIcon from '@mui/icons-material/PanTool';
+import { useEventListener } from '../../../libs/react/hooks/use-event-listener';
 
-export const MainMenu = ({ heroSets, ignitor }: { heroSets: HeroSets; ignitor: BgsIgnitor }) => {
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+export const MainMenu = memo(({ heroSets, ignitor }: { heroSets: HeroSets; ignitor: BgsIgnitor }) => {
+  const [mode, setMode] = useState<'pan' | null>(null);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
-  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+  const handleMenuButtonClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
 
-  const handleClose = () => {
+  const handleMenuClose = () => {
     setAnchorEl(null);
   };
 
@@ -32,6 +35,32 @@ export const MainMenu = ({ heroSets, ignitor }: { heroSets: HeroSets; ignitor: B
       },
     });
   };
+
+  const handlePanIconButtonClick = () => {
+    const panModeCP = World.getOrAddPool(ignitor.world, 'PanModeComponent');
+    if (mode === 'pan') {
+      setMode(null);
+      const entities = World.filter(ignitor.world, ['PanModeComponent']);
+      entities.forEach((entity) => {
+        Pool.delete(panModeCP, entity);
+      });
+    } else {
+      setMode('pan');
+      Pool.add(panModeCP, EntityId.new(), {
+        id: ComponentId.new(),
+        name: 'PanModeComponent',
+        data: {},
+      });
+    }
+  };
+
+  const handler = ({ key }: WindowEventMap['keydown']) => {
+    if (key === 'p') {
+      handlePanIconButtonClick();
+    }
+  };
+
+  useEventListener('keydown', handler);
 
   const spawnHeroSet = (setId: SetId) => {
     const spawnHeroSetComponentPool = World.getOrAddPool(ignitor.world, 'SpawnHeroSetComponent');
@@ -49,16 +78,25 @@ export const MainMenu = ({ heroSets, ignitor }: { heroSets: HeroSets; ignitor: B
       <Box
         sx={{ display: 'flex', alignItems: 'center', textAlign: 'center', position: 'fixed', bottom: 15, right: 15 }}
       >
+        <Tooltip title="Pan mode">
+          <IconButton
+            size="large"
+            onClick={handlePanIconButtonClick}
+            sx={{ ml: 2, backgroundColor: mode === 'pan' ? '#b388da' : '#bdbdbd' }}
+          >
+            <PanToolIcon />
+          </IconButton>
+        </Tooltip>
         <Tooltip title="Main menu">
           <IconButton
-            onClick={handleClick}
+            onClick={handleMenuButtonClick}
             size="large"
             sx={{ ml: 2, backgroundColor: '#bdbdbd' }}
             aria-controls={open ? 'account-menu' : undefined}
             aria-haspopup="true"
             aria-expanded={open ? 'true' : undefined}
           >
-            <MoreVertIcon />
+            <AddIcon />
           </IconButton>
         </Tooltip>
       </Box>
@@ -66,7 +104,7 @@ export const MainMenu = ({ heroSets, ignitor }: { heroSets: HeroSets; ignitor: B
         anchorEl={anchorEl}
         id="account-menu"
         open={open}
-        onClose={handleClose}
+        onClose={handleMenuClose}
         PaperProps={{
           elevation: 0,
           sx: {
@@ -103,4 +141,4 @@ export const MainMenu = ({ heroSets, ignitor }: { heroSets: HeroSets; ignitor: B
       </Menu>
     </React.Fragment>
   );
-};
+});

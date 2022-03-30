@@ -5,6 +5,7 @@ import {
   OwnerComponent,
   PlayerComponent,
   PositionComponent,
+  PositionComponentName,
   SelectableComponent,
   SizeComponent,
 } from '../../components';
@@ -18,7 +19,7 @@ export const SelectSystem = (): System<{
   OwnerComponent: OwnerComponent;
   SelectableComponent: SelectableComponent;
   IsSelectedComponent: IsSelectedComponent;
-  PositionComponent: PositionComponent;
+  [PositionComponentName]: PositionComponent;
   SizeComponent: SizeComponent;
 }> => {
   return {
@@ -40,13 +41,13 @@ export const SelectSystem = (): System<{
         const playerMouseComponent = Pool.get(handPool, playerMouseEntity);
 
         // . IF MOUSE UP
-        if (!playerMouseComponent.data.current.down) {
+        if (!playerMouseComponent.data.click.current.down) {
           if (isSelectedEntities.length) {
             isSelectedEntities.forEach((entity) => {
               Pool.delete(isSelectedComponentsPool, entity);
             });
           }
-        } else if (playerMouseComponent.data.current.down && isSelectedEntities.length === 0) {
+        } else if (playerMouseComponent.data.click.current.down && isSelectedEntities.length === 0) {
           const positionCP = World.getOrAddPool(world, 'PositionComponent');
           const sizeCP = World.getOrAddPool(world, 'SizeComponent');
 
@@ -56,10 +57,10 @@ export const SelectSystem = (): System<{
             const positionC = Pool.get(positionCP, selectableEntity);
             const sizeC = Pool.get(sizeCP, selectableEntity);
             if (
-              playerMouseComponent.data.current.x > positionC.data.x &&
-              playerMouseComponent.data.current.x < positionC.data.x + sizeC.data.width &&
-              playerMouseComponent.data.current.y > positionC.data.y &&
-              playerMouseComponent.data.current.y < positionC.data.y + sizeC.data.height
+              playerMouseComponent.data.onBoardPosition.current.x > positionC.data.x &&
+              playerMouseComponent.data.onBoardPosition.current.x < positionC.data.x + sizeC.data.width &&
+              playerMouseComponent.data.onBoardPosition.current.y > positionC.data.y &&
+              playerMouseComponent.data.onBoardPosition.current.y < positionC.data.y + sizeC.data.height
             ) {
               mouseOnEntities.push(selectableEntity);
             }

@@ -1,12 +1,29 @@
 import { System } from '../../../../ecs/system';
 import { World } from '../../../../ecs/world';
 import { ComponentId, Pool } from '../../../../ecs/component';
-import { HealthMeterComponent, SpawnHealthMeterEventComponent, SpawnGameObjectEventComponent } from '../../components';
+import {
+  HealthMeterComponent,
+  SpawnHealthMeterEventComponent,
+  SpawnGameObjectEventComponent,
+  CameraComponentName,
+  CameraComponent,
+  PlayerComponentName,
+  PlayerComponent,
+  PositionComponentName,
+  PositionComponent,
+  SizeComponentName,
+  SizeComponent,
+} from '../../components';
+import { Vector2 } from '../../../../math';
 
 export const SpawnHealthMeterEventSystem = (): System<{
   SpawnHealthMeterEventComponent: SpawnHealthMeterEventComponent;
   HealthMeterComponent: HealthMeterComponent;
   SpawnGameObjectEventComponent: SpawnGameObjectEventComponent;
+  [CameraComponentName]: CameraComponent;
+  [PlayerComponentName]: PlayerComponent;
+  [PositionComponentName]: PositionComponent;
+  [SizeComponentName]: SizeComponent;
 }> => {
   return {
     run: async ({ world }) => {
@@ -14,6 +31,15 @@ export const SpawnHealthMeterEventSystem = (): System<{
       if (entities.length === 0) {
         return;
       }
+
+      const playerEntities = World.filter(world, ['PlayerComponent', 'CameraComponent']);
+      const cameraPositionComponentPool = World.getOrAddPool(world, 'PositionComponent');
+      const cameraSizeComponentPool = World.getOrAddPool(world, 'SizeComponent');
+
+      // TODO. Refactor for collaboration
+      const playerEntity = playerEntities[0];
+      const cameraPositionC = Pool.get(cameraPositionComponentPool, playerEntity);
+      const cameraSizeC = Pool.get(cameraSizeComponentPool, playerEntity);
 
       const spawnHealthMeterComponentPool = World.getOrAddPool(world, 'SpawnHealthMeterEventComponent');
       const deckComponentPool = World.getOrAddPool(world, 'HealthMeterComponent');
@@ -24,19 +50,24 @@ export const SpawnHealthMeterEventSystem = (): System<{
 
         // TODO. Think about entity id: must be new or the same
         // . Create deck spawn event
+        const size = {
+          width: 140,
+          height: 140,
+        };
         Pool.add(spawnGameObjectComponentPool, deckEntity, {
           id: ComponentId.new(),
           name: 'SpawnGameObjectEventComponent',
           data: {
             imageUrl: spawnComponent.data.url,
-            x: 100,
-            y: 100,
-            width: 140,
-            height: 140,
             draggable: true,
             selectable: true,
             lockable: true,
             deletable: false,
+            ...size,
+            ...Vector2.sum(cameraPositionC.data, {
+              x: cameraSizeC.data.width / 2 - size.width / 2,
+              y: cameraSizeC.data.height / 2 - size.height / 2,
+            }),
           },
         });
 

@@ -5,14 +5,16 @@ import { World } from '../../../libs/ecs/world';
 import { ComponentId, Pool } from '../../../libs/ecs/component';
 import { MenuItem } from '@mui/material';
 import { BgsIgnitor } from '../../../libs/bgs/ecs';
+import { v4 } from 'uuid';
+import { Square } from '../../../libs/math';
 
 export const ContextMenu: FC<{ ignitor: BgsIgnitor }> = (props) => {
   const { children, ignitor } = props;
 
   // CONTEXT MENU
   const [contextMenu, setContextMenu] = React.useState<{
-    mouseX: number;
-    mouseY: number;
+    x: number;
+    y: number;
   } | null>(null);
 
   const handleContextMenu = (event: React.MouseEvent) => {
@@ -20,8 +22,8 @@ export const ContextMenu: FC<{ ignitor: BgsIgnitor }> = (props) => {
     setContextMenu(
       contextMenu === null
         ? {
-            mouseX: event.clientX - 2,
-            mouseY: event.clientY - 4,
+            x: event.clientX - 2,
+            y: event.clientY - 4,
           }
         : // repeated contextmenu when it is already open closes it with Chrome 84 on Ubuntu
           // Other native context menus might behave different.
@@ -36,26 +38,35 @@ export const ContextMenu: FC<{ ignitor: BgsIgnitor }> = (props) => {
 
   const contextMenuActions = () => {
     const actions: JSX.Element[] = [];
-    const emptyActions = [<MenuItem>No actions</MenuItem>];
+    const emptyActions = [<MenuItem key={v4()}>No actions</MenuItem>];
 
     if (!contextMenu) {
       return emptyActions;
     }
 
-    const positionEntities = World.filter(ignitor.world, ['PositionComponent', 'SizeComponent']);
+    const cameraEntities = World.filter(ignitor.world, ['CameraComponent', 'PlayerComponent']);
+    const cameraEntity = cameraEntities[0];
+
+    const positionEntities = World.filter(ignitor.world, ['GameObjectComponent', 'PositionComponent', 'SizeComponent']);
     const positionComponentPool = World.getOrAddPool(ignitor.world, 'PositionComponent');
     const sizeComponentPool = World.getOrAddPool(ignitor.world, 'SizeComponent');
+
+    const cameraPositionC = Pool.get(positionComponentPool, cameraEntity);
 
     const mouseOnEntities: EntityId[] = [];
 
     positionEntities.forEach((entity) => {
       const positionComponent = Pool.get(positionComponentPool, entity);
       const sizeComponent = Pool.get(sizeComponentPool, entity);
+      // . Is inside object zone, including camera position
       if (
-        contextMenu.mouseX > positionComponent.data.x &&
-        contextMenu.mouseX < positionComponent.data.x + sizeComponent.data.width &&
-        contextMenu.mouseY > positionComponent.data.y &&
-        contextMenu.mouseY < positionComponent.data.y + sizeComponent.data.height
+        Square.isInside(
+          {
+            x: contextMenu.x + cameraPositionC.data.x,
+            y: contextMenu.y + cameraPositionC.data.y,
+          },
+          { ...positionComponent.data, ...sizeComponent.data }
+        )
       ) {
         mouseOnEntities.push(entity);
       }
@@ -145,7 +156,7 @@ export const ContextMenu: FC<{ ignitor: BgsIgnitor }> = (props) => {
         open={contextMenu !== null}
         onClose={handleClose}
         anchorReference="anchorPosition"
-        anchorPosition={contextMenu !== null ? { top: contextMenu.mouseY, left: contextMenu.mouseX } : undefined}
+        anchorPosition={contextMenu !== null ? { top: contextMenu.y, left: contextMenu.x } : undefined}
       >
         {contextMenuActions()}
       </Menu>

@@ -27,15 +27,41 @@ export const useEcsComponent = <
 
   useEffect(() => {
     const reactCompPool = World.getOrAddPool(ignitor.world, componentName);
-    Pool.add<ReactComponent<CN, S>>(reactCompPool, entity, {
-      id: ComponentId.new(),
-      name: componentName,
-      data: {
-        state,
-        setState,
-      },
-    });
+    const comp = Pool.tryGet(reactCompPool, entity);
+    if (!comp) {
+      Pool.add<ReactComponent<CN, S>>(reactCompPool, entity, {
+        id: ComponentId.new(),
+        name: componentName,
+        data: {
+          state,
+          setState,
+        },
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    const reactCompPool = World.getOrAddPool(ignitor.world, componentName);
+    const comp = Pool.tryGet(reactCompPool, entity);
+    if (comp) {
+      // . This hack is needed if we have different components, who are using one ReactComponent (like Minimap and GameStage)
+      const oldSetState = comp.data.setState;
+      comp.data.setState = (val: S) => {
+        oldSetState(val);
+        setState(val);
+      };
+    }
+  }, [setState]);
+
+  useEffect(() => {
+    const reactCompPool = World.getOrAddPool(ignitor.world, componentName);
+    const comp = Pool.tryGet(reactCompPool, entity);
+    if (comp) {
+      comp.data.state = state;
+    }
   }, [state]);
+
+  // console.log("useEcsComponent", state)
 
   return state;
 };

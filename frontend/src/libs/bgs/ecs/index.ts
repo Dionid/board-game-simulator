@@ -1,5 +1,9 @@
 import { Ignitor } from '../../ecs/ignitor';
 import {
+  BoardComponent,
+  BoardComponentName,
+  CameraComponent,
+  CameraComponentName,
   CardComponent,
   DeckComponent,
   DeletableComponent,
@@ -14,6 +18,10 @@ import {
   IsLockedComponent,
   IsSelectedComponent,
   LockableComponent,
+  PanModeComponent,
+  PanModeComponentName,
+  PlayerComponent,
+  PlayerComponentName,
   PositionComponent,
   ReactGameMapComponent,
   ReactHeroComponent,
@@ -42,9 +50,13 @@ import { HeroSets } from '../games/unmatched';
 
 export type BgsIgnitorCtx = {
   heroSets: typeof HeroSets;
+  forceUpdate: () => void;
 };
 
 export type BgsIgnitorComponents = {
+  [PlayerComponentName]: PlayerComponent;
+  [CameraComponentName]: CameraComponent;
+  [BoardComponentName]: BoardComponent;
   // GAME
   ImageComponent: ImageComponent;
   PositionComponent: PositionComponent;
@@ -77,6 +89,9 @@ export type BgsIgnitorComponents = {
 
   GameObjectComponent: GameObjectComponent;
   SpawnGameObjectEventComponent: SpawnGameObjectEventComponent;
+
+  // UI
+  [PanModeComponentName]: PanModeComponent;
 
   // REACT COMPONENTS
   ReactPositionComponent: ReactPositionComponent;
