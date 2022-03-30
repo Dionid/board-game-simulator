@@ -9,7 +9,10 @@ import Menu from '@mui/material/Menu';
 import { PersonAdd } from '@mui/icons-material';
 import AddIcon from '@mui/icons-material/Add';
 import PanToolIcon from '@mui/icons-material/PanTool';
+import ZoomInIcon from '@mui/icons-material/ZoomIn';
+import ZoomOutIcon from '@mui/icons-material/ZoomOut';
 import { useEventListener } from '../../../libs/react/hooks/use-event-listener';
+import { CameraComponentName, PlayerComponentName, ScaleComponentName } from '../../../libs/bgs/ecs/components';
 
 export const MainMenu = memo(({ heroSets, ignitor }: { heroSets: HeroSets; ignitor: BgsIgnitor }) => {
   const [mode, setMode] = useState<'pan' | null>(null);
@@ -73,11 +76,38 @@ export const MainMenu = memo(({ heroSets, ignitor }: { heroSets: HeroSets; ignit
     });
   };
 
+  const onZoomOutClick = () => {
+    const cameraEntities = World.filter(ignitor.world, [CameraComponentName, ScaleComponentName, PlayerComponentName]);
+    const scaleCP = World.getOrAddPool(ignitor.world, ScaleComponentName);
+    const cameraEntity = cameraEntities[0];
+    const scaleC = Pool.get(scaleCP, cameraEntity);
+    scaleC.data.x -= 0.1;
+    scaleC.data.y -= 0.1;
+  };
+  const onZoomInClick = () => {
+    const cameraEntities = World.filter(ignitor.world, [CameraComponentName, ScaleComponentName, PlayerComponentName]);
+    const scaleCP = World.getOrAddPool(ignitor.world, ScaleComponentName);
+    const cameraEntity = cameraEntities[0];
+    const scaleC = Pool.get(scaleCP, cameraEntity);
+    scaleC.data.x += 0.1;
+    scaleC.data.y += 0.1;
+  };
+
   return (
     <React.Fragment>
       <Box
         sx={{ display: 'flex', alignItems: 'center', textAlign: 'center', position: 'fixed', bottom: 15, right: 15 }}
       >
+        <Tooltip title="Zoom out">
+          <IconButton size="large" onClick={onZoomOutClick} sx={{ ml: 2, backgroundColor: '#bdbdbd' }}>
+            <ZoomOutIcon />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Zoom in">
+          <IconButton size="large" onClick={onZoomInClick} sx={{ ml: 2, backgroundColor: '#bdbdbd' }}>
+            <ZoomInIcon />
+          </IconButton>
+        </Tooltip>
         <Tooltip title="Pan mode">
           <IconButton
             size="large"

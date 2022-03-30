@@ -27,11 +27,16 @@ import {
   ReactHeroComponent,
   ReactImageComponent,
   ReactPositionComponent,
+  ReactScaleComponent,
+  ReactScaleComponentName,
   ReactSizeComponent,
   RuleCardComponent,
+  ScaleComponent,
+  ScaleComponentName,
   SelectableComponent,
   SidekickComponent,
   SizeComponent,
+  SizeComponentName,
   SpawnCardEventComponent,
   SpawnDeckEventComponent,
   SpawnGameMapComponent,
@@ -60,7 +65,8 @@ export type BgsIgnitorComponents = {
   // GAME
   ImageComponent: ImageComponent;
   PositionComponent: PositionComponent;
-  SizeComponent: SizeComponent;
+  [SizeComponentName]: SizeComponent;
+  [ScaleComponentName]: ScaleComponent;
   SelectableComponent: SelectableComponent;
   IsSelectedComponent: IsSelectedComponent;
   DraggableComponent: DraggableComponent;
@@ -99,6 +105,7 @@ export type BgsIgnitorComponents = {
   ReactSizeComponent: ReactSizeComponent;
   ReactGameMapComponent: ReactGameMapComponent;
   ReactHeroComponent: ReactHeroComponent;
+  [ReactScaleComponentName]: ReactScaleComponent;
 };
 
 export type BgsIgnitor = Ignitor<BgsIgnitorComponents, BgsIgnitorCtx>;

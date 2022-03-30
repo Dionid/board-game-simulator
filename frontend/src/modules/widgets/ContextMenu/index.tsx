@@ -6,7 +6,8 @@ import { ComponentId, Pool } from '../../../libs/ecs/component';
 import { MenuItem } from '@mui/material';
 import { BgsIgnitor } from '../../../libs/bgs/ecs';
 import { v4 } from 'uuid';
-import { Square } from '../../../libs/math';
+import { Size, Square } from '../../../libs/math';
+import { ScaleComponentName } from '../../../libs/bgs/ecs/components';
 
 export const ContextMenu: FC<{ ignitor: BgsIgnitor }> = (props) => {
   const { children, ignitor } = props;
@@ -50,6 +51,8 @@ export const ContextMenu: FC<{ ignitor: BgsIgnitor }> = (props) => {
     const positionEntities = World.filter(ignitor.world, ['GameObjectComponent', 'PositionComponent', 'SizeComponent']);
     const positionComponentPool = World.getOrAddPool(ignitor.world, 'PositionComponent');
     const sizeComponentPool = World.getOrAddPool(ignitor.world, 'SizeComponent');
+    const scaleCP = World.getOrAddPool(ignitor.world, ScaleComponentName);
+    const scaleC = Pool.get(scaleCP, cameraEntity);
 
     const cameraPositionC = Pool.get(positionComponentPool, cameraEntity);
 
@@ -61,11 +64,11 @@ export const ContextMenu: FC<{ ignitor: BgsIgnitor }> = (props) => {
       // . Is inside object zone, including camera position
       if (
         Square.isInside(
+          { ...positionComponent.data, ...Size.multiplyByVector2(sizeComponent.data, scaleC.data) },
           {
             x: contextMenu.x + cameraPositionC.data.x,
             y: contextMenu.y + cameraPositionC.data.y,
-          },
-          { ...positionComponent.data, ...sizeComponent.data }
+          }
         )
       ) {
         mouseOnEntities.push(entity);

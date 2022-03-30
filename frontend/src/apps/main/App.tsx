@@ -27,6 +27,7 @@ import { BoardSystem } from '../../libs/bgs/ecs/systems/board';
 import { useForceUpdate } from '../../libs/react/hooks/use-force-update';
 import { Minimap } from '../../modules/widgets/Minimap';
 import { GameStage } from '../../modules/widgets/GameStage';
+import { ChangeReactScaleSystem } from '../../libs/bgs/ecs/systems/change-react-scale-system';
 
 // TODO. Move
 const boardSize = {
@@ -80,6 +81,7 @@ function App() {
         ChangeReactPositionSystem(),
         ChangeReactImageSystem(),
         ChangeReactSizeSystem(),
+        ChangeReactScaleSystem(),
       ],
     };
 

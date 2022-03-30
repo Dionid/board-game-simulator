@@ -4,10 +4,28 @@ export type Vector2 = {
 };
 
 export const Vector2 = {
+  multiply: (a: Vector2, b: Vector2): Vector2 => {
+    return {
+      x: a.x * b.x,
+      y: a.y * b.y,
+    };
+  },
+  divide: (a: Vector2, b: Vector2): Vector2 => {
+    return {
+      x: a.x / b.x,
+      y: a.y / b.y,
+    };
+  },
   sum: (a: Vector2, b: Vector2): Vector2 => {
     return {
       x: a.x + b.x,
       y: a.y + b.y,
+    };
+  },
+  subtract: (a: Vector2, b: Vector2): Vector2 => {
+    return {
+      x: a.x - b.x,
+      y: a.y - b.y,
     };
   },
   minMaxDelta: (a: Vector2, b: Vector2): Vector2 => {
@@ -63,10 +81,19 @@ export type Size = {
   height: number;
 };
 
+export const Size = {
+  multiplyByVector2: (size: Size, vector: Vector2): Size => {
+    return {
+      width: size.width * vector.x,
+      height: size.height * vector.y,
+    };
+  },
+};
+
 export type Square = Vector2 & Size;
 
 export const Square = {
-  isInside: (position: Vector2, square: Square): boolean => {
+  isInside: (square: Square, position: Vector2): boolean => {
     return (
       position.x > square.x &&
       position.x < square.x + square.width &&

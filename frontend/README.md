@@ -16,32 +16,35 @@
    1. ~~Lock~~
    2. ~~Delete~~
 4. ~~Add "DeletableComponent"~~
-5. Move Camera on Board
+5. ~~Move Camera on Board~~
    1. ~~Fix drag and select position~~
    2. ~~Add "lapka"~~
    3. ~~Add minimap~~
-   4. Add objects to minimap
-6. Deck actions
+   4. ~~Add objects to minimap~~
+6. Zoom
+7. Deck actions
    1. Get card
    2. Shuffle
-7. Card actions
+8. Card actions
    1. Put in deck
    2. Flip
-8. Hero actions
+9. Hero actions
    1. Flip
-9. Health Meter actions
-   1. Increase & Decrease
-10. Hero Set actions
+10. Health Meter actions
+    1. Increase & Decrease
+11. Hero Set actions
     1. Delete set
-11. Depth system based on y axis
-12. Authorization
-13. Cards shown
-14. Persistence and collaboration
+12. Depth system
+    1. Based on dragging
+    2. Based on y axis
+13. Authorization
+14. Cards shown
+15. Persistence and collaboration
     1. Room
     2. Player cursor
     3. Player actions
-15. Refactor SelectSystem
-16. Remove entities
+16. Refactor SelectSystem
+17. Remove entities
 
 ## Second
 
@@ -55,7 +58,6 @@
 ## Additional
 
 1. Resize canvas on window resize
-2. Zoom
-3. Background grid
-4. Immutable data
-5. History
+2. Background grid
+3. Immutable data
+4. History
