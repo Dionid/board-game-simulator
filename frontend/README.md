@@ -17,6 +17,9 @@
    2. ~~Delete~~
 4. ~~Add "DeletableComponent"~~
 5. Move Camera on Board
+   1. ~~Fix drag and select position~~
+   2. Add "lapka"
+   3. Add minimap
 6. Deck actions
    1. Get card
    2. Shuffle

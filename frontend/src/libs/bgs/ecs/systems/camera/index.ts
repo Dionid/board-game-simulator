@@ -84,25 +84,25 @@ export const CameraSystem = (): System<{
         const margin = 20;
         const velocity = timeDelta * 0.5;
         // . Check that camera position is more than 0 and less than board size
-        if (handC.data.current.x > sizeC.data.width - margin) {
+        if (handC.data.onCameraPosition.current.x > sizeC.data.width - margin) {
           const newX = positionC.data.x + velocity;
           if (newX + sizeC.data.width < boardC.data.width) {
             console.log('RIGHT');
             positionC.data.x = newX;
           }
-        } else if (handC.data.current.x < margin) {
+        } else if (handC.data.onCameraPosition.current.x < margin) {
           const newX = positionC.data.x - velocity;
           if (newX > 0) {
             console.log('LEFT');
             positionC.data.x = newX;
           }
-        } else if (handC.data.current.y < margin) {
+        } else if (handC.data.onCameraPosition.current.y < margin) {
           const newY = positionC.data.y - velocity;
           if (newY > 0) {
             console.log('TOP');
             positionC.data.y = newY;
           }
-        } else if (handC.data.current.y > sizeC.data.height - margin) {
+        } else if (handC.data.onCameraPosition.current.y > sizeC.data.height - margin) {
           const newY = positionC.data.y + velocity;
           if (newY + sizeC.data.height < boardC.data.height) {
             console.log('DOWN');

@@ -16,14 +16,25 @@ export type CameraComponent = Component<typeof CameraComponentName, {}>;
 
 // . INPUT
 
+export const HandComponentName = 'HandComponent' as const;
 export type HandComponent = Component<
-  'HandComponent',
+  typeof HandComponentName,
   {
-    current: Vector2 & {
-      down: boolean;
+    onBoardPosition: {
+      current: Vector2;
+      previous: Vector2;
     };
-    previous: Vector2 & {
-      down: boolean;
+    onCameraPosition: {
+      current: Vector2;
+      previous: Vector2;
+    };
+    click: {
+      current: {
+        down: boolean;
+      };
+      previous: {
+        down: boolean;
+      };
     };
   }
 >;

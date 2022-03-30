@@ -49,15 +49,27 @@ export const DragSystem = (): System<{
 
         playerMouseEntities.forEach((playerMouseEntity) => {
           const playerMouseComponent = Pool.get(handPool, playerMouseEntity);
-          if (playerMouseComponent.data.previous.x > playerMouseComponent.data.current.x) {
-            positionC.data.x -= playerMouseComponent.data.previous.x - playerMouseComponent.data.current.x;
+          if (
+            playerMouseComponent.data.onCameraPosition.previous.x > playerMouseComponent.data.onCameraPosition.current.x
+          ) {
+            positionC.data.x -=
+              playerMouseComponent.data.onCameraPosition.previous.x -
+              playerMouseComponent.data.onCameraPosition.current.x;
           } else {
-            positionC.data.x += playerMouseComponent.data.current.x - playerMouseComponent.data.previous.x;
+            positionC.data.x +=
+              playerMouseComponent.data.onCameraPosition.current.x -
+              playerMouseComponent.data.onCameraPosition.previous.x;
           }
-          if (playerMouseComponent.data.previous.y > playerMouseComponent.data.current.y) {
-            positionC.data.y -= playerMouseComponent.data.previous.y - playerMouseComponent.data.current.y;
+          if (
+            playerMouseComponent.data.onCameraPosition.previous.y > playerMouseComponent.data.onCameraPosition.current.y
+          ) {
+            positionC.data.y -=
+              playerMouseComponent.data.onCameraPosition.previous.y -
+              playerMouseComponent.data.onCameraPosition.current.y;
           } else {
-            positionC.data.y += playerMouseComponent.data.current.y - playerMouseComponent.data.previous.y;
+            positionC.data.y +=
+              playerMouseComponent.data.onCameraPosition.current.y -
+              playerMouseComponent.data.onCameraPosition.previous.y;
           }
         });
       });
