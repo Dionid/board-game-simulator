@@ -14,6 +14,8 @@ export const GameStage = memo(
     const position = useEcsComponent(playerEntity, { x: 0, y: 0 }, 'ReactPositionComponent', ignitor);
     const gameObjectComponentPool = World.getOrAddPool(ignitor.world, 'GameObjectComponent');
 
+    console.log('GameStage', position);
+
     return (
       <Stage style={{ backgroundColor: '#e1e1e1' }} width={surfaceWidth} height={surfaceHeight}>
         <Layer x={-position.x} y={-position.y}>

@@ -87,6 +87,11 @@ export const CameraSystem = (): System<{
         const positionC = Pool.get(positionComponentPool, playerEntityId);
         const sizeC = Pool.get(sizeComponentPool, playerEntityId);
 
+        const newPosition: Vector2 = {
+          x: positionC.data.x,
+          y: positionC.data.y,
+        };
+
         // Pan mode
         if (panModeEntities.length > 0) {
           if (handC.data.click.current.down) {
@@ -94,38 +99,34 @@ export const CameraSystem = (): System<{
               handC.data.onCameraPosition.previous,
               handC.data.onCameraPosition.current
             );
-            positionC.data.x -= delta.x;
-            positionC.data.y -= delta.y;
+            newPosition.x -= delta.x;
+            newPosition.y -= delta.y;
           }
         } else {
           const margin = 20;
           const velocity = timeDelta * 0.5;
           // . Check that camera position is more than 0 and less than board size
           if (handC.data.onCameraPosition.current.x > sizeC.data.width - margin) {
-            const newX = positionC.data.x + velocity;
-            if (newX + sizeC.data.width < boardC.data.width) {
-              console.log('RIGHT');
-              positionC.data.x = newX;
-            }
+            // console.log('RIGHT');
+            newPosition.x += velocity;
           } else if (handC.data.onCameraPosition.current.x < margin) {
-            const newX = positionC.data.x - velocity;
-            if (newX > 0) {
-              console.log('LEFT');
-              positionC.data.x = newX;
-            }
+            // console.log('LEFT');
+            newPosition.x -= velocity;
           } else if (handC.data.onCameraPosition.current.y < margin) {
-            const newY = positionC.data.y - velocity;
-            if (newY > 0) {
-              console.log('TOP');
-              positionC.data.y = newY;
-            }
+            // console.log('TOP');
+            newPosition.y -= velocity;
           } else if (handC.data.onCameraPosition.current.y > sizeC.data.height - margin) {
-            const newY = positionC.data.y + velocity;
-            if (newY + sizeC.data.height < boardC.data.height) {
-              console.log('DOWN');
-              positionC.data.y = newY;
-            }
+            // console.log('DOWN');
+            newPosition.y += velocity;
           }
+        }
+
+        // . Restrict
+        if (newPosition.x > 0 && newPosition.x + sizeC.data.width < boardC.data.width) {
+          positionC.data.x = newPosition.x;
+        }
+        if (newPosition.y > 0 && newPosition.y + sizeC.data.height < boardC.data.height) {
+          positionC.data.y = newPosition.y;
         }
       });
     },

@@ -26,6 +26,8 @@ export const ECSCustomImage = React.memo((props: { entity: EntityId; ignitor: Bg
   const position = useEcsComponent(entity, { x: 0, y: 0 }, 'ReactPositionComponent', ignitor);
   const size = useEcsComponent(entity, { width: 0, height: 0 }, 'ReactSizeComponent', ignitor);
 
+  // console.log("ECSCustomImage", position)
+
   return (
     <Group clipFunc={(ctx: any) => calcClipFunc(ctx, position.x, position.y, size.width, size.height, 3)}>
       <CustomImage
