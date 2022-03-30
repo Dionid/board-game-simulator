@@ -128,7 +128,14 @@ function App() {
         )}
       </ContextMenu>
       <MainMenu ignitor={ignitor} heroSets={heroSets} />
-      {playerEntity && <Minimap ignitor={ignitor} boardSize={boardSize} playerEntity={playerEntity} />}
+      {playerEntity && (
+        <Minimap
+          forceUpdateState={forceUpdateState}
+          ignitor={ignitor}
+          boardSize={boardSize}
+          playerEntity={playerEntity}
+        />
+      )}
     </div>
   );
 }
