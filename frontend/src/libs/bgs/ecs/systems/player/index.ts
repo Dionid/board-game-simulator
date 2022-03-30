@@ -11,6 +11,7 @@ export const PlayerSystem = (): System<{
 }> => {
   return {
     init: async ({ world }) => {
+      console.log('PlayerSystem init');
       const playerEntity = EntityId.new();
 
       const playerPool = World.getOrAddPool(world, 'PlayerComponent');

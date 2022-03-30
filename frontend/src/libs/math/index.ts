@@ -64,3 +64,14 @@ export type Size = {
 };
 
 export type Square = Vector2 & Size;
+
+export const Square = {
+  isInside: (position: Vector2, square: Square): boolean => {
+    return (
+      position.x > square.x &&
+      position.x < square.x + square.width &&
+      position.y > square.y &&
+      position.y < square.y + square.height
+    );
+  },
+};

@@ -50,6 +50,7 @@ import { HeroSets } from '../games/unmatched';
 
 export type BgsIgnitorCtx = {
   heroSets: typeof HeroSets;
+  forceUpdate: () => void;
 };
 
 export type BgsIgnitorComponents = {

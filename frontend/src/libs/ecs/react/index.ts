@@ -37,5 +37,7 @@ export const useEcsComponent = <
     });
   }, [state, entity]);
 
+  // console.log("useEcsComponent", state)
+
   return state;
 };

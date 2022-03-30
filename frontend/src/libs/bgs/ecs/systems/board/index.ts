@@ -3,8 +3,11 @@ import { BoardComponent, BoardComponentName } from '../../components';
 import { World } from '../../../../ecs/world';
 import { ComponentId, Pool } from '../../../../ecs/component';
 import { EntityId } from '../../../../ecs/entity';
+import { Size } from '../../../../math';
 
-export const BoardSystem = (): System<{
+export const BoardSystem = (
+  boardSize: Size
+): System<{
   [BoardComponentName]: BoardComponent;
 }> => {
   return {
@@ -17,8 +20,8 @@ export const BoardSystem = (): System<{
         id: ComponentId.new(),
         data: {
           // TODO. move somewhere (as deps or ctx)
-          width: 10000,
-          height: 10000,
+          width: boardSize.width,
+          height: boardSize.height,
         },
       };
       Pool.add(boardComponentPool, EntityId.new(), boardComponent);

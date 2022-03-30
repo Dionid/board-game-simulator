@@ -13,21 +13,26 @@ import {
 import { World } from '../../../../ecs/world';
 import { ComponentId, Pool } from '../../../../ecs/component';
 
-export const SpawnGameObjectSystem = (): System<{
-  SpawnGameObjectEventComponent: SpawnGameObjectEventComponent;
-  ImageComponent: ImageComponent;
-  PositionComponent: PositionComponent;
-  SizeComponent: SizeComponent;
-  DraggableComponent: DraggableComponent;
-  SelectableComponent: SelectableComponent;
-  LockableComponent: LockableComponent;
-  GameObjectComponent: GameObjectComponent;
-  DeletableComponent: DeletableComponent;
-}> => {
+export const SpawnGameObjectSystem = (): System<
+  {
+    SpawnGameObjectEventComponent: SpawnGameObjectEventComponent;
+    ImageComponent: ImageComponent;
+    PositionComponent: PositionComponent;
+    SizeComponent: SizeComponent;
+    DraggableComponent: DraggableComponent;
+    SelectableComponent: SelectableComponent;
+    LockableComponent: LockableComponent;
+    GameObjectComponent: GameObjectComponent;
+    DeletableComponent: DeletableComponent;
+  },
+  {
+    forceUpdate: () => void;
+  }
+> => {
   let lastZ = 1;
 
   return {
-    run: async ({ world }) => {
+    run: async ({ world, ctx }) => {
       const entities = World.filter(world, ['SpawnGameObjectEventComponent']);
 
       if (entities.length === 0) {
@@ -115,6 +120,8 @@ export const SpawnGameObjectSystem = (): System<{
 
         // . Destroy event
         Pool.delete(spawnGameObjectComponentPool, gameObjectEntity);
+
+        ctx.forceUpdate();
 
         lastZ += 1;
       }
