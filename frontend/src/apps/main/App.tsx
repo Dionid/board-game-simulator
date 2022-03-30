@@ -16,7 +16,6 @@ import { HandInputSystem } from '../../libs/bgs/ecs/systems/mouse-input';
 import { PlayerSystem } from '../../libs/bgs/ecs/systems/player';
 import { DragSystem } from '../../libs/bgs/ecs/systems/drag';
 import { SelectSystem } from '../../libs/bgs/ecs/systems/select';
-import { useForceUpdate } from '../../libs/react/hooks/use-force-update';
 import { HeroSets } from '../../libs/bgs/games/unmatched';
 import { SpawnHeroSetSystem } from '../../libs/bgs/ecs/systems/spawn-hero-set-system';
 import { SpawnGameObjectSystem } from '../../libs/bgs/ecs/systems/spawn-game-object';
@@ -29,6 +28,7 @@ import { MainMenu } from '../../modules/widgets/MainMenu';
 import { ContextMenu } from '../../modules/widgets/ContextMenu';
 import { CameraSystem } from '../../libs/bgs/ecs/systems/camera';
 import { BoardSystem } from '../../libs/bgs/ecs/systems/board';
+import { Pool } from '../../libs/ecs/component';
 
 const ignitor: BgsIgnitor = {
   world: {
@@ -99,7 +99,7 @@ function App() {
   const surfaceWidth = window.innerWidth;
   const surfaceHeight = window.innerHeight;
 
-  const forceUpdate = useForceUpdate();
+  // const forceUpdate = useForceUpdate();
   const [heroSets] = useState(HeroSets);
   const [, selectShape] = useState<string | null>(null);
 
@@ -116,14 +116,26 @@ function App() {
 
   useEffect(() => {
     initIgnitor();
-    setInterval(() => {
-      forceUpdate();
-    }, 1000);
+
+    // const run = () => {
+    //   forceUpdate();
+    //   requestAnimationFrame(run);
+    // }
+    // requestAnimationFrame(run);
+    // setInterval(() => {
+    //   forceUpdate();
+    // }, 100);
   }, []);
 
   // console.log('RERENDER');
 
   const gameObjectComponentPool = World.getOrAddPool(ignitor.world, 'GameObjectComponent');
+
+  const playerEntities = World.filter(ignitor.world, ['PlayerComponent', 'CameraComponent']);
+  const cameraComponentPool = World.getOrAddPool(ignitor.world, 'CameraComponent');
+  // TODO. Refactor for collaboration
+  const playerEntity = playerEntities[0];
+  const cameraC = Pool.tryGet(cameraComponentPool, playerEntity);
 
   return (
     <div>
@@ -136,7 +148,7 @@ function App() {
           onMouseDown={checkDeselect}
           onTouchStart={checkDeselect}
         >
-          <Layer>
+          <Layer x={cameraC ? -cameraC.data.x : 0} y={cameraC ? -cameraC.data.y : 0}>
             {Object.keys(gameObjectComponentPool.data).map((entity) => {
               return <ECSCustomImage key={entity} entity={entity as EntityId} ignitor={ignitor} />;
             })}

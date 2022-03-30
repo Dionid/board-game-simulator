@@ -57,7 +57,7 @@ export const CameraSystem = (): System<{
         const handC = Pool.get(handPool, playerEntityId);
         const cameraC = Pool.get(cameraComponentPool, playerEntityId);
         const margin = 20;
-        const velocity = timeDelta;
+        const velocity = timeDelta * 0.5;
         // . Check that camera position is more than 0 and less than board size
         if (handC.data.current.x > cameraC.data.width - margin) {
           const newX = cameraC.data.x + velocity;

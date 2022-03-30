@@ -18,6 +18,8 @@ import {
   IsLockedComponent,
   IsSelectedComponent,
   LockableComponent,
+  PlayerComponent,
+  PlayerComponentName,
   PositionComponent,
   ReactGameMapComponent,
   ReactHeroComponent,
@@ -49,6 +51,7 @@ export type BgsIgnitorCtx = {
 };
 
 export type BgsIgnitorComponents = {
+  [PlayerComponentName]: PlayerComponent;
   [CameraComponentName]: CameraComponent;
   [BoardComponentName]: BoardComponent;
   // GAME
