@@ -18,6 +18,8 @@ import {
   IsLockedComponent,
   IsSelectedComponent,
   LockableComponent,
+  PanModeComponent,
+  PanModeComponentName,
   PlayerComponent,
   PlayerComponentName,
   PositionComponent,
@@ -86,6 +88,9 @@ export type BgsIgnitorComponents = {
 
   GameObjectComponent: GameObjectComponent;
   SpawnGameObjectEventComponent: SpawnGameObjectEventComponent;
+
+  // UI
+  [PanModeComponentName]: PanModeComponent;
 
   // REACT COMPONENTS
   ReactPositionComponent: ReactPositionComponent;

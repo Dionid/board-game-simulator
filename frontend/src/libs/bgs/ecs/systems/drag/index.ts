@@ -6,11 +6,14 @@ import {
   IsLockedComponent,
   IsSelectedComponent,
   OwnerComponent,
+  PanModeComponent,
+  PanModeComponentName,
   PlayerComponent,
   PositionComponent,
 } from '../../components';
 import { World } from '../../../../ecs/world';
 import { Pool } from '../../../../ecs/component';
+import { Vector2 } from '../../../../math';
 
 export const DragSystem = (): System<{
   PlayerComponent: PlayerComponent;
@@ -21,10 +24,18 @@ export const DragSystem = (): System<{
   IsDraggingComponent: IsDraggingComponent;
   IsSelectedComponent: IsSelectedComponent;
   IsLockedComponent: IsLockedComponent;
+  [PanModeComponentName]: PanModeComponent;
 }> => {
   return {
     run: async (props) => {
       const { world } = props;
+
+      const panModeEntities = World.filter(world, ['PanModeComponent']);
+
+      // . Disable drag in pan mode
+      if (panModeEntities.length > 0) {
+        return;
+      }
 
       const playerMouseEntities = World.filter(world, ['PlayerComponent', 'OwnerComponent', 'HandComponent']);
       let selectedAndDraggableEntities = World.filter(world, [
@@ -48,29 +59,12 @@ export const DragSystem = (): System<{
         const positionC = Pool.get(positionCP, selectedAndDraggableEntity);
 
         playerMouseEntities.forEach((playerMouseEntity) => {
-          const playerMouseComponent = Pool.get(handPool, playerMouseEntity);
-          if (
-            playerMouseComponent.data.onCameraPosition.previous.x > playerMouseComponent.data.onCameraPosition.current.x
-          ) {
-            positionC.data.x -=
-              playerMouseComponent.data.onCameraPosition.previous.x -
-              playerMouseComponent.data.onCameraPosition.current.x;
-          } else {
-            positionC.data.x +=
-              playerMouseComponent.data.onCameraPosition.current.x -
-              playerMouseComponent.data.onCameraPosition.previous.x;
-          }
-          if (
-            playerMouseComponent.data.onCameraPosition.previous.y > playerMouseComponent.data.onCameraPosition.current.y
-          ) {
-            positionC.data.y -=
-              playerMouseComponent.data.onCameraPosition.previous.y -
-              playerMouseComponent.data.onCameraPosition.current.y;
-          } else {
-            positionC.data.y +=
-              playerMouseComponent.data.onCameraPosition.current.y -
-              playerMouseComponent.data.onCameraPosition.previous.y;
-          }
+          const {
+            data: { onCameraPosition },
+          } = Pool.get(handPool, playerMouseEntity);
+          const delta = Vector2.compareAndChange(onCameraPosition.previous, onCameraPosition.current);
+          positionC.data.x += delta.x;
+          positionC.data.y += delta.y;
         });
       });
     },

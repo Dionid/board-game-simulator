@@ -218,7 +218,12 @@ export type SpawnHeroSetComponent = Component<
   }
 >;
 
-// . REACT COMPONENTS
+// . UI
+
+export const PanModeComponentName = 'PanModeComponent';
+export type PanModeComponent = Component<typeof PanModeComponentName, Record<any, any>>;
+
+// .. REACT COMPONENTS
 
 export type ReactPositionComponentData = Vector2;
 export type ReactPositionComponent = ReactComponent<'ReactPositionComponent', ReactPositionComponentData>;
