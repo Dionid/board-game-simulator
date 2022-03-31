@@ -49,7 +49,8 @@ export type PlayerComponent = Component<
   }
 >;
 
-export type OwnerComponent = Component<'OwnerComponent', {}>;
+export const OwnerComponentName = 'OwnerComponent';
+export type OwnerComponent = Component<typeof OwnerComponentName, {}>;
 
 // . GAME OBJECT
 

@@ -1,23 +1,18 @@
 import { System } from '../../../../ecs/system';
 import {
-  CameraComponent,
-  CameraComponentName,
   HandComponent,
   IsSelectedComponent,
   OwnerComponent,
   PlayerComponent,
-  PlayerComponentName,
   PositionComponent,
   PositionComponentName,
-  ScaleComponent,
-  ScaleComponentName,
   SelectableComponent,
   SizeComponent,
 } from '../../components';
 import { World } from '../../../../ecs/world';
 import { ComponentId, Pool } from '../../../../ecs/component';
 import { EntityId } from '../../../../ecs/entity';
-import { Size, Square, Vector2 } from '../../../../math';
+import { Square } from '../../../../math';
 
 export const SelectSystem = (): System<{
   HandComponent: HandComponent;
@@ -27,8 +22,6 @@ export const SelectSystem = (): System<{
   IsSelectedComponent: IsSelectedComponent;
   SizeComponent: SizeComponent;
   [PositionComponentName]: PositionComponent;
-  [CameraComponentName]: CameraComponent;
-  [ScaleComponentName]: ScaleComponent;
 }> => {
   return {
     run: async ({ world }) => {
@@ -38,8 +31,6 @@ export const SelectSystem = (): System<{
         return;
       }
 
-      const playerCameraEntities = World.filter(world, [PlayerComponentName, CameraComponentName, ScaleComponentName]);
-      const playerCameraEntity = playerCameraEntities[0];
       const playerMouseEntities = World.filter(world, ['PlayerComponent', 'OwnerComponent', 'HandComponent']);
       const isSelectedEntities = World.filter(world, ['IsSelectedComponent']);
 
@@ -60,9 +51,6 @@ export const SelectSystem = (): System<{
         } else if (playerMouseComponent.data.click.current.down && isSelectedEntities.length === 0) {
           const positionCP = World.getOrAddPool(world, 'PositionComponent');
           const sizeCP = World.getOrAddPool(world, 'SizeComponent');
-          const scaleCP = World.getOrAddPool(world, ScaleComponentName);
-          const cameraScaleC = Pool.get(scaleCP, playerCameraEntity);
-          const cameraPositionC = Pool.get(positionCP, playerCameraEntity);
 
           const mouseOnEntities: EntityId[] = [];
 
@@ -72,10 +60,10 @@ export const SelectSystem = (): System<{
             if (
               Square.isInside(
                 {
-                  ...Vector2.multiply(Vector2.subtract(positionC.data, cameraPositionC.data), cameraScaleC.data),
-                  ...Size.multiplyByVector2(sizeC.data, cameraScaleC.data),
+                  ...positionC.data,
+                  ...sizeC.data,
                 },
-                playerMouseComponent.data.onCameraPosition.current
+                playerMouseComponent.data.onBoardPosition.current
               )
             ) {
               mouseOnEntities.push(selectableEntity);

@@ -96,6 +96,7 @@ export const CameraSystem = (): System<{
       const positionCP = World.getOrAddPool(world, 'PositionComponent');
       const sizeCP = World.getOrAddPool(world, 'SizeComponent');
       const handPool = World.getOrAddPool(world, 'HandComponent');
+      const scaleCP = World.getOrAddPool(world, ScaleComponentName);
 
       const boardEntity = World.filter(world, ['BoardComponent']);
       const boardCP = World.getOrAddPool(world, 'BoardComponent');
@@ -108,6 +109,7 @@ export const CameraSystem = (): System<{
         const handC = Pool.get(handPool, playerEntityId);
         const positionC = Pool.get(positionCP, playerEntityId);
         const sizeC = Pool.get(sizeCP, playerEntityId);
+        const cameraScaleC = Pool.get(scaleCP, playerEntityId);
 
         const newPosition: Vector2 = {
           x: positionC.data.x,
@@ -145,10 +147,10 @@ export const CameraSystem = (): System<{
         }
 
         // . Restrict
-        if (newPosition.x > 0 && newPosition.x + sizeC.data.width < boardC.data.width) {
+        if (newPosition.x > 0 && newPosition.x + sizeC.data.width / cameraScaleC.data.x < boardC.data.width) {
           positionC.data.x = newPosition.x;
         }
-        if (newPosition.y > 0 && newPosition.y + sizeC.data.height < boardC.data.height) {
+        if (newPosition.y > 0 && newPosition.y + sizeC.data.height / cameraScaleC.data.y < boardC.data.height) {
           positionC.data.y = newPosition.y;
         }
       });

@@ -1,11 +1,16 @@
 import { System } from '../../../../ecs/system';
 import {
+  CameraComponent,
+  CameraComponentName,
   HandComponent,
   HandComponentName,
   OwnerComponent,
   PlayerComponent,
+  PlayerComponentName,
   PositionComponent,
   PositionComponentName,
+  ScaleComponent,
+  ScaleComponentName,
   SizeComponent,
   SizeComponentName,
 } from '../../components';
@@ -18,6 +23,8 @@ export const HandInputSystem = (): System<{
   OwnerComponent: OwnerComponent;
   [PositionComponentName]: PositionComponent;
   [SizeComponentName]: SizeComponent;
+  [ScaleComponentName]: ScaleComponent;
+  [CameraComponentName]: CameraComponent;
 }> => {
   const lastMouseData = {
     x: 0,
@@ -83,12 +90,17 @@ export const HandInputSystem = (): System<{
     run: async ({ world }) => {
       const entities = World.filter(world, ['HandComponent', 'PlayerComponent', 'OwnerComponent']);
 
-      const mousePool = World.getOrAddPool(world, 'HandComponent');
-      const positionComponentPool = World.getOrAddPool(world, 'PositionComponent');
+      const mouseCP = World.getOrAddPool(world, 'HandComponent');
+      const positionCP = World.getOrAddPool(world, 'PositionComponent');
+      const scaleCP = World.getOrAddPool(world, ScaleComponentName);
+
+      const playerCameraEntities = World.filter(world, [PlayerComponentName, CameraComponentName, ScaleComponentName]);
+      const playerCameraEntity = playerCameraEntities[0];
+      const cameraScaleC = Pool.get(scaleCP, playerCameraEntity);
 
       entities.forEach((entity) => {
-        const component = Pool.get(mousePool, entity);
-        const cameraPositionComponent = Pool.get(positionComponentPool, entity);
+        const component = Pool.get(mouseCP, entity);
+        const cameraPositionComponent = Pool.get(positionCP, entity);
 
         component.data.onCameraPosition.previous = component.data.onCameraPosition.current;
         component.data.onBoardPosition.previous = component.data.onBoardPosition.current;
@@ -99,8 +111,8 @@ export const HandInputSystem = (): System<{
           y: lastMouseData.y,
         };
         component.data.onBoardPosition.current = {
-          x: lastMouseData.x + cameraPositionComponent.data.x,
-          y: lastMouseData.y + cameraPositionComponent.data.y,
+          x: lastMouseData.x / cameraScaleC.data.x + cameraPositionComponent.data.x,
+          y: lastMouseData.y / cameraScaleC.data.y + cameraPositionComponent.data.y,
         };
         component.data.click.current = {
           down: lastMouseData.down,

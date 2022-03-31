@@ -4,7 +4,6 @@ import { Size } from '../../../libs/math';
 import React, { memo } from 'react';
 import { EntityId } from '../../../libs/ecs/entity';
 import { World } from '../../../libs/ecs/world';
-import { ReactScaleComponentName } from '../../../libs/bgs/ecs/components';
 
 const coef = 30;
 
@@ -36,7 +35,6 @@ export const Minimap = memo(
 
     const position = useEcsComponent(playerEntity, { x: 0, y: 0 }, 'ReactPositionComponent', ignitor);
     const size = useEcsComponent(playerEntity, { width: 0, height: 0 }, 'ReactSizeComponent', ignitor);
-    const scale = useEcsComponent(playerEntity, { x: 1, y: 1 }, ReactScaleComponentName, ignitor);
 
     const goCP = World.getOrAddPool(ignitor.world, 'GameObjectComponent');
 
@@ -54,8 +52,8 @@ export const Minimap = memo(
         >
           <div
             style={{
-              width: size.width / scale.x / coef,
-              height: size.height / scale.y / coef,
+              width: size.width / coef,
+              height: size.height / coef,
               outline: '2px red solid',
               position: 'absolute',
               top: position.y / coef,

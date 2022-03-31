@@ -10,6 +10,8 @@ import {
   DraggableComponent,
   GameMapComponent,
   GameObjectComponent,
+  HandComponent,
+  HandComponentName,
   HealthMeterComponent,
   HeroComponent,
   HeroSetComponent,
@@ -18,6 +20,8 @@ import {
   IsLockedComponent,
   IsSelectedComponent,
   LockableComponent,
+  OwnerComponent,
+  OwnerComponentName,
   PanModeComponent,
   PanModeComponentName,
   PlayerComponent,
@@ -60,8 +64,10 @@ export type BgsIgnitorCtx = {
 
 export type BgsIgnitorComponents = {
   [PlayerComponentName]: PlayerComponent;
+  [OwnerComponentName]: OwnerComponent;
   [CameraComponentName]: CameraComponent;
   [BoardComponentName]: BoardComponent;
+  [HandComponentName]: HandComponent;
   // GAME
   ImageComponent: ImageComponent;
   PositionComponent: PositionComponent;
