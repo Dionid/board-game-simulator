@@ -95,6 +95,7 @@ export const ContextMenu: FC<{ ignitor: BgsIgnitor }> = (props) => {
             onClick={() => {
               handleClose();
               World.destroyEntity(ignitor.world, maxZPositionEntity);
+              ignitor.ctx.forceUpdate();
             }}
           >
             Delete
