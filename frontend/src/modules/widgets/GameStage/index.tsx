@@ -4,7 +4,7 @@ import { EntityId } from '../../../libs/ecs/entity';
 import React, { memo } from 'react';
 import { BgsIgnitor } from '../../../libs/bgs/ecs';
 import { useEcsComponent } from '../../../libs/ecs/react';
-import { Essence } from '../../../libs/ecs/world';
+import { Essence } from '../../../libs/ecs/essence';
 import { ReactPositionComponentName, ReactScaleComponentName } from '../../../libs/bgs/ecs/components';
 
 export const GameStage = memo(

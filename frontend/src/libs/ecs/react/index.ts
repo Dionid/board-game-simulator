@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Essence } from '../world';
+import { Essence } from '../essence';
 import { Component, ComponentId, Pool } from '../component';
 import { Ignitor } from '../ignitor';
 import { EntityId } from '../entity';

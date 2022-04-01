@@ -1,7 +1,7 @@
 import { HeroSets, MapId, SetId } from '../../../libs/bgs/games/unmatched';
 import { BgsIgnitor } from '../../../libs/bgs/ecs';
 import React, { memo, useState } from 'react';
-import { Essence } from '../../../libs/ecs/world';
+import { Essence } from '../../../libs/ecs/essence';
 import { ComponentId, Pool } from '../../../libs/ecs/component';
 import { EntityId } from '../../../libs/ecs/entity';
 import { Box, IconButton, ListItemIcon, MenuItem, Tooltip } from '@mui/material';

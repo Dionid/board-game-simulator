@@ -1,6 +1,6 @@
 import { System } from '../../../../ecs/system';
 import { BoardComponent, BoardComponentName } from '../../components';
-import { Essence } from '../../../../ecs/world';
+import { Essence } from '../../../../ecs/essence';
 import { ComponentId, Pool } from '../../../../ecs/component';
 import { EntityId } from '../../../../ecs/entity';
 import { Size } from '../../../../math';

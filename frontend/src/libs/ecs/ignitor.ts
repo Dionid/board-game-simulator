@@ -1,5 +1,5 @@
 import { System } from './system';
-import { Essence } from './world';
+import { Essence } from './essence';
 import { Component } from './component';
 
 export type Ignitor<CR extends Record<string, Component<any, any>>, Ctx extends Record<any, any> = Record<any, any>> = {

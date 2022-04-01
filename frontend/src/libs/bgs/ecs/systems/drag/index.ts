@@ -16,7 +16,7 @@ import {
   ScaleComponent,
   ScaleComponentName,
 } from '../../components';
-import { Essence } from '../../../../ecs/world';
+import { Essence } from '../../../../ecs/essence';
 import { Pool } from '../../../../ecs/component';
 import { Vector2 } from '../../../../math';
 

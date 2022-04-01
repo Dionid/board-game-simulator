@@ -13,7 +13,7 @@ import {
   ZoomOutEventComponentName,
 } from '../../components';
 import { System } from '../../../../ecs/system';
-import { Essence } from '../../../../ecs/world';
+import { Essence } from '../../../../ecs/essence';
 import { Pool } from '../../../../ecs/component';
 
 export const ZoomSystem = (): System<{

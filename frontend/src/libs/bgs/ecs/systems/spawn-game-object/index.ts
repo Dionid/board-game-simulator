@@ -10,7 +10,7 @@ import {
   LockableComponent,
   DeletableComponent,
 } from '../../components';
-import { Essence } from '../../../../ecs/world';
+import { Essence } from '../../../../ecs/essence';
 import { ComponentId, Pool } from '../../../../ecs/component';
 
 export const SpawnGameObjectSystem = (): System<

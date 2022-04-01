@@ -1,4 +1,4 @@
-import { Essence } from './world';
+import { Essence } from './essence';
 import { Component } from './component';
 
 export type SystemProps<

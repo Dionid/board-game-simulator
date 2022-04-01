@@ -3,7 +3,7 @@ import { useEcsComponent } from '../../../libs/ecs/react';
 import { Size } from '../../../libs/math';
 import React, { memo } from 'react';
 import { EntityId } from '../../../libs/ecs/entity';
-import { Essence } from '../../../libs/ecs/world';
+import { Essence } from '../../../libs/ecs/essence';
 
 const coef = 30;
 

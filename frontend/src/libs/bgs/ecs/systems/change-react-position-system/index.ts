@@ -1,5 +1,5 @@
 import { System } from '../../../../ecs/system';
-import { Essence } from '../../../../ecs/world';
+import { Essence } from '../../../../ecs/essence';
 import { Pool } from '../../../../ecs/component';
 import { PositionComponent, ReactPositionComponent } from '../../components';
 

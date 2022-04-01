@@ -1,7 +1,7 @@
 import { EntityId } from '../../../libs/ecs/entity';
 import Menu from '@mui/material/Menu';
 import React, { FC } from 'react';
-import { Essence } from '../../../libs/ecs/world';
+import { Essence } from '../../../libs/ecs/essence';
 import { ComponentId, Pool } from '../../../libs/ecs/component';
 import { MenuItem } from '@mui/material';
 import { BgsIgnitor } from '../../../libs/bgs/ecs';

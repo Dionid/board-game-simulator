@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import CssBaseline from '@mui/material/CssBaseline';
 import { BgsIgnitor, BgsIgnitorCtx } from '../../libs/bgs/ecs';
 import { Ignitor } from '../../libs/ecs/ignitor';
-import { Essence } from '../../libs/ecs/world';
+import { Essence } from '../../libs/ecs/essence';
 import { ChangeReactPositionSystem } from '../../libs/bgs/ecs/systems/change-react-position-system';
 import { ChangeReactImageSystem } from '../../libs/bgs/ecs/systems/change-react-image-system';
 import { SpawnGameMapSystem } from '../../libs/bgs/ecs/systems/spawn-game-map-system';
