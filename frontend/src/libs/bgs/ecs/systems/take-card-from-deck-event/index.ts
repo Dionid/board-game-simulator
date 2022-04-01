@@ -48,8 +48,6 @@ export const TakeCardFromDeckEventSystem = (): System<{
           throw new Error(`No card found in deck`);
         }
 
-        debugger;
-
         // . Create card on deck
         Pool.add(spawnCardEventCP, EntityId.new(), {
           id: ComponentId.new(),
@@ -61,6 +59,10 @@ export const TakeCardFromDeckEventSystem = (): System<{
             y: deckPosition.data.y + deckSize.data.height + 20,
           },
         });
+
+        if (deckC.data.cards.length === 0) {
+          Essence.destroyEntity(essence, eventC.data.deckIdEntity);
+        }
 
         Pool.delete(takeCardFromDeckEventCP, entity);
       });

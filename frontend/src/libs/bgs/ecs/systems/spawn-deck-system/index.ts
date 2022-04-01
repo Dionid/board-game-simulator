@@ -83,7 +83,7 @@ export const SpawnDeckEventSystem = (): System<
 
         const deck: Deck = {
           id: spawnComponent.data.deckId,
-          cards,
+          cards: cards,
         };
         Deck.shuffle(deck);
         Pool.add(deckComponentPool, deckEntity, {
