@@ -126,10 +126,10 @@ function App() {
   return (
     <div>
       <CssBaseline />
-      <ContextMenu world={world}>
+      <ContextMenu world={world} heroSets={heroSets}>
         {playerEntity && <GameStage forceUpdateState={forceUpdateState} world={world} playerEntity={playerEntity} />}
       </ContextMenu>
-      <MainMenu world={world} heroSets={heroSets} />
+      <MainMenu world={world} />
       {playerEntity && (
         <Minimap forceUpdateState={forceUpdateState} world={world} boardSize={boardSize} playerEntity={playerEntity} />
       )}

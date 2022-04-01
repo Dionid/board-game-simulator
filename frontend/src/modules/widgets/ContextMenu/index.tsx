@@ -3,13 +3,15 @@ import Menu from '@mui/material/Menu';
 import React, { FC } from 'react';
 import { Essence } from '../../../libs/ecs/essence';
 import { ComponentId, Pool } from '../../../libs/ecs/component';
-import { MenuItem } from '@mui/material';
+import { ListItemIcon, MenuItem } from '@mui/material';
 import { BgsWorld } from '../../../libs/bgs/ecs';
-import { v4 } from 'uuid';
 import { Square } from '../../../libs/math';
+import { PersonAdd } from '@mui/icons-material';
+import { HeroSets, MapId, SetId } from '../../../libs/bgs/games/unmatched';
+import { SpawnGameMapEventComponentName, SpawnHeroSetEventComponentName } from '../../../libs/bgs/ecs/components';
 
-export const ContextMenu: FC<{ world: BgsWorld }> = (props) => {
-  const { children, world } = props;
+export const ContextMenu: FC<{ world: BgsWorld; heroSets: HeroSets }> = (props) => {
+  const { children, world, heroSets } = props;
 
   // CONTEXT MENU
   const [contextMenu, setContextMenu] = React.useState<{
@@ -36,9 +38,51 @@ export const ContextMenu: FC<{ world: BgsWorld }> = (props) => {
     setContextMenu(null);
   };
 
+  const spawnMap = () => {
+    const spawnGameMapComponentPool = Essence.getOrAddPool(world.essence, SpawnGameMapEventComponentName);
+    Pool.add(spawnGameMapComponentPool, EntityId.new(), {
+      name: SpawnHeroSetEventComponentName,
+      id: ComponentId.new(),
+      data: {
+        url: '/maps/soho.png',
+        mapId: MapId.new(),
+      },
+    });
+    handleClose();
+  };
+
+  const spawnHeroSet = (setId: SetId) => {
+    const spawnHeroSetComponentPool = Essence.getOrAddPool(world.essence, SpawnHeroSetEventComponentName);
+    Pool.add(spawnHeroSetComponentPool, EntityId.new(), {
+      name: SpawnHeroSetEventComponentName,
+      id: ComponentId.new(),
+      data: {
+        setId,
+      },
+    });
+    handleClose();
+  };
+
   const contextMenuActions = () => {
     const actions: JSX.Element[] = [];
-    const emptyActions = [<MenuItem key={v4()}>No actions</MenuItem>];
+    const emptyActions = [
+      <MenuItem onClick={spawnMap}>
+        <ListItemIcon>
+          <PersonAdd fontSize="small" />
+        </ListItemIcon>
+        Add Soho map
+      </MenuItem>,
+      Object.keys(heroSets).map((id) => {
+        return (
+          <MenuItem key={id} onClick={() => spawnHeroSet(id as SetId)}>
+            <ListItemIcon>
+              <PersonAdd fontSize="small" />
+            </ListItemIcon>
+            Add {heroSets[id].name} Hero Set
+          </MenuItem>
+        );
+      }),
+    ];
 
     if (!contextMenu) {
       return emptyActions;
