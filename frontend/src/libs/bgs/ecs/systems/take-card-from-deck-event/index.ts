@@ -37,9 +37,11 @@ export const TakeCardFromDeckEventSystem = (): System<{
 
       entities.forEach((entity) => {
         const eventC = Pool.get(takeCardFromDeckEventCP, entity);
-        const deckC = Pool.get(deckCP, eventC.data.deckIdEntity);
-        const deckPosition = Pool.get(positionCP, eventC.data.deckIdEntity);
-        const deckSize = Pool.get(sizeCP, eventC.data.deckIdEntity);
+
+        const { deckEntityId } = eventC.data;
+        const deckC = Pool.get(deckCP, deckEntityId);
+        const deckPosition = Pool.get(positionCP, deckEntityId);
+        const deckSize = Pool.get(sizeCP, deckEntityId);
 
         // . Get 1 card
         const card = deckC.data.cards.pop();
@@ -57,11 +59,13 @@ export const TakeCardFromDeckEventSystem = (): System<{
             cardId: card.id,
             x: deckPosition.data.x,
             y: deckPosition.data.y + deckSize.data.height + 20,
+            deckEntityId,
+            card,
           },
         });
 
         if (deckC.data.cards.length === 0) {
-          Essence.destroyEntity(essence, eventC.data.deckIdEntity);
+          Essence.destroyEntity(essence, deckEntityId);
         }
 
         Pool.delete(takeCardFromDeckEventCP, entity);

@@ -9,6 +9,7 @@ import { Square } from '../../../libs/math';
 import { PersonAdd } from '@mui/icons-material';
 import { Deck, HeroSets, MapId, SetId } from '../../../libs/bgs/games/unmatched';
 import {
+  CardComponentName,
   DeckComponentName,
   DeletableComponentName,
   HandComponentName,
@@ -189,7 +190,7 @@ export const ContextMenu: FC<{ world: BgsWorld; heroSets: HeroSets }> = (props) 
                 id: ComponentId.new(),
                 name: TakeCardFromDeckEventComponentName,
                 data: {
-                  deckIdEntity: maxZPositionEntity,
+                  deckEntityId: maxZPositionEntity,
                 },
               });
             }}
@@ -209,6 +210,29 @@ export const ContextMenu: FC<{ world: BgsWorld; heroSets: HeroSets }> = (props) 
             Shuffle
           </MenuItem>
         );
+      }
+
+      // . CARD ACTIONS
+      const cardComponentPool = Essence.getOrAddPool(world.essence, CardComponentName);
+      const cardComponent = Pool.tryGet(cardComponentPool, maxZPositionEntity);
+
+      if (cardComponent) {
+        const deck = Pool.tryGet(deckComponentPool, cardComponent.data.deckEntityId);
+        if (deck) {
+          actions.push(
+            <MenuItem
+              key={maxZPositionEntity + ':deck:take_card'}
+              onClick={() => {
+                handleClose();
+                deck.data.cards.push(cardComponent.data.card);
+                Essence.destroyEntity(world.essence, maxZPositionEntity);
+                world.ctx.forceUpdate();
+              }}
+            >
+              Put on deck
+            </MenuItem>
+          );
+        }
       }
 
       // . (UN)LOCK BUTTON

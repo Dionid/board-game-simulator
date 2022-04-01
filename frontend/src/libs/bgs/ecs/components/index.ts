@@ -2,6 +2,7 @@ import { Component } from '../../../ecs/component';
 import { ReactComponent } from '../../../ecs/react';
 import { UUID } from '../../../branded-types';
 import {
+  Card,
   CardId,
   Deck,
   DeckId,
@@ -162,6 +163,8 @@ export type CardComponent = Component<
   typeof CardComponentName,
   {
     cardId: CardId;
+    deckEntityId: EntityId;
+    card: Card;
   }
 >;
 
@@ -244,6 +247,8 @@ export type SpawnCardEventComponent = Component<
     cardId: CardId;
     x: number;
     y: number;
+    deckEntityId: EntityId;
+    card: Card;
   }
 >;
 
@@ -283,7 +288,7 @@ export const TakeCardFromDeckEventComponentName = 'TakeCardFromDeckEventComponen
 export type TakeCardFromDeckEventComponent = Component<
   typeof TakeCardFromDeckEventComponentName,
   {
-    deckIdEntity: EntityId;
+    deckEntityId: EntityId;
   }
 >;
 

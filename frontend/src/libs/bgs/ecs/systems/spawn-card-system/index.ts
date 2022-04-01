@@ -55,6 +55,8 @@ export const SpawnCardEventSystem = (): System<{
           name: CardComponentName,
           data: {
             cardId: spawnComponent.data.cardId,
+            deckEntityId: spawnComponent.data.deckEntityId,
+            card: spawnComponent.data.card,
           },
         });
 
