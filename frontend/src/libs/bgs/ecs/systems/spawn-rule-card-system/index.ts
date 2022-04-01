@@ -1,5 +1,5 @@
 import { System } from '../../../../ecs/system';
-import { World } from '../../../../ecs/world';
+import { Essence } from '../../../../ecs/essence';
 import { ComponentId, Pool } from '../../../../ecs/component';
 import {
   RuleCardComponent,
@@ -26,24 +26,24 @@ export const SpawnRuleCardEventSystem = (): System<{
   [SizeComponentName]: SizeComponent;
 }> => {
   return {
-    run: async ({ world }) => {
-      const entities = World.filter(world, ['SpawnRuleCardEventComponent']);
+    run: async ({ essence }) => {
+      const entities = Essence.filter(essence, ['SpawnRuleCardEventComponent']);
       if (entities.length === 0) {
         return;
       }
 
-      const playerEntities = World.filter(world, ['PlayerComponent', 'CameraComponent']);
-      const cameraPositionComponentPool = World.getOrAddPool(world, 'PositionComponent');
-      const cameraSizeComponentPool = World.getOrAddPool(world, 'SizeComponent');
+      const playerEntities = Essence.filter(essence, ['PlayerComponent', 'CameraComponent']);
+      const cameraPositionComponentPool = Essence.getOrAddPool(essence, 'PositionComponent');
+      const cameraSizeComponentPool = Essence.getOrAddPool(essence, 'SizeComponent');
 
       // TODO. Refactor for collaboration
       const playerEntity = playerEntities[0];
       const cameraPositionC = Pool.get(cameraPositionComponentPool, playerEntity);
       const cameraSizeC = Pool.get(cameraSizeComponentPool, playerEntity);
 
-      const spawnRuleCardComponentPool = World.getOrAddPool(world, 'SpawnRuleCardEventComponent');
-      const ruleCardComponentPool = World.getOrAddPool(world, 'RuleCardComponent');
-      const spawnGameObjectComponentPool = World.getOrAddPool(world, 'SpawnGameObjectEventComponent');
+      const spawnRuleCardComponentPool = Essence.getOrAddPool(essence, 'SpawnRuleCardEventComponent');
+      const ruleCardComponentPool = Essence.getOrAddPool(essence, 'RuleCardComponent');
+      const spawnGameObjectComponentPool = Essence.getOrAddPool(essence, 'SpawnGameObjectEventComponent');
 
       for (const ruleCardEntity of entities) {
         const spawnComponent = Pool.get(spawnRuleCardComponentPool, ruleCardEntity);

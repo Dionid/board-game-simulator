@@ -13,7 +13,7 @@ import {
   ZoomOutEventComponentName,
 } from '../../components';
 import { System } from '../../../../ecs/system';
-import { World } from '../../../../ecs/world';
+import { Essence } from '../../../../ecs/essence';
 import { Pool } from '../../../../ecs/component';
 
 export const ZoomSystem = (): System<{
@@ -25,20 +25,20 @@ export const ZoomSystem = (): System<{
   [SizeComponentName]: SizeComponent;
 }> => {
   return {
-    run: async ({ world }) => {
-      const zoomInEntities = World.filter(world, [ZoomInEventComponentName]);
-      const zoomOutEntities = World.filter(world, [ZoomOutEventComponentName]);
+    run: async ({ essence }) => {
+      const zoomInEntities = Essence.filter(essence, [ZoomInEventComponentName]);
+      const zoomOutEntities = Essence.filter(essence, [ZoomOutEventComponentName]);
 
       if (zoomInEntities.length === 0 && zoomOutEntities.length === 0) {
         return;
       }
 
-      const zoomInCP = World.getOrAddPool(world, ZoomInEventComponentName);
-      const zoomOutCP = World.getOrAddPool(world, ZoomOutEventComponentName);
+      const zoomInCP = Essence.getOrAddPool(essence, ZoomInEventComponentName);
+      const zoomOutCP = Essence.getOrAddPool(essence, ZoomOutEventComponentName);
 
-      const cameraEntities = World.filter(world, [CameraComponentName, ScaleComponentName, PlayerComponentName]);
-      const scaleCP = World.getOrAddPool(world, ScaleComponentName);
-      const sizeCP = World.getOrAddPool(world, SizeComponentName);
+      const cameraEntities = Essence.filter(essence, [CameraComponentName, ScaleComponentName, PlayerComponentName]);
+      const scaleCP = Essence.getOrAddPool(essence, ScaleComponentName);
+      const sizeCP = Essence.getOrAddPool(essence, SizeComponentName);
       const cameraEntity = cameraEntities[0];
 
       const scaleC = Pool.get(scaleCP, cameraEntity);

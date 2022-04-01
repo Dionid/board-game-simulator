@@ -1,5 +1,5 @@
 import { EntityId } from '../../../libs/ecs/entity';
-import { BgsIgnitor } from '../../../libs/bgs/ecs';
+import { BgsWorld } from '../../../libs/bgs/ecs';
 import { useEcsComponent } from '../../../libs/ecs/react';
 import { CustomImage } from './index';
 import React from 'react';
@@ -19,12 +19,12 @@ function calcClipFunc(ctx: any, x: number, y: number, width: number, height: num
   ctx.closePath();
 }
 
-export const ECSCustomImage = React.memo((props: { entity: EntityId; ignitor: BgsIgnitor }) => {
-  const { entity, ignitor } = props;
+export const ECSCustomImage = React.memo((props: { entity: EntityId; world: BgsWorld }) => {
+  const { entity, world } = props;
 
-  const image = useEcsComponent(entity, { url: '' }, 'ReactImageComponent', ignitor);
-  const position = useEcsComponent(entity, { x: 0, y: 0 }, 'ReactPositionComponent', ignitor);
-  const size = useEcsComponent(entity, { width: 0, height: 0 }, 'ReactSizeComponent', ignitor);
+  const image = useEcsComponent(entity, { url: '' }, 'ReactImageComponent', world);
+  const position = useEcsComponent(entity, { x: 0, y: 0 }, 'ReactPositionComponent', world);
+  const size = useEcsComponent(entity, { width: 0, height: 0 }, 'ReactSizeComponent', world);
 
   return (
     <Group clipFunc={(ctx: any) => calcClipFunc(ctx, position.x, position.y, size.width, size.height, 3)}>

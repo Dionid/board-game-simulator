@@ -1,4 +1,4 @@
-import { Ignitor } from '../../ecs/ignitor';
+import { World } from '../../ecs/world';
 import {
   BoardComponent,
   BoardComponentName,
@@ -43,11 +43,12 @@ import {
   SizeComponentName,
   SpawnCardEventComponent,
   SpawnDeckEventComponent,
-  SpawnGameMapComponent,
+  SpawnGameMapEventComponent,
+  SpawnGameMapEventComponentName,
   SpawnGameObjectEventComponent,
   SpawnHealthMeterEventComponent,
-  SpawnHeroComponent,
-  SpawnHeroSetComponent,
+  SpawnHeroEventComponent,
+  SpawnHeroSetEventComponent,
   SpawnRuleCardEventComponent,
   SpawnSideKickEventComponent,
   ZoomInEventComponent,
@@ -61,12 +62,12 @@ import { HeroSets } from '../games/unmatched';
 
 // export type BgsWorld = World<>;
 
-export type BgsIgnitorCtx = {
+export type BgsWorldCtx = {
   heroSets: typeof HeroSets;
   forceUpdate: () => void;
 };
 
-export type BgsIgnitorComponents = {
+export type BgsWorldComponents = {
   [PlayerComponentName]: PlayerComponent;
   [OwnerComponentName]: OwnerComponent;
   [CameraComponentName]: CameraComponent;
@@ -98,14 +99,14 @@ export type BgsIgnitorComponents = {
   // . EVENTS
   [ZoomInEventComponentName]: ZoomInEventComponent;
   [ZoomOutEventComponentName]: ZoomOutEventComponent;
-  SpawnGameMapComponent: SpawnGameMapComponent;
-  SpawnHeroComponent: SpawnHeroComponent;
+  [SpawnGameMapEventComponentName]: SpawnGameMapEventComponent;
+  SpawnHeroComponent: SpawnHeroEventComponent;
   SpawnSideKickEventComponent: SpawnSideKickEventComponent;
   SpawnDeckEventComponent: SpawnDeckEventComponent;
   SpawnCardEventComponent: SpawnCardEventComponent;
   SpawnRuleCardEventComponent: SpawnRuleCardEventComponent;
   SpawnHealthMeterEventComponent: SpawnHealthMeterEventComponent;
-  SpawnHeroSetComponent: SpawnHeroSetComponent;
+  SpawnHeroSetEventComponent: SpawnHeroSetEventComponent;
 
   GameObjectComponent: GameObjectComponent;
   SpawnGameObjectEventComponent: SpawnGameObjectEventComponent;
@@ -122,4 +123,4 @@ export type BgsIgnitorComponents = {
   [ReactScaleComponentName]: ReactScaleComponent;
 };
 
-export type BgsIgnitor = Ignitor<BgsIgnitorComponents, BgsIgnitorCtx>;
+export type BgsWorld = World<BgsWorldComponents, BgsWorldCtx>;

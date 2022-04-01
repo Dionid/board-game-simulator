@@ -1,5 +1,5 @@
 import { System } from '../../../../ecs/system';
-import { World } from '../../../../ecs/world';
+import { Essence } from '../../../../ecs/essence';
 import { ComponentId, Pool } from '../../../../ecs/component';
 import {
   SpawnSideKickEventComponent,
@@ -26,24 +26,24 @@ export const SpawnSidekickEventSystem = (): System<{
   [SizeComponentName]: SizeComponent;
 }> => {
   return {
-    run: async ({ world }) => {
-      const entities = World.filter(world, ['SpawnSideKickEventComponent']);
+    run: async ({ essence }) => {
+      const entities = Essence.filter(essence, ['SpawnSideKickEventComponent']);
       if (entities.length === 0) {
         return;
       }
 
-      const playerEntities = World.filter(world, ['PlayerComponent', 'CameraComponent']);
-      const cameraPositionComponentPool = World.getOrAddPool(world, 'PositionComponent');
-      const cameraSizeComponentPool = World.getOrAddPool(world, 'SizeComponent');
+      const playerEntities = Essence.filter(essence, ['PlayerComponent', 'CameraComponent']);
+      const cameraPositionComponentPool = Essence.getOrAddPool(essence, 'PositionComponent');
+      const cameraSizeComponentPool = Essence.getOrAddPool(essence, 'SizeComponent');
 
       // TODO. Refactor for collaboration
       const playerEntity = playerEntities[0];
       const cameraPositionC = Pool.get(cameraPositionComponentPool, playerEntity);
       const cameraSizeC = Pool.get(cameraSizeComponentPool, playerEntity);
 
-      const spawnSidekickComponentPool = World.getOrAddPool(world, 'SpawnSideKickEventComponent');
-      const sidekickComponentPool = World.getOrAddPool(world, 'SidekickComponent');
-      const spawnGameObjectComponentPool = World.getOrAddPool(world, 'SpawnGameObjectEventComponent');
+      const spawnSidekickComponentPool = Essence.getOrAddPool(essence, 'SpawnSideKickEventComponent');
+      const sidekickComponentPool = Essence.getOrAddPool(essence, 'SidekickComponent');
+      const spawnGameObjectComponentPool = Essence.getOrAddPool(essence, 'SpawnGameObjectEventComponent');
 
       for (const sidekickEntity of entities) {
         const spawnComponent = Pool.get(spawnSidekickComponentPool, sidekickEntity);

@@ -1,46 +1,53 @@
 import { System } from '../../../../ecs/system';
-import { World } from '../../../../ecs/world';
+import { Essence } from '../../../../ecs/essence';
 import { ComponentId, Pool } from '../../../../ecs/component';
 import { EntityId } from '../../../../ecs/entity';
 import {
   SpawnCardEventComponent,
+  SpawnCardEventComponentName,
   SpawnDeckEventComponent,
+  SpawnDeckEventComponentName,
   SpawnHealthMeterEventComponent,
-  SpawnHeroComponent,
-  SpawnHeroSetComponent,
+  SpawnHealthMeterEventComponentName,
+  SpawnHeroEventComponent,
+  SpawnHeroEventComponentName,
+  SpawnHeroSetEventComponent,
+  SpawnHeroSetEventComponentName,
   SpawnRuleCardEventComponent,
+  SpawnRuleCardEventComponentName,
   SpawnSideKickEventComponent,
+  SpawnSideKickEventComponentName,
 } from '../../components';
 import { HeroSets } from '../../../games/unmatched';
 
 export const SpawnHeroSetSystem = (): System<
   {
-    SpawnHeroSetComponent: SpawnHeroSetComponent;
-    SpawnHeroComponent: SpawnHeroComponent;
-    SpawnSideKickEventComponent: SpawnSideKickEventComponent;
-    SpawnDeckEventComponent: SpawnDeckEventComponent;
-    SpawnCardEventComponent: SpawnCardEventComponent;
-    SpawnHealthMeterEventComponent: SpawnHealthMeterEventComponent;
-    SpawnRuleCardEventComponent: SpawnRuleCardEventComponent;
+    [SpawnHeroSetEventComponentName]: SpawnHeroSetEventComponent;
+    [SpawnHeroEventComponentName]: SpawnHeroEventComponent;
+    [SpawnSideKickEventComponentName]: SpawnSideKickEventComponent;
+    [SpawnDeckEventComponentName]: SpawnDeckEventComponent;
+    [SpawnCardEventComponentName]: SpawnCardEventComponent;
+    [SpawnHealthMeterEventComponentName]: SpawnHealthMeterEventComponent;
+    [SpawnRuleCardEventComponentName]: SpawnRuleCardEventComponent;
   },
   {
     heroSets: HeroSets;
   }
 > => {
   return {
-    run: async ({ world, ctx }) => {
-      const entities = World.filter(world, ['SpawnHeroSetComponent']);
+    run: async ({ essence, ctx }) => {
+      const entities = Essence.filter(essence, [SpawnHeroSetEventComponentName]);
       if (entities.length === 0) {
         return;
       }
 
-      const spawnHeroSetComponentPool = World.getOrAddPool(world, 'SpawnHeroSetComponent');
-      const spawnHeroComponentPool = World.getOrAddPool(world, 'SpawnHeroComponent');
-      const spawnSidekickEventComponentPool = World.getOrAddPool(world, 'SpawnSideKickEventComponent');
-      const spawnDeckEventComponentPool = World.getOrAddPool(world, 'SpawnDeckEventComponent');
-      // const spawnCardEventComponentPool = World.getOrAddPool(world, 'SpawnCardEventComponent');
-      const spawnRuleCardEventComponentPool = World.getOrAddPool(world, 'SpawnRuleCardEventComponent');
-      const spawnHealthMeterEventComponentPool = World.getOrAddPool(world, 'SpawnHealthMeterEventComponent');
+      const spawnHeroSetComponentPool = Essence.getOrAddPool(essence, SpawnHeroSetEventComponentName);
+      const spawnHeroComponentPool = Essence.getOrAddPool(essence, SpawnHeroEventComponentName);
+      const spawnSidekickEventComponentPool = Essence.getOrAddPool(essence, SpawnSideKickEventComponentName);
+      const spawnDeckEventComponentPool = Essence.getOrAddPool(essence, SpawnDeckEventComponentName);
+      // const spawnCardEventComponentPool = Essence.getOrAddPool(essence, SpawnCardEventComponentName');
+      const spawnRuleCardEventComponentPool = Essence.getOrAddPool(essence, SpawnRuleCardEventComponentName);
+      const spawnHealthMeterEventComponentPool = Essence.getOrAddPool(essence, SpawnHealthMeterEventComponentName);
 
       const heroSets = ctx.heroSets;
 
@@ -53,7 +60,7 @@ export const SpawnHeroSetSystem = (): System<
           for (let i = 0; i < hero.qty; i++) {
             // . Create new hero component
             Pool.add(spawnHeroComponentPool, EntityId.new(), {
-              name: 'SpawnHeroComponent',
+              name: SpawnHeroEventComponentName,
               id: ComponentId.new(),
               data: {
                 url: hero.frontImageUrl,
@@ -67,7 +74,7 @@ export const SpawnHeroSetSystem = (): System<
           for (let i = 0; i < sidekick.qty; i++) {
             // . Create new sidekick component
             Pool.add(spawnSidekickEventComponentPool, EntityId.new(), {
-              name: 'SidekickEventComponent',
+              name: SpawnSideKickEventComponentName,
               id: ComponentId.new(),
               data: {
                 url: sidekick.frontImageUrl,
@@ -80,7 +87,7 @@ export const SpawnHeroSetSystem = (): System<
         heroSet.decks.forEach((deck) => {
           // . Create new sidekick component
           Pool.add(spawnDeckEventComponentPool, EntityId.new(), {
-            name: 'SpawnDeckEventComponent',
+            name: SpawnDeckEventComponentName,
             id: ComponentId.new(),
             data: {
               url: deck.frontImageUrl,
@@ -92,7 +99,7 @@ export const SpawnHeroSetSystem = (): System<
         heroSet.healthMeters.forEach((healthMeter) => {
           // . Create new sidekick component
           Pool.add(spawnHealthMeterEventComponentPool, EntityId.new(), {
-            name: 'SpawnHealthMeterEventComponent',
+            name: SpawnHealthMeterEventComponentName,
             id: ComponentId.new(),
             data: {
               url: healthMeter.frontImageUrl,
@@ -104,7 +111,7 @@ export const SpawnHeroSetSystem = (): System<
         heroSet.ruleCards.forEach((ruleCard) => {
           // . Create new sidekick component
           Pool.add(spawnRuleCardEventComponentPool, EntityId.new(), {
-            name: 'SpawnRuleCardEventComponentPool',
+            name: SpawnRuleCardEventComponentName,
             id: ComponentId.new(),
             data: {
               url: ruleCard.frontImageUrl,

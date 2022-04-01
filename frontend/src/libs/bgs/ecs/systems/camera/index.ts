@@ -17,7 +17,7 @@ import {
   SizeComponent,
   SizeComponentName,
 } from '../../components';
-import { World } from '../../../../ecs/world';
+import { Essence } from '../../../../ecs/essence';
 import { ComponentId, Pool } from '../../../../ecs/component';
 import { Vector2 } from '../../../../math';
 
@@ -32,15 +32,15 @@ export const CameraSystem = (): System<{
   [HandComponentName]: HandComponent;
 }> => {
   return {
-    init: async ({ world }) => {
-      const cameraCP = World.getOrAddPool(world, CameraComponentName);
-      const positionCP = World.getOrAddPool(world, PositionComponentName);
-      const sizeCP = World.getOrAddPool(world, SizeComponentName);
-      const scaleCP = World.getOrAddPool(world, ScaleComponentName);
-      const playerEntityId = World.filter(world, [PlayerComponentName]);
+    init: async ({ essence }) => {
+      const cameraCP = Essence.getOrAddPool(essence, CameraComponentName);
+      const positionCP = Essence.getOrAddPool(essence, PositionComponentName);
+      const sizeCP = Essence.getOrAddPool(essence, SizeComponentName);
+      const scaleCP = Essence.getOrAddPool(essence, ScaleComponentName);
+      const playerEntityId = Essence.filter(essence, [PlayerComponentName]);
 
-      const boardEntity = World.filter(world, [BoardComponentName]);
-      const boardCP = World.getOrAddPool(world, BoardComponentName);
+      const boardEntity = Essence.filter(essence, [BoardComponentName]);
+      const boardCP = Essence.getOrAddPool(essence, BoardComponentName);
 
       // TODO. Singleton entities
       const boardC = Pool.get(boardCP, boardEntity[0]);
@@ -90,15 +90,15 @@ export const CameraSystem = (): System<{
         });
       });
     },
-    run: async ({ world, timeDelta }) => {
-      const entities = World.filter(world, ['PlayerComponent', 'HandComponent', 'CameraComponent']);
-      const panModeEntities = World.filter(world, ['PanModeComponent']);
-      const positionCP = World.getOrAddPool(world, 'PositionComponent');
-      const sizeCP = World.getOrAddPool(world, 'SizeComponent');
-      const handPool = World.getOrAddPool(world, 'HandComponent');
+    run: async ({ essence, timeDelta }) => {
+      const entities = Essence.filter(essence, ['PlayerComponent', 'HandComponent', 'CameraComponent']);
+      const panModeEntities = Essence.filter(essence, ['PanModeComponent']);
+      const positionCP = Essence.getOrAddPool(essence, 'PositionComponent');
+      const sizeCP = Essence.getOrAddPool(essence, 'SizeComponent');
+      const handPool = Essence.getOrAddPool(essence, 'HandComponent');
 
-      const boardEntity = World.filter(world, ['BoardComponent']);
-      const boardCP = World.getOrAddPool(world, 'BoardComponent');
+      const boardEntity = Essence.filter(essence, ['BoardComponent']);
+      const boardCP = Essence.getOrAddPool(essence, 'BoardComponent');
 
       // TODO. Singleton entities
       const boardC = Pool.get(boardCP, boardEntity[0]);

@@ -1,23 +1,26 @@
 import { System } from '../../../../ecs/system';
-import { World } from '../../../../ecs/world';
+import { Essence } from '../../../../ecs/essence';
 import { ComponentId, Pool } from '../../../../ecs/component';
 import {
   CameraComponent,
   CameraComponentName,
   GameMapComponent,
+  GameMapComponentName,
   PlayerComponent,
   PlayerComponentName,
   PositionComponent,
   PositionComponentName,
   SizeComponent,
   SizeComponentName,
-  SpawnGameMapComponent,
+  SpawnGameMapEventComponent,
+  SpawnGameMapEventComponentName,
   SpawnGameObjectEventComponent,
+  SpawnGameObjectEventComponentName,
 } from '../../components';
 import { Size, Vector2 } from '../../../../math';
 
 export const SpawnGameMapSystem = (): System<{
-  SpawnGameMapComponent: SpawnGameMapComponent;
+  [SpawnGameMapEventComponentName]: SpawnGameMapEventComponent;
   GameMapComponent: GameMapComponent;
   SpawnGameObjectEventComponent: SpawnGameObjectEventComponent;
   [CameraComponentName]: CameraComponent;
@@ -25,24 +28,24 @@ export const SpawnGameMapSystem = (): System<{
   [PositionComponentName]: PositionComponent;
   [SizeComponentName]: SizeComponent;
 }> => ({
-  run: async ({ world }) => {
-    const entities = World.filter(world, ['SpawnGameMapComponent']);
+  run: async ({ essence }) => {
+    const entities = Essence.filter(essence, [SpawnGameMapEventComponentName]);
     if (entities.length === 0) {
       return;
     }
 
-    const playerEntities = World.filter(world, ['PlayerComponent', 'CameraComponent']);
-    const cameraPositionComponentPool = World.getOrAddPool(world, 'PositionComponent');
-    const cameraSizeComponentPool = World.getOrAddPool(world, 'SizeComponent');
+    const playerEntities = Essence.filter(essence, [PlayerComponentName, CameraComponentName]);
+    const cameraPositionComponentPool = Essence.getOrAddPool(essence, PositionComponentName);
+    const cameraSizeComponentPool = Essence.getOrAddPool(essence, SizeComponentName);
 
     // TODO. Refactor for collaboration
     const playerEntity = playerEntities[0];
     const cameraPositionC = Pool.get(cameraPositionComponentPool, playerEntity);
     const cameraSizeC = Pool.get(cameraSizeComponentPool, playerEntity);
 
-    const spawnGameMapComponentPool = World.getOrAddPool(world, 'SpawnGameMapComponent');
-    const spawnGameObjectComponentPool = World.getOrAddPool(world, 'SpawnGameObjectEventComponent');
-    const gameMapComponentPool = World.getOrAddPool(world, 'GameMapComponent');
+    const spawnGameMapComponentPool = Essence.getOrAddPool(essence, SpawnGameMapEventComponentName);
+    const spawnGameObjectComponentPool = Essence.getOrAddPool(essence, SpawnGameObjectEventComponentName);
+    const gameMapComponentPool = Essence.getOrAddPool(essence, GameMapComponentName);
 
     for (const mapEntity of entities) {
       const spawnComponent = Pool.get(spawnGameMapComponentPool, mapEntity);
@@ -54,7 +57,7 @@ export const SpawnGameMapSystem = (): System<{
       };
       Pool.add(spawnGameObjectComponentPool, mapEntity, {
         id: ComponentId.new(),
-        name: 'SpawnGameObjectEventComponent',
+        name: SpawnGameObjectEventComponentName,
         data: {
           imageUrl: spawnComponent.data.url,
           draggable: true,

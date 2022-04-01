@@ -1,8 +1,8 @@
 import { System } from '../../../../ecs/system';
-import { World } from '../../../../ecs/world';
+import { Essence } from '../../../../ecs/essence';
 import { ComponentId, Pool } from '../../../../ecs/component';
 import {
-  SpawnHeroComponent,
+  SpawnHeroEventComponent,
   SpawnGameObjectEventComponent,
   HeroComponent,
   CameraComponentName,
@@ -13,37 +13,40 @@ import {
   PositionComponent,
   SizeComponentName,
   SizeComponent,
+  SpawnHeroEventComponentName,
+  SpawnGameObjectEventComponentName,
+  HeroComponentName,
 } from '../../components';
 import { Vector2 } from '../../../../math';
 
 export const SpawnHeroSystem = (): System<{
-  SpawnHeroComponent: SpawnHeroComponent;
-  SpawnGameObjectEventComponent: SpawnGameObjectEventComponent;
-  HeroComponent: HeroComponent;
+  [SpawnHeroEventComponentName]: SpawnHeroEventComponent;
+  [SpawnGameObjectEventComponentName]: SpawnGameObjectEventComponent;
+  [HeroComponentName]: HeroComponent;
   [CameraComponentName]: CameraComponent;
   [PlayerComponentName]: PlayerComponent;
   [PositionComponentName]: PositionComponent;
   [SizeComponentName]: SizeComponent;
 }> => {
   return {
-    run: async ({ world }) => {
-      const entities = World.filter(world, ['SpawnHeroComponent']);
+    run: async ({ essence }) => {
+      const entities = Essence.filter(essence, [SpawnHeroEventComponentName]);
       if (entities.length === 0) {
         return;
       }
 
-      const playerEntities = World.filter(world, ['PlayerComponent', 'CameraComponent']);
-      const cameraPositionComponentPool = World.getOrAddPool(world, 'PositionComponent');
-      const cameraSizeComponentPool = World.getOrAddPool(world, 'SizeComponent');
+      const playerEntities = Essence.filter(essence, [PlayerComponentName, CameraComponentName]);
+      const cameraPositionComponentPool = Essence.getOrAddPool(essence, PositionComponentName);
+      const cameraSizeComponentPool = Essence.getOrAddPool(essence, SizeComponentName);
 
       // TODO. Refactor for collaboration
       const playerEntity = playerEntities[0];
       const cameraPositionC = Pool.get(cameraPositionComponentPool, playerEntity);
       const cameraSizeC = Pool.get(cameraSizeComponentPool, playerEntity);
 
-      const spawnHeroComponentPool = World.getOrAddPool(world, 'SpawnHeroComponent');
-      const spawnGameObjectComponentPool = World.getOrAddPool(world, 'SpawnGameObjectEventComponent');
-      const heroComponentPool = World.getOrAddPool(world, 'HeroComponent');
+      const spawnHeroComponentPool = Essence.getOrAddPool(essence, SpawnHeroEventComponentName);
+      const spawnGameObjectComponentPool = Essence.getOrAddPool(essence, SpawnGameObjectEventComponentName);
+      const heroComponentPool = Essence.getOrAddPool(essence, HeroComponentName);
 
       for (const heroEntity of entities) {
         const spawnComponent = Pool.get(spawnHeroComponentPool, heroEntity);
@@ -56,7 +59,7 @@ export const SpawnHeroSystem = (): System<{
         };
         Pool.add(spawnGameObjectComponentPool, heroEntity, {
           id: ComponentId.new(),
-          name: 'SpawnGameObjectEventComponent',
+          name: SpawnGameObjectEventComponentName,
           data: {
             imageUrl: spawnComponent.data.url,
             draggable: true,

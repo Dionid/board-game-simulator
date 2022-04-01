@@ -1,17 +1,17 @@
-import { BgsIgnitor } from '../../../libs/bgs/ecs';
+import { BgsWorld } from '../../../libs/bgs/ecs';
 import { useEcsComponent } from '../../../libs/ecs/react';
 import { Size } from '../../../libs/math';
 import React, { memo } from 'react';
 import { EntityId } from '../../../libs/ecs/entity';
-import { World } from '../../../libs/ecs/world';
+import { Essence } from '../../../libs/ecs/essence';
 
 const coef = 30;
 
-const MinimapObject = memo((props: { ignitor: BgsIgnitor; entity: EntityId }) => {
-  const { entity, ignitor } = props;
+const MinimapObject = memo((props: { world: BgsWorld; entity: EntityId }) => {
+  const { entity, world } = props;
 
-  const position = useEcsComponent(entity, { x: 0, y: 0 }, 'ReactPositionComponent', ignitor);
-  const size = useEcsComponent(entity, { width: 0, height: 0 }, 'ReactSizeComponent', ignitor);
+  const position = useEcsComponent(entity, { x: 0, y: 0 }, 'ReactPositionComponent', world);
+  const size = useEcsComponent(entity, { width: 0, height: 0 }, 'ReactSizeComponent', world);
 
   return (
     <div
@@ -30,13 +30,13 @@ const MinimapObject = memo((props: { ignitor: BgsIgnitor; entity: EntityId }) =>
 });
 
 export const Minimap = memo(
-  (props: { forceUpdateState: string; ignitor: BgsIgnitor; playerEntity: EntityId; boardSize: Size }) => {
-    const { ignitor, playerEntity, boardSize } = props;
+  (props: { forceUpdateState: string; world: BgsWorld; playerEntity: EntityId; boardSize: Size }) => {
+    const { world, playerEntity, boardSize } = props;
 
-    const position = useEcsComponent(playerEntity, { x: 0, y: 0 }, 'ReactPositionComponent', ignitor);
-    const size = useEcsComponent(playerEntity, { width: 0, height: 0 }, 'ReactSizeComponent', ignitor);
+    const position = useEcsComponent(playerEntity, { x: 0, y: 0 }, 'ReactPositionComponent', world);
+    const size = useEcsComponent(playerEntity, { width: 0, height: 0 }, 'ReactSizeComponent', world);
 
-    const goCP = World.getOrAddPool(ignitor.world, 'GameObjectComponent');
+    const goCP = Essence.getOrAddPool(world.essence, 'GameObjectComponent');
 
     return (
       <div
@@ -61,7 +61,7 @@ export const Minimap = memo(
             }}
           />
           {Object.keys(goCP.data).map((entity) => {
-            return <MinimapObject key={entity} ignitor={ignitor} entity={entity as EntityId} />;
+            return <MinimapObject key={entity} world={world} entity={entity as EntityId} />;
           })}
         </div>
       </div>

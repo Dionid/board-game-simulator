@@ -1,6 +1,6 @@
 import { System } from '../../../../ecs/system';
 import { BoardComponent, BoardComponentName } from '../../components';
-import { World } from '../../../../ecs/world';
+import { Essence } from '../../../../ecs/essence';
 import { ComponentId, Pool } from '../../../../ecs/component';
 import { EntityId } from '../../../../ecs/entity';
 import { Size } from '../../../../math';
@@ -12,8 +12,8 @@ export const BoardSystem = (
 }> => {
   return {
     // TODO. Think how to sync this across players
-    init: async ({ world }) => {
-      const boardComponentPool = World.getOrAddPool(world, 'BoardComponent');
+    init: async ({ essence }) => {
+      const boardComponentPool = Essence.getOrAddPool(essence, 'BoardComponent');
 
       const boardComponent = {
         name: 'BoardComponent',

@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import CssBaseline from '@mui/material/CssBaseline';
-import { BgsIgnitor, BgsIgnitorCtx } from '../../libs/bgs/ecs';
-import { Ignitor } from '../../libs/ecs/ignitor';
+import { BgsWorld, BgsWorldCtx } from '../../libs/bgs/ecs';
 import { World } from '../../libs/ecs/world';
+import { Essence } from '../../libs/ecs/essence';
 import { ChangeReactPositionSystem } from '../../libs/bgs/ecs/systems/change-react-position-system';
 import { ChangeReactImageSystem } from '../../libs/bgs/ecs/systems/change-react-image-system';
 import { SpawnGameMapSystem } from '../../libs/bgs/ecs/systems/spawn-game-map-system';
@@ -39,14 +39,14 @@ function App() {
   const [forceUpdateState, forceUpdate] = useForceUpdate();
   const [heroSets] = useState(HeroSets);
 
-  const ignitor = useMemo(() => {
-    const ignitor: BgsIgnitor = {
-      world: {
+  const world = useMemo(() => {
+    const world: BgsWorld = {
+      essence: {
         pools: {},
       },
       ctx: {
         forceUpdate,
-      } as BgsIgnitorCtx,
+      } as BgsWorldCtx,
       systems: [
         // INIT
         PlayerSystem(),
@@ -88,21 +88,21 @@ function App() {
     };
 
     // @ts-ignore
-    window.ignitor = ignitor;
-    // @ts-ignore
-    window.Ignitor = Ignitor;
+    window.world = world;
     // @ts-ignore
     window.World = World;
+    // @ts-ignore
+    window.Essence = Essence;
 
     (async () => {
-      await Ignitor.init(ignitor);
+      await World.init(world);
       forceUpdate();
 
       let lastTimeStamp = new Date();
       const run = async () => {
         const newTimeStamp = new Date();
         const timeDelta = newTimeStamp.getMilliseconds() - lastTimeStamp.getMilliseconds();
-        await Ignitor.run(ignitor, timeDelta < 0 ? 0 : timeDelta);
+        await World.run(world, timeDelta < 0 ? 0 : timeDelta);
         lastTimeStamp = newTimeStamp;
         requestAnimationFrame(run);
       };
@@ -110,15 +110,15 @@ function App() {
       requestAnimationFrame(run);
     })();
 
-    return ignitor;
+    return world;
   }, []);
 
   useEffect(() => {
-    Ignitor.addToCtx(ignitor, 'heroSets', heroSets);
+    World.addToCtx(world, 'heroSets', heroSets);
   }, [heroSets]);
 
   // TODO. Refactor for collaboration
-  const playerEntities = World.filter(ignitor.world, ['PlayerComponent', 'CameraComponent']);
+  const playerEntities = Essence.filter(world.essence, ['PlayerComponent', 'CameraComponent']);
   const playerEntity = playerEntities[0];
 
   console.log('APP', playerEntity);
@@ -126,19 +126,12 @@ function App() {
   return (
     <div>
       <CssBaseline />
-      <ContextMenu ignitor={ignitor}>
-        {playerEntity && (
-          <GameStage forceUpdateState={forceUpdateState} ignitor={ignitor} playerEntity={playerEntity} />
-        )}
+      <ContextMenu world={world}>
+        {playerEntity && <GameStage forceUpdateState={forceUpdateState} world={world} playerEntity={playerEntity} />}
       </ContextMenu>
-      <MainMenu ignitor={ignitor} heroSets={heroSets} />
+      <MainMenu world={world} heroSets={heroSets} />
       {playerEntity && (
-        <Minimap
-          forceUpdateState={forceUpdateState}
-          ignitor={ignitor}
-          boardSize={boardSize}
-          playerEntity={playerEntity}
-        />
+        <Minimap forceUpdateState={forceUpdateState} world={world} boardSize={boardSize} playerEntity={playerEntity} />
       )}
     </div>
   );
