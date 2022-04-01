@@ -4,7 +4,7 @@
 
 ## Main
 
-1. Add Hero Set
+1. ~~Add Hero Set~~
    1. ~~Hero~~
    2. ~~Sidekick~~
    3. ~~Deck~~
@@ -45,18 +45,20 @@
     1. Room
     2. Player cursor
     3. Player actions
-18. ~~Remove entities~~
+18. Zoom in cards
+19. ~~Remove entities~~
 
 ## Second
 
 1. Refactor SelectSystem
-2. Replace png with svg
+2. Refactor Pan system
 3. Ipad version
 4. More `Essence.filter` operations (`in`, `notIn`, etc.)
 5. Rename Systems to "Input" and "Output"
-6. ~~Rename Systems to EventSystems~~
-7. ~~Make component names as constants~~
-8. ~~How to rerender on changes~~
+6. ~~Replace png with svg~~
+7. ~~Rename Systems to EventSystems~~
+8. ~~Make component names as constants~~
+9. ~~How to rerender on changes~~
 
 ## Additional
 

@@ -14,13 +14,15 @@ import {
   SizeComponentName,
   SizeComponent,
   SpawnHeroEventComponentName,
+  SpawnGameObjectEventComponentName,
+  HeroComponentName,
 } from '../../components';
 import { Vector2 } from '../../../../math';
 
 export const SpawnHeroSystem = (): System<{
   [SpawnHeroEventComponentName]: SpawnHeroEventComponent;
-  SpawnGameObjectEventComponent: SpawnGameObjectEventComponent;
-  HeroComponent: HeroComponent;
+  [SpawnGameObjectEventComponentName]: SpawnGameObjectEventComponent;
+  [HeroComponentName]: HeroComponent;
   [CameraComponentName]: CameraComponent;
   [PlayerComponentName]: PlayerComponent;
   [PositionComponentName]: PositionComponent;
@@ -33,9 +35,9 @@ export const SpawnHeroSystem = (): System<{
         return;
       }
 
-      const playerEntities = Essence.filter(essence, ['PlayerComponent', 'CameraComponent']);
-      const cameraPositionComponentPool = Essence.getOrAddPool(essence, 'PositionComponent');
-      const cameraSizeComponentPool = Essence.getOrAddPool(essence, 'SizeComponent');
+      const playerEntities = Essence.filter(essence, [PlayerComponentName, CameraComponentName]);
+      const cameraPositionComponentPool = Essence.getOrAddPool(essence, PositionComponentName);
+      const cameraSizeComponentPool = Essence.getOrAddPool(essence, SizeComponentName);
 
       // TODO. Refactor for collaboration
       const playerEntity = playerEntities[0];
@@ -43,8 +45,8 @@ export const SpawnHeroSystem = (): System<{
       const cameraSizeC = Pool.get(cameraSizeComponentPool, playerEntity);
 
       const spawnHeroComponentPool = Essence.getOrAddPool(essence, SpawnHeroEventComponentName);
-      const spawnGameObjectComponentPool = Essence.getOrAddPool(essence, 'SpawnGameObjectEventComponent');
-      const heroComponentPool = Essence.getOrAddPool(essence, 'HeroComponent');
+      const spawnGameObjectComponentPool = Essence.getOrAddPool(essence, SpawnGameObjectEventComponentName);
+      const heroComponentPool = Essence.getOrAddPool(essence, HeroComponentName);
 
       for (const heroEntity of entities) {
         const spawnComponent = Pool.get(spawnHeroComponentPool, heroEntity);
@@ -57,7 +59,7 @@ export const SpawnHeroSystem = (): System<{
         };
         Pool.add(spawnGameObjectComponentPool, heroEntity, {
           id: ComponentId.new(),
-          name: 'SpawnGameObjectEventComponent',
+          name: SpawnGameObjectEventComponentName,
           data: {
             imageUrl: spawnComponent.data.url,
             draggable: true,
