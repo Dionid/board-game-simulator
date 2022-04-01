@@ -12,6 +12,13 @@ import PanToolIcon from '@mui/icons-material/PanTool';
 import ZoomInIcon from '@mui/icons-material/ZoomIn';
 import ZoomOutIcon from '@mui/icons-material/ZoomOut';
 import { useEventListener } from '../../../libs/react/hooks/use-event-listener';
+import {
+  PanModeComponentName,
+  SpawnGameMapEventComponentName,
+  SpawnHeroSetEventComponentName,
+  ZoomInEventComponentName,
+  ZoomOutEventComponentName,
+} from '../../../libs/bgs/ecs/components';
 
 export const MainMenu = memo(({ heroSets, world }: { heroSets: HeroSets; world: BgsWorld }) => {
   const [mode, setMode] = useState<'pan' | null>(null);
@@ -27,9 +34,9 @@ export const MainMenu = memo(({ heroSets, world }: { heroSets: HeroSets; world: 
   };
 
   const spawnMap = () => {
-    const spawnGameMapComponentPool = Essence.getOrAddPool(world.essence, 'SpawnGameMapComponent');
+    const spawnGameMapComponentPool = Essence.getOrAddPool(world.essence, SpawnGameMapEventComponentName);
     Pool.add(spawnGameMapComponentPool, EntityId.new(), {
-      name: 'SpawnGameMapComponent',
+      name: SpawnHeroSetEventComponentName,
       id: ComponentId.new(),
       data: {
         url: '/maps/soho.png',
@@ -39,10 +46,10 @@ export const MainMenu = memo(({ heroSets, world }: { heroSets: HeroSets; world: 
   };
 
   const handlePanIconButtonClick = () => {
-    const panModeCP = Essence.getOrAddPool(world.essence, 'PanModeComponent');
+    const panModeCP = Essence.getOrAddPool(world.essence, PanModeComponentName);
     if (mode === 'pan') {
       setMode(null);
-      const entities = Essence.filter(world.essence, ['PanModeComponent']);
+      const entities = Essence.filter(world.essence, [PanModeComponentName]);
       entities.forEach((entity) => {
         Pool.delete(panModeCP, entity);
       });
@@ -50,7 +57,7 @@ export const MainMenu = memo(({ heroSets, world }: { heroSets: HeroSets; world: 
       setMode('pan');
       Pool.add(panModeCP, EntityId.new(), {
         id: ComponentId.new(),
-        name: 'PanModeComponent',
+        name: PanModeComponentName,
         data: {},
       });
     }
@@ -65,9 +72,9 @@ export const MainMenu = memo(({ heroSets, world }: { heroSets: HeroSets; world: 
   useEventListener('keydown', handler);
 
   const spawnHeroSet = (setId: SetId) => {
-    const spawnHeroSetComponentPool = Essence.getOrAddPool(world.essence, 'SpawnHeroSetComponent');
+    const spawnHeroSetComponentPool = Essence.getOrAddPool(world.essence, SpawnHeroSetEventComponentName);
     Pool.add(spawnHeroSetComponentPool, EntityId.new(), {
-      name: 'SpawnHeroSetComponent',
+      name: SpawnHeroSetEventComponentName,
       id: ComponentId.new(),
       data: {
         setId,
@@ -76,18 +83,18 @@ export const MainMenu = memo(({ heroSets, world }: { heroSets: HeroSets; world: 
   };
 
   const onZoomOutClick = () => {
-    const zoomOutCP = Essence.getOrAddPool(world.essence, 'ZoomOutEventComponent');
+    const zoomOutCP = Essence.getOrAddPool(world.essence, ZoomOutEventComponentName);
     Pool.add(zoomOutCP, EntityId.new(), {
       id: ComponentId.new(),
-      name: 'ZoomOutEventComponent',
+      name: ZoomOutEventComponentName,
       data: {},
     });
   };
   const onZoomInClick = () => {
-    const zoomInCP = Essence.getOrAddPool(world.essence, 'ZoomInEventComponent');
+    const zoomInCP = Essence.getOrAddPool(world.essence, ZoomInEventComponentName);
     Pool.add(zoomInCP, EntityId.new(), {
       id: ComponentId.new(),
-      name: 'ZoomInEventComponent',
+      name: ZoomInEventComponentName,
       data: {},
     });
   };

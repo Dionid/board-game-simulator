@@ -185,18 +185,18 @@ export type HeroSetComponent = Component<
 
 // .. SPAWN EVENTS
 
-export const SpawnGameMapComponentName = 'SpawnGameMapComponent';
-export type SpawnGameMapComponent = Component<
-  typeof SpawnGameMapComponentName,
+export const SpawnGameMapEventComponentName = 'SpawnGameMapEventComponent';
+export type SpawnGameMapEventComponent = Component<
+  typeof SpawnGameMapEventComponentName,
   {
     url: string;
     mapId: MapId;
   }
 >;
 
-export const SpawnHeroComponentName = 'SpawnHeroComponent';
-export type SpawnHeroComponent = Component<
-  typeof SpawnHeroComponentName,
+export const SpawnHeroEventComponentName = 'SpawnHeroEventComponent';
+export type SpawnHeroEventComponent = Component<
+  typeof SpawnHeroEventComponentName,
   {
     url: string;
     heroId: HeroId;
@@ -248,9 +248,9 @@ export type SpawnHealthMeterEventComponent = Component<
   }
 >;
 
-export const SpawnHeroSetComponentName = 'SpawnHeroSetComponent';
-export type SpawnHeroSetComponent = Component<
-  typeof SpawnHeroSetComponentName,
+export const SpawnHeroSetEventComponentName = 'SpawnHeroSetEventComponent';
+export type SpawnHeroSetEventComponent = Component<
+  typeof SpawnHeroSetEventComponentName,
   {
     setId: SetId;
   }

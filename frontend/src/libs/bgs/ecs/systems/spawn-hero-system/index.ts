@@ -2,7 +2,7 @@ import { System } from '../../../../ecs/system';
 import { Essence } from '../../../../ecs/essence';
 import { ComponentId, Pool } from '../../../../ecs/component';
 import {
-  SpawnHeroComponent,
+  SpawnHeroEventComponent,
   SpawnGameObjectEventComponent,
   HeroComponent,
   CameraComponentName,
@@ -13,11 +13,12 @@ import {
   PositionComponent,
   SizeComponentName,
   SizeComponent,
+  SpawnHeroEventComponentName,
 } from '../../components';
 import { Vector2 } from '../../../../math';
 
 export const SpawnHeroSystem = (): System<{
-  SpawnHeroComponent: SpawnHeroComponent;
+  [SpawnHeroEventComponentName]: SpawnHeroEventComponent;
   SpawnGameObjectEventComponent: SpawnGameObjectEventComponent;
   HeroComponent: HeroComponent;
   [CameraComponentName]: CameraComponent;
@@ -27,7 +28,7 @@ export const SpawnHeroSystem = (): System<{
 }> => {
   return {
     run: async ({ essence }) => {
-      const entities = Essence.filter(essence, ['SpawnHeroComponent']);
+      const entities = Essence.filter(essence, [SpawnHeroEventComponentName]);
       if (entities.length === 0) {
         return;
       }
@@ -41,7 +42,7 @@ export const SpawnHeroSystem = (): System<{
       const cameraPositionC = Pool.get(cameraPositionComponentPool, playerEntity);
       const cameraSizeC = Pool.get(cameraSizeComponentPool, playerEntity);
 
-      const spawnHeroComponentPool = Essence.getOrAddPool(essence, 'SpawnHeroComponent');
+      const spawnHeroComponentPool = Essence.getOrAddPool(essence, SpawnHeroEventComponentName);
       const spawnGameObjectComponentPool = Essence.getOrAddPool(essence, 'SpawnGameObjectEventComponent');
       const heroComponentPool = Essence.getOrAddPool(essence, 'HeroComponent');
 

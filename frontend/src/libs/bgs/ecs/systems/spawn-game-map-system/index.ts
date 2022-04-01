@@ -5,19 +5,22 @@ import {
   CameraComponent,
   CameraComponentName,
   GameMapComponent,
+  GameMapComponentName,
   PlayerComponent,
   PlayerComponentName,
   PositionComponent,
   PositionComponentName,
   SizeComponent,
   SizeComponentName,
-  SpawnGameMapComponent,
+  SpawnGameMapEventComponent,
+  SpawnGameMapEventComponentName,
   SpawnGameObjectEventComponent,
+  SpawnGameObjectEventComponentName,
 } from '../../components';
 import { Size, Vector2 } from '../../../../math';
 
 export const SpawnGameMapSystem = (): System<{
-  SpawnGameMapComponent: SpawnGameMapComponent;
+  [SpawnGameMapEventComponentName]: SpawnGameMapEventComponent;
   GameMapComponent: GameMapComponent;
   SpawnGameObjectEventComponent: SpawnGameObjectEventComponent;
   [CameraComponentName]: CameraComponent;
@@ -26,23 +29,23 @@ export const SpawnGameMapSystem = (): System<{
   [SizeComponentName]: SizeComponent;
 }> => ({
   run: async ({ essence }) => {
-    const entities = Essence.filter(essence, ['SpawnGameMapComponent']);
+    const entities = Essence.filter(essence, [SpawnGameMapEventComponentName]);
     if (entities.length === 0) {
       return;
     }
 
-    const playerEntities = Essence.filter(essence, ['PlayerComponent', 'CameraComponent']);
-    const cameraPositionComponentPool = Essence.getOrAddPool(essence, 'PositionComponent');
-    const cameraSizeComponentPool = Essence.getOrAddPool(essence, 'SizeComponent');
+    const playerEntities = Essence.filter(essence, [PlayerComponentName, CameraComponentName]);
+    const cameraPositionComponentPool = Essence.getOrAddPool(essence, PositionComponentName);
+    const cameraSizeComponentPool = Essence.getOrAddPool(essence, SizeComponentName);
 
     // TODO. Refactor for collaboration
     const playerEntity = playerEntities[0];
     const cameraPositionC = Pool.get(cameraPositionComponentPool, playerEntity);
     const cameraSizeC = Pool.get(cameraSizeComponentPool, playerEntity);
 
-    const spawnGameMapComponentPool = Essence.getOrAddPool(essence, 'SpawnGameMapComponent');
-    const spawnGameObjectComponentPool = Essence.getOrAddPool(essence, 'SpawnGameObjectEventComponent');
-    const gameMapComponentPool = Essence.getOrAddPool(essence, 'GameMapComponent');
+    const spawnGameMapComponentPool = Essence.getOrAddPool(essence, SpawnGameMapEventComponentName);
+    const spawnGameObjectComponentPool = Essence.getOrAddPool(essence, SpawnGameObjectEventComponentName);
+    const gameMapComponentPool = Essence.getOrAddPool(essence, GameMapComponentName);
 
     for (const mapEntity of entities) {
       const spawnComponent = Pool.get(spawnGameMapComponentPool, mapEntity);
@@ -54,7 +57,7 @@ export const SpawnGameMapSystem = (): System<{
       };
       Pool.add(spawnGameObjectComponentPool, mapEntity, {
         id: ComponentId.new(),
-        name: 'SpawnGameObjectEventComponent',
+        name: SpawnGameObjectEventComponentName,
         data: {
           imageUrl: spawnComponent.data.url,
           draggable: true,

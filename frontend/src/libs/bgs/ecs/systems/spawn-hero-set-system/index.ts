@@ -6,8 +6,9 @@ import {
   SpawnCardEventComponent,
   SpawnDeckEventComponent,
   SpawnHealthMeterEventComponent,
-  SpawnHeroComponent,
-  SpawnHeroSetComponent,
+  SpawnHeroEventComponent,
+  SpawnHeroSetEventComponent,
+  SpawnHeroSetEventComponentName,
   SpawnRuleCardEventComponent,
   SpawnSideKickEventComponent,
 } from '../../components';
@@ -15,8 +16,8 @@ import { HeroSets } from '../../../games/unmatched';
 
 export const SpawnHeroSetSystem = (): System<
   {
-    SpawnHeroSetComponent: SpawnHeroSetComponent;
-    SpawnHeroComponent: SpawnHeroComponent;
+    [SpawnHeroSetEventComponentName]: SpawnHeroSetEventComponent;
+    SpawnHeroComponent: SpawnHeroEventComponent;
     SpawnSideKickEventComponent: SpawnSideKickEventComponent;
     SpawnDeckEventComponent: SpawnDeckEventComponent;
     SpawnCardEventComponent: SpawnCardEventComponent;
@@ -29,12 +30,12 @@ export const SpawnHeroSetSystem = (): System<
 > => {
   return {
     run: async ({ essence, ctx }) => {
-      const entities = Essence.filter(essence, ['SpawnHeroSetComponent']);
+      const entities = Essence.filter(essence, [SpawnHeroSetEventComponentName]);
       if (entities.length === 0) {
         return;
       }
 
-      const spawnHeroSetComponentPool = Essence.getOrAddPool(essence, 'SpawnHeroSetComponent');
+      const spawnHeroSetComponentPool = Essence.getOrAddPool(essence, SpawnHeroSetEventComponentName);
       const spawnHeroComponentPool = Essence.getOrAddPool(essence, 'SpawnHeroComponent');
       const spawnSidekickEventComponentPool = Essence.getOrAddPool(essence, 'SpawnSideKickEventComponent');
       const spawnDeckEventComponentPool = Essence.getOrAddPool(essence, 'SpawnDeckEventComponent');

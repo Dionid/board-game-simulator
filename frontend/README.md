@@ -21,8 +21,8 @@
    2. ~~Add "lapka"~~
    3. ~~Add minimap~~
    4. ~~Add objects to minimap~~
-6. Zoom
-7. Rename World -> Essence and Ignitor -> World
+6. ~~Zoom~~
+7. ~~Rename World -> Essence and Ignitor -> World~~
 8. Deck actions
    1. Get card
    2. Shuffle
@@ -54,7 +54,7 @@
 3. Ipad version
 4. More `Essence.filter` operations (`in`, `notIn`, etc.)
 5. Rename Systems to "Input" and "Output"
-6. Rename Systems to EvenSystems
+6. ~~Rename Systems to EventSystems~~
 7. ~~Make component names as constants~~
 8. ~~How to rerender on changes~~
 

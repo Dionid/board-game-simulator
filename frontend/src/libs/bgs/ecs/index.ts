@@ -43,11 +43,12 @@ import {
   SizeComponentName,
   SpawnCardEventComponent,
   SpawnDeckEventComponent,
-  SpawnGameMapComponent,
+  SpawnGameMapEventComponent,
+  SpawnGameMapEventComponentName,
   SpawnGameObjectEventComponent,
   SpawnHealthMeterEventComponent,
-  SpawnHeroComponent,
-  SpawnHeroSetComponent,
+  SpawnHeroEventComponent,
+  SpawnHeroSetEventComponent,
   SpawnRuleCardEventComponent,
   SpawnSideKickEventComponent,
   ZoomInEventComponent,
@@ -98,14 +99,14 @@ export type BgsWorldComponents = {
   // . EVENTS
   [ZoomInEventComponentName]: ZoomInEventComponent;
   [ZoomOutEventComponentName]: ZoomOutEventComponent;
-  SpawnGameMapComponent: SpawnGameMapComponent;
-  SpawnHeroComponent: SpawnHeroComponent;
+  [SpawnGameMapEventComponentName]: SpawnGameMapEventComponent;
+  SpawnHeroComponent: SpawnHeroEventComponent;
   SpawnSideKickEventComponent: SpawnSideKickEventComponent;
   SpawnDeckEventComponent: SpawnDeckEventComponent;
   SpawnCardEventComponent: SpawnCardEventComponent;
   SpawnRuleCardEventComponent: SpawnRuleCardEventComponent;
   SpawnHealthMeterEventComponent: SpawnHealthMeterEventComponent;
-  SpawnHeroSetComponent: SpawnHeroSetComponent;
+  SpawnHeroSetEventComponent: SpawnHeroSetEventComponent;
 
   GameObjectComponent: GameObjectComponent;
   SpawnGameObjectEventComponent: SpawnGameObjectEventComponent;
