@@ -9,6 +9,8 @@ import Menu from '@mui/material/Menu';
 import { PersonAdd } from '@mui/icons-material';
 import AddIcon from '@mui/icons-material/Add';
 import PanToolIcon from '@mui/icons-material/PanTool';
+import ZoomInIcon from '@mui/icons-material/ZoomIn';
+import ZoomOutIcon from '@mui/icons-material/ZoomOut';
 import { useEventListener } from '../../../libs/react/hooks/use-event-listener';
 
 export const MainMenu = memo(({ heroSets, ignitor }: { heroSets: HeroSets; ignitor: BgsIgnitor }) => {
@@ -73,11 +75,38 @@ export const MainMenu = memo(({ heroSets, ignitor }: { heroSets: HeroSets; ignit
     });
   };
 
+  const onZoomOutClick = () => {
+    const zoomOutCP = World.getOrAddPool(ignitor.world, 'ZoomOutEventComponent');
+    Pool.add(zoomOutCP, EntityId.new(), {
+      id: ComponentId.new(),
+      name: 'ZoomOutEventComponent',
+      data: {},
+    });
+  };
+  const onZoomInClick = () => {
+    const zoomInCP = World.getOrAddPool(ignitor.world, 'ZoomInEventComponent');
+    Pool.add(zoomInCP, EntityId.new(), {
+      id: ComponentId.new(),
+      name: 'ZoomInEventComponent',
+      data: {},
+    });
+  };
+
   return (
     <React.Fragment>
       <Box
         sx={{ display: 'flex', alignItems: 'center', textAlign: 'center', position: 'fixed', bottom: 15, right: 15 }}
       >
+        <Tooltip title="Zoom out">
+          <IconButton size="large" onClick={onZoomOutClick} sx={{ ml: 2, backgroundColor: '#bdbdbd' }}>
+            <ZoomOutIcon />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Zoom in">
+          <IconButton size="large" onClick={onZoomInClick} sx={{ ml: 2, backgroundColor: '#bdbdbd' }}>
+            <ZoomInIcon />
+          </IconButton>
+        </Tooltip>
         <Tooltip title="Pan mode">
           <IconButton
             size="large"

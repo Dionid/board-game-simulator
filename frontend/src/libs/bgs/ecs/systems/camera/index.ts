@@ -12,6 +12,8 @@ import {
   PlayerComponentName,
   PositionComponent,
   PositionComponentName,
+  ScaleComponent,
+  ScaleComponentName,
   SizeComponent,
   SizeComponentName,
 } from '../../components';
@@ -22,6 +24,7 @@ import { Vector2 } from '../../../../math';
 export const CameraSystem = (): System<{
   [CameraComponentName]: CameraComponent;
   [PositionComponentName]: PositionComponent;
+  [ScaleComponentName]: ScaleComponent;
   [SizeComponentName]: SizeComponent;
   [PlayerComponentName]: PlayerComponent;
   [BoardComponentName]: BoardComponent;
@@ -30,16 +33,17 @@ export const CameraSystem = (): System<{
 }> => {
   return {
     init: async ({ world }) => {
-      const cameraComponentPool = World.getOrAddPool(world, 'CameraComponent');
-      const positionComponentPool = World.getOrAddPool(world, 'PositionComponent');
-      const sizeComponentPool = World.getOrAddPool(world, 'SizeComponent');
-      const playerEntityId = World.filter(world, ['PlayerComponent']);
+      const cameraCP = World.getOrAddPool(world, CameraComponentName);
+      const positionCP = World.getOrAddPool(world, PositionComponentName);
+      const sizeCP = World.getOrAddPool(world, SizeComponentName);
+      const scaleCP = World.getOrAddPool(world, ScaleComponentName);
+      const playerEntityId = World.filter(world, [PlayerComponentName]);
 
-      const boardEntity = World.filter(world, ['BoardComponent']);
-      const boardComponentPool = World.getOrAddPool(world, 'BoardComponent');
+      const boardEntity = World.filter(world, [BoardComponentName]);
+      const boardCP = World.getOrAddPool(world, BoardComponentName);
 
       // TODO. Singleton entities
-      const boardC = Pool.get(boardComponentPool, boardEntity[0]);
+      const boardC = Pool.get(boardCP, boardEntity[0]);
 
       playerEntityId.forEach((playerEntityId) => {
         const cameraComponent = {
@@ -52,7 +56,8 @@ export const CameraSystem = (): System<{
           width: window.innerWidth,
           height: window.innerHeight,
         };
-        Pool.add(cameraComponentPool, playerEntityId, cameraComponent);
+        Pool.add(cameraCP, playerEntityId, cameraComponent);
+        // POSITION
         const positionComponent = {
           name: 'PositionComponent',
           id: ComponentId.new(),
@@ -61,38 +66,48 @@ export const CameraSystem = (): System<{
             y: boardC.data.height / 2 - cameraSize.height / 2,
           },
         };
-        Pool.add(positionComponentPool, playerEntityId, positionComponent);
+        Pool.add(positionCP, playerEntityId, positionComponent);
+        // SIZE
         const sizeComponent = {
           name: 'SizeComponent',
           id: ComponentId.new(),
           data: cameraSize,
         };
-        Pool.add(sizeComponentPool, playerEntityId, sizeComponent);
+        Pool.add(sizeCP, playerEntityId, sizeComponent);
         // TODO. Move somewhere (as deps or ctx)
         window.addEventListener('resize', () => {
           sizeComponent.data.width = window.innerWidth;
           sizeComponent.data.height = window.innerHeight;
+        });
+        // SCALE
+        Pool.add(scaleCP, playerEntityId, {
+          id: ComponentId.new(),
+          name: ScaleComponentName,
+          data: {
+            x: 1,
+            y: 1,
+          },
         });
       });
     },
     run: async ({ world, timeDelta }) => {
       const entities = World.filter(world, ['PlayerComponent', 'HandComponent', 'CameraComponent']);
       const panModeEntities = World.filter(world, ['PanModeComponent']);
-      const positionComponentPool = World.getOrAddPool(world, 'PositionComponent');
-      const sizeComponentPool = World.getOrAddPool(world, 'SizeComponent');
+      const positionCP = World.getOrAddPool(world, 'PositionComponent');
+      const sizeCP = World.getOrAddPool(world, 'SizeComponent');
       const handPool = World.getOrAddPool(world, 'HandComponent');
 
       const boardEntity = World.filter(world, ['BoardComponent']);
-      const boardComponentPool = World.getOrAddPool(world, 'BoardComponent');
+      const boardCP = World.getOrAddPool(world, 'BoardComponent');
 
       // TODO. Singleton entities
-      const boardC = Pool.get(boardComponentPool, boardEntity[0]);
+      const boardC = Pool.get(boardCP, boardEntity[0]);
 
       // TODO. Filter only current player move
       entities.forEach((playerEntityId) => {
         const handC = Pool.get(handPool, playerEntityId);
-        const positionC = Pool.get(positionComponentPool, playerEntityId);
-        const sizeC = Pool.get(sizeComponentPool, playerEntityId);
+        const positionC = Pool.get(positionCP, playerEntityId);
+        const sizeC = Pool.get(sizeCP, playerEntityId);
 
         const newPosition: Vector2 = {
           x: positionC.data.x,

@@ -49,7 +49,8 @@ export type PlayerComponent = Component<
   }
 >;
 
-export type OwnerComponent = Component<'OwnerComponent', {}>;
+export const OwnerComponentName = 'OwnerComponent';
+export type OwnerComponent = Component<typeof OwnerComponentName, {}>;
 
 // . GAME OBJECT
 
@@ -82,10 +83,14 @@ export type IsDraggingComponent = Component<'IsDraggingComponent', {}>;
 
 export type DeletableComponent = Component<'DeletableComponent', {}>;
 
+export const ScaleComponentName = 'ScaleComponent';
+export type ScaleComponent = Component<typeof ScaleComponentName, Vector2>;
+
 // .. SPAWN EVENTS
 
+export const SpawnGameObjectEventComponentName = 'SpawnGameObjectEventComponent';
 export type SpawnGameObjectEventComponent = Component<
-  'SpawnGameObjectEventComponent',
+  typeof SpawnGameObjectEventComponentName,
   Square & {
     draggable: boolean;
     selectable: boolean;
@@ -94,6 +99,14 @@ export type SpawnGameObjectEventComponent = Component<
     deletable: boolean;
   }
 >;
+
+// .. Events
+
+export const ZoomInEventComponentName = 'ZoomInEventComponent';
+export type ZoomInEventComponent = Component<typeof ZoomInEventComponentName, {}>;
+
+export const ZoomOutEventComponentName = 'ZoomOutEventComponent';
+export type ZoomOutEventComponent = Component<typeof ZoomOutEventComponentName, {}>;
 
 // . UNMATCHED COMPONENTS
 
@@ -225,11 +238,17 @@ export type PanModeComponent = Component<typeof PanModeComponentName, Record<any
 
 // .. REACT COMPONENTS
 
+export const ReactPositionComponentName = 'ReactPositionComponent';
 export type ReactPositionComponentData = Vector2;
-export type ReactPositionComponent = ReactComponent<'ReactPositionComponent', ReactPositionComponentData>;
+export type ReactPositionComponent = ReactComponent<typeof ReactPositionComponentName, ReactPositionComponentData>;
 
+export const ReactSizeComponentName = 'ReactSizeComponent';
 export type ReactSizeComponentData = Size;
-export type ReactSizeComponent = ReactComponent<'ReactSizeComponent', ReactSizeComponentData>;
+export type ReactSizeComponent = ReactComponent<typeof ReactSizeComponentName, ReactSizeComponentData>;
+
+export const ReactScaleComponentName = 'ReactScaleComponent';
+export type ReactScaleComponentData = Vector2;
+export type ReactScaleComponent = ReactComponent<typeof ReactScaleComponentName, ReactScaleComponentData>;
 
 export type ReactImageComponentData = { url: string };
 export type ReactImageComponent = ReactComponent<'ReactImageComponent', ReactImageComponentData>;

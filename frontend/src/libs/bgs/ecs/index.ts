@@ -10,6 +10,8 @@ import {
   DraggableComponent,
   GameMapComponent,
   GameObjectComponent,
+  HandComponent,
+  HandComponentName,
   HealthMeterComponent,
   HeroComponent,
   HeroSetComponent,
@@ -18,6 +20,8 @@ import {
   IsLockedComponent,
   IsSelectedComponent,
   LockableComponent,
+  OwnerComponent,
+  OwnerComponentName,
   PanModeComponent,
   PanModeComponentName,
   PlayerComponent,
@@ -27,11 +31,16 @@ import {
   ReactHeroComponent,
   ReactImageComponent,
   ReactPositionComponent,
+  ReactScaleComponent,
+  ReactScaleComponentName,
   ReactSizeComponent,
   RuleCardComponent,
+  ScaleComponent,
+  ScaleComponentName,
   SelectableComponent,
   SidekickComponent,
   SizeComponent,
+  SizeComponentName,
   SpawnCardEventComponent,
   SpawnDeckEventComponent,
   SpawnGameMapComponent,
@@ -41,6 +50,10 @@ import {
   SpawnHeroSetComponent,
   SpawnRuleCardEventComponent,
   SpawnSideKickEventComponent,
+  ZoomInEventComponent,
+  ZoomInEventComponentName,
+  ZoomOutEventComponent,
+  ZoomOutEventComponentName,
 } from './components';
 import { HeroSets } from '../games/unmatched';
 
@@ -55,12 +68,16 @@ export type BgsIgnitorCtx = {
 
 export type BgsIgnitorComponents = {
   [PlayerComponentName]: PlayerComponent;
+  [OwnerComponentName]: OwnerComponent;
   [CameraComponentName]: CameraComponent;
   [BoardComponentName]: BoardComponent;
+  [HandComponentName]: HandComponent;
+
   // GAME
   ImageComponent: ImageComponent;
   PositionComponent: PositionComponent;
-  SizeComponent: SizeComponent;
+  [SizeComponentName]: SizeComponent;
+  [ScaleComponentName]: ScaleComponent;
   SelectableComponent: SelectableComponent;
   IsSelectedComponent: IsSelectedComponent;
   DraggableComponent: DraggableComponent;
@@ -78,6 +95,9 @@ export type BgsIgnitorComponents = {
   HeroSetComponent: HeroSetComponent;
   HealthMeterComponent: HealthMeterComponent;
 
+  // . EVENTS
+  [ZoomInEventComponentName]: ZoomInEventComponent;
+  [ZoomOutEventComponentName]: ZoomOutEventComponent;
   SpawnGameMapComponent: SpawnGameMapComponent;
   SpawnHeroComponent: SpawnHeroComponent;
   SpawnSideKickEventComponent: SpawnSideKickEventComponent;
@@ -99,6 +119,7 @@ export type BgsIgnitorComponents = {
   ReactSizeComponent: ReactSizeComponent;
   ReactGameMapComponent: ReactGameMapComponent;
   ReactHeroComponent: ReactHeroComponent;
+  [ReactScaleComponentName]: ReactScaleComponent;
 };
 
 export type BgsIgnitor = Ignitor<BgsIgnitorComponents, BgsIgnitorCtx>;

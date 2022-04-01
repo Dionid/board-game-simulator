@@ -44,14 +44,13 @@ export const ContextMenu: FC<{ ignitor: BgsIgnitor }> = (props) => {
       return emptyActions;
     }
 
-    const cameraEntities = World.filter(ignitor.world, ['CameraComponent', 'PlayerComponent']);
-    const cameraEntity = cameraEntities[0];
-
     const positionEntities = World.filter(ignitor.world, ['GameObjectComponent', 'PositionComponent', 'SizeComponent']);
     const positionComponentPool = World.getOrAddPool(ignitor.world, 'PositionComponent');
     const sizeComponentPool = World.getOrAddPool(ignitor.world, 'SizeComponent');
 
-    const cameraPositionC = Pool.get(positionComponentPool, cameraEntity);
+    const playerMouseEntities = World.filter(ignitor.world, ['PlayerComponent', 'OwnerComponent', 'HandComponent']);
+    const handPool = World.getOrAddPool(ignitor.world, 'HandComponent');
+    const playerMouseComponent = Pool.get(handPool, playerMouseEntities[0]);
 
     const mouseOnEntities: EntityId[] = [];
 
@@ -61,11 +60,8 @@ export const ContextMenu: FC<{ ignitor: BgsIgnitor }> = (props) => {
       // . Is inside object zone, including camera position
       if (
         Square.isInside(
-          {
-            x: contextMenu.x + cameraPositionC.data.x,
-            y: contextMenu.y + cameraPositionC.data.y,
-          },
-          { ...positionComponent.data, ...sizeComponent.data }
+          { ...positionComponent.data, ...sizeComponent.data },
+          playerMouseComponent.data.onBoardPosition.current
         )
       ) {
         mouseOnEntities.push(entity);
@@ -99,6 +95,7 @@ export const ContextMenu: FC<{ ignitor: BgsIgnitor }> = (props) => {
             onClick={() => {
               handleClose();
               World.destroyEntity(ignitor.world, maxZPositionEntity);
+              ignitor.ctx.forceUpdate();
             }}
           >
             Delete

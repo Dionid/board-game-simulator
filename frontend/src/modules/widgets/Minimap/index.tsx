@@ -54,7 +54,7 @@ export const Minimap = memo(
             style={{
               width: size.width / coef,
               height: size.height / coef,
-              border: '2px red solid',
+              outline: '2px red solid',
               position: 'absolute',
               top: position.y / coef,
               left: position.x / coef,

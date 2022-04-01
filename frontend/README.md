@@ -16,46 +16,51 @@
    1. ~~Lock~~
    2. ~~Delete~~
 4. ~~Add "DeletableComponent"~~
-5. Move Camera on Board
+5. ~~Move Camera on Board~~
    1. ~~Fix drag and select position~~
    2. ~~Add "lapka"~~
    3. ~~Add minimap~~
-   4. Add objects to minimap
-6. Deck actions
+   4. ~~Add objects to minimap~~
+6. Zoom
+7. Rename World -> Essence and Ignitor -> World
+8. Deck actions
    1. Get card
    2. Shuffle
-7. Card actions
+9. Card actions
    1. Put in deck
    2. Flip
-8. Hero actions
-   1. Flip
-9. Health Meter actions
-   1. Increase & Decrease
-10. Hero Set actions
+10. Hero actions
+    1. Flip
+11. Health Meter actions
+    1. Increase & Decrease
+12. Hero Set actions
     1. Delete set
-11. Depth system based on y axis
-12. Authorization
-13. Cards shown
-14. Persistence and collaboration
+13. Depth system
+    1. Based on dragging
+    2. Based on y axis
+14. Move Hero Set and Map creation to Context Menu
+15. Authorization
+16. Cards shown
+17. Persistence and collaboration
     1. Room
     2. Player cursor
     3. Player actions
-15. Refactor SelectSystem
-16. Remove entities
+18. ~~Remove entities~~
 
 ## Second
 
-1. How to rerender on changes
-2. More `World.filter` operations (`in`, `notIn`, etc.)
-3. Mobile version
-4. Rename Systems to "Input" and "Output"
-5. Rename SpawnComponents to "SpawnEventComponents"
-6. Make component names as constants
+1. Refactor SelectSystem
+2. Replace png with svg
+3. Ipad version
+4. More `World.filter` operations (`in`, `notIn`, etc.)
+5. Rename Systems to "Input" and "Output"
+6. Rename Systems to EvenSystems
+7. ~~Make component names as constants~~
+8. ~~How to rerender on changes~~
 
 ## Additional
 
-1. Resize canvas on window resize
-2. Zoom
+1. Mobile version
+2. Resize canvas on window resize
 3. Background grid
-4. Immutable data
-5. History
+4. History

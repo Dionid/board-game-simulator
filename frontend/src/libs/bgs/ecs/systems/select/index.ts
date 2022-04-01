@@ -12,6 +12,7 @@ import {
 import { World } from '../../../../ecs/world';
 import { ComponentId, Pool } from '../../../../ecs/component';
 import { EntityId } from '../../../../ecs/entity';
+import { Square } from '../../../../math';
 
 export const SelectSystem = (): System<{
   HandComponent: HandComponent;
@@ -19,8 +20,8 @@ export const SelectSystem = (): System<{
   OwnerComponent: OwnerComponent;
   SelectableComponent: SelectableComponent;
   IsSelectedComponent: IsSelectedComponent;
-  [PositionComponentName]: PositionComponent;
   SizeComponent: SizeComponent;
+  [PositionComponentName]: PositionComponent;
 }> => {
   return {
     run: async ({ world }) => {
@@ -57,10 +58,13 @@ export const SelectSystem = (): System<{
             const positionC = Pool.get(positionCP, selectableEntity);
             const sizeC = Pool.get(sizeCP, selectableEntity);
             if (
-              playerMouseComponent.data.onBoardPosition.current.x > positionC.data.x &&
-              playerMouseComponent.data.onBoardPosition.current.x < positionC.data.x + sizeC.data.width &&
-              playerMouseComponent.data.onBoardPosition.current.y > positionC.data.y &&
-              playerMouseComponent.data.onBoardPosition.current.y < positionC.data.y + sizeC.data.height
+              Square.isInside(
+                {
+                  ...positionC.data,
+                  ...sizeC.data,
+                },
+                playerMouseComponent.data.onBoardPosition.current
+              )
             ) {
               mouseOnEntities.push(selectableEntity);
             }
