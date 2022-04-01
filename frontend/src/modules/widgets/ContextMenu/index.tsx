@@ -7,7 +7,7 @@ import { ListItemIcon, MenuItem } from '@mui/material';
 import { BgsWorld } from '../../../libs/bgs/ecs';
 import { Square } from '../../../libs/math';
 import { PersonAdd } from '@mui/icons-material';
-import { HeroSets, MapId, SetId } from '../../../libs/bgs/games/unmatched';
+import { Deck, HeroSets, MapId, SetId } from '../../../libs/bgs/games/unmatched';
 import {
   DeckComponentName,
   DeletableComponentName,
@@ -174,6 +174,43 @@ export const ContextMenu: FC<{ world: BgsWorld; heroSets: HeroSets }> = (props) 
         );
       }
 
+      // . DECK ACTIONS
+      const deckComponentPool = Essence.getOrAddPool(world.essence, DeckComponentName);
+      const deckComponent = Pool.tryGet(deckComponentPool, maxZPositionEntity);
+
+      if (deckComponent) {
+        actions.push(
+          <MenuItem
+            key={maxZPositionEntity + ':deck:take_card'}
+            onClick={() => {
+              handleClose();
+              const takeCardFromDeckEventCP = Essence.getOrAddPool(world.essence, TakeCardFromDeckEventComponentName);
+              Pool.add(takeCardFromDeckEventCP, EntityId.new(), {
+                id: ComponentId.new(),
+                name: TakeCardFromDeckEventComponentName,
+                data: {
+                  deckIdEntity: maxZPositionEntity,
+                },
+              });
+            }}
+          >
+            Take 1 card
+          </MenuItem>
+        );
+        actions.push(
+          <MenuItem
+            key={maxZPositionEntity + ':deck:shuffle'}
+            onClick={() => {
+              handleClose();
+              // TODO. Move to system
+              Deck.shuffle(deckComponent.data);
+            }}
+          >
+            Shuffle
+          </MenuItem>
+        );
+      }
+
       // . (UN)LOCK BUTTON
       const lockableComponentPool = Essence.getOrAddPool(world.essence, LockableComponentName);
       const lockableComponent = Pool.tryGet(lockableComponentPool, maxZPositionEntity);
@@ -211,35 +248,6 @@ export const ContextMenu: FC<{ world: BgsWorld; heroSets: HeroSets }> = (props) 
             </MenuItem>
           );
         }
-      }
-    }
-
-    // . DECK ACTIONS
-    const deckComponentPool = Essence.getOrAddPool(world.essence, DeckComponentName);
-    const deckComponent = Pool.tryGet(deckComponentPool, maxZPositionEntity);
-
-    if (deckComponent) {
-      if (deckComponent.data.cards.length > 0) {
-        actions.push(
-          <MenuItem
-            key={maxZPositionEntity + ':deck:no_cards'}
-            onClick={() => {
-              handleClose();
-              const takeCardFromDeckEventCP = Essence.getOrAddPool(world.essence, TakeCardFromDeckEventComponentName);
-              Pool.add(takeCardFromDeckEventCP, EntityId.new(), {
-                id: ComponentId.new(),
-                name: TakeCardFromDeckEventComponentName,
-                data: {
-                  deckIdEntity: maxZPositionEntity,
-                },
-              });
-            }}
-          >
-            Take 1 card
-          </MenuItem>
-        );
-      } else {
-        actions.push(<MenuItem key={maxZPositionEntity + ':deck:no_cards'}>No cards left</MenuItem>);
       }
     }
 

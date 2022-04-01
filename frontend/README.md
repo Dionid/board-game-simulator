@@ -23,9 +23,9 @@
    4. ~~Add objects to minimap~~
 6. ~~Zoom~~
 7. ~~Rename World -> Essence and Ignitor -> World~~
-8. Deck actions
-   1. Get card
-   2. Shuffle
+8. ~~Deck actions~~
+   1. ~~Get card~~
+   2. ~~Shuffle~~
 9. Card actions
    1. Put in deck
    2. Flip
