@@ -1,4 +1,4 @@
-import { Ignitor } from '../../ecs/ignitor';
+import { World } from '../../ecs/world';
 import {
   BoardComponent,
   BoardComponentName,
@@ -122,4 +122,4 @@ export type BgsIgnitorComponents = {
   [ReactScaleComponentName]: ReactScaleComponent;
 };
 
-export type BgsIgnitor = Ignitor<BgsIgnitorComponents, BgsIgnitorCtx>;
+export type BgsIgnitor = World<BgsIgnitorComponents, BgsIgnitorCtx>;

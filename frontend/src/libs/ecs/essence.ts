@@ -52,8 +52,6 @@ export const Essence = {
         return [];
       }
 
-      // debugger
-
       if (i === 0) {
         // TODO. Fix types
         const ids = Object.keys(pool.data) as EntityId[];

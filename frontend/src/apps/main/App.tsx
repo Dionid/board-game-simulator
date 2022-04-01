@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import CssBaseline from '@mui/material/CssBaseline';
 import { BgsIgnitor, BgsIgnitorCtx } from '../../libs/bgs/ecs';
-import { Ignitor } from '../../libs/ecs/ignitor';
+import { World } from '../../libs/ecs/world';
 import { Essence } from '../../libs/ecs/essence';
 import { ChangeReactPositionSystem } from '../../libs/bgs/ecs/systems/change-react-position-system';
 import { ChangeReactImageSystem } from '../../libs/bgs/ecs/systems/change-react-image-system';
@@ -90,19 +90,19 @@ function App() {
     // @ts-ignore
     window.ignitor = ignitor;
     // @ts-ignore
-    window.Ignitor = Ignitor;
+    window.Ignitor = World;
     // @ts-ignore
     window.Essence = Essence;
 
     (async () => {
-      await Ignitor.init(ignitor);
+      await World.init(ignitor);
       forceUpdate();
 
       let lastTimeStamp = new Date();
       const run = async () => {
         const newTimeStamp = new Date();
         const timeDelta = newTimeStamp.getMilliseconds() - lastTimeStamp.getMilliseconds();
-        await Ignitor.run(ignitor, timeDelta < 0 ? 0 : timeDelta);
+        await World.run(ignitor, timeDelta < 0 ? 0 : timeDelta);
         lastTimeStamp = newTimeStamp;
         requestAnimationFrame(run);
       };
@@ -114,7 +114,7 @@ function App() {
   }, []);
 
   useEffect(() => {
-    Ignitor.addToCtx(ignitor, 'heroSets', heroSets);
+    World.addToCtx(ignitor, 'heroSets', heroSets);
   }, [heroSets]);
 
   // TODO. Refactor for collaboration
