@@ -42,19 +42,52 @@ import {
   SizeComponent,
   SizeComponentName,
   SpawnCardEventComponent,
+  SpawnCardEventComponentName,
   SpawnDeckEventComponent,
+  SpawnDeckEventComponentName,
   SpawnGameMapEventComponent,
   SpawnGameMapEventComponentName,
   SpawnGameObjectEventComponent,
   SpawnHealthMeterEventComponent,
+  SpawnHealthMeterEventComponentName,
   SpawnHeroEventComponent,
+  SpawnHeroEventComponentName,
   SpawnHeroSetEventComponent,
+  SpawnHeroSetEventComponentName,
   SpawnRuleCardEventComponent,
+  SpawnRuleCardEventComponentName,
   SpawnSideKickEventComponent,
+  SpawnSideKickEventComponentName,
+  TakeCardFromDeckEventComponent,
+  TakeCardFromDeckEventComponentName,
   ZoomInEventComponent,
   ZoomInEventComponentName,
   ZoomOutEventComponent,
   ZoomOutEventComponentName,
+  PositionComponentName,
+  SelectableComponentName,
+  IsSelectedComponentName,
+  DraggableComponentName,
+  IsDraggingComponentName,
+  LockableComponentName,
+  IsLockedComponentName,
+  DeletableComponentName,
+  GameMapComponentName,
+  HeroComponentName,
+  SidekickComponentName,
+  DeckComponentName,
+  CardComponentName,
+  RuleCardComponentName,
+  HeroSetComponentName,
+  HealthMeterComponentName,
+  ImageComponentName,
+  GameObjectComponentName,
+  SpawnGameObjectEventComponentName,
+  ReactPositionComponentName,
+  ReactImageComponentName,
+  ReactSizeComponentName,
+  ReactGameMapComponentName,
+  ReactHeroComponentName,
 } from './components';
 import { HeroSets } from '../games/unmatched';
 
@@ -75,51 +108,52 @@ export type BgsWorldComponents = {
   [HandComponentName]: HandComponent;
 
   // GAME
-  ImageComponent: ImageComponent;
-  PositionComponent: PositionComponent;
   [SizeComponentName]: SizeComponent;
   [ScaleComponentName]: ScaleComponent;
-  SelectableComponent: SelectableComponent;
-  IsSelectedComponent: IsSelectedComponent;
-  DraggableComponent: DraggableComponent;
-  IsDraggingComponent: IsDraggingComponent;
-  LockableComponent: LockableComponent;
-  IsLockedComponent: IsLockedComponent;
-  DeletableComponent: DeletableComponent;
+  [ImageComponentName]: ImageComponent;
+  [PositionComponentName]: PositionComponent;
+  [SelectableComponentName]: SelectableComponent;
+  [IsSelectedComponentName]: IsSelectedComponent;
+  [DraggableComponentName]: DraggableComponent;
+  [IsDraggingComponentName]: IsDraggingComponent;
+  [LockableComponentName]: LockableComponent;
+  [IsLockedComponentName]: IsLockedComponent;
+  [DeletableComponentName]: DeletableComponent;
 
-  GameMapComponent: GameMapComponent;
-  HeroComponent: HeroComponent;
-  SidekickComponent: SidekickComponent;
-  DeckComponent: DeckComponent;
-  CardComponent: CardComponent;
-  RuleCardComponent: RuleCardComponent;
-  HeroSetComponent: HeroSetComponent;
-  HealthMeterComponent: HealthMeterComponent;
+  [GameMapComponentName]: GameMapComponent;
+  [HeroComponentName]: HeroComponent;
+  [SidekickComponentName]: SidekickComponent;
+  [DeckComponentName]: DeckComponent;
+  [CardComponentName]: CardComponent;
+  [RuleCardComponentName]: RuleCardComponent;
+  [HeroSetComponentName]: HeroSetComponent;
+  [HealthMeterComponentName]: HealthMeterComponent;
 
   // . EVENTS
   [ZoomInEventComponentName]: ZoomInEventComponent;
   [ZoomOutEventComponentName]: ZoomOutEventComponent;
   [SpawnGameMapEventComponentName]: SpawnGameMapEventComponent;
-  SpawnHeroComponent: SpawnHeroEventComponent;
-  SpawnSideKickEventComponent: SpawnSideKickEventComponent;
-  SpawnDeckEventComponent: SpawnDeckEventComponent;
-  SpawnCardEventComponent: SpawnCardEventComponent;
-  SpawnRuleCardEventComponent: SpawnRuleCardEventComponent;
-  SpawnHealthMeterEventComponent: SpawnHealthMeterEventComponent;
-  SpawnHeroSetEventComponent: SpawnHeroSetEventComponent;
+  [SpawnHeroEventComponentName]: SpawnHeroEventComponent;
+  [SpawnSideKickEventComponentName]: SpawnSideKickEventComponent;
+  [SpawnDeckEventComponentName]: SpawnDeckEventComponent;
+  [SpawnCardEventComponentName]: SpawnCardEventComponent;
+  [SpawnRuleCardEventComponentName]: SpawnRuleCardEventComponent;
+  [SpawnHealthMeterEventComponentName]: SpawnHealthMeterEventComponent;
+  [SpawnHeroSetEventComponentName]: SpawnHeroSetEventComponent;
+  [TakeCardFromDeckEventComponentName]: TakeCardFromDeckEventComponent;
 
-  GameObjectComponent: GameObjectComponent;
-  SpawnGameObjectEventComponent: SpawnGameObjectEventComponent;
+  [GameObjectComponentName]: GameObjectComponent;
+  [SpawnGameObjectEventComponentName]: SpawnGameObjectEventComponent;
 
   // UI
   [PanModeComponentName]: PanModeComponent;
 
   // REACT COMPONENTS
-  ReactPositionComponent: ReactPositionComponent;
-  ReactImageComponent: ReactImageComponent;
-  ReactSizeComponent: ReactSizeComponent;
-  ReactGameMapComponent: ReactGameMapComponent;
-  ReactHeroComponent: ReactHeroComponent;
+  [ReactPositionComponentName]: ReactPositionComponent;
+  [ReactImageComponentName]: ReactImageComponent;
+  [ReactSizeComponentName]: ReactSizeComponent;
+  [ReactGameMapComponentName]: ReactGameMapComponent;
+  [ReactHeroComponentName]: ReactHeroComponent;
   [ReactScaleComponentName]: ReactScaleComponent;
 };
 

@@ -8,7 +8,19 @@ import { BgsWorld } from '../../../libs/bgs/ecs';
 import { Square } from '../../../libs/math';
 import { PersonAdd } from '@mui/icons-material';
 import { HeroSets, MapId, SetId } from '../../../libs/bgs/games/unmatched';
-import { SpawnGameMapEventComponentName, SpawnHeroSetEventComponentName } from '../../../libs/bgs/ecs/components';
+import {
+  DeckComponentName,
+  DeletableComponentName,
+  HandComponentName,
+  IsLockedComponentName,
+  LockableComponentName,
+  PlayerComponentName,
+  PositionComponentName,
+  SizeComponentName,
+  SpawnGameMapEventComponentName,
+  SpawnHeroSetEventComponentName,
+  TakeCardFromDeckEventComponentName,
+} from '../../../libs/bgs/ecs/components';
 import { v4 } from 'uuid';
 
 export const ContextMenu: FC<{ world: BgsWorld; heroSets: HeroSets }> = (props) => {
@@ -104,11 +116,11 @@ export const ContextMenu: FC<{ world: BgsWorld; heroSets: HeroSets }> = (props) 
       'PositionComponent',
       'SizeComponent',
     ]);
-    const positionComponentPool = Essence.getOrAddPool(world.essence, 'PositionComponent');
-    const sizeComponentPool = Essence.getOrAddPool(world.essence, 'SizeComponent');
+    const positionComponentPool = Essence.getOrAddPool(world.essence, PositionComponentName);
+    const sizeComponentPool = Essence.getOrAddPool(world.essence, SizeComponentName);
 
-    const playerMouseEntities = Essence.filter(world.essence, ['PlayerComponent', 'OwnerComponent', 'HandComponent']);
-    const handPool = Essence.getOrAddPool(world.essence, 'HandComponent');
+    const playerMouseEntities = Essence.filter(world.essence, [PlayerComponentName, HandComponentName]);
+    const handPool = Essence.getOrAddPool(world.essence, HandComponentName);
     const playerMouseComponent = Pool.get(handPool, playerMouseEntities[0]);
 
     const mouseOnEntities: EntityId[] = [];
@@ -145,7 +157,7 @@ export const ContextMenu: FC<{ world: BgsWorld; heroSets: HeroSets }> = (props) 
     });
 
     if (maxZPositionEntity) {
-      const deletableCP = Essence.getOrAddPool(world.essence, 'DeletableComponent');
+      const deletableCP = Essence.getOrAddPool(world.essence, DeletableComponentName);
       if (Pool.tryGet(deletableCP, maxZPositionEntity)) {
         // . DELETE BUTTON
         actions.push(
@@ -163,11 +175,11 @@ export const ContextMenu: FC<{ world: BgsWorld; heroSets: HeroSets }> = (props) 
       }
 
       // . (UN)LOCK BUTTON
-      const lockableComponentPool = Essence.getOrAddPool(world.essence, 'LockableComponent');
+      const lockableComponentPool = Essence.getOrAddPool(world.essence, LockableComponentName);
       const lockableComponent = Pool.tryGet(lockableComponentPool, maxZPositionEntity);
 
       if (lockableComponent) {
-        const isLockedComponentPool = Essence.getOrAddPool(world.essence, 'IsLockedComponent');
+        const isLockedComponentPool = Essence.getOrAddPool(world.essence, IsLockedComponentName);
         const isLockedComponent = Pool.tryGet(isLockedComponentPool, maxZPositionEntity);
 
         if (isLockedComponent) {
@@ -199,6 +211,35 @@ export const ContextMenu: FC<{ world: BgsWorld; heroSets: HeroSets }> = (props) 
             </MenuItem>
           );
         }
+      }
+    }
+
+    // . DECK ACTIONS
+    const deckComponentPool = Essence.getOrAddPool(world.essence, DeckComponentName);
+    const deckComponent = Pool.tryGet(deckComponentPool, maxZPositionEntity);
+
+    if (deckComponent) {
+      if (deckComponent.data.cards.length > 0) {
+        actions.push(
+          <MenuItem
+            key={maxZPositionEntity + ':deck:no_cards'}
+            onClick={() => {
+              handleClose();
+              const takeCardFromDeckEventCP = Essence.getOrAddPool(world.essence, TakeCardFromDeckEventComponentName);
+              Pool.add(takeCardFromDeckEventCP, EntityId.new(), {
+                id: ComponentId.new(),
+                name: TakeCardFromDeckEventComponentName,
+                data: {
+                  deckIdEntity: maxZPositionEntity,
+                },
+              });
+            }}
+          >
+            Take 1 card
+          </MenuItem>
+        );
+      } else {
+        actions.push(<MenuItem key={maxZPositionEntity + ':deck:no_cards'}>No cards left</MenuItem>);
       }
     }
 

@@ -29,6 +29,7 @@ import { Minimap } from '../../modules/widgets/Minimap';
 import { GameStage } from '../../modules/widgets/GameStage';
 import { ChangeReactScaleSystem } from '../../libs/bgs/ecs/systems/change-react-scale-system';
 import { ZoomSystem } from '../../libs/bgs/ecs/systems/zoom';
+import { TakeCardFromDeckEventSystem } from '../../libs/bgs/ecs/systems/take-card-from-deck-event';
 
 // TODO. Move
 const boardSize = {
@@ -72,6 +73,8 @@ function App() {
         SpawnCardEventSystem(),
         SpawnRuleCardEventSystem(),
         SpawnHealthMeterEventSystem(),
+
+        TakeCardFromDeckEventSystem(),
 
         // SPAWN GAME OBJECT
         SpawnGameObjectSystem(),

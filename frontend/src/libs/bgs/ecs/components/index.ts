@@ -13,6 +13,7 @@ import {
   SidekickId,
 } from '../../games/unmatched';
 import { Size, Square, Vector2, Vector3 } from '../../../math';
+import { EntityId } from '../../../ecs/entity';
 
 // . BOARD
 
@@ -70,9 +71,9 @@ export type GameObjectComponent = Component<typeof GameObjectComponentName, {}>;
 export const PositionComponentName = 'PositionComponent';
 export type PositionComponent = Component<typeof PositionComponentName, Vector3>;
 
-export const ImageComponent = 'ImageComponent';
+export const ImageComponentName = 'ImageComponent';
 export type ImageComponent = Component<
-  typeof ImageComponent,
+  typeof ImageComponentName,
   {
     url: string;
   }
@@ -275,6 +276,14 @@ export type SpawnHeroSetEventComponent = Component<
     setId: SetId;
     x: number;
     y: number;
+  }
+>;
+
+export const TakeCardFromDeckEventComponentName = 'TakeCardFromDeckEventComponent';
+export type TakeCardFromDeckEventComponent = Component<
+  typeof TakeCardFromDeckEventComponentName,
+  {
+    deckIdEntity: EntityId;
   }
 >;
 
