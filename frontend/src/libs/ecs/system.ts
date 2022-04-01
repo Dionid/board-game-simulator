@@ -1,11 +1,11 @@
-import { World } from './world';
+import { Essence } from './world';
 import { Component } from './component';
 
 export type SystemProps<
   CR extends Record<string, Component<any, any>>,
   Ctx extends Record<any, any> = Record<any, any>
 > = {
-  world: World<CR>;
+  essence: Essence<CR>;
   timeDelta: number;
   ctx: Ctx;
 };

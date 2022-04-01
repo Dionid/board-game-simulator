@@ -9,7 +9,7 @@ import {
   SelectableComponent,
   SizeComponent,
 } from '../../components';
-import { World } from '../../../../ecs/world';
+import { Essence } from '../../../../ecs/world';
 import { ComponentId, Pool } from '../../../../ecs/component';
 import { EntityId } from '../../../../ecs/entity';
 import { Square } from '../../../../math';
@@ -24,19 +24,19 @@ export const SelectSystem = (): System<{
   [PositionComponentName]: PositionComponent;
 }> => {
   return {
-    run: async ({ world }) => {
-      const selectableEntities = World.filter(world, ['SelectableComponent', 'PositionComponent', 'SizeComponent']);
+    run: async ({ essence }) => {
+      const selectableEntities = Essence.filter(essence, ['SelectableComponent', 'PositionComponent', 'SizeComponent']);
 
       if (selectableEntities.length === 0) {
         return;
       }
 
-      const playerMouseEntities = World.filter(world, ['PlayerComponent', 'OwnerComponent', 'HandComponent']);
-      const isSelectedEntities = World.filter(world, ['IsSelectedComponent']);
+      const playerMouseEntities = Essence.filter(essence, ['PlayerComponent', 'OwnerComponent', 'HandComponent']);
+      const isSelectedEntities = Essence.filter(essence, ['IsSelectedComponent']);
 
-      const isSelectedComponentsPool = World.getOrAddPool(world, 'IsSelectedComponent');
+      const isSelectedComponentsPool = Essence.getOrAddPool(essence, 'IsSelectedComponent');
 
-      const handPool = World.getOrAddPool(world, 'HandComponent');
+      const handPool = Essence.getOrAddPool(essence, 'HandComponent');
 
       playerMouseEntities.forEach((playerMouseEntity) => {
         const playerMouseComponent = Pool.get(handPool, playerMouseEntity);
@@ -49,8 +49,8 @@ export const SelectSystem = (): System<{
             });
           }
         } else if (playerMouseComponent.data.click.current.down && isSelectedEntities.length === 0) {
-          const positionCP = World.getOrAddPool(world, 'PositionComponent');
-          const sizeCP = World.getOrAddPool(world, 'SizeComponent');
+          const positionCP = Essence.getOrAddPool(essence, 'PositionComponent');
+          const sizeCP = Essence.getOrAddPool(essence, 'SizeComponent');
 
           const mouseOnEntities: EntityId[] = [];
 

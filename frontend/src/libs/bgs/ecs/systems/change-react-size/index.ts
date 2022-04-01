@@ -1,5 +1,5 @@
 import { System } from '../../../../ecs/system';
-import { World } from '../../../../ecs/world';
+import { Essence } from '../../../../ecs/world';
 import { Pool } from '../../../../ecs/component';
 import { ReactSizeComponent, SizeComponent } from '../../components';
 
@@ -7,14 +7,14 @@ export const ChangeReactSizeSystem = (): System<{
   ReactSizeComponent: ReactSizeComponent;
   SizeComponent: SizeComponent;
 }> => ({
-  run: async ({ world }) => {
-    const entities = World.filter(world, ['ReactSizeComponent', 'SizeComponent']);
+  run: async ({ essence }) => {
+    const entities = Essence.filter(essence, ['ReactSizeComponent', 'SizeComponent']);
     if (entities.length === 0) {
       return;
     }
 
-    const sizePool = World.getOrAddPool(world, 'SizeComponent');
-    const reactSizePool = World.getOrAddPool(world, 'ReactSizeComponent');
+    const sizePool = Essence.getOrAddPool(essence, 'SizeComponent');
+    const reactSizePool = Essence.getOrAddPool(essence, 'ReactSizeComponent');
 
     entities.forEach((entity) => {
       const sizeComponent = Pool.get(sizePool, entity);

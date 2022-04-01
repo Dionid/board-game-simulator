@@ -1,5 +1,5 @@
 import { System } from '../../../../ecs/system';
-import { World } from '../../../../ecs/world';
+import { Essence } from '../../../../ecs/world';
 import { Pool } from '../../../../ecs/component';
 import { ImageComponent, ReactImageComponent } from '../../components';
 
@@ -7,14 +7,14 @@ export const ChangeReactImageSystem = (): System<{
   ReactImageComponent: ReactImageComponent;
   ImageComponent: ImageComponent;
 }> => ({
-  run: async ({ world }) => {
-    const entities = World.filter(world, ['ReactImageComponent', 'ImageComponent']);
+  run: async ({ essence }) => {
+    const entities = Essence.filter(essence, ['ReactImageComponent', 'ImageComponent']);
     if (entities.length === 0) {
       return;
     }
 
-    const imagePool = World.getOrAddPool(world, 'ImageComponent');
-    const reactImagePool = World.getOrAddPool(world, 'ReactImageComponent');
+    const imagePool = Essence.getOrAddPool(essence, 'ImageComponent');
+    const reactImagePool = Essence.getOrAddPool(essence, 'ReactImageComponent');
 
     entities.forEach((entity) => {
       const imageComponent = Pool.get(imagePool, entity);

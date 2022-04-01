@@ -1,5 +1,5 @@
 import { System } from '../../../../ecs/system';
-import { World } from '../../../../ecs/world';
+import { Essence } from '../../../../ecs/world';
 import { ComponentId, Pool } from '../../../../ecs/component';
 import {
   CameraComponent,
@@ -25,24 +25,24 @@ export const SpawnGameMapSystem = (): System<{
   [PositionComponentName]: PositionComponent;
   [SizeComponentName]: SizeComponent;
 }> => ({
-  run: async ({ world }) => {
-    const entities = World.filter(world, ['SpawnGameMapComponent']);
+  run: async ({ essence }) => {
+    const entities = Essence.filter(essence, ['SpawnGameMapComponent']);
     if (entities.length === 0) {
       return;
     }
 
-    const playerEntities = World.filter(world, ['PlayerComponent', 'CameraComponent']);
-    const cameraPositionComponentPool = World.getOrAddPool(world, 'PositionComponent');
-    const cameraSizeComponentPool = World.getOrAddPool(world, 'SizeComponent');
+    const playerEntities = Essence.filter(essence, ['PlayerComponent', 'CameraComponent']);
+    const cameraPositionComponentPool = Essence.getOrAddPool(essence, 'PositionComponent');
+    const cameraSizeComponentPool = Essence.getOrAddPool(essence, 'SizeComponent');
 
     // TODO. Refactor for collaboration
     const playerEntity = playerEntities[0];
     const cameraPositionC = Pool.get(cameraPositionComponentPool, playerEntity);
     const cameraSizeC = Pool.get(cameraSizeComponentPool, playerEntity);
 
-    const spawnGameMapComponentPool = World.getOrAddPool(world, 'SpawnGameMapComponent');
-    const spawnGameObjectComponentPool = World.getOrAddPool(world, 'SpawnGameObjectEventComponent');
-    const gameMapComponentPool = World.getOrAddPool(world, 'GameMapComponent');
+    const spawnGameMapComponentPool = Essence.getOrAddPool(essence, 'SpawnGameMapComponent');
+    const spawnGameObjectComponentPool = Essence.getOrAddPool(essence, 'SpawnGameObjectEventComponent');
+    const gameMapComponentPool = Essence.getOrAddPool(essence, 'GameMapComponent');
 
     for (const mapEntity of entities) {
       const spawnComponent = Pool.get(spawnGameMapComponentPool, mapEntity);

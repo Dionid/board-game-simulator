@@ -1,7 +1,7 @@
 import { HeroSets, MapId, SetId } from '../../../libs/bgs/games/unmatched';
 import { BgsIgnitor } from '../../../libs/bgs/ecs';
 import React, { memo, useState } from 'react';
-import { World } from '../../../libs/ecs/world';
+import { Essence } from '../../../libs/ecs/world';
 import { ComponentId, Pool } from '../../../libs/ecs/component';
 import { EntityId } from '../../../libs/ecs/entity';
 import { Box, IconButton, ListItemIcon, MenuItem, Tooltip } from '@mui/material';
@@ -27,7 +27,7 @@ export const MainMenu = memo(({ heroSets, ignitor }: { heroSets: HeroSets; ignit
   };
 
   const spawnMap = () => {
-    const spawnGameMapComponentPool = World.getOrAddPool(ignitor.world, 'SpawnGameMapComponent');
+    const spawnGameMapComponentPool = Essence.getOrAddPool(ignitor.essence, 'SpawnGameMapComponent');
     Pool.add(spawnGameMapComponentPool, EntityId.new(), {
       name: 'SpawnGameMapComponent',
       id: ComponentId.new(),
@@ -39,10 +39,10 @@ export const MainMenu = memo(({ heroSets, ignitor }: { heroSets: HeroSets; ignit
   };
 
   const handlePanIconButtonClick = () => {
-    const panModeCP = World.getOrAddPool(ignitor.world, 'PanModeComponent');
+    const panModeCP = Essence.getOrAddPool(ignitor.essence, 'PanModeComponent');
     if (mode === 'pan') {
       setMode(null);
-      const entities = World.filter(ignitor.world, ['PanModeComponent']);
+      const entities = Essence.filter(ignitor.essence, ['PanModeComponent']);
       entities.forEach((entity) => {
         Pool.delete(panModeCP, entity);
       });
@@ -65,7 +65,7 @@ export const MainMenu = memo(({ heroSets, ignitor }: { heroSets: HeroSets; ignit
   useEventListener('keydown', handler);
 
   const spawnHeroSet = (setId: SetId) => {
-    const spawnHeroSetComponentPool = World.getOrAddPool(ignitor.world, 'SpawnHeroSetComponent');
+    const spawnHeroSetComponentPool = Essence.getOrAddPool(ignitor.essence, 'SpawnHeroSetComponent');
     Pool.add(spawnHeroSetComponentPool, EntityId.new(), {
       name: 'SpawnHeroSetComponent',
       id: ComponentId.new(),
@@ -76,7 +76,7 @@ export const MainMenu = memo(({ heroSets, ignitor }: { heroSets: HeroSets; ignit
   };
 
   const onZoomOutClick = () => {
-    const zoomOutCP = World.getOrAddPool(ignitor.world, 'ZoomOutEventComponent');
+    const zoomOutCP = Essence.getOrAddPool(ignitor.essence, 'ZoomOutEventComponent');
     Pool.add(zoomOutCP, EntityId.new(), {
       id: ComponentId.new(),
       name: 'ZoomOutEventComponent',
@@ -84,7 +84,7 @@ export const MainMenu = memo(({ heroSets, ignitor }: { heroSets: HeroSets; ignit
     });
   };
   const onZoomInClick = () => {
-    const zoomInCP = World.getOrAddPool(ignitor.world, 'ZoomInEventComponent');
+    const zoomInCP = Essence.getOrAddPool(ignitor.essence, 'ZoomInEventComponent');
     Pool.add(zoomInCP, EntityId.new(), {
       id: ComponentId.new(),
       name: 'ZoomInEventComponent',

@@ -3,7 +3,7 @@ import { useEcsComponent } from '../../../libs/ecs/react';
 import { Size } from '../../../libs/math';
 import React, { memo } from 'react';
 import { EntityId } from '../../../libs/ecs/entity';
-import { World } from '../../../libs/ecs/world';
+import { Essence } from '../../../libs/ecs/world';
 
 const coef = 30;
 
@@ -36,7 +36,7 @@ export const Minimap = memo(
     const position = useEcsComponent(playerEntity, { x: 0, y: 0 }, 'ReactPositionComponent', ignitor);
     const size = useEcsComponent(playerEntity, { width: 0, height: 0 }, 'ReactSizeComponent', ignitor);
 
-    const goCP = World.getOrAddPool(ignitor.world, 'GameObjectComponent');
+    const goCP = Essence.getOrAddPool(ignitor.essence, 'GameObjectComponent');
 
     return (
       <div

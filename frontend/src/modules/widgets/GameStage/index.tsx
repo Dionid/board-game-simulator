@@ -4,7 +4,7 @@ import { EntityId } from '../../../libs/ecs/entity';
 import React, { memo } from 'react';
 import { BgsIgnitor } from '../../../libs/bgs/ecs';
 import { useEcsComponent } from '../../../libs/ecs/react';
-import { World } from '../../../libs/ecs/world';
+import { Essence } from '../../../libs/ecs/world';
 import { ReactPositionComponentName, ReactScaleComponentName } from '../../../libs/bgs/ecs/components';
 
 export const GameStage = memo(
@@ -15,7 +15,7 @@ export const GameStage = memo(
     const position = useEcsComponent(playerEntity, { x: 0, y: 0 }, ReactPositionComponentName, ignitor);
     const scale = useEcsComponent(playerEntity, { x: 1, y: 1 }, ReactScaleComponentName, ignitor);
 
-    const gameObjectComponentPool = World.getOrAddPool(ignitor.world, 'GameObjectComponent');
+    const gameObjectComponentPool = Essence.getOrAddPool(ignitor.essence, 'GameObjectComponent');
 
     console.log('GameStage', position);
 

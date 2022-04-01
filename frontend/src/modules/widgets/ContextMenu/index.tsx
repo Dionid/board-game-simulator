@@ -1,7 +1,7 @@
 import { EntityId } from '../../../libs/ecs/entity';
 import Menu from '@mui/material/Menu';
 import React, { FC } from 'react';
-import { World } from '../../../libs/ecs/world';
+import { Essence } from '../../../libs/ecs/world';
 import { ComponentId, Pool } from '../../../libs/ecs/component';
 import { MenuItem } from '@mui/material';
 import { BgsIgnitor } from '../../../libs/bgs/ecs';
@@ -44,12 +44,16 @@ export const ContextMenu: FC<{ ignitor: BgsIgnitor }> = (props) => {
       return emptyActions;
     }
 
-    const positionEntities = World.filter(ignitor.world, ['GameObjectComponent', 'PositionComponent', 'SizeComponent']);
-    const positionComponentPool = World.getOrAddPool(ignitor.world, 'PositionComponent');
-    const sizeComponentPool = World.getOrAddPool(ignitor.world, 'SizeComponent');
+    const positionEntities = Essence.filter(ignitor.essence, [
+      'GameObjectComponent',
+      'PositionComponent',
+      'SizeComponent',
+    ]);
+    const positionComponentPool = Essence.getOrAddPool(ignitor.essence, 'PositionComponent');
+    const sizeComponentPool = Essence.getOrAddPool(ignitor.essence, 'SizeComponent');
 
-    const playerMouseEntities = World.filter(ignitor.world, ['PlayerComponent', 'OwnerComponent', 'HandComponent']);
-    const handPool = World.getOrAddPool(ignitor.world, 'HandComponent');
+    const playerMouseEntities = Essence.filter(ignitor.essence, ['PlayerComponent', 'OwnerComponent', 'HandComponent']);
+    const handPool = Essence.getOrAddPool(ignitor.essence, 'HandComponent');
     const playerMouseComponent = Pool.get(handPool, playerMouseEntities[0]);
 
     const mouseOnEntities: EntityId[] = [];
@@ -86,7 +90,7 @@ export const ContextMenu: FC<{ ignitor: BgsIgnitor }> = (props) => {
     });
 
     if (maxZPositionEntity) {
-      const deletableCP = World.getOrAddPool(ignitor.world, 'DeletableComponent');
+      const deletableCP = Essence.getOrAddPool(ignitor.essence, 'DeletableComponent');
       if (Pool.tryGet(deletableCP, maxZPositionEntity)) {
         // . DELETE BUTTON
         actions.push(
@@ -94,7 +98,7 @@ export const ContextMenu: FC<{ ignitor: BgsIgnitor }> = (props) => {
             key={maxZPositionEntity + ':delete_button'}
             onClick={() => {
               handleClose();
-              World.destroyEntity(ignitor.world, maxZPositionEntity);
+              Essence.destroyEntity(ignitor.essence, maxZPositionEntity);
               ignitor.ctx.forceUpdate();
             }}
           >
@@ -104,11 +108,11 @@ export const ContextMenu: FC<{ ignitor: BgsIgnitor }> = (props) => {
       }
 
       // . (UN)LOCK BUTTON
-      const lockableComponentPool = World.getOrAddPool(ignitor.world, 'LockableComponent');
+      const lockableComponentPool = Essence.getOrAddPool(ignitor.essence, 'LockableComponent');
       const lockableComponent = Pool.tryGet(lockableComponentPool, maxZPositionEntity);
 
       if (lockableComponent) {
-        const isLockedComponentPool = World.getOrAddPool(ignitor.world, 'IsLockedComponent');
+        const isLockedComponentPool = Essence.getOrAddPool(ignitor.essence, 'IsLockedComponent');
         const isLockedComponent = Pool.tryGet(isLockedComponentPool, maxZPositionEntity);
 
         if (isLockedComponent) {

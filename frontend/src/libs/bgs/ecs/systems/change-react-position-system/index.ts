@@ -1,5 +1,5 @@
 import { System } from '../../../../ecs/system';
-import { World } from '../../../../ecs/world';
+import { Essence } from '../../../../ecs/world';
 import { Pool } from '../../../../ecs/component';
 import { PositionComponent, ReactPositionComponent } from '../../components';
 
@@ -7,14 +7,14 @@ export const ChangeReactPositionSystem = (): System<{
   ReactPositionComponent: ReactPositionComponent;
   PositionComponent: PositionComponent;
 }> => ({
-  run: async ({ world }) => {
-    const entities = World.filter(world, ['ReactPositionComponent', 'PositionComponent']);
+  run: async ({ essence }) => {
+    const entities = Essence.filter(essence, ['ReactPositionComponent', 'PositionComponent']);
     if (entities.length === 0) {
       return;
     }
 
-    const positionPool = World.getOrAddPool(world, 'PositionComponent');
-    const reactPositionPool = World.getOrAddPool(world, 'ReactPositionComponent');
+    const positionPool = Essence.getOrAddPool(essence, 'PositionComponent');
+    const reactPositionPool = Essence.getOrAddPool(essence, 'ReactPositionComponent');
 
     entities.forEach((entity) => {
       const positionComponent = Pool.get(positionPool, entity);

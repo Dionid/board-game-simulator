@@ -1,5 +1,5 @@
 import { System } from '../../../../ecs/system';
-import { World } from '../../../../ecs/world';
+import { Essence } from '../../../../ecs/world';
 import { ComponentId, Pool } from '../../../../ecs/component';
 import { EntityId } from '../../../../ecs/entity';
 import {
@@ -28,19 +28,19 @@ export const SpawnHeroSetSystem = (): System<
   }
 > => {
   return {
-    run: async ({ world, ctx }) => {
-      const entities = World.filter(world, ['SpawnHeroSetComponent']);
+    run: async ({ essence, ctx }) => {
+      const entities = Essence.filter(essence, ['SpawnHeroSetComponent']);
       if (entities.length === 0) {
         return;
       }
 
-      const spawnHeroSetComponentPool = World.getOrAddPool(world, 'SpawnHeroSetComponent');
-      const spawnHeroComponentPool = World.getOrAddPool(world, 'SpawnHeroComponent');
-      const spawnSidekickEventComponentPool = World.getOrAddPool(world, 'SpawnSideKickEventComponent');
-      const spawnDeckEventComponentPool = World.getOrAddPool(world, 'SpawnDeckEventComponent');
-      // const spawnCardEventComponentPool = World.getOrAddPool(world, 'SpawnCardEventComponent');
-      const spawnRuleCardEventComponentPool = World.getOrAddPool(world, 'SpawnRuleCardEventComponent');
-      const spawnHealthMeterEventComponentPool = World.getOrAddPool(world, 'SpawnHealthMeterEventComponent');
+      const spawnHeroSetComponentPool = Essence.getOrAddPool(essence, 'SpawnHeroSetComponent');
+      const spawnHeroComponentPool = Essence.getOrAddPool(essence, 'SpawnHeroComponent');
+      const spawnSidekickEventComponentPool = Essence.getOrAddPool(essence, 'SpawnSideKickEventComponent');
+      const spawnDeckEventComponentPool = Essence.getOrAddPool(essence, 'SpawnDeckEventComponent');
+      // const spawnCardEventComponentPool = Essence.getOrAddPool(essence, 'SpawnCardEventComponent');
+      const spawnRuleCardEventComponentPool = Essence.getOrAddPool(essence, 'SpawnRuleCardEventComponent');
+      const spawnHealthMeterEventComponentPool = Essence.getOrAddPool(essence, 'SpawnHealthMeterEventComponent');
 
       const heroSets = ctx.heroSets;
 

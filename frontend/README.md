@@ -52,7 +52,7 @@
 1. Refactor SelectSystem
 2. Replace png with svg
 3. Ipad version
-4. More `World.filter` operations (`in`, `notIn`, etc.)
+4. More `Essence.filter` operations (`in`, `notIn`, etc.)
 5. Rename Systems to "Input" and "Output"
 6. Rename Systems to EvenSystems
 7. ~~Make component names as constants~~

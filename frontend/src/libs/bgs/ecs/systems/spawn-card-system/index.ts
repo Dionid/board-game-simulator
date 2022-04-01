@@ -1,5 +1,5 @@
 import { System } from '../../../../ecs/system';
-import { World } from '../../../../ecs/world';
+import { Essence } from '../../../../ecs/world';
 import { ComponentId, Pool } from '../../../../ecs/component';
 import { CardComponent, SpawnCardEventComponent, SpawnGameObjectEventComponent } from '../../components';
 
@@ -9,15 +9,15 @@ export const SpawnCardEventSystem = (): System<{
   SpawnGameObjectEventComponent: SpawnGameObjectEventComponent;
 }> => {
   return {
-    run: async ({ world }) => {
-      const entities = World.filter(world, ['SpawnCardEventComponent']);
+    run: async ({ essence }) => {
+      const entities = Essence.filter(essence, ['SpawnCardEventComponent']);
       if (entities.length === 0) {
         return;
       }
 
-      const spawnCardComponentPool = World.getOrAddPool(world, 'SpawnCardEventComponent');
-      const cardComponentPool = World.getOrAddPool(world, 'CardComponent');
-      const spawnGameObjectComponentPool = World.getOrAddPool(world, 'SpawnGameObjectEventComponent');
+      const spawnCardComponentPool = Essence.getOrAddPool(essence, 'SpawnCardEventComponent');
+      const cardComponentPool = Essence.getOrAddPool(essence, 'CardComponent');
+      const spawnGameObjectComponentPool = Essence.getOrAddPool(essence, 'SpawnGameObjectEventComponent');
 
       for (const cardEntity of entities) {
         const spawnComponent = Pool.get(spawnCardComponentPool, cardEntity);

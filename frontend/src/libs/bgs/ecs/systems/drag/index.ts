@@ -16,7 +16,7 @@ import {
   ScaleComponent,
   ScaleComponentName,
 } from '../../components';
-import { World } from '../../../../ecs/world';
+import { Essence } from '../../../../ecs/world';
 import { Pool } from '../../../../ecs/component';
 import { Vector2 } from '../../../../math';
 
@@ -35,38 +35,42 @@ export const DragSystem = (): System<{
 }> => {
   return {
     run: async (props) => {
-      const { world } = props;
+      const { essence } = props;
 
-      const panModeEntities = World.filter(world, ['PanModeComponent']);
+      const panModeEntities = Essence.filter(essence, ['PanModeComponent']);
 
       // . Disable drag in pan mode
       if (panModeEntities.length > 0) {
         return;
       }
 
-      const playerCameraEntities = World.filter(world, [PlayerComponentName, CameraComponentName, ScaleComponentName]);
+      const playerCameraEntities = Essence.filter(essence, [
+        PlayerComponentName,
+        CameraComponentName,
+        ScaleComponentName,
+      ]);
       const playerCameraEntity = playerCameraEntities[0];
-      const playerMouseEntities = World.filter(world, ['PlayerComponent', 'OwnerComponent', 'HandComponent']);
-      let selectedAndDraggableEntities = World.filter(world, [
+      const playerMouseEntities = Essence.filter(essence, ['PlayerComponent', 'OwnerComponent', 'HandComponent']);
+      let selectedAndDraggableEntities = Essence.filter(essence, [
         'DraggableComponent',
         'PositionComponent',
         'IsSelectedComponent',
       ]);
 
       // . Filter out locked entities
-      const isLockedEntities = World.filter(world, ['IsLockedComponent']);
+      const isLockedEntities = Essence.filter(essence, ['IsLockedComponent']);
       selectedAndDraggableEntities = selectedAndDraggableEntities.filter((id) => isLockedEntities.indexOf(id) === -1);
 
       if (selectedAndDraggableEntities.length === 0) {
         return;
       }
 
-      const handPool = World.getOrAddPool(world, 'HandComponent');
+      const handPool = Essence.getOrAddPool(essence, 'HandComponent');
 
       selectedAndDraggableEntities.forEach((selectedAndDraggableEntity) => {
-        const positionCP = World.getOrAddPool(world, 'PositionComponent');
+        const positionCP = Essence.getOrAddPool(essence, 'PositionComponent');
         const positionC = Pool.get(positionCP, selectedAndDraggableEntity);
-        const scaleCP = World.getOrAddPool(world, ScaleComponentName);
+        const scaleCP = Essence.getOrAddPool(essence, ScaleComponentName);
         const cameraScaleC = Pool.get(scaleCP, playerCameraEntity);
 
         playerMouseEntities.forEach((playerMouseEntity) => {

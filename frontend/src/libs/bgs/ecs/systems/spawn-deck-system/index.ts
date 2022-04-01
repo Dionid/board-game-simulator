@@ -1,5 +1,5 @@
 import { System } from '../../../../ecs/system';
-import { World } from '../../../../ecs/world';
+import { Essence } from '../../../../ecs/world';
 import { ComponentId, Pool } from '../../../../ecs/component';
 import {
   CameraComponent,
@@ -26,24 +26,24 @@ export const SpawnDeckEventSystem = (): System<{
   [SizeComponentName]: SizeComponent;
 }> => {
   return {
-    run: async ({ world }) => {
-      const entities = World.filter(world, ['SpawnDeckEventComponent']);
+    run: async ({ essence }) => {
+      const entities = Essence.filter(essence, ['SpawnDeckEventComponent']);
       if (entities.length === 0) {
         return;
       }
 
-      const playerEntities = World.filter(world, ['PlayerComponent', 'CameraComponent']);
-      const cameraPositionComponentPool = World.getOrAddPool(world, 'PositionComponent');
-      const cameraSizeComponentPool = World.getOrAddPool(world, 'SizeComponent');
+      const playerEntities = Essence.filter(essence, ['PlayerComponent', 'CameraComponent']);
+      const cameraPositionComponentPool = Essence.getOrAddPool(essence, 'PositionComponent');
+      const cameraSizeComponentPool = Essence.getOrAddPool(essence, 'SizeComponent');
 
       // TODO. Refactor for collaboration
       const playerEntity = playerEntities[0];
       const cameraPositionC = Pool.get(cameraPositionComponentPool, playerEntity);
       const cameraSizeC = Pool.get(cameraSizeComponentPool, playerEntity);
 
-      const spawnDeckComponentPool = World.getOrAddPool(world, 'SpawnDeckEventComponent');
-      const deckComponentPool = World.getOrAddPool(world, 'DeckComponent');
-      const spawnGameObjectComponentPool = World.getOrAddPool(world, 'SpawnGameObjectEventComponent');
+      const spawnDeckComponentPool = Essence.getOrAddPool(essence, 'SpawnDeckEventComponent');
+      const deckComponentPool = Essence.getOrAddPool(essence, 'DeckComponent');
+      const spawnGameObjectComponentPool = Essence.getOrAddPool(essence, 'SpawnGameObjectEventComponent');
 
       for (const deckEntity of entities) {
         const spawnComponent = Pool.get(spawnDeckComponentPool, deckEntity);

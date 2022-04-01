@@ -10,7 +10,7 @@ import {
   LockableComponent,
   DeletableComponent,
 } from '../../components';
-import { World } from '../../../../ecs/world';
+import { Essence } from '../../../../ecs/world';
 import { ComponentId, Pool } from '../../../../ecs/component';
 
 export const SpawnGameObjectSystem = (): System<
@@ -32,22 +32,22 @@ export const SpawnGameObjectSystem = (): System<
   let lastZ = 1;
 
   return {
-    run: async ({ world, ctx }) => {
-      const entities = World.filter(world, ['SpawnGameObjectEventComponent']);
+    run: async ({ essence, ctx }) => {
+      const entities = Essence.filter(essence, ['SpawnGameObjectEventComponent']);
 
       if (entities.length === 0) {
         return;
       }
 
-      const spawnGameObjectComponentPool = World.getOrAddPool(world, 'SpawnGameObjectEventComponent');
-      const imageComponentPool = World.getOrAddPool(world, 'ImageComponent');
-      const positionComponentPool = World.getOrAddPool(world, 'PositionComponent');
-      const sizeComponentPool = World.getOrAddPool(world, 'SizeComponent');
-      const draggableComponentPool = World.getOrAddPool(world, 'DraggableComponent');
-      const selectableComponentPool = World.getOrAddPool(world, 'SelectableComponent');
-      const lockableComponentPool = World.getOrAddPool(world, 'LockableComponent');
-      const deletableComponentPool = World.getOrAddPool(world, 'DeletableComponent');
-      const gameObjectComponentPool = World.getOrAddPool(world, 'GameObjectComponent');
+      const spawnGameObjectComponentPool = Essence.getOrAddPool(essence, 'SpawnGameObjectEventComponent');
+      const imageComponentPool = Essence.getOrAddPool(essence, 'ImageComponent');
+      const positionComponentPool = Essence.getOrAddPool(essence, 'PositionComponent');
+      const sizeComponentPool = Essence.getOrAddPool(essence, 'SizeComponent');
+      const draggableComponentPool = Essence.getOrAddPool(essence, 'DraggableComponent');
+      const selectableComponentPool = Essence.getOrAddPool(essence, 'SelectableComponent');
+      const lockableComponentPool = Essence.getOrAddPool(essence, 'LockableComponent');
+      const deletableComponentPool = Essence.getOrAddPool(essence, 'DeletableComponent');
+      const gameObjectComponentPool = Essence.getOrAddPool(essence, 'GameObjectComponent');
 
       for (const gameObjectEntity of entities) {
         const spawnComponent = Pool.get(spawnGameObjectComponentPool, gameObjectEntity);

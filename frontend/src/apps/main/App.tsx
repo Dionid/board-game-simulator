@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import CssBaseline from '@mui/material/CssBaseline';
 import { BgsIgnitor, BgsIgnitorCtx } from '../../libs/bgs/ecs';
 import { Ignitor } from '../../libs/ecs/ignitor';
-import { World } from '../../libs/ecs/world';
+import { Essence } from '../../libs/ecs/world';
 import { ChangeReactPositionSystem } from '../../libs/bgs/ecs/systems/change-react-position-system';
 import { ChangeReactImageSystem } from '../../libs/bgs/ecs/systems/change-react-image-system';
 import { SpawnGameMapSystem } from '../../libs/bgs/ecs/systems/spawn-game-map-system';
@@ -41,7 +41,7 @@ function App() {
 
   const ignitor = useMemo(() => {
     const ignitor: BgsIgnitor = {
-      world: {
+      essence: {
         pools: {},
       },
       ctx: {
@@ -92,7 +92,7 @@ function App() {
     // @ts-ignore
     window.Ignitor = Ignitor;
     // @ts-ignore
-    window.World = World;
+    window.Essence = Essence;
 
     (async () => {
       await Ignitor.init(ignitor);
@@ -118,7 +118,7 @@ function App() {
   }, [heroSets]);
 
   // TODO. Refactor for collaboration
-  const playerEntities = World.filter(ignitor.world, ['PlayerComponent', 'CameraComponent']);
+  const playerEntities = Essence.filter(ignitor.essence, ['PlayerComponent', 'CameraComponent']);
   const playerEntity = playerEntities[0];
 
   console.log('APP', playerEntity);

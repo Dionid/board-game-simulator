@@ -14,7 +14,7 @@ import {
   SizeComponent,
   SizeComponentName,
 } from '../../components';
-import { World } from '../../../../ecs/world';
+import { Essence } from '../../../../ecs/world';
 import { ComponentId, Pool } from '../../../../ecs/component';
 
 export const HandInputSystem = (): System<{
@@ -33,9 +33,9 @@ export const HandInputSystem = (): System<{
   };
 
   return {
-    init: async ({ world }) => {
-      const entities = World.filter(world, ['PlayerComponent']);
-      const mousePool = World.getOrAddPool(world, 'HandComponent');
+    init: async ({ essence }) => {
+      const entities = Essence.filter(essence, ['PlayerComponent']);
+      const mousePool = Essence.getOrAddPool(essence, 'HandComponent');
 
       // TODO. Fix for collaboration
       const playerEntity = entities[0];
@@ -87,14 +87,18 @@ export const HandInputSystem = (): System<{
         lastMouseData.y = event.pageY;
       };
     },
-    run: async ({ world }) => {
-      const entities = World.filter(world, ['HandComponent', 'PlayerComponent', 'OwnerComponent']);
+    run: async ({ essence }) => {
+      const entities = Essence.filter(essence, ['HandComponent', 'PlayerComponent', 'OwnerComponent']);
 
-      const mouseCP = World.getOrAddPool(world, 'HandComponent');
-      const positionCP = World.getOrAddPool(world, 'PositionComponent');
-      const scaleCP = World.getOrAddPool(world, ScaleComponentName);
+      const mouseCP = Essence.getOrAddPool(essence, 'HandComponent');
+      const positionCP = Essence.getOrAddPool(essence, 'PositionComponent');
+      const scaleCP = Essence.getOrAddPool(essence, ScaleComponentName);
 
-      const playerCameraEntities = World.filter(world, [PlayerComponentName, CameraComponentName, ScaleComponentName]);
+      const playerCameraEntities = Essence.filter(essence, [
+        PlayerComponentName,
+        CameraComponentName,
+        ScaleComponentName,
+      ]);
       const playerCameraEntity = playerCameraEntities[0];
       const cameraScaleC = Pool.get(scaleCP, playerCameraEntity);
 
