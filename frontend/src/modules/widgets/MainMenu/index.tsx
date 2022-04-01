@@ -12,12 +12,6 @@ import PanToolIcon from '@mui/icons-material/PanTool';
 import ZoomInIcon from '@mui/icons-material/ZoomIn';
 import ZoomOutIcon from '@mui/icons-material/ZoomOut';
 import { useEventListener } from '../../../libs/react/hooks/use-event-listener';
-import {
-  CameraComponentName,
-  PlayerComponentName,
-  ScaleComponentName,
-  SizeComponentName,
-} from '../../../libs/bgs/ecs/components';
 
 export const MainMenu = memo(({ heroSets, ignitor }: { heroSets: HeroSets; ignitor: BgsIgnitor }) => {
   const [mode, setMode] = useState<'pan' | null>(null);
@@ -82,32 +76,20 @@ export const MainMenu = memo(({ heroSets, ignitor }: { heroSets: HeroSets; ignit
   };
 
   const onZoomOutClick = () => {
-    const cameraEntities = World.filter(ignitor.world, [CameraComponentName, ScaleComponentName, PlayerComponentName]);
-    const scaleCP = World.getOrAddPool(ignitor.world, ScaleComponentName);
-    const sizeCP = World.getOrAddPool(ignitor.world, SizeComponentName);
-    const cameraEntity = cameraEntities[0];
-    const scaleC = Pool.get(scaleCP, cameraEntity);
-    const sizeC = Pool.get(sizeCP, cameraEntity);
-    if (scaleC.data.x > 0.6) {
-      scaleC.data.x -= 0.1;
-      scaleC.data.y -= 0.1;
-      sizeC.data.width *= 1.1;
-      sizeC.data.height *= 1.1;
-    }
+    const zoomOutCP = World.getOrAddPool(ignitor.world, 'ZoomOutEventComponent');
+    Pool.add(zoomOutCP, EntityId.new(), {
+      id: ComponentId.new(),
+      name: 'ZoomOutEventComponent',
+      data: {},
+    });
   };
   const onZoomInClick = () => {
-    const cameraEntities = World.filter(ignitor.world, [CameraComponentName, ScaleComponentName, PlayerComponentName]);
-    const scaleCP = World.getOrAddPool(ignitor.world, ScaleComponentName);
-    const sizeCP = World.getOrAddPool(ignitor.world, SizeComponentName);
-    const cameraEntity = cameraEntities[0];
-    const scaleC = Pool.get(scaleCP, cameraEntity);
-    const sizeC = Pool.get(sizeCP, cameraEntity);
-    if (scaleC.data.x < 1.4) {
-      scaleC.data.x += 0.1;
-      scaleC.data.y += 0.1;
-      sizeC.data.width *= 0.9;
-      sizeC.data.height *= 0.9;
-    }
+    const zoomInCP = World.getOrAddPool(ignitor.world, 'ZoomInEventComponent');
+    Pool.add(zoomInCP, EntityId.new(), {
+      id: ComponentId.new(),
+      name: 'ZoomInEventComponent',
+      data: {},
+    });
   };
 
   return (

@@ -88,8 +88,9 @@ export type ScaleComponent = Component<typeof ScaleComponentName, Vector2>;
 
 // .. SPAWN EVENTS
 
+export const SpawnGameObjectEventComponentName = 'SpawnGameObjectEventComponent';
 export type SpawnGameObjectEventComponent = Component<
-  'SpawnGameObjectEventComponent',
+  typeof SpawnGameObjectEventComponentName,
   Square & {
     draggable: boolean;
     selectable: boolean;
@@ -98,6 +99,14 @@ export type SpawnGameObjectEventComponent = Component<
     deletable: boolean;
   }
 >;
+
+// .. Events
+
+export const ZoomInEventComponentName = 'ZoomInEventComponent';
+export type ZoomInEventComponent = Component<typeof ZoomInEventComponentName, {}>;
+
+export const ZoomOutEventComponentName = 'ZoomOutEventComponent';
+export type ZoomOutEventComponent = Component<typeof ZoomOutEventComponentName, {}>;
 
 // . UNMATCHED COMPONENTS
 

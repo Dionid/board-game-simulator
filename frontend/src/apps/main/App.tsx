@@ -28,6 +28,7 @@ import { useForceUpdate } from '../../libs/react/hooks/use-force-update';
 import { Minimap } from '../../modules/widgets/Minimap';
 import { GameStage } from '../../modules/widgets/GameStage';
 import { ChangeReactScaleSystem } from '../../libs/bgs/ecs/systems/change-react-scale-system';
+import { ZoomSystem } from '../../libs/bgs/ecs/systems/zoom';
 
 // TODO. Move
 const boardSize = {
@@ -56,6 +57,7 @@ function App() {
         // CAMERA
         BoardSystem(boardSize),
         CameraSystem(),
+        ZoomSystem(),
 
         // INTERACTION
         SelectSystem(),

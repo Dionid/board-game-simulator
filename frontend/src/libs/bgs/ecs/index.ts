@@ -50,6 +50,10 @@ import {
   SpawnHeroSetComponent,
   SpawnRuleCardEventComponent,
   SpawnSideKickEventComponent,
+  ZoomInEventComponent,
+  ZoomInEventComponentName,
+  ZoomOutEventComponent,
+  ZoomOutEventComponentName,
 } from './components';
 import { HeroSets } from '../games/unmatched';
 
@@ -68,6 +72,7 @@ export type BgsIgnitorComponents = {
   [CameraComponentName]: CameraComponent;
   [BoardComponentName]: BoardComponent;
   [HandComponentName]: HandComponent;
+
   // GAME
   ImageComponent: ImageComponent;
   PositionComponent: PositionComponent;
@@ -90,6 +95,9 @@ export type BgsIgnitorComponents = {
   HeroSetComponent: HeroSetComponent;
   HealthMeterComponent: HealthMeterComponent;
 
+  // . EVENTS
+  [ZoomInEventComponentName]: ZoomInEventComponent;
+  [ZoomOutEventComponentName]: ZoomOutEventComponent;
   SpawnGameMapComponent: SpawnGameMapComponent;
   SpawnHeroComponent: SpawnHeroComponent;
   SpawnSideKickEventComponent: SpawnSideKickEventComponent;
