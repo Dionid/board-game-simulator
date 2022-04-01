@@ -9,6 +9,7 @@ import { Square } from '../../../libs/math';
 import { PersonAdd } from '@mui/icons-material';
 import { HeroSets, MapId, SetId } from '../../../libs/bgs/games/unmatched';
 import { SpawnGameMapEventComponentName, SpawnHeroSetEventComponentName } from '../../../libs/bgs/ecs/components';
+import { v4 } from 'uuid';
 
 export const ContextMenu: FC<{ world: BgsWorld; heroSets: HeroSets }> = (props) => {
   const { children, world, heroSets } = props;
@@ -76,7 +77,7 @@ export const ContextMenu: FC<{ world: BgsWorld; heroSets: HeroSets }> = (props) 
   const contextMenuActions = () => {
     const actions: JSX.Element[] = [];
     const emptyActions = [
-      <MenuItem onClick={spawnMap}>
+      <MenuItem key={v4()} onClick={spawnMap}>
         <ListItemIcon>
           <PersonAdd fontSize="small" />
         </ListItemIcon>

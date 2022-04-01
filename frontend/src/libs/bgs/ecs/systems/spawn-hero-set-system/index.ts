@@ -110,6 +110,7 @@ export const SpawnHeroSetSystem = (): System<
             id: ComponentId.new(),
             data: {
               url: deck.frontImageUrl,
+              setId: spawnComponent.data.setId,
               deckId: deck.id,
               x,
               y,

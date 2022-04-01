@@ -50,19 +50,19 @@
 
 ## Second
 
+2. Resize canvas on window resize
 1. Refactor SelectSystem
-2. Refactor Pan system
-3. Ipad version
-4. More `Essence.filter` operations (`in`, `notIn`, etc.)
-5. Rename Systems to "Input" and "Output"
-6. ~~Replace png with svg~~
-7. ~~Rename Systems to EventSystems~~
-8. ~~Make component names as constants~~
-9. ~~How to rerender on changes~~
+1. Refactor Pan system
+1. Ipad version
+1. More `Essence.filter` operations (`in`, `notIn`, etc.)
+1. Rename Systems to "Input" and "Output"
+1. ~~Replace png with svg~~
+1. ~~Rename Systems to EventSystems~~
+1. ~~Make component names as constants~~
+1. ~~How to rerender on changes~~
 
 ## Additional
 
 1. Mobile version
-2. Resize canvas on window resize
-3. Background grid
-4. History
+2. Background grid
+3. History

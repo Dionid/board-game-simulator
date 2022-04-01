@@ -5,6 +5,7 @@ import {
   CameraComponent,
   CameraComponentName,
   DeckComponent,
+  DeckComponentName,
   PlayerComponent,
   PlayerComponentName,
   PositionComponent,
@@ -12,29 +13,37 @@ import {
   SizeComponent,
   SizeComponentName,
   SpawnDeckEventComponent,
+  SpawnDeckEventComponentName,
   SpawnGameObjectEventComponent,
+  SpawnGameObjectEventComponentName,
 } from '../../components';
 import { Size } from '../../../../math';
+import { Card, Deck, HeroSets } from '../../../games/unmatched';
 
-export const SpawnDeckEventSystem = (): System<{
-  SpawnDeckEventComponent: SpawnDeckEventComponent;
-  DeckComponent: DeckComponent;
-  SpawnGameObjectEventComponent: SpawnGameObjectEventComponent;
-  [CameraComponentName]: CameraComponent;
-  [PlayerComponentName]: PlayerComponent;
-  [PositionComponentName]: PositionComponent;
-  [SizeComponentName]: SizeComponent;
-}> => {
+export const SpawnDeckEventSystem = (): System<
+  {
+    [SpawnDeckEventComponentName]: SpawnDeckEventComponent;
+    [DeckComponentName]: DeckComponent;
+    [SpawnGameObjectEventComponentName]: SpawnGameObjectEventComponent;
+    [CameraComponentName]: CameraComponent;
+    [PlayerComponentName]: PlayerComponent;
+    [PositionComponentName]: PositionComponent;
+    [SizeComponentName]: SizeComponent;
+  },
+  {
+    heroSets: HeroSets;
+  }
+> => {
   return {
-    run: async ({ essence }) => {
-      const entities = Essence.filter(essence, ['SpawnDeckEventComponent']);
+    run: async ({ essence, ctx }) => {
+      const entities = Essence.filter(essence, [SpawnDeckEventComponentName]);
       if (entities.length === 0) {
         return;
       }
 
-      const spawnDeckComponentPool = Essence.getOrAddPool(essence, 'SpawnDeckEventComponent');
-      const deckComponentPool = Essence.getOrAddPool(essence, 'DeckComponent');
-      const spawnGameObjectComponentPool = Essence.getOrAddPool(essence, 'SpawnGameObjectEventComponent');
+      const spawnDeckComponentPool = Essence.getOrAddPool(essence, SpawnDeckEventComponentName);
+      const deckComponentPool = Essence.getOrAddPool(essence, DeckComponentName);
+      const spawnGameObjectComponentPool = Essence.getOrAddPool(essence, SpawnGameObjectEventComponentName);
 
       for (const deckEntity of entities) {
         const spawnComponent = Pool.get(spawnDeckComponentPool, deckEntity);
@@ -47,7 +56,7 @@ export const SpawnDeckEventSystem = (): System<{
         };
         Pool.add(spawnGameObjectComponentPool, deckEntity, {
           id: ComponentId.new(),
-          name: 'SpawnGameObjectEventComponent',
+          name: SpawnGameObjectEventComponentName,
           data: {
             imageUrl: spawnComponent.data.url,
             draggable: true,
@@ -60,12 +69,27 @@ export const SpawnDeckEventSystem = (): System<{
           },
         });
 
+        const heroSets = ctx.heroSets;
+        const herSetCards = heroSets[spawnComponent.data.setId].cards;
+
+        const cards: Card[] = [];
+
+        for (let i = 0; i < herSetCards.length; i++) {
+          const cardTemplate = herSetCards[i];
+          for (let j = 0; j < cardTemplate.qty; j++) {
+            cards.push(cardTemplate);
+          }
+        }
+
+        const deck: Deck = {
+          id: spawnComponent.data.deckId,
+          cards,
+        };
+        Deck.shuffle(deck);
         Pool.add(deckComponentPool, deckEntity, {
           id: ComponentId.new(),
-          name: 'DeckComponent',
-          data: {
-            deckId: spawnComponent.data.deckId,
-          },
+          name: DeckComponentName,
+          data: deck,
         });
 
         // Destroy event

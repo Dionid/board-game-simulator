@@ -1,7 +1,17 @@
 import { Component } from '../../../ecs/component';
 import { ReactComponent } from '../../../ecs/react';
 import { UUID } from '../../../branded-types';
-import { CardId, DeckId, HealthMeterId, HeroId, MapId, RuleCardId, SetId, SidekickId } from '../../games/unmatched';
+import {
+  CardId,
+  Deck,
+  DeckId,
+  HealthMeterId,
+  HeroId,
+  MapId,
+  RuleCardId,
+  SetId,
+  SidekickId,
+} from '../../games/unmatched';
 import { Size, Square, Vector2, Vector3 } from '../../../math';
 
 // . BOARD
@@ -144,12 +154,7 @@ export type SidekickComponent = Component<
 >;
 
 export const DeckComponentName = 'DeckComponent';
-export type DeckComponent = Component<
-  typeof DeckComponentName,
-  {
-    deckId: DeckId;
-  }
->;
+export type DeckComponent = Component<typeof DeckComponentName, Deck>;
 
 export const CardComponentName = 'CardComponent';
 export type CardComponent = Component<
@@ -223,6 +228,7 @@ export type SpawnDeckEventComponent = Component<
   typeof SpawnDeckEventComponentName,
   {
     url: string;
+    setId: SetId;
     deckId: DeckId;
     x: number;
     y: number;

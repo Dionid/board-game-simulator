@@ -60,6 +60,14 @@ export const CardId = {
   },
 };
 
+export type Card = {
+  id: CardId;
+  name: string;
+  frontImageUrl: string;
+  backImageUrl: string;
+  qty: number;
+};
+
 export type DeckId = UUID & { readonly DeckId: unique symbol };
 export const DeckId = {
   ofString: (value: string): DeckId => {
@@ -67,6 +75,21 @@ export const DeckId = {
   },
   new: (): DeckId => {
     return DeckId.ofString(UUID.new());
+  },
+};
+
+export type Deck = {
+  id: DeckId;
+  cards: Card[];
+};
+
+export const Deck = {
+  shuffle: (deck: Deck) => {
+    const { cards } = deck;
+    for (let i = cards.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [cards[i], cards[j]] = [cards[j], cards[i]];
+    }
   },
 };
 
@@ -80,7 +103,7 @@ export const SetId = {
   },
 };
 
-const LamdielCards = [
+const LamdielCards: Card[] = [
   {
     id: CardId.ofString('ecc54a26-c7c3-4487-be9a-a4658cd5a1d1'),
     name: 'Ambush',
@@ -248,7 +271,7 @@ export const LamdielHeroSet = {
 
 // DEKU
 
-const DekuCards = [
+const DekuCards: Card[] = [
   {
     id: CardId.ofString('867e90cd-c757-4855-be51-36da33970b0f'),
     name: 'Controlled Smash',
