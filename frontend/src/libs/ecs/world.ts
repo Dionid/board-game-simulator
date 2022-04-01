@@ -10,29 +10,29 @@ export type World<CR extends Record<string, Component<any, any>>, Ctx extends Re
 
 export const World = {
   init: async <CR extends Record<string, Component<any, any>>, Ctx extends Record<any, any> = Record<any, any>>(
-    ignitor: World<CR, Ctx>
+    world: World<CR, Ctx>
   ): Promise<void> => {
-    for (let i = 0; i < ignitor.systems.length; i++) {
-      const system = ignitor.systems[i];
+    for (let i = 0; i < world.systems.length; i++) {
+      const system = world.systems[i];
       if (system.init) {
         await system.init({
-          essence: ignitor.essence,
-          ctx: ignitor.ctx,
+          essence: world.essence,
+          ctx: world.ctx,
           timeDelta: 0,
         });
       }
     }
   },
   run: async <CR extends Record<string, Component<any, any>>, Ctx extends Record<any, any> = Record<any, any>>(
-    ignitor: World<CR, Ctx>,
+    world: World<CR, Ctx>,
     timeDelta: number
   ): Promise<void> => {
-    for (let i = 0; i < ignitor.systems.length; i++) {
-      const system = ignitor.systems[i];
+    for (let i = 0; i < world.systems.length; i++) {
+      const system = world.systems[i];
       if (system.run) {
         await system.run({
-          essence: ignitor.essence,
-          ctx: ignitor.ctx,
+          essence: world.essence,
+          ctx: world.ctx,
           timeDelta,
         });
       }
@@ -43,10 +43,10 @@ export const World = {
     K extends keyof Ctx,
     Ctx extends Record<K, any> = Record<K, any>
   >(
-    ignitor: World<CR, Ctx>,
+    world: World<CR, Ctx>,
     ctxName: K,
     dep: Ctx[K]
   ): void => {
-    ignitor.ctx[ctxName] = dep;
+    world.ctx[ctxName] = dep;
   },
 };

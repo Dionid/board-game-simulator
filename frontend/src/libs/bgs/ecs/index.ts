@@ -61,12 +61,12 @@ import { HeroSets } from '../games/unmatched';
 
 // export type BgsWorld = World<>;
 
-export type BgsIgnitorCtx = {
+export type BgsWorldCtx = {
   heroSets: typeof HeroSets;
   forceUpdate: () => void;
 };
 
-export type BgsIgnitorComponents = {
+export type BgsWorldComponents = {
   [PlayerComponentName]: PlayerComponent;
   [OwnerComponentName]: OwnerComponent;
   [CameraComponentName]: CameraComponent;
@@ -122,4 +122,4 @@ export type BgsIgnitorComponents = {
   [ReactScaleComponentName]: ReactScaleComponent;
 };
 
-export type BgsIgnitor = World<BgsIgnitorComponents, BgsIgnitorCtx>;
+export type BgsWorld = World<BgsWorldComponents, BgsWorldCtx>;

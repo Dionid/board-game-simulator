@@ -14,25 +14,25 @@ type EntityWithComponents = {
 
 export const Essence = {
   getPool: <CR extends Record<string, Component<any, any>>, K extends keyof CR>(
-    world: Essence<CR>,
+    essence: Essence<CR>,
     poolName: K
   ): Pool<CR[K]> | undefined => {
-    return world.pools[poolName];
+    return essence.pools[poolName];
   },
 
-  addPool: (world: Essence, pool: Pool): void => {
-    world.pools[pool.name] = pool;
+  addPool: (essence: Essence, pool: Pool): void => {
+    essence.pools[pool.name] = pool;
   },
 
   getOrAddPool: <CR extends Record<string, Component<any, any>>, K extends keyof CR>(
-    world: Essence<CR>,
+    essence: Essence<CR>,
     poolName: K
   ): Pool<CR[K]> => {
-    const pool = world.pools[poolName];
+    const pool = essence.pools[poolName];
 
     if (!pool) {
       const newPool = { name: poolName, data: {} };
-      world.pools[poolName] = newPool;
+      essence.pools[poolName] = newPool;
       return newPool;
     }
 
@@ -40,14 +40,14 @@ export const Essence = {
   },
 
   filter: <CR extends Record<string, Component<any, any>>, K extends keyof CR>(
-    world: Essence<CR>,
+    essence: Essence<CR>,
     componentNames: CR[K]['name'][]
   ): EntityId[] => {
     const entityIds: Record<EntityId, boolean> = {};
 
     for (let i = 0; i < componentNames.length; i++) {
       const compName = componentNames[i];
-      const pool = world.pools[compName];
+      const pool = essence.pools[compName];
       if (!pool) {
         return [];
       }
@@ -75,12 +75,12 @@ export const Essence = {
   },
 
   getEntity: <CR extends Record<string, Component<any, any>>>(
-    world: Essence<CR>,
+    essence: Essence<CR>,
     entityId: EntityId
   ): EntityWithComponents | undefined => {
-    const res = Object.keys(world.pools).reduce<EntityWithComponents>(
+    const res = Object.keys(essence.pools).reduce<EntityWithComponents>(
       (acc, poolName) => {
-        const pool = world.pools[poolName];
+        const pool = essence.pools[poolName];
         if (!pool) {
           return acc;
         }
@@ -103,9 +103,9 @@ export const Essence = {
     }
   },
 
-  destroyEntity: <CR extends Record<string, Component<any, any>>>(world: Essence<CR>, entityId: EntityId): void => {
-    Object.keys(world.pools).forEach((poolName) => {
-      const pool = world.pools[poolName];
+  destroyEntity: <CR extends Record<string, Component<any, any>>>(essence: Essence<CR>, entityId: EntityId): void => {
+    Object.keys(essence.pools).forEach((poolName) => {
+      const pool = essence.pools[poolName];
       if (!pool) {
         return;
       }
