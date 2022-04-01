@@ -191,6 +191,8 @@ export type SpawnGameMapEventComponent = Component<
   {
     url: string;
     mapId: MapId;
+    x: number;
+    y: number;
   }
 >;
 
@@ -200,6 +202,8 @@ export type SpawnHeroEventComponent = Component<
   {
     url: string;
     heroId: HeroId;
+    x: number;
+    y: number;
   }
 >;
 
@@ -209,6 +213,8 @@ export type SpawnSideKickEventComponent = Component<
   {
     url: string;
     sidekickId: SidekickId;
+    x: number;
+    y: number;
   }
 >;
 
@@ -218,6 +224,8 @@ export type SpawnDeckEventComponent = Component<
   {
     url: string;
     deckId: DeckId;
+    x: number;
+    y: number;
   }
 >;
 
@@ -227,6 +235,8 @@ export type SpawnCardEventComponent = Component<
   {
     url: string;
     cardId: CardId;
+    x: number;
+    y: number;
   }
 >;
 
@@ -236,6 +246,8 @@ export type SpawnRuleCardEventComponent = Component<
   {
     url: string;
     ruleCardId: RuleCardId;
+    x: number;
+    y: number;
   }
 >;
 
@@ -245,6 +257,8 @@ export type SpawnHealthMeterEventComponent = Component<
   {
     url: string;
     healthMeterId: HealthMeterId;
+    x: number;
+    y: number;
   }
 >;
 
@@ -253,6 +267,8 @@ export type SpawnHeroSetEventComponent = Component<
   typeof SpawnHeroSetEventComponentName,
   {
     setId: SetId;
+    x: number;
+    y: number;
   }
 >;
 

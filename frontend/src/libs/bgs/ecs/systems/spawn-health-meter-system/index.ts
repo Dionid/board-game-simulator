@@ -13,13 +13,15 @@ import {
   PositionComponent,
   SizeComponentName,
   SizeComponent,
+  HealthMeterComponentName,
+  SpawnGameObjectEventComponentName,
+  SpawnHealthMeterEventComponentName,
 } from '../../components';
-import { Vector2 } from '../../../../math';
 
 export const SpawnHealthMeterEventSystem = (): System<{
-  SpawnHealthMeterEventComponent: SpawnHealthMeterEventComponent;
-  HealthMeterComponent: HealthMeterComponent;
-  SpawnGameObjectEventComponent: SpawnGameObjectEventComponent;
+  [SpawnHealthMeterEventComponentName]: SpawnHealthMeterEventComponent;
+  [HealthMeterComponentName]: HealthMeterComponent;
+  [SpawnGameObjectEventComponentName]: SpawnGameObjectEventComponent;
   [CameraComponentName]: CameraComponent;
   [PlayerComponentName]: PlayerComponent;
   [PositionComponentName]: PositionComponent;
@@ -27,23 +29,14 @@ export const SpawnHealthMeterEventSystem = (): System<{
 }> => {
   return {
     run: async ({ essence }) => {
-      const entities = Essence.filter(essence, ['SpawnHealthMeterEventComponent']);
+      const entities = Essence.filter(essence, [SpawnHealthMeterEventComponentName]);
       if (entities.length === 0) {
         return;
       }
 
-      const playerEntities = Essence.filter(essence, ['PlayerComponent', 'CameraComponent']);
-      const cameraPositionComponentPool = Essence.getOrAddPool(essence, 'PositionComponent');
-      const cameraSizeComponentPool = Essence.getOrAddPool(essence, 'SizeComponent');
-
-      // TODO. Refactor for collaboration
-      const playerEntity = playerEntities[0];
-      const cameraPositionC = Pool.get(cameraPositionComponentPool, playerEntity);
-      const cameraSizeC = Pool.get(cameraSizeComponentPool, playerEntity);
-
-      const spawnHealthMeterComponentPool = Essence.getOrAddPool(essence, 'SpawnHealthMeterEventComponent');
-      const deckComponentPool = Essence.getOrAddPool(essence, 'HealthMeterComponent');
-      const spawnGameObjectComponentPool = Essence.getOrAddPool(essence, 'SpawnGameObjectEventComponent');
+      const spawnHealthMeterComponentPool = Essence.getOrAddPool(essence, SpawnHealthMeterEventComponentName);
+      const deckComponentPool = Essence.getOrAddPool(essence, HealthMeterComponentName);
+      const spawnGameObjectComponentPool = Essence.getOrAddPool(essence, SpawnGameObjectEventComponentName);
 
       for (const deckEntity of entities) {
         const spawnComponent = Pool.get(spawnHealthMeterComponentPool, deckEntity);
@@ -56,24 +49,22 @@ export const SpawnHealthMeterEventSystem = (): System<{
         };
         Pool.add(spawnGameObjectComponentPool, deckEntity, {
           id: ComponentId.new(),
-          name: 'SpawnGameObjectEventComponent',
+          name: SpawnGameObjectEventComponentName,
           data: {
             imageUrl: spawnComponent.data.url,
             draggable: true,
             selectable: true,
             lockable: true,
             deletable: false,
+            x: spawnComponent.data.x - size.width / 2,
+            y: spawnComponent.data.y - size.height / 2,
             ...size,
-            ...Vector2.sum(cameraPositionC.data, {
-              x: cameraSizeC.data.width / 2 - size.width / 2,
-              y: cameraSizeC.data.height / 2 - size.height / 2,
-            }),
           },
         });
 
         Pool.add(deckComponentPool, deckEntity, {
           id: ComponentId.new(),
-          name: 'HealthMeterComponent',
+          name: HealthMeterComponentName,
           data: {
             healthMeterId: spawnComponent.data.healthMeterId,
           },

@@ -39,25 +39,35 @@ export const ContextMenu: FC<{ world: BgsWorld; heroSets: HeroSets }> = (props) 
   };
 
   const spawnMap = () => {
+    if (!contextMenu) {
+      throw new Error(`Context menu must be not emtpy`);
+    }
     const spawnGameMapComponentPool = Essence.getOrAddPool(world.essence, SpawnGameMapEventComponentName);
     Pool.add(spawnGameMapComponentPool, EntityId.new(), {
-      name: SpawnHeroSetEventComponentName,
+      name: SpawnGameMapEventComponentName,
       id: ComponentId.new(),
       data: {
         url: '/maps/soho.png',
         mapId: MapId.new(),
+        x: contextMenu.x,
+        y: contextMenu.y,
       },
     });
     handleClose();
   };
 
   const spawnHeroSet = (setId: SetId) => {
+    if (!contextMenu) {
+      throw new Error(`Context menu must be not emtpy`);
+    }
     const spawnHeroSetComponentPool = Essence.getOrAddPool(world.essence, SpawnHeroSetEventComponentName);
     Pool.add(spawnHeroSetComponentPool, EntityId.new(), {
       name: SpawnHeroSetEventComponentName,
       id: ComponentId.new(),
       data: {
         setId,
+        x: contextMenu.x,
+        y: contextMenu.y,
       },
     });
     handleClose();

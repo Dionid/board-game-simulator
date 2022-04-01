@@ -14,7 +14,7 @@ import {
   SpawnDeckEventComponent,
   SpawnGameObjectEventComponent,
 } from '../../components';
-import { Size, Vector2 } from '../../../../math';
+import { Size } from '../../../../math';
 
 export const SpawnDeckEventSystem = (): System<{
   SpawnDeckEventComponent: SpawnDeckEventComponent;
@@ -31,15 +31,6 @@ export const SpawnDeckEventSystem = (): System<{
       if (entities.length === 0) {
         return;
       }
-
-      const playerEntities = Essence.filter(essence, ['PlayerComponent', 'CameraComponent']);
-      const cameraPositionComponentPool = Essence.getOrAddPool(essence, 'PositionComponent');
-      const cameraSizeComponentPool = Essence.getOrAddPool(essence, 'SizeComponent');
-
-      // TODO. Refactor for collaboration
-      const playerEntity = playerEntities[0];
-      const cameraPositionC = Pool.get(cameraPositionComponentPool, playerEntity);
-      const cameraSizeC = Pool.get(cameraSizeComponentPool, playerEntity);
 
       const spawnDeckComponentPool = Essence.getOrAddPool(essence, 'SpawnDeckEventComponent');
       const deckComponentPool = Essence.getOrAddPool(essence, 'DeckComponent');
@@ -63,11 +54,9 @@ export const SpawnDeckEventSystem = (): System<{
             selectable: true,
             lockable: true,
             deletable: false,
+            x: spawnComponent.data.x - size.width / 2,
+            y: spawnComponent.data.y - size.height / 2,
             ...size,
-            ...Vector2.sum(cameraPositionC.data, {
-              x: cameraSizeC.data.width / 2 - size.width / 2,
-              y: cameraSizeC.data.height / 2 - size.height / 2,
-            }),
           },
         });
 

@@ -24,19 +24,22 @@ export const SpawnCardEventSystem = (): System<{
 
         // TODO. Think about entity id: must be new or the same
         // . Create card spawn event
+        const size = {
+          width: 100,
+          height: 140,
+        };
         Pool.add(spawnGameObjectComponentPool, cardEntity, {
           id: ComponentId.new(),
           name: 'SpawnGameObjectEventComponent',
           data: {
             imageUrl: spawnComponent.data.url,
-            x: 100,
-            y: 100,
-            width: 100,
-            height: 140,
             draggable: true,
             selectable: true,
             lockable: true,
             deletable: false,
+            x: spawnComponent.data.x - size.width / 2,
+            y: spawnComponent.data.y - size.height / 2,
+            ...size,
           },
         });
 

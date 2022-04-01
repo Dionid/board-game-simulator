@@ -3,6 +3,12 @@ import { Essence } from '../../../../ecs/essence';
 import { ComponentId, Pool } from '../../../../ecs/component';
 import { EntityId } from '../../../../ecs/entity';
 import {
+  CameraComponent,
+  CameraComponentName,
+  PlayerComponent,
+  PlayerComponentName,
+  PositionComponent,
+  PositionComponentName,
   SpawnCardEventComponent,
   SpawnCardEventComponentName,
   SpawnDeckEventComponent,
@@ -29,6 +35,9 @@ export const SpawnHeroSetSystem = (): System<
     [SpawnCardEventComponentName]: SpawnCardEventComponent;
     [SpawnHealthMeterEventComponentName]: SpawnHealthMeterEventComponent;
     [SpawnRuleCardEventComponentName]: SpawnRuleCardEventComponent;
+    [PlayerComponentName]: PlayerComponent;
+    [CameraComponentName]: CameraComponent;
+    [PositionComponentName]: PositionComponent;
   },
   {
     heroSets: HeroSets;
@@ -45,14 +54,20 @@ export const SpawnHeroSetSystem = (): System<
       const spawnHeroComponentPool = Essence.getOrAddPool(essence, SpawnHeroEventComponentName);
       const spawnSidekickEventComponentPool = Essence.getOrAddPool(essence, SpawnSideKickEventComponentName);
       const spawnDeckEventComponentPool = Essence.getOrAddPool(essence, SpawnDeckEventComponentName);
-      // const spawnCardEventComponentPool = Essence.getOrAddPool(essence, SpawnCardEventComponentName');
       const spawnRuleCardEventComponentPool = Essence.getOrAddPool(essence, SpawnRuleCardEventComponentName);
       const spawnHealthMeterEventComponentPool = Essence.getOrAddPool(essence, SpawnHealthMeterEventComponentName);
 
       const heroSets = ctx.heroSets;
 
+      const playerCameraEntityId = Essence.filter(essence, [PlayerComponentName, CameraComponentName])[0];
+      const positionCP = Essence.getOrAddPool(essence, PositionComponentName);
+      const cameraPositionC = Pool.get(positionCP, playerCameraEntityId);
+
       for (const entity of entities) {
         const spawnComponent = Pool.get(spawnHeroSetComponentPool, entity);
+
+        const x = spawnComponent.data.x + cameraPositionC.data.x;
+        const y = spawnComponent.data.y + cameraPositionC.data.y;
 
         const heroSet = heroSets[spawnComponent.data.setId];
 
@@ -65,6 +80,8 @@ export const SpawnHeroSetSystem = (): System<
               data: {
                 url: hero.frontImageUrl,
                 heroId: hero.id,
+                x,
+                y,
               },
             });
           }
@@ -79,6 +96,8 @@ export const SpawnHeroSetSystem = (): System<
               data: {
                 url: sidekick.frontImageUrl,
                 sidekickId: sidekick.id,
+                x,
+                y,
               },
             });
           }
@@ -92,6 +111,8 @@ export const SpawnHeroSetSystem = (): System<
             data: {
               url: deck.frontImageUrl,
               deckId: deck.id,
+              x,
+              y,
             },
           });
         });
@@ -104,6 +125,8 @@ export const SpawnHeroSetSystem = (): System<
             data: {
               url: healthMeter.frontImageUrl,
               healthMeterId: healthMeter.id,
+              x,
+              y,
             },
           });
         });
@@ -116,6 +139,8 @@ export const SpawnHeroSetSystem = (): System<
             data: {
               url: ruleCard.frontImageUrl,
               ruleCardId: ruleCard.id,
+              x,
+              y,
             },
           });
         });

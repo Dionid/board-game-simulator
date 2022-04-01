@@ -17,7 +17,6 @@ import {
   SpawnGameObjectEventComponentName,
   HeroComponentName,
 } from '../../components';
-import { Vector2 } from '../../../../math';
 
 export const SpawnHeroSystem = (): System<{
   [SpawnHeroEventComponentName]: SpawnHeroEventComponent;
@@ -34,15 +33,6 @@ export const SpawnHeroSystem = (): System<{
       if (entities.length === 0) {
         return;
       }
-
-      const playerEntities = Essence.filter(essence, [PlayerComponentName, CameraComponentName]);
-      const cameraPositionComponentPool = Essence.getOrAddPool(essence, PositionComponentName);
-      const cameraSizeComponentPool = Essence.getOrAddPool(essence, SizeComponentName);
-
-      // TODO. Refactor for collaboration
-      const playerEntity = playerEntities[0];
-      const cameraPositionC = Pool.get(cameraPositionComponentPool, playerEntity);
-      const cameraSizeC = Pool.get(cameraSizeComponentPool, playerEntity);
 
       const spawnHeroComponentPool = Essence.getOrAddPool(essence, SpawnHeroEventComponentName);
       const spawnGameObjectComponentPool = Essence.getOrAddPool(essence, SpawnGameObjectEventComponentName);
@@ -66,11 +56,9 @@ export const SpawnHeroSystem = (): System<{
             selectable: true,
             lockable: true,
             deletable: false,
+            x: spawnComponent.data.x - size.width / 2,
+            y: spawnComponent.data.y - size.height / 2,
             ...size,
-            ...Vector2.sum(cameraPositionC.data, {
-              x: cameraSizeC.data.width / 2 - size.width / 2,
-              y: cameraSizeC.data.height / 2 - size.height / 2,
-            }),
           },
         });
 
