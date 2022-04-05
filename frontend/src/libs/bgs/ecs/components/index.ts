@@ -129,6 +129,28 @@ export type ZoomInEventComponent = Component<typeof ZoomInEventComponentName, {}
 export const ZoomOutEventComponentName = 'ZoomOutEventComponent';
 export type ZoomOutEventComponent = Component<typeof ZoomOutEventComponentName, {}>;
 
+export const FlippableComponentName = 'FlippableComponent';
+export type FlippableComponent = Component<
+  typeof FlippableComponentName,
+  {
+    currentSide: 'front' | 'back';
+    front: {
+      url: string;
+    };
+    back: {
+      url: string;
+    };
+  }
+>;
+
+export const FlipEventComponentName = 'FlipEventComponent';
+export type FlipEventComponent = Component<
+  typeof FlipEventComponentName,
+  {
+    entityId: EntityId;
+  }
+>;
+
 // . UNMATCHED COMPONENTS
 
 export const GameMapComponentName = 'GameMapComponent';
@@ -243,7 +265,8 @@ export const SpawnCardEventComponentName = 'SpawnCardEventComponent';
 export type SpawnCardEventComponent = Component<
   typeof SpawnCardEventComponentName,
   {
-    url: string;
+    frontSideUrl: string;
+    backSideUrl: string;
     cardId: CardId;
     x: number;
     y: number;

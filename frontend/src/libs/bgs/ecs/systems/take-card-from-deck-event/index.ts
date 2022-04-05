@@ -55,7 +55,8 @@ export const TakeCardFromDeckEventSystem = (): System<{
           id: ComponentId.new(),
           name: SpawnCardEventComponentName,
           data: {
-            url: card.frontImageUrl,
+            frontSideUrl: card.frontImageUrl,
+            backSideUrl: card.backImageUrl,
             cardId: card.id,
             x: deckPosition.data.x,
             y: deckPosition.data.y + deckSize.data.height + 20,

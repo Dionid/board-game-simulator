@@ -30,6 +30,7 @@ import { GameStage } from '../../modules/widgets/GameStage';
 import { ChangeReactScaleSystem } from '../../libs/bgs/ecs/systems/change-react-scale-system';
 import { ZoomSystem } from '../../libs/bgs/ecs/systems/zoom';
 import { TakeCardFromDeckEventSystem } from '../../libs/bgs/ecs/systems/take-card-from-deck-event';
+import { Flip } from '../../libs/bgs/ecs/systems/flip';
 
 // TODO. Move
 const boardSize = {
@@ -75,6 +76,7 @@ function App() {
         SpawnHealthMeterEventSystem(),
 
         TakeCardFromDeckEventSystem(),
+        Flip(),
 
         // SPAWN GAME OBJECT
         SpawnGameObjectSystem(),

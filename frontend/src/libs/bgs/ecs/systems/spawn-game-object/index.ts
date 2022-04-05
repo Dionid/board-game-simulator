@@ -9,6 +9,15 @@ import {
   GameObjectComponent,
   LockableComponent,
   DeletableComponent,
+  SpawnGameObjectEventComponentName,
+  ImageComponentName,
+  SizeComponentName,
+  PositionComponentName,
+  DraggableComponentName,
+  SelectableComponentName,
+  LockableComponentName,
+  DeletableComponentName,
+  GameObjectComponentName,
 } from '../../components';
 import { Essence } from '../../../../ecs/essence';
 import { ComponentId, Pool } from '../../../../ecs/component';
@@ -33,21 +42,21 @@ export const SpawnGameObjectSystem = (): System<
 
   return {
     run: async ({ essence, ctx }) => {
-      const entities = Essence.filter(essence, ['SpawnGameObjectEventComponent']);
+      const entities = Essence.filter(essence, [SpawnGameObjectEventComponentName]);
 
       if (entities.length === 0) {
         return;
       }
 
-      const spawnGameObjectComponentPool = Essence.getOrAddPool(essence, 'SpawnGameObjectEventComponent');
-      const imageComponentPool = Essence.getOrAddPool(essence, 'ImageComponent');
-      const positionComponentPool = Essence.getOrAddPool(essence, 'PositionComponent');
-      const sizeComponentPool = Essence.getOrAddPool(essence, 'SizeComponent');
-      const draggableComponentPool = Essence.getOrAddPool(essence, 'DraggableComponent');
-      const selectableComponentPool = Essence.getOrAddPool(essence, 'SelectableComponent');
-      const lockableComponentPool = Essence.getOrAddPool(essence, 'LockableComponent');
-      const deletableComponentPool = Essence.getOrAddPool(essence, 'DeletableComponent');
-      const gameObjectComponentPool = Essence.getOrAddPool(essence, 'GameObjectComponent');
+      const spawnGameObjectComponentPool = Essence.getOrAddPool(essence, SpawnGameObjectEventComponentName);
+      const imageComponentPool = Essence.getOrAddPool(essence, ImageComponentName);
+      const positionComponentPool = Essence.getOrAddPool(essence, PositionComponentName);
+      const sizeComponentPool = Essence.getOrAddPool(essence, SizeComponentName);
+      const draggableComponentPool = Essence.getOrAddPool(essence, DraggableComponentName);
+      const selectableComponentPool = Essence.getOrAddPool(essence, SelectableComponentName);
+      const lockableComponentPool = Essence.getOrAddPool(essence, LockableComponentName);
+      const deletableComponentPool = Essence.getOrAddPool(essence, DeletableComponentName);
+      const gameObjectComponentPool = Essence.getOrAddPool(essence, GameObjectComponentName);
 
       for (const gameObjectEntity of entities) {
         const spawnComponent = Pool.get(spawnGameObjectComponentPool, gameObjectEntity);
@@ -61,7 +70,7 @@ export const SpawnGameObjectSystem = (): System<
         // . Create react game map
         Pool.add(imageComponentPool, gameObjectEntity, {
           id: ComponentId.new(),
-          name: 'ImageComponent',
+          name: ImageComponentName,
           data: {
             url: spawnComponent.data.imageUrl,
           },
@@ -69,7 +78,7 @@ export const SpawnGameObjectSystem = (): System<
 
         Pool.add(positionComponentPool, gameObjectEntity, {
           id: ComponentId.new(),
-          name: 'PositionComponent',
+          name: PositionComponentName,
           data: {
             x: spawnComponent.data.x,
             y: spawnComponent.data.y,
@@ -79,7 +88,7 @@ export const SpawnGameObjectSystem = (): System<
 
         Pool.add(sizeComponentPool, gameObjectEntity, {
           id: ComponentId.new(),
-          name: 'SizeComponent',
+          name: SizeComponentName,
           data: {
             width: spawnComponent.data.width,
             height: spawnComponent.data.height,
@@ -89,7 +98,7 @@ export const SpawnGameObjectSystem = (): System<
         if (spawnComponent.data.selectable) {
           Pool.add(selectableComponentPool, gameObjectEntity, {
             id: ComponentId.new(),
-            name: 'SelectableComponent',
+            name: SelectableComponentName,
             data: {},
           });
         }
@@ -97,7 +106,7 @@ export const SpawnGameObjectSystem = (): System<
         if (spawnComponent.data.draggable) {
           Pool.add(draggableComponentPool, gameObjectEntity, {
             id: ComponentId.new(),
-            name: 'DraggableComponent',
+            name: DraggableComponentName,
             data: {},
           });
         }
@@ -105,7 +114,7 @@ export const SpawnGameObjectSystem = (): System<
         if (spawnComponent.data.lockable) {
           Pool.add(lockableComponentPool, gameObjectEntity, {
             id: ComponentId.new(),
-            name: 'LockableComponent',
+            name: LockableComponentName,
             data: {},
           });
         }
@@ -113,7 +122,7 @@ export const SpawnGameObjectSystem = (): System<
         if (spawnComponent.data.deletable) {
           Pool.add(deletableComponentPool, gameObjectEntity, {
             id: ComponentId.new(),
-            name: 'DeletableComponent',
+            name: DeletableComponentName,
             data: {},
           });
         }

@@ -4,6 +4,8 @@ import { ComponentId, Pool } from '../../../../ecs/component';
 import {
   CardComponent,
   CardComponentName,
+  FlippableComponent,
+  FlippableComponentName,
   SpawnCardEventComponent,
   SpawnCardEventComponentName,
   SpawnGameObjectEventComponent,
@@ -14,6 +16,7 @@ export const SpawnCardEventSystem = (): System<{
   [SpawnCardEventComponentName]: SpawnCardEventComponent;
   [CardComponentName]: CardComponent;
   [SpawnGameObjectEventComponentName]: SpawnGameObjectEventComponent;
+  [FlippableComponentName]: FlippableComponent;
 }> => {
   return {
     run: async ({ essence }) => {
@@ -25,6 +28,7 @@ export const SpawnCardEventSystem = (): System<{
       const spawnCardComponentPool = Essence.getOrAddPool(essence, SpawnCardEventComponentName);
       const cardComponentPool = Essence.getOrAddPool(essence, CardComponentName);
       const spawnGameObjectComponentPool = Essence.getOrAddPool(essence, SpawnGameObjectEventComponentName);
+      const flippableCP = Essence.getOrAddPool(essence, FlippableComponentName);
 
       for (const cardEntity of entities) {
         const spawnComponent = Pool.get(spawnCardComponentPool, cardEntity);
@@ -39,7 +43,7 @@ export const SpawnCardEventSystem = (): System<{
           id: ComponentId.new(),
           name: SpawnGameObjectEventComponentName,
           data: {
-            imageUrl: spawnComponent.data.url,
+            imageUrl: spawnComponent.data.frontSideUrl,
             draggable: true,
             selectable: true,
             lockable: true,
@@ -57,6 +61,20 @@ export const SpawnCardEventSystem = (): System<{
             cardId: spawnComponent.data.cardId,
             deckEntityId: spawnComponent.data.deckEntityId,
             card: spawnComponent.data.card,
+          },
+        });
+
+        Pool.add(flippableCP, cardEntity, {
+          id: ComponentId.new(),
+          name: FlippableComponentName,
+          data: {
+            currentSide: 'front',
+            front: {
+              url: spawnComponent.data.frontSideUrl,
+            },
+            back: {
+              url: spawnComponent.data.backSideUrl,
+            },
           },
         });
 

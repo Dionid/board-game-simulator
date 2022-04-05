@@ -12,6 +12,8 @@ import {
   CardComponentName,
   DeckComponentName,
   DeletableComponentName,
+  FlipEventComponentName,
+  FlippableComponentName,
   HandComponentName,
   IsLockedComponentName,
   LockableComponentName,
@@ -233,6 +235,31 @@ export const ContextMenu: FC<{ world: BgsWorld; heroSets: HeroSets }> = (props) 
             </MenuItem>
           );
         }
+      }
+
+      // . FLIPPABLE
+      const flippablePool = Essence.getOrAddPool(world.essence, FlippableComponentName);
+      const flippable = Pool.tryGet(flippablePool, maxZPositionEntity);
+
+      if (flippable) {
+        actions.push(
+          <MenuItem
+            key={maxZPositionEntity + ':flip'}
+            onClick={() => {
+              handleClose();
+              const flipEventCP = Essence.getOrAddPool(world.essence, FlipEventComponentName);
+              Pool.add(flipEventCP, EntityId.new(), {
+                id: ComponentId.new(),
+                name: FlipEventComponentName,
+                data: {
+                  entityId: maxZPositionEntity,
+                },
+              });
+            }}
+          >
+            Flip
+          </MenuItem>
+        );
       }
 
       // . (UN)LOCK BUTTON

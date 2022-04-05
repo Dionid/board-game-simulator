@@ -88,6 +88,10 @@ import {
   ReactSizeComponentName,
   ReactGameMapComponentName,
   ReactHeroComponentName,
+  FlippableComponentName,
+  FlippableComponent,
+  FlipEventComponentName,
+  FlipEventComponent,
 } from './components';
 import { HeroSets } from '../games/unmatched';
 
@@ -119,6 +123,8 @@ export type BgsWorldComponents = {
   [LockableComponentName]: LockableComponent;
   [IsLockedComponentName]: IsLockedComponent;
   [DeletableComponentName]: DeletableComponent;
+  [FlippableComponentName]: FlippableComponent;
+  [FlipEventComponentName]: FlipEventComponent;
 
   [GameMapComponentName]: GameMapComponent;
   [HeroComponentName]: HeroComponent;
