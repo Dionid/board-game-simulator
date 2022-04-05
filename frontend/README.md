@@ -27,7 +27,7 @@
    1. ~~Get card~~
    2. ~~Shuffle~~
 9. Card actions
-   1. Put in deck
+   1. ~~Put in deck~~
    2. Flip
 10. Hero actions
     1. Flip
@@ -38,15 +38,17 @@
 13. Depth system
     1. Based on dragging
     2. Based on y axis
-14. Move Hero Set and Map creation to Context Menu
-15. Authorization
-16. Cards shown
-17. Persistence and collaboration
+14. Card
+    1. Show
+15. Move Hero Set and Map creation to Context Menu
+16. Authorization
+17. Cards shown
+18. Persistence and collaboration
     1. Room
     2. Player cursor
     3. Player actions
-18. Zoom in cards
-19. ~~Remove entities~~
+19. Zoom in cards
+20. ~~Remove entities~~
 
 ## Second
 
