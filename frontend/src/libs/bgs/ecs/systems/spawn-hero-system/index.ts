@@ -16,6 +16,8 @@ import {
   SpawnHeroEventComponentName,
   SpawnGameObjectEventComponentName,
   HeroComponentName,
+  ViewChangeableComponentName,
+  ViewChangeableComponent,
 } from '../../components';
 
 export const SpawnHeroSystem = (): System<{
@@ -26,6 +28,7 @@ export const SpawnHeroSystem = (): System<{
   [PlayerComponentName]: PlayerComponent;
   [PositionComponentName]: PositionComponent;
   [SizeComponentName]: SizeComponent;
+  [ViewChangeableComponentName]: ViewChangeableComponent;
 }> => {
   return {
     run: async ({ essence }) => {
@@ -37,6 +40,7 @@ export const SpawnHeroSystem = (): System<{
       const spawnHeroComponentPool = Essence.getOrAddPool(essence, SpawnHeroEventComponentName);
       const spawnGameObjectComponentPool = Essence.getOrAddPool(essence, SpawnGameObjectEventComponentName);
       const heroComponentPool = Essence.getOrAddPool(essence, HeroComponentName);
+      const viewChangeableCP = Essence.getOrAddPool(essence, ViewChangeableComponentName);
 
       for (const heroEntity of entities) {
         const spawnComponent = Pool.get(spawnHeroComponentPool, heroEntity);
@@ -51,7 +55,7 @@ export const SpawnHeroSystem = (): System<{
           id: ComponentId.new(),
           name: SpawnGameObjectEventComponentName,
           data: {
-            imageUrl: spawnComponent.data.url,
+            imageUrl: spawnComponent.data.views[0].url,
             draggable: true,
             selectable: true,
             lockable: true,
@@ -62,9 +66,20 @@ export const SpawnHeroSystem = (): System<{
           },
         });
 
+        if (spawnComponent.data.views.length > 1) {
+          Pool.add(viewChangeableCP, heroEntity, {
+            id: ComponentId.new(),
+            name: ViewChangeableComponentName,
+            data: {
+              current: 0,
+              views: spawnComponent.data.views,
+            },
+          });
+        }
+
         Pool.add(heroComponentPool, heroEntity, {
           id: ComponentId.new(),
-          name: 'HeroComponent',
+          name: HeroComponentName,
           data: {
             heroId: spawnComponent.data.heroId,
           },

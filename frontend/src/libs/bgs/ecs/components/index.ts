@@ -151,6 +151,23 @@ export type FlipEventComponent = Component<
   }
 >;
 
+export const ViewChangeableComponentName = 'ViewChangeableComponent';
+export type ViewChangeableComponent = Component<
+  typeof ViewChangeableComponentName,
+  {
+    current: number;
+    views: { url: string }[];
+  }
+>;
+
+export const ChangeViewEventComponentName = 'ChangeViewEventComponent';
+export type ChangeViewEventComponent = Component<
+  typeof ChangeViewEventComponentName,
+  {
+    entityId: EntityId;
+  }
+>;
+
 // . UNMATCHED COMPONENTS
 
 export const GameMapComponentName = 'GameMapComponent';
@@ -231,10 +248,10 @@ export const SpawnHeroEventComponentName = 'SpawnHeroEventComponent';
 export type SpawnHeroEventComponent = Component<
   typeof SpawnHeroEventComponentName,
   {
-    url: string;
     heroId: HeroId;
     x: number;
     y: number;
+    views: { url: string }[];
   }
 >;
 

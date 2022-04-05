@@ -31,6 +31,7 @@ import { ChangeReactScaleSystem } from '../../libs/bgs/ecs/systems/change-react-
 import { ZoomSystem } from '../../libs/bgs/ecs/systems/zoom';
 import { TakeCardFromDeckEventSystem } from '../../libs/bgs/ecs/systems/take-card-from-deck-event';
 import { Flip } from '../../libs/bgs/ecs/systems/flip';
+import { ChangeView } from '../../libs/bgs/ecs/systems/change-view';
 
 // TODO. Move
 const boardSize = {
@@ -77,6 +78,7 @@ function App() {
 
         TakeCardFromDeckEventSystem(),
         Flip(),
+        ChangeView(),
 
         // SPAWN GAME OBJECT
         SpawnGameObjectSystem(),

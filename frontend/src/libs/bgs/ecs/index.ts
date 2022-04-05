@@ -92,6 +92,10 @@ import {
   FlippableComponent,
   FlipEventComponentName,
   FlipEventComponent,
+  ViewChangeableComponentName,
+  ChangeViewEventComponentName,
+  ViewChangeableComponent,
+  ChangeViewEventComponent,
 } from './components';
 import { HeroSets } from '../games/unmatched';
 
@@ -124,10 +128,10 @@ export type BgsWorldComponents = {
   [IsLockedComponentName]: IsLockedComponent;
   [DeletableComponentName]: DeletableComponent;
   [FlippableComponentName]: FlippableComponent;
-  [FlipEventComponentName]: FlipEventComponent;
-
+  [ViewChangeableComponentName]: ViewChangeableComponent;
   [GameMapComponentName]: GameMapComponent;
   [HeroComponentName]: HeroComponent;
+
   [SidekickComponentName]: SidekickComponent;
   [DeckComponentName]: DeckComponent;
   [CardComponentName]: CardComponent;
@@ -136,6 +140,9 @@ export type BgsWorldComponents = {
   [HealthMeterComponentName]: HealthMeterComponent;
 
   // . EVENTS
+
+  [FlipEventComponentName]: FlipEventComponent;
+  [ChangeViewEventComponentName]: ChangeViewEventComponent;
   [ZoomInEventComponentName]: ZoomInEventComponent;
   [ZoomOutEventComponentName]: ZoomOutEventComponent;
   [SpawnGameMapEventComponentName]: SpawnGameMapEventComponent;

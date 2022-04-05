@@ -78,7 +78,7 @@ export const SpawnHeroSetSystem = (): System<
               name: SpawnHeroEventComponentName,
               id: ComponentId.new(),
               data: {
-                url: hero.frontImageUrl,
+                views: hero.views,
                 heroId: hero.id,
                 x,
                 y,

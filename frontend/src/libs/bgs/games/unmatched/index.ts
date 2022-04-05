@@ -204,8 +204,7 @@ export const LamdielHeroSet = {
     {
       id: HeroId.ofString('ed185079-11a8-4cbd-b94e-c8d1ceeb985b'),
       name: 'Lamdiel',
-      frontImageUrl: '/hero-sets/lamdiel/hero-front-image.png',
-      backImageUrl: '/hero-sets/lamdiel/hero-front-image.png',
+      views: [{ url: '/hero-sets/lamdiel/hero-front-image.png' }, { url: '/hero-sets/lamdiel/hero-front-image.png' }],
       qty: 1,
     },
   ],
@@ -372,8 +371,7 @@ export const DekuHeroSet = {
     {
       id: HeroId.ofString('1cab25fa-e29f-43fe-84d0-adf787589fe5'),
       name: 'Deku',
-      frontImageUrl: '/hero-sets/deku/hero-front-image.png',
-      backImageUrl: '/hero-sets/deku/hero-front-image.png',
+      views: [{ url: '/hero-sets/deku/hero-front-image.png' }],
       qty: 1,
     },
   ],

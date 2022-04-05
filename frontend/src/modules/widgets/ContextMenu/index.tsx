@@ -10,6 +10,7 @@ import { PersonAdd } from '@mui/icons-material';
 import { Deck, HeroSets, MapId, SetId } from '../../../libs/bgs/games/unmatched';
 import {
   CardComponentName,
+  ChangeViewEventComponentName,
   DeckComponentName,
   DeletableComponentName,
   FlipEventComponentName,
@@ -23,6 +24,7 @@ import {
   SpawnGameMapEventComponentName,
   SpawnHeroSetEventComponentName,
   TakeCardFromDeckEventComponentName,
+  ViewChangeableComponentName,
 } from '../../../libs/bgs/ecs/components';
 import { v4 } from 'uuid';
 
@@ -258,6 +260,31 @@ export const ContextMenu: FC<{ world: BgsWorld; heroSets: HeroSets }> = (props) 
             }}
           >
             Flip
+          </MenuItem>
+        );
+      }
+
+      // . VIEW CHANGEABLE
+      const viewChangablePool = Essence.getOrAddPool(world.essence, ViewChangeableComponentName);
+      const viewChangable = Pool.tryGet(viewChangablePool, maxZPositionEntity);
+
+      if (viewChangable) {
+        actions.push(
+          <MenuItem
+            key={maxZPositionEntity + ':flip'}
+            onClick={() => {
+              handleClose();
+              const changeViewEventCP = Essence.getOrAddPool(world.essence, ChangeViewEventComponentName);
+              Pool.add(changeViewEventCP, EntityId.new(), {
+                id: ComponentId.new(),
+                name: ChangeViewEventComponentName,
+                data: {
+                  entityId: maxZPositionEntity,
+                },
+              });
+            }}
+          >
+            Change view
           </MenuItem>
         );
       }

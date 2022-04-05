@@ -26,11 +26,11 @@
 8. ~~Deck actions~~
    1. ~~Get card~~
    2. ~~Shuffle~~
-9. Card actions
+9. ~~Card actions~~
    1. ~~Put in deck~~
-   2. Flip
-10. Hero actions
-    1. Flip
+   2. ~~Flip~~
+10. ~~Hero actions~~
+    1. ~~Change view~~
 11. Health Meter actions
     1. Increase & Decrease
 12. Hero Set actions
