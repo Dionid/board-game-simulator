@@ -13,12 +13,15 @@ import {
   PositionComponent,
   SizeComponentName,
   SizeComponent,
+  SpawnRuleCardEventComponentName,
+  RuleCardComponentName,
+  SpawnGameObjectEventComponentName,
 } from '../../components';
 
 export const SpawnRuleCardEventSystem = (): System<{
-  SpawnRuleCardEventComponent: SpawnRuleCardEventComponent;
-  RuleCardComponent: RuleCardComponent;
-  SpawnGameObjectEventComponent: SpawnGameObjectEventComponent;
+  [SpawnRuleCardEventComponentName]: SpawnRuleCardEventComponent;
+  [RuleCardComponentName]: RuleCardComponent;
+  [SpawnGameObjectEventComponentName]: SpawnGameObjectEventComponent;
   [CameraComponentName]: CameraComponent;
   [PlayerComponentName]: PlayerComponent;
   [PositionComponentName]: PositionComponent;
@@ -26,14 +29,14 @@ export const SpawnRuleCardEventSystem = (): System<{
 }> => {
   return {
     run: async ({ essence }) => {
-      const entities = Essence.filter(essence, ['SpawnRuleCardEventComponent']);
+      const entities = Essence.filter(essence, [SpawnRuleCardEventComponentName]);
       if (entities.length === 0) {
         return;
       }
 
-      const spawnRuleCardComponentPool = Essence.getOrAddPool(essence, 'SpawnRuleCardEventComponent');
-      const ruleCardComponentPool = Essence.getOrAddPool(essence, 'RuleCardComponent');
-      const spawnGameObjectComponentPool = Essence.getOrAddPool(essence, 'SpawnGameObjectEventComponent');
+      const spawnRuleCardComponentPool = Essence.getOrAddPool(essence, SpawnRuleCardEventComponentName);
+      const ruleCardComponentPool = Essence.getOrAddPool(essence, RuleCardComponentName);
+      const spawnGameObjectComponentPool = Essence.getOrAddPool(essence, SpawnGameObjectEventComponentName);
 
       for (const ruleCardEntity of entities) {
         const spawnComponent = Pool.get(spawnRuleCardComponentPool, ruleCardEntity);
@@ -63,6 +66,7 @@ export const SpawnRuleCardEventSystem = (): System<{
           id: ComponentId.new(),
           name: 'RuleCardComponent',
           data: {
+            heroSetEntityId: spawnComponent.data.heroSetEntityId,
             ruleCardId: spawnComponent.data.ruleCardId,
           },
         });

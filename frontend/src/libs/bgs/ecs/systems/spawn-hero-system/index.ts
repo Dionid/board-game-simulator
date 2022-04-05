@@ -81,6 +81,7 @@ export const SpawnHeroSystem = (): System<{
           id: ComponentId.new(),
           name: HeroComponentName,
           data: {
+            heroSetEntityId: spawnComponent.data.heroSetEntityId,
             heroId: spawnComponent.data.heroId,
           },
         });

@@ -32,6 +32,7 @@ import { ZoomSystem } from '../../libs/bgs/ecs/systems/zoom';
 import { TakeCardFromDeckEventSystem } from '../../libs/bgs/ecs/systems/take-card-from-deck-event';
 import { Flip } from '../../libs/bgs/ecs/systems/flip';
 import { ChangeView } from '../../libs/bgs/ecs/systems/change-view';
+import { DeleteHeroEventSet } from '../../libs/bgs/ecs/systems/delete-hero-set-event';
 
 // TODO. Move
 const boardSize = {
@@ -75,6 +76,7 @@ function App() {
         SpawnCardEventSystem(),
         SpawnRuleCardEventSystem(),
         SpawnHealthMeterEventSystem(),
+        DeleteHeroEventSet(),
 
         TakeCardFromDeckEventSystem(),
         Flip(),
@@ -127,8 +129,6 @@ function App() {
   // TODO. Refactor for collaboration
   const playerEntities = Essence.filter(world.essence, ['PlayerComponent', 'CameraComponent']);
   const playerEntity = playerEntities[0];
-
-  console.log('APP', playerEntity);
 
   return (
     <div>

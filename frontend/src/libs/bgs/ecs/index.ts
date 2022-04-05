@@ -96,6 +96,10 @@ import {
   ChangeViewEventComponentName,
   ViewChangeableComponent,
   ChangeViewEventComponent,
+  HeroSetDeletableComponentName,
+  HeroSetDeletableComponent,
+  DeleteHeroSetEventComponentName,
+  DeleteHeroSetEventComponent,
 } from './components';
 import { HeroSets } from '../games/unmatched';
 
@@ -131,6 +135,7 @@ export type BgsWorldComponents = {
   [ViewChangeableComponentName]: ViewChangeableComponent;
   [GameMapComponentName]: GameMapComponent;
   [HeroComponentName]: HeroComponent;
+  [HeroSetDeletableComponentName]: HeroSetDeletableComponent;
 
   [SidekickComponentName]: SidekickComponent;
   [DeckComponentName]: DeckComponent;
@@ -141,6 +146,7 @@ export type BgsWorldComponents = {
 
   // . EVENTS
 
+  [DeleteHeroSetEventComponentName]: DeleteHeroSetEventComponent;
   [FlipEventComponentName]: FlipEventComponent;
   [ChangeViewEventComponentName]: ChangeViewEventComponent;
   [ZoomInEventComponentName]: ZoomInEventComponent;

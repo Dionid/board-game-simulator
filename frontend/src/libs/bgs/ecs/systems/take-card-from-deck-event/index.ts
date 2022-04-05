@@ -1,6 +1,8 @@
 import {
   DeckComponent,
   DeckComponentName,
+  HeroSetComponent,
+  HeroSetComponentName,
   PositionComponent,
   PositionComponentName,
   SizeComponent,
@@ -21,6 +23,7 @@ export const TakeCardFromDeckEventSystem = (): System<{
   [SpawnCardEventComponentName]: SpawnCardEventComponent;
   [PositionComponentName]: PositionComponent;
   [SizeComponentName]: SizeComponent;
+  [HeroSetComponentName]: HeroSetComponent;
 }> => {
   return {
     run: async ({ essence }) => {
@@ -34,6 +37,7 @@ export const TakeCardFromDeckEventSystem = (): System<{
       const spawnCardEventCP = Essence.getOrAddPool(essence, SpawnCardEventComponentName);
       const positionCP = Essence.getOrAddPool(essence, PositionComponentName);
       const sizeCP = Essence.getOrAddPool(essence, SizeComponentName);
+      const heroSetCP = Essence.getOrAddPool(essence, HeroSetComponentName);
 
       entities.forEach((entity) => {
         const eventC = Pool.get(takeCardFromDeckEventCP, entity);
@@ -42,6 +46,7 @@ export const TakeCardFromDeckEventSystem = (): System<{
         const deckC = Pool.get(deckCP, deckEntityId);
         const deckPosition = Pool.get(positionCP, deckEntityId);
         const deckSize = Pool.get(sizeCP, deckEntityId);
+        const heroSetC = Pool.get(heroSetCP, deckC.data.heroSetEntityId);
 
         // . Get 1 card
         const card = deckC.data.cards.pop();
@@ -51,10 +56,12 @@ export const TakeCardFromDeckEventSystem = (): System<{
         }
 
         // . Create card on deck
-        Pool.add(spawnCardEventCP, EntityId.new(), {
+        const cardEntityId = EntityId.new();
+        Pool.add(spawnCardEventCP, cardEntityId, {
           id: ComponentId.new(),
           name: SpawnCardEventComponentName,
           data: {
+            heroSetEntityId: deckC.data.heroSetEntityId,
             frontSideUrl: card.frontImageUrl,
             backSideUrl: card.backImageUrl,
             cardId: card.id,
@@ -68,6 +75,8 @@ export const TakeCardFromDeckEventSystem = (): System<{
         if (deckC.data.cards.length === 0) {
           Essence.destroyEntity(essence, deckEntityId);
         }
+
+        heroSetC.data.boundedEntityIds.push(cardEntityId);
 
         Pool.delete(takeCardFromDeckEventCP, entity);
       });

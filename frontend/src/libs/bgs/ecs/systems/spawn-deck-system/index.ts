@@ -80,8 +80,7 @@ export const SpawnDeckEventSystem = (): System<
             cards.push(cardTemplate);
           }
         }
-
-        const deck: Deck = {
+        const deck = {
           id: spawnComponent.data.deckId,
           cards,
         };
@@ -89,7 +88,10 @@ export const SpawnDeckEventSystem = (): System<
         Pool.add(deckComponentPool, deckEntity, {
           id: ComponentId.new(),
           name: DeckComponentName,
-          data: deck,
+          data: {
+            ...deck,
+            heroSetEntityId: spawnComponent.data.heroSetEntityId,
+          },
         });
 
         // Destroy event

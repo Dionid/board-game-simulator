@@ -6,6 +6,8 @@ import {
   CardComponentName,
   FlippableComponent,
   FlippableComponentName,
+  HeroSetDeletableComponent,
+  HeroSetDeletableComponentName,
   SpawnCardEventComponent,
   SpawnCardEventComponentName,
   SpawnGameObjectEventComponent,
@@ -17,6 +19,7 @@ export const SpawnCardEventSystem = (): System<{
   [CardComponentName]: CardComponent;
   [SpawnGameObjectEventComponentName]: SpawnGameObjectEventComponent;
   [FlippableComponentName]: FlippableComponent;
+  [HeroSetDeletableComponentName]: HeroSetDeletableComponent;
 }> => {
   return {
     run: async ({ essence }) => {
@@ -58,6 +61,7 @@ export const SpawnCardEventSystem = (): System<{
           id: ComponentId.new(),
           name: CardComponentName,
           data: {
+            heroSetEntityId: spawnComponent.data.heroSetEntityId,
             cardId: spawnComponent.data.cardId,
             deckEntityId: spawnComponent.data.deckEntityId,
             card: spawnComponent.data.card,

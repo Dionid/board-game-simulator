@@ -38,8 +38,8 @@ export const SpawnHealthMeterEventSystem = (): System<{
       const deckComponentPool = Essence.getOrAddPool(essence, HealthMeterComponentName);
       const spawnGameObjectComponentPool = Essence.getOrAddPool(essence, SpawnGameObjectEventComponentName);
 
-      for (const deckEntity of entities) {
-        const spawnComponent = Pool.get(spawnHealthMeterComponentPool, deckEntity);
+      for (const healthMeterEntity of entities) {
+        const spawnComponent = Pool.get(spawnHealthMeterComponentPool, healthMeterEntity);
 
         // TODO. Think about entity id: must be new or the same
         // . Create deck spawn event
@@ -47,7 +47,7 @@ export const SpawnHealthMeterEventSystem = (): System<{
           width: 140,
           height: 140,
         };
-        Pool.add(spawnGameObjectComponentPool, deckEntity, {
+        Pool.add(spawnGameObjectComponentPool, healthMeterEntity, {
           id: ComponentId.new(),
           name: SpawnGameObjectEventComponentName,
           data: {
@@ -62,16 +62,17 @@ export const SpawnHealthMeterEventSystem = (): System<{
           },
         });
 
-        Pool.add(deckComponentPool, deckEntity, {
+        Pool.add(deckComponentPool, healthMeterEntity, {
           id: ComponentId.new(),
           name: HealthMeterComponentName,
           data: {
+            heroSetEntityId: spawnComponent.data.heroSetEntityId,
             healthMeterId: spawnComponent.data.healthMeterId,
           },
         });
 
         // Destroy event
-        Pool.delete(spawnHealthMeterComponentPool, deckEntity);
+        Pool.delete(spawnHealthMeterComponentPool, healthMeterEntity);
       }
     },
   };

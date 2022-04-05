@@ -31,10 +31,9 @@
    2. ~~Flip~~
 10. ~~Hero actions~~
     1. ~~Change view~~
-11. Health Meter actions
+11. ~~Hero Set actions~~ 2. ~~Delete set~~
+12. Health Meter actions
     1. Increase & Decrease
-12. Hero Set actions
-    1. Delete set
 13. Depth system
     1. Based on dragging
     2. Based on y axis
@@ -48,7 +47,8 @@
     2. Player cursor
     3. Player actions
 19. Zoom in cards
-20. ~~Remove entities~~
+20. Spawn Hero Set in different spaces
+21. ~~Remove entities~~
 
 ## Second
 

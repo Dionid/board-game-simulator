@@ -212,8 +212,7 @@ export const LamdielHeroSet = {
     {
       id: SidekickId.ofString('15ad2da8-e752-4d7a-992a-2bdf5a04a50f'),
       name: 'Illusion',
-      frontImageUrl: '/hero-sets/lamdiel/hero-front-image.png',
-      backImageUrl: '/hero-sets/lamdiel/hero-front-image.png',
+      views: [{ url: '/hero-sets/lamdiel/hero-front-image.png' }, { url: '/hero-sets/lamdiel/hero-front-image.png' }],
       qty: 4,
     },
   ],

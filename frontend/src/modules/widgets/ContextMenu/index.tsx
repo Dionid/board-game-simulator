@@ -13,9 +13,11 @@ import {
   ChangeViewEventComponentName,
   DeckComponentName,
   DeletableComponentName,
+  DeleteHeroSetEventComponentName,
   FlipEventComponentName,
   FlippableComponentName,
   HandComponentName,
+  HeroSetDeletableComponentName,
   IsLockedComponentName,
   LockableComponentName,
   PlayerComponentName,
@@ -285,6 +287,31 @@ export const ContextMenu: FC<{ world: BgsWorld; heroSets: HeroSets }> = (props) 
             }}
           >
             Change view
+          </MenuItem>
+        );
+      }
+
+      // . DELETE HERO SET
+      const heroSetDeletablePool = Essence.getOrAddPool(world.essence, HeroSetDeletableComponentName);
+      const heroSetDeletable = Pool.tryGet(heroSetDeletablePool, maxZPositionEntity);
+
+      if (heroSetDeletable) {
+        actions.push(
+          <MenuItem
+            key={maxZPositionEntity + ':heroSetDeletable'}
+            onClick={() => {
+              handleClose();
+              const deleteHeroSetCP = Essence.getOrAddPool(world.essence, DeleteHeroSetEventComponentName);
+              Pool.add(deleteHeroSetCP, EntityId.new(), {
+                id: ComponentId.new(),
+                name: DeleteHeroSetEventComponentName,
+                data: {
+                  setEntityId: heroSetDeletable?.data.setEntityId,
+                },
+              });
+            }}
+          >
+            Delete hero set
           </MenuItem>
         );
       }

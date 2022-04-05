@@ -17,8 +17,6 @@ export const GameStage = memo(
 
     const gameObjectComponentPool = Essence.getOrAddPool(world.essence, 'GameObjectComponent');
 
-    console.log('GameStage', position);
-
     return (
       <Stage style={{ backgroundColor: '#e1e1e1' }} width={surfaceWidth} height={surfaceHeight} scale={scale}>
         <Layer x={-position.x} y={-position.y}>
