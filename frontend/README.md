@@ -36,19 +36,19 @@
     1. ~~Increase & Decrease~~
 13. ~~Depth system~~
     1. ~~Based on select~~
-14. Zoom in cards
-15. Spawn Hero Set in different spaces
-16. Authorization
-17. Persistence and collaboration
-    1. Room
-    2. Player cursor
-    3. Owner
-    4. Sync
-18. Cards shown
-19. Refactor Select + Drag + Depth systems
-20. Refactor HealthMeter UI
-21. ~~Move Hero Set and Map creation to Context Menu~~
-22. ~~Remove entities~~
+14. Persistence and collaboration
+    1. Authorization
+    2. Room
+    3. Player cursor
+    4. Owner
+    5. Sync
+15. Cards shown
+16. Spawn Hero Set in different spaces
+17. Refactor Select + Drag + Depth systems
+18. Zoom in cards
+19. Refactor HealthMeter UI
+20. ~~Move Hero Set and Map creation to Context Menu~~
+21. ~~Remove entities~~
 
 ## Second
 
