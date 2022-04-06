@@ -51,6 +51,7 @@ export const SpawnCardEventSystem = (): System<{
             selectable: true,
             lockable: true,
             deletable: false,
+            dynamicDepth: true,
             x: spawnComponent.data.x,
             y: spawnComponent.data.y,
             ...size,

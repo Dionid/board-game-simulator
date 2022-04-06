@@ -45,13 +45,15 @@
     3. Owner
     4. Sync
 18. Cards shown
-19. ~~Move Hero Set and Map creation to Context Menu~~
-20. ~~Remove entities~~
+19. Refactor Select + Drag + Depth systems
+20. Refactor HealthMeter UI
+21. ~~Move Hero Set and Map creation to Context Menu~~
+22. ~~Remove entities~~
 
 ## Second
 
-1. Background grid
-2. Refactor Select + Drag + Depth systems
+1. Place in the end of depth
+2. Background grid
 3. Refactor Pan system
 4. Ipad version
 5. More `Essence.filter` operations (`in`, `notIn`, etc.)

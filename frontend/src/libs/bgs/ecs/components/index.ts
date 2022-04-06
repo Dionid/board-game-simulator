@@ -129,6 +129,7 @@ export type SpawnGameObjectEventComponent = Component<
     lockable: boolean;
     imageUrl: string;
     deletable: boolean;
+    dynamicDepth: boolean;
   }
 >;
 

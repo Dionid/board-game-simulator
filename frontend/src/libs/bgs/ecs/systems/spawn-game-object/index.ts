@@ -99,11 +99,13 @@ export const SpawnGameObjectSystem = (): System<
           },
         });
 
-        Pool.add(dynamicDepthComponentPool, gameObjectEntity, {
-          id: ComponentId.new(),
-          name: DynamicDepthComponentName,
-          data: {},
-        });
+        if (spawnComponent.data.dynamicDepth) {
+          Pool.add(dynamicDepthComponentPool, gameObjectEntity, {
+            id: ComponentId.new(),
+            name: DynamicDepthComponentName,
+            data: {},
+          });
+        }
 
         if (spawnComponent.data.selectable) {
           Pool.add(selectableComponentPool, gameObjectEntity, {
@@ -140,7 +142,7 @@ export const SpawnGameObjectSystem = (): System<
         // . Destroy event
         Pool.delete(spawnGameObjectComponentPool, gameObjectEntity);
 
-        // ctx.forceUpdate();
+        ctx.forceUpdate();
 
         lastZ += 1;
       }

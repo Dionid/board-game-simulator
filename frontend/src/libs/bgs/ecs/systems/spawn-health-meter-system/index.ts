@@ -56,6 +56,7 @@ export const SpawnHealthMeterEventSystem = (): System<{
             selectable: true,
             lockable: true,
             deletable: false,
+            dynamicDepth: true,
             x: spawnComponent.data.x - size.width / 2,
             y: spawnComponent.data.y - size.height / 2,
             ...size,

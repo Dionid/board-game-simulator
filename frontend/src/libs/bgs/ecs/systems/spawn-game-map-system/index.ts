@@ -67,6 +67,7 @@ export const SpawnGameMapSystem = (): System<{
           selectable: true,
           lockable: true,
           deletable: true,
+          dynamicDepth: true,
           x,
           y,
           ...size,
