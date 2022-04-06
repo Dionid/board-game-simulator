@@ -3,13 +3,35 @@ import Menu from '@mui/material/Menu';
 import React, { FC } from 'react';
 import { Essence } from '../../../libs/ecs/essence';
 import { ComponentId, Pool } from '../../../libs/ecs/component';
-import { MenuItem } from '@mui/material';
+import { ListItemIcon, MenuItem } from '@mui/material';
 import { BgsWorld } from '../../../libs/bgs/ecs';
-import { v4 } from 'uuid';
 import { Square } from '../../../libs/math';
+import { PersonAdd } from '@mui/icons-material';
+import { Deck, HeroSets, MapId, SetId } from '../../../libs/bgs/games/unmatched';
+import {
+  CardComponentName,
+  ChangeViewEventComponentName,
+  DeckComponentName,
+  DeletableComponentName,
+  DeleteHeroSetEventComponentName,
+  FlipEventComponentName,
+  FlippableComponentName,
+  HandComponentName,
+  HeroSetDeletableComponentName,
+  IsLockedComponentName,
+  LockableComponentName,
+  PlayerComponentName,
+  PositionComponentName,
+  SizeComponentName,
+  SpawnGameMapEventComponentName,
+  SpawnHeroSetEventComponentName,
+  TakeCardFromDeckEventComponentName,
+  ViewChangeableComponentName,
+} from '../../../libs/bgs/ecs/components';
+import { v4 } from 'uuid';
 
-export const ContextMenu: FC<{ world: BgsWorld }> = (props) => {
-  const { children, world } = props;
+export const ContextMenu: FC<{ world: BgsWorld; heroSets: HeroSets }> = (props) => {
+  const { children, world, heroSets } = props;
 
   // CONTEXT MENU
   const [contextMenu, setContextMenu] = React.useState<{
@@ -36,9 +58,61 @@ export const ContextMenu: FC<{ world: BgsWorld }> = (props) => {
     setContextMenu(null);
   };
 
+  const spawnMap = () => {
+    if (!contextMenu) {
+      throw new Error(`Context menu must be not emtpy`);
+    }
+    const spawnGameMapComponentPool = Essence.getOrAddPool(world.essence, SpawnGameMapEventComponentName);
+    Pool.add(spawnGameMapComponentPool, EntityId.new(), {
+      name: SpawnGameMapEventComponentName,
+      id: ComponentId.new(),
+      data: {
+        url: '/maps/soho.png',
+        mapId: MapId.new(),
+        x: contextMenu.x,
+        y: contextMenu.y,
+      },
+    });
+    handleClose();
+  };
+
+  const spawnHeroSet = (setId: SetId) => {
+    if (!contextMenu) {
+      throw new Error(`Context menu must be not emtpy`);
+    }
+    const spawnHeroSetComponentPool = Essence.getOrAddPool(world.essence, SpawnHeroSetEventComponentName);
+    Pool.add(spawnHeroSetComponentPool, EntityId.new(), {
+      name: SpawnHeroSetEventComponentName,
+      id: ComponentId.new(),
+      data: {
+        setId,
+        x: contextMenu.x,
+        y: contextMenu.y,
+      },
+    });
+    handleClose();
+  };
+
   const contextMenuActions = () => {
     const actions: JSX.Element[] = [];
-    const emptyActions = [<MenuItem key={v4()}>No actions</MenuItem>];
+    const emptyActions = [
+      <MenuItem key={v4()} onClick={spawnMap}>
+        <ListItemIcon>
+          <PersonAdd fontSize="small" />
+        </ListItemIcon>
+        Add Soho map
+      </MenuItem>,
+      Object.keys(heroSets).map((id) => {
+        return (
+          <MenuItem key={id} onClick={() => spawnHeroSet(id as SetId)}>
+            <ListItemIcon>
+              <PersonAdd fontSize="small" />
+            </ListItemIcon>
+            Add {heroSets[id].name} Hero Set
+          </MenuItem>
+        );
+      }),
+    ];
 
     if (!contextMenu) {
       return emptyActions;
@@ -49,11 +123,11 @@ export const ContextMenu: FC<{ world: BgsWorld }> = (props) => {
       'PositionComponent',
       'SizeComponent',
     ]);
-    const positionComponentPool = Essence.getOrAddPool(world.essence, 'PositionComponent');
-    const sizeComponentPool = Essence.getOrAddPool(world.essence, 'SizeComponent');
+    const positionComponentPool = Essence.getOrAddPool(world.essence, PositionComponentName);
+    const sizeComponentPool = Essence.getOrAddPool(world.essence, SizeComponentName);
 
-    const playerMouseEntities = Essence.filter(world.essence, ['PlayerComponent', 'OwnerComponent', 'HandComponent']);
-    const handPool = Essence.getOrAddPool(world.essence, 'HandComponent');
+    const playerMouseEntities = Essence.filter(world.essence, [PlayerComponentName, HandComponentName]);
+    const handPool = Essence.getOrAddPool(world.essence, HandComponentName);
     const playerMouseComponent = Pool.get(handPool, playerMouseEntities[0]);
 
     const mouseOnEntities: EntityId[] = [];
@@ -90,7 +164,7 @@ export const ContextMenu: FC<{ world: BgsWorld }> = (props) => {
     });
 
     if (maxZPositionEntity) {
-      const deletableCP = Essence.getOrAddPool(world.essence, 'DeletableComponent');
+      const deletableCP = Essence.getOrAddPool(world.essence, DeletableComponentName);
       if (Pool.tryGet(deletableCP, maxZPositionEntity)) {
         // . DELETE BUTTON
         actions.push(
@@ -107,12 +181,147 @@ export const ContextMenu: FC<{ world: BgsWorld }> = (props) => {
         );
       }
 
+      // . DECK ACTIONS
+      const deckComponentPool = Essence.getOrAddPool(world.essence, DeckComponentName);
+      const deckComponent = Pool.tryGet(deckComponentPool, maxZPositionEntity);
+
+      if (deckComponent) {
+        actions.push(
+          <MenuItem
+            key={maxZPositionEntity + ':deck:take_card'}
+            onClick={() => {
+              handleClose();
+              const takeCardFromDeckEventCP = Essence.getOrAddPool(world.essence, TakeCardFromDeckEventComponentName);
+              Pool.add(takeCardFromDeckEventCP, EntityId.new(), {
+                id: ComponentId.new(),
+                name: TakeCardFromDeckEventComponentName,
+                data: {
+                  deckEntityId: maxZPositionEntity,
+                },
+              });
+            }}
+          >
+            Take 1 card
+          </MenuItem>
+        );
+        actions.push(
+          <MenuItem
+            key={maxZPositionEntity + ':deck:shuffle'}
+            onClick={() => {
+              handleClose();
+              // TODO. Move to system
+              Deck.shuffle(deckComponent.data);
+            }}
+          >
+            Shuffle
+          </MenuItem>
+        );
+      }
+
+      // . CARD ACTIONS
+      const cardComponentPool = Essence.getOrAddPool(world.essence, CardComponentName);
+      const cardComponent = Pool.tryGet(cardComponentPool, maxZPositionEntity);
+
+      if (cardComponent) {
+        const deck = Pool.tryGet(deckComponentPool, cardComponent.data.deckEntityId);
+        if (deck) {
+          actions.push(
+            <MenuItem
+              key={maxZPositionEntity + ':deck:take_card'}
+              onClick={() => {
+                handleClose();
+                deck.data.cards.push(cardComponent.data.card);
+                Essence.destroyEntity(world.essence, maxZPositionEntity);
+                world.ctx.forceUpdate();
+              }}
+            >
+              Put on deck
+            </MenuItem>
+          );
+        }
+      }
+
+      // . FLIPPABLE
+      const flippablePool = Essence.getOrAddPool(world.essence, FlippableComponentName);
+      const flippable = Pool.tryGet(flippablePool, maxZPositionEntity);
+
+      if (flippable) {
+        actions.push(
+          <MenuItem
+            key={maxZPositionEntity + ':flip'}
+            onClick={() => {
+              handleClose();
+              const flipEventCP = Essence.getOrAddPool(world.essence, FlipEventComponentName);
+              Pool.add(flipEventCP, EntityId.new(), {
+                id: ComponentId.new(),
+                name: FlipEventComponentName,
+                data: {
+                  entityId: maxZPositionEntity,
+                },
+              });
+            }}
+          >
+            Flip
+          </MenuItem>
+        );
+      }
+
+      // . VIEW CHANGEABLE
+      const viewChangablePool = Essence.getOrAddPool(world.essence, ViewChangeableComponentName);
+      const viewChangable = Pool.tryGet(viewChangablePool, maxZPositionEntity);
+
+      if (viewChangable) {
+        actions.push(
+          <MenuItem
+            key={maxZPositionEntity + ':flip'}
+            onClick={() => {
+              handleClose();
+              const changeViewEventCP = Essence.getOrAddPool(world.essence, ChangeViewEventComponentName);
+              Pool.add(changeViewEventCP, EntityId.new(), {
+                id: ComponentId.new(),
+                name: ChangeViewEventComponentName,
+                data: {
+                  entityId: maxZPositionEntity,
+                },
+              });
+            }}
+          >
+            Change view
+          </MenuItem>
+        );
+      }
+
+      // . DELETE HERO SET
+      const heroSetDeletablePool = Essence.getOrAddPool(world.essence, HeroSetDeletableComponentName);
+      const heroSetDeletable = Pool.tryGet(heroSetDeletablePool, maxZPositionEntity);
+
+      if (heroSetDeletable) {
+        actions.push(
+          <MenuItem
+            key={maxZPositionEntity + ':heroSetDeletable'}
+            onClick={() => {
+              handleClose();
+              const deleteHeroSetCP = Essence.getOrAddPool(world.essence, DeleteHeroSetEventComponentName);
+              Pool.add(deleteHeroSetCP, EntityId.new(), {
+                id: ComponentId.new(),
+                name: DeleteHeroSetEventComponentName,
+                data: {
+                  setEntityId: heroSetDeletable?.data.setEntityId,
+                },
+              });
+            }}
+          >
+            Delete hero set
+          </MenuItem>
+        );
+      }
+
       // . (UN)LOCK BUTTON
-      const lockableComponentPool = Essence.getOrAddPool(world.essence, 'LockableComponent');
+      const lockableComponentPool = Essence.getOrAddPool(world.essence, LockableComponentName);
       const lockableComponent = Pool.tryGet(lockableComponentPool, maxZPositionEntity);
 
       if (lockableComponent) {
-        const isLockedComponentPool = Essence.getOrAddPool(world.essence, 'IsLockedComponent');
+        const isLockedComponentPool = Essence.getOrAddPool(world.essence, IsLockedComponentName);
         const isLockedComponent = Pool.tryGet(isLockedComponentPool, maxZPositionEntity);
 
         if (isLockedComponent) {

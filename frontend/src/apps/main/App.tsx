@@ -29,6 +29,12 @@ import { Minimap } from '../../modules/widgets/Minimap';
 import { GameStage } from '../../modules/widgets/GameStage';
 import { ChangeReactScaleSystem } from '../../libs/bgs/ecs/systems/change-react-scale-system';
 import { ZoomSystem } from '../../libs/bgs/ecs/systems/zoom';
+import { TakeCardFromDeckEventSystem } from '../../libs/bgs/ecs/systems/take-card-from-deck-event';
+import { Flip } from '../../libs/bgs/ecs/systems/flip';
+import { ChangeView } from '../../libs/bgs/ecs/systems/change-view';
+import { DeleteHeroEventSet } from '../../libs/bgs/ecs/systems/delete-hero-set-event';
+import { IncDecHealthMeterEvent } from '../../libs/bgs/ecs/systems/inc-dec-health-meter-event';
+import { ChangeReactHealthMeter } from '../../libs/bgs/ecs/systems/change-react-health-meter';
 
 // TODO. Move
 const boardSize = {
@@ -72,6 +78,12 @@ function App() {
         SpawnCardEventSystem(),
         SpawnRuleCardEventSystem(),
         SpawnHealthMeterEventSystem(),
+        DeleteHeroEventSet(),
+
+        TakeCardFromDeckEventSystem(),
+        Flip(),
+        ChangeView(),
+        IncDecHealthMeterEvent(),
 
         // SPAWN GAME OBJECT
         SpawnGameObjectSystem(),
@@ -84,6 +96,7 @@ function App() {
         ChangeReactImageSystem(),
         ChangeReactSizeSystem(),
         ChangeReactScaleSystem(),
+        ChangeReactHealthMeter(),
       ],
     };
 
@@ -121,15 +134,13 @@ function App() {
   const playerEntities = Essence.filter(world.essence, ['PlayerComponent', 'CameraComponent']);
   const playerEntity = playerEntities[0];
 
-  console.log('APP', playerEntity);
-
   return (
     <div>
       <CssBaseline />
-      <ContextMenu world={world}>
+      <ContextMenu world={world} heroSets={heroSets}>
         {playerEntity && <GameStage forceUpdateState={forceUpdateState} world={world} playerEntity={playerEntity} />}
       </ContextMenu>
-      <MainMenu world={world} heroSets={heroSets} />
+      <MainMenu world={world} />
       {playerEntity && (
         <Minimap forceUpdateState={forceUpdateState} world={world} boardSize={boardSize} playerEntity={playerEntity} />
       )}

@@ -3,6 +3,14 @@ import { Essence } from '../../../../ecs/essence';
 import { ComponentId, Pool } from '../../../../ecs/component';
 import { EntityId } from '../../../../ecs/entity';
 import {
+  CameraComponent,
+  CameraComponentName,
+  HeroSetComponent,
+  HeroSetComponentName,
+  PlayerComponent,
+  PlayerComponentName,
+  PositionComponent,
+  PositionComponentName,
   SpawnCardEventComponent,
   SpawnCardEventComponentName,
   SpawnDeckEventComponent,
@@ -29,6 +37,10 @@ export const SpawnHeroSetSystem = (): System<
     [SpawnCardEventComponentName]: SpawnCardEventComponent;
     [SpawnHealthMeterEventComponentName]: SpawnHealthMeterEventComponent;
     [SpawnRuleCardEventComponentName]: SpawnRuleCardEventComponent;
+    [PlayerComponentName]: PlayerComponent;
+    [CameraComponentName]: CameraComponent;
+    [PositionComponentName]: PositionComponent;
+    [HeroSetComponentName]: HeroSetComponent;
   },
   {
     heroSets: HeroSets;
@@ -45,26 +57,40 @@ export const SpawnHeroSetSystem = (): System<
       const spawnHeroComponentPool = Essence.getOrAddPool(essence, SpawnHeroEventComponentName);
       const spawnSidekickEventComponentPool = Essence.getOrAddPool(essence, SpawnSideKickEventComponentName);
       const spawnDeckEventComponentPool = Essence.getOrAddPool(essence, SpawnDeckEventComponentName);
-      // const spawnCardEventComponentPool = Essence.getOrAddPool(essence, SpawnCardEventComponentName');
       const spawnRuleCardEventComponentPool = Essence.getOrAddPool(essence, SpawnRuleCardEventComponentName);
       const spawnHealthMeterEventComponentPool = Essence.getOrAddPool(essence, SpawnHealthMeterEventComponentName);
+      const heroSetCP = Essence.getOrAddPool(essence, HeroSetComponentName);
 
       const heroSets = ctx.heroSets;
 
+      const playerCameraEntityId = Essence.filter(essence, [PlayerComponentName, CameraComponentName])[0];
+      const positionCP = Essence.getOrAddPool(essence, PositionComponentName);
+      const cameraPositionC = Pool.get(positionCP, playerCameraEntityId);
+
       for (const entity of entities) {
+        const boundedEntityIds: EntityId[] = [];
+        const heroSetEntityId = EntityId.new();
         const spawnComponent = Pool.get(spawnHeroSetComponentPool, entity);
+
+        const x = spawnComponent.data.x + cameraPositionC.data.x;
+        const y = spawnComponent.data.y + cameraPositionC.data.y;
 
         const heroSet = heroSets[spawnComponent.data.setId];
 
         heroSet.heroes.forEach((hero) => {
           for (let i = 0; i < hero.qty; i++) {
+            const heroEntityId = EntityId.new();
+            boundedEntityIds.push(heroEntityId);
             // . Create new hero component
-            Pool.add(spawnHeroComponentPool, EntityId.new(), {
+            Pool.add(spawnHeroComponentPool, heroEntityId, {
               name: SpawnHeroEventComponentName,
               id: ComponentId.new(),
               data: {
-                url: hero.frontImageUrl,
+                heroSetEntityId,
+                views: hero.views,
                 heroId: hero.id,
+                x,
+                y,
               },
             });
           }
@@ -72,13 +98,18 @@ export const SpawnHeroSetSystem = (): System<
 
         heroSet.sidekicks.forEach((sidekick) => {
           for (let i = 0; i < sidekick.qty; i++) {
+            const sideKickEntityId = EntityId.new();
+            boundedEntityIds.push(sideKickEntityId);
             // . Create new sidekick component
-            Pool.add(spawnSidekickEventComponentPool, EntityId.new(), {
+            Pool.add(spawnSidekickEventComponentPool, sideKickEntityId, {
               name: SpawnSideKickEventComponentName,
               id: ComponentId.new(),
               data: {
-                url: sidekick.frontImageUrl,
+                heroSetEntityId,
+                views: sidekick.views,
                 sidekickId: sidekick.id,
+                x,
+                y,
               },
             });
           }
@@ -86,61 +117,64 @@ export const SpawnHeroSetSystem = (): System<
 
         heroSet.decks.forEach((deck) => {
           // . Create new sidekick component
-          Pool.add(spawnDeckEventComponentPool, EntityId.new(), {
+          const deckEntityId = EntityId.new();
+          boundedEntityIds.push(deckEntityId);
+          Pool.add(spawnDeckEventComponentPool, deckEntityId, {
             name: SpawnDeckEventComponentName,
             id: ComponentId.new(),
             data: {
+              heroSetEntityId,
               url: deck.frontImageUrl,
+              setId: spawnComponent.data.setId,
               deckId: deck.id,
+              x,
+              y,
             },
           });
         });
 
         heroSet.healthMeters.forEach((healthMeter) => {
-          // . Create new sidekick component
-          Pool.add(spawnHealthMeterEventComponentPool, EntityId.new(), {
+          // . Create new health meter component
+          const healthMeterEntityId = EntityId.new();
+          boundedEntityIds.push(healthMeterEntityId);
+          Pool.add(spawnHealthMeterEventComponentPool, healthMeterEntityId, {
             name: SpawnHealthMeterEventComponentName,
             id: ComponentId.new(),
             data: {
+              heroSetEntityId,
               url: healthMeter.frontImageUrl,
               healthMeterId: healthMeter.id,
+              maxValue: healthMeter.maxValue,
+              x,
+              y,
             },
           });
         });
 
         heroSet.ruleCards.forEach((ruleCard) => {
-          // . Create new sidekick component
-          Pool.add(spawnRuleCardEventComponentPool, EntityId.new(), {
+          // . Create new ruleCard component
+          const ruleCardEntityId = EntityId.new();
+          boundedEntityIds.push(ruleCardEntityId);
+          Pool.add(spawnRuleCardEventComponentPool, ruleCardEntityId, {
             name: SpawnRuleCardEventComponentName,
             id: ComponentId.new(),
             data: {
+              heroSetEntityId,
               url: ruleCard.frontImageUrl,
               ruleCardId: ruleCard.id,
+              x,
+              y,
             },
           });
         });
 
-        // // TODO. Remove after deck get card action
-        // for (let i = 0; i < heroSet.cards[0].qty; i++) {
-        //   Pool.add(spawnCardEventComponentPool, EntityId.new(), {
-        //     name: 'SpawnCardEventComponent',
-        //     id: ComponentId.new(),
-        //     data: {
-        //       url: heroSet.cards[0].frontImageUrl,
-        //       cardId: heroSet.cards[0].id,
-        //     },
-        //   });
-        // }
-        // for (let i = 0; i < heroSet.cards[1].qty; i++) {
-        //   Pool.add(spawnCardEventComponentPool, EntityId.new(), {
-        //     name: 'SpawnCardEventComponent',
-        //     id: ComponentId.new(),
-        //     data: {
-        //       url: heroSet.cards[1].frontImageUrl,
-        //       cardId: heroSet.cards[1].id,
-        //     },
-        //   });
-        // }
+        Pool.add(heroSetCP, heroSetEntityId, {
+          id: ComponentId.new(),
+          name: HeroSetComponentName,
+          data: {
+            boundedEntityIds,
+          },
+        });
 
         // . Destroy event
         Pool.delete(spawnHeroSetComponentPool, entity);

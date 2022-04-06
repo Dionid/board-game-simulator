@@ -5,6 +5,7 @@ import {
   CameraComponent,
   CameraComponentName,
   DeckComponent,
+  DeckComponentName,
   PlayerComponent,
   PlayerComponentName,
   PositionComponent,
@@ -12,38 +13,37 @@ import {
   SizeComponent,
   SizeComponentName,
   SpawnDeckEventComponent,
+  SpawnDeckEventComponentName,
   SpawnGameObjectEventComponent,
+  SpawnGameObjectEventComponentName,
 } from '../../components';
-import { Size, Vector2 } from '../../../../math';
+import { Size } from '../../../../math';
+import { Card, Deck, HeroSets } from '../../../games/unmatched';
 
-export const SpawnDeckEventSystem = (): System<{
-  SpawnDeckEventComponent: SpawnDeckEventComponent;
-  DeckComponent: DeckComponent;
-  SpawnGameObjectEventComponent: SpawnGameObjectEventComponent;
-  [CameraComponentName]: CameraComponent;
-  [PlayerComponentName]: PlayerComponent;
-  [PositionComponentName]: PositionComponent;
-  [SizeComponentName]: SizeComponent;
-}> => {
+export const SpawnDeckEventSystem = (): System<
+  {
+    [SpawnDeckEventComponentName]: SpawnDeckEventComponent;
+    [DeckComponentName]: DeckComponent;
+    [SpawnGameObjectEventComponentName]: SpawnGameObjectEventComponent;
+    [CameraComponentName]: CameraComponent;
+    [PlayerComponentName]: PlayerComponent;
+    [PositionComponentName]: PositionComponent;
+    [SizeComponentName]: SizeComponent;
+  },
+  {
+    heroSets: HeroSets;
+  }
+> => {
   return {
-    run: async ({ essence }) => {
-      const entities = Essence.filter(essence, ['SpawnDeckEventComponent']);
+    run: async ({ essence, ctx }) => {
+      const entities = Essence.filter(essence, [SpawnDeckEventComponentName]);
       if (entities.length === 0) {
         return;
       }
 
-      const playerEntities = Essence.filter(essence, ['PlayerComponent', 'CameraComponent']);
-      const cameraPositionComponentPool = Essence.getOrAddPool(essence, 'PositionComponent');
-      const cameraSizeComponentPool = Essence.getOrAddPool(essence, 'SizeComponent');
-
-      // TODO. Refactor for collaboration
-      const playerEntity = playerEntities[0];
-      const cameraPositionC = Pool.get(cameraPositionComponentPool, playerEntity);
-      const cameraSizeC = Pool.get(cameraSizeComponentPool, playerEntity);
-
-      const spawnDeckComponentPool = Essence.getOrAddPool(essence, 'SpawnDeckEventComponent');
-      const deckComponentPool = Essence.getOrAddPool(essence, 'DeckComponent');
-      const spawnGameObjectComponentPool = Essence.getOrAddPool(essence, 'SpawnGameObjectEventComponent');
+      const spawnDeckComponentPool = Essence.getOrAddPool(essence, SpawnDeckEventComponentName);
+      const deckComponentPool = Essence.getOrAddPool(essence, DeckComponentName);
+      const spawnGameObjectComponentPool = Essence.getOrAddPool(essence, SpawnGameObjectEventComponentName);
 
       for (const deckEntity of entities) {
         const spawnComponent = Pool.get(spawnDeckComponentPool, deckEntity);
@@ -56,26 +56,41 @@ export const SpawnDeckEventSystem = (): System<{
         };
         Pool.add(spawnGameObjectComponentPool, deckEntity, {
           id: ComponentId.new(),
-          name: 'SpawnGameObjectEventComponent',
+          name: SpawnGameObjectEventComponentName,
           data: {
             imageUrl: spawnComponent.data.url,
             draggable: true,
             selectable: true,
             lockable: true,
             deletable: false,
+            x: spawnComponent.data.x - size.width / 2,
+            y: spawnComponent.data.y - size.height / 2,
             ...size,
-            ...Vector2.sum(cameraPositionC.data, {
-              x: cameraSizeC.data.width / 2 - size.width / 2,
-              y: cameraSizeC.data.height / 2 - size.height / 2,
-            }),
           },
         });
 
+        const heroSets = ctx.heroSets;
+        const herSetCards = heroSets[spawnComponent.data.setId].cards;
+
+        const cards: Card[] = [];
+
+        for (let i = 0; i < herSetCards.length; i++) {
+          const cardTemplate = herSetCards[i];
+          for (let j = 0; j < cardTemplate.qty; j++) {
+            cards.push(cardTemplate);
+          }
+        }
+        const deck = {
+          id: spawnComponent.data.deckId,
+          cards,
+        };
+        Deck.shuffle(deck);
         Pool.add(deckComponentPool, deckEntity, {
           id: ComponentId.new(),
-          name: 'DeckComponent',
+          name: DeckComponentName,
           data: {
-            deckId: spawnComponent.data.deckId,
+            ...deck,
+            heroSetEntityId: spawnComponent.data.heroSetEntityId,
           },
         });
 

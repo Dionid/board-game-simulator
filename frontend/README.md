@@ -23,46 +23,46 @@
    4. ~~Add objects to minimap~~
 6. ~~Zoom~~
 7. ~~Rename World -> Essence and Ignitor -> World~~
-8. Deck actions
-   1. Get card
-   2. Shuffle
-9. Card actions
-   1. Put in deck
-   2. Flip
-10. Hero actions
-    1. Flip
-11. Health Meter actions
+8. ~~Deck actions~~
+   1. ~~Get card~~
+   2. ~~Shuffle~~
+9. ~~Card actions~~
+   1. ~~Put in deck~~
+   2. ~~Flip~~
+10. ~~Hero actions~~
+    1. ~~Change view~~
+11. ~~Hero Set actions~~ 2. ~~Delete set~~
+12. Health Meter actions
     1. Increase & Decrease
-12. Hero Set actions
-    1. Delete set
 13. Depth system
     1. Based on dragging
     2. Based on y axis
-14. Move Hero Set and Map creation to Context Menu
-15. Authorization
-16. Cards shown
-17. Persistence and collaboration
+14. Authorization
+15. Persistence and collaboration
     1. Room
     2. Player cursor
     3. Player actions
-18. Zoom in cards
-19. ~~Remove entities~~
+16. Cards shown
+17. Zoom in cards
+18. Spawn Hero Set in different spaces
+19. ~~Move Hero Set and Map creation to Context Menu~~
+20. ~~Remove entities~~
 
 ## Second
 
+2. Resize canvas on window resize
 1. Refactor SelectSystem
-2. Refactor Pan system
-3. Ipad version
-4. More `Essence.filter` operations (`in`, `notIn`, etc.)
-5. Rename Systems to "Input" and "Output"
-6. ~~Replace png with svg~~
-7. ~~Rename Systems to EventSystems~~
-8. ~~Make component names as constants~~
-9. ~~How to rerender on changes~~
+1. Refactor Pan system
+1. Ipad version
+1. More `Essence.filter` operations (`in`, `notIn`, etc.)
+1. Rename Systems to "Input" and "Output"
+1. ~~Replace png with svg~~
+1. ~~Rename Systems to EventSystems~~
+1. ~~Make component names as constants~~
+1. ~~How to rerender on changes~~
 
 ## Additional
 
 1. Mobile version
-2. Resize canvas on window resize
-3. Background grid
-4. History
+2. Background grid
+3. History

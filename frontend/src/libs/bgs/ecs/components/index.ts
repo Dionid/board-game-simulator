@@ -1,8 +1,20 @@
 import { Component } from '../../../ecs/component';
 import { ReactComponent } from '../../../ecs/react';
 import { UUID } from '../../../branded-types';
-import { CardId, DeckId, HealthMeterId, HeroId, MapId, RuleCardId, SetId, SidekickId } from '../../games/unmatched';
+import {
+  Card,
+  CardId,
+  Deck,
+  DeckId,
+  HealthMeterId,
+  HeroId,
+  MapId,
+  RuleCardId,
+  SetId,
+  SidekickId,
+} from '../../games/unmatched';
 import { Size, Square, Vector2, Vector3 } from '../../../math';
+import { EntityId } from '../../../ecs/entity';
 
 // . BOARD
 
@@ -60,9 +72,9 @@ export type GameObjectComponent = Component<typeof GameObjectComponentName, {}>;
 export const PositionComponentName = 'PositionComponent';
 export type PositionComponent = Component<typeof PositionComponentName, Vector3>;
 
-export const ImageComponent = 'ImageComponent';
+export const ImageComponentName = 'ImageComponent';
 export type ImageComponent = Component<
-  typeof ImageComponent,
+  typeof ImageComponentName,
   {
     url: string;
   }
@@ -117,7 +129,62 @@ export type ZoomInEventComponent = Component<typeof ZoomInEventComponentName, {}
 export const ZoomOutEventComponentName = 'ZoomOutEventComponent';
 export type ZoomOutEventComponent = Component<typeof ZoomOutEventComponentName, {}>;
 
+export const FlippableComponentName = 'FlippableComponent';
+export type FlippableComponent = Component<
+  typeof FlippableComponentName,
+  {
+    currentSide: 'front' | 'back';
+    front: {
+      url: string;
+    };
+    back: {
+      url: string;
+    };
+  }
+>;
+
+export const FlipEventComponentName = 'FlipEventComponent';
+export type FlipEventComponent = Component<
+  typeof FlipEventComponentName,
+  {
+    entityId: EntityId;
+  }
+>;
+
+export const ViewChangeableComponentName = 'ViewChangeableComponent';
+export type ViewChangeableComponent = Component<
+  typeof ViewChangeableComponentName,
+  {
+    current: number;
+    views: { url: string }[];
+  }
+>;
+
+export const ChangeViewEventComponentName = 'ChangeViewEventComponent';
+export type ChangeViewEventComponent = Component<
+  typeof ChangeViewEventComponentName,
+  {
+    entityId: EntityId;
+  }
+>;
+
 // . UNMATCHED COMPONENTS
+
+export const HeroSetDeletableComponentName = 'HeroSetDeletableComponent';
+export type HeroSetDeletableComponent = Component<
+  typeof HeroSetDeletableComponentName,
+  {
+    setEntityId: EntityId;
+  }
+>;
+
+export const DeleteHeroSetEventComponentName = 'DeleteHeroSetEventComponent';
+export type DeleteHeroSetEventComponent = Component<
+  typeof DeleteHeroSetEventComponentName,
+  {
+    setEntityId: EntityId;
+  }
+>;
 
 export const GameMapComponentName = 'GameMapComponent';
 export type GameMapComponent = Component<
@@ -131,6 +198,7 @@ export const HeroComponentName = 'HeroComponent';
 export type HeroComponent = Component<
   typeof HeroComponentName,
   {
+    heroSetEntityId: EntityId;
     heroId: HeroId;
   }
 >;
@@ -139,6 +207,7 @@ export const SidekickComponentName = 'SidekickComponent';
 export type SidekickComponent = Component<
   typeof SidekickComponentName,
   {
+    heroSetEntityId: EntityId;
     sidekickId: SidekickId;
   }
 >;
@@ -146,8 +215,8 @@ export type SidekickComponent = Component<
 export const DeckComponentName = 'DeckComponent';
 export type DeckComponent = Component<
   typeof DeckComponentName,
-  {
-    deckId: DeckId;
+  Deck & {
+    heroSetEntityId: EntityId;
   }
 >;
 
@@ -155,7 +224,10 @@ export const CardComponentName = 'CardComponent';
 export type CardComponent = Component<
   typeof CardComponentName,
   {
+    heroSetEntityId: EntityId;
     cardId: CardId;
+    deckEntityId: EntityId;
+    card: Card;
   }
 >;
 
@@ -163,6 +235,7 @@ export const RuleCardComponentName = 'RuleCardComponent';
 export type RuleCardComponent = Component<
   typeof RuleCardComponentName,
   {
+    heroSetEntityId: EntityId;
     ruleCardId: RuleCardId;
   }
 >;
@@ -171,7 +244,26 @@ export const HealthMeterComponentName = 'HealthMeterComponent';
 export type HealthMeterComponent = Component<
   typeof HealthMeterComponentName,
   {
+    heroSetEntityId: EntityId;
     healthMeterId: HealthMeterId;
+    maxHealth: number;
+    currentHealth: number;
+  }
+>;
+
+export const DecrementCurrentHealthEventComponentName = 'DecrementCurrentHealthEventComponent';
+export type DecrementCurrentHealthEventComponent = Component<
+  typeof DecrementCurrentHealthEventComponentName,
+  {
+    healthMeterEntityId: EntityId;
+  }
+>;
+
+export const IncrementCurrentHealthEventComponentName = 'IncrementCurrentHealthEventComponent';
+export type IncrementCurrentHealthEventComponent = Component<
+  typeof IncrementCurrentHealthEventComponentName,
+  {
+    healthMeterEntityId: EntityId;
   }
 >;
 
@@ -179,7 +271,7 @@ export const HeroSetComponentName = 'HeroSetComponent';
 export type HeroSetComponent = Component<
   typeof HeroSetComponentName,
   {
-    setId: SetId;
+    boundedEntityIds: EntityId[];
   }
 >;
 
@@ -191,6 +283,8 @@ export type SpawnGameMapEventComponent = Component<
   {
     url: string;
     mapId: MapId;
+    x: number;
+    y: number;
   }
 >;
 
@@ -198,8 +292,11 @@ export const SpawnHeroEventComponentName = 'SpawnHeroEventComponent';
 export type SpawnHeroEventComponent = Component<
   typeof SpawnHeroEventComponentName,
   {
-    url: string;
+    heroSetEntityId: EntityId;
     heroId: HeroId;
+    x: number;
+    y: number;
+    views: { url: string }[];
   }
 >;
 
@@ -207,8 +304,11 @@ export const SpawnSideKickEventComponentName = 'SpawnSideKickEventComponent';
 export type SpawnSideKickEventComponent = Component<
   typeof SpawnSideKickEventComponentName,
   {
-    url: string;
+    heroSetEntityId: EntityId;
+    views: { url: string }[];
     sidekickId: SidekickId;
+    x: number;
+    y: number;
   }
 >;
 
@@ -216,8 +316,12 @@ export const SpawnDeckEventComponentName = 'SpawnDeckEventComponent';
 export type SpawnDeckEventComponent = Component<
   typeof SpawnDeckEventComponentName,
   {
+    heroSetEntityId: EntityId;
     url: string;
+    setId: SetId;
     deckId: DeckId;
+    x: number;
+    y: number;
   }
 >;
 
@@ -225,8 +329,14 @@ export const SpawnCardEventComponentName = 'SpawnCardEventComponent';
 export type SpawnCardEventComponent = Component<
   typeof SpawnCardEventComponentName,
   {
-    url: string;
+    heroSetEntityId: EntityId;
+    frontSideUrl: string;
+    backSideUrl: string;
     cardId: CardId;
+    x: number;
+    y: number;
+    deckEntityId: EntityId;
+    card: Card;
   }
 >;
 
@@ -234,8 +344,11 @@ export const SpawnRuleCardEventComponentName = 'SpawnRuleCardEventComponent';
 export type SpawnRuleCardEventComponent = Component<
   typeof SpawnRuleCardEventComponentName,
   {
+    heroSetEntityId: EntityId;
     url: string;
     ruleCardId: RuleCardId;
+    x: number;
+    y: number;
   }
 >;
 
@@ -243,8 +356,12 @@ export const SpawnHealthMeterEventComponentName = 'SpawnHealthMeterEventComponen
 export type SpawnHealthMeterEventComponent = Component<
   typeof SpawnHealthMeterEventComponentName,
   {
+    heroSetEntityId: EntityId;
     url: string;
     healthMeterId: HealthMeterId;
+    maxValue: number;
+    x: number;
+    y: number;
   }
 >;
 
@@ -253,6 +370,16 @@ export type SpawnHeroSetEventComponent = Component<
   typeof SpawnHeroSetEventComponentName,
   {
     setId: SetId;
+    x: number;
+    y: number;
+  }
+>;
+
+export const TakeCardFromDeckEventComponentName = 'TakeCardFromDeckEventComponent';
+export type TakeCardFromDeckEventComponent = Component<
+  typeof TakeCardFromDeckEventComponentName,
+  {
+    deckEntityId: EntityId;
   }
 >;
 
@@ -280,6 +407,14 @@ export type ReactImageComponentData = { url: string };
 export type ReactImageComponent = ReactComponent<typeof ReactImageComponentName, ReactImageComponentData>;
 
 export const ReactGameMapComponentName = 'ReactGameMapComponent';
-export type ReactGameMapComponent = Component<typeof ReactGameMapComponentName, {}>;
+export type ReactGameMapComponent = ReactComponent<typeof ReactGameMapComponentName, {}>;
+
 export const ReactHeroComponentName = 'ReactHeroComponent';
-export type ReactHeroComponent = Component<typeof ReactHeroComponentName, {}>;
+export type ReactHeroComponent = ReactComponent<typeof ReactHeroComponentName, {}>;
+
+export const ReactHealthMeterComponentName = 'ReactHealthMeterComponent';
+export type ReactHealthMeterComponentData = { current: number };
+export type ReactHealthMeterComponent = ReactComponent<
+  typeof ReactHealthMeterComponentName,
+  ReactHealthMeterComponentData
+>;

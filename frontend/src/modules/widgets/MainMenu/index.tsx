@@ -1,4 +1,3 @@
-import { HeroSets, MapId, SetId } from '../../../libs/bgs/games/unmatched';
 import { BgsWorld } from '../../../libs/bgs/ecs';
 import React, { memo, useState } from 'react';
 import { Essence } from '../../../libs/ecs/essence';
@@ -14,13 +13,11 @@ import ZoomOutIcon from '@mui/icons-material/ZoomOut';
 import { useEventListener } from '../../../libs/react/hooks/use-event-listener';
 import {
   PanModeComponentName,
-  SpawnGameMapEventComponentName,
-  SpawnHeroSetEventComponentName,
   ZoomInEventComponentName,
   ZoomOutEventComponentName,
 } from '../../../libs/bgs/ecs/components';
 
-export const MainMenu = memo(({ heroSets, world }: { heroSets: HeroSets; world: BgsWorld }) => {
+export const MainMenu = memo(({ world }: { world: BgsWorld }) => {
   const [mode, setMode] = useState<'pan' | null>(null);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -31,18 +28,6 @@ export const MainMenu = memo(({ heroSets, world }: { heroSets: HeroSets; world: 
 
   const handleMenuClose = () => {
     setAnchorEl(null);
-  };
-
-  const spawnMap = () => {
-    const spawnGameMapComponentPool = Essence.getOrAddPool(world.essence, SpawnGameMapEventComponentName);
-    Pool.add(spawnGameMapComponentPool, EntityId.new(), {
-      name: SpawnHeroSetEventComponentName,
-      id: ComponentId.new(),
-      data: {
-        url: '/maps/soho.png',
-        mapId: MapId.new(),
-      },
-    });
   };
 
   const handlePanIconButtonClick = () => {
@@ -70,17 +55,6 @@ export const MainMenu = memo(({ heroSets, world }: { heroSets: HeroSets; world: 
   };
 
   useEventListener('keydown', handler);
-
-  const spawnHeroSet = (setId: SetId) => {
-    const spawnHeroSetComponentPool = Essence.getOrAddPool(world.essence, SpawnHeroSetEventComponentName);
-    Pool.add(spawnHeroSetComponentPool, EntityId.new(), {
-      name: SpawnHeroSetEventComponentName,
-      id: ComponentId.new(),
-      data: {
-        setId,
-      },
-    });
-  };
 
   const onZoomOutClick = () => {
     const zoomOutCP = Essence.getOrAddPool(world.essence, ZoomOutEventComponentName);
@@ -158,22 +132,12 @@ export const MainMenu = memo(({ heroSets, world }: { heroSets: HeroSets; world: 
         transformOrigin={{ horizontal: 'right', vertical: 'bottom' }}
         anchorOrigin={{ horizontal: 'left', vertical: 'top' }}
       >
-        <MenuItem onClick={spawnMap}>
+        <MenuItem>
           <ListItemIcon>
             <PersonAdd fontSize="small" />
           </ListItemIcon>
-          Add Soho map
+          No actions
         </MenuItem>
-        {Object.keys(heroSets).map((id) => {
-          return (
-            <MenuItem key={id} onClick={() => spawnHeroSet(id as SetId)}>
-              <ListItemIcon>
-                <PersonAdd fontSize="small" />
-              </ListItemIcon>
-              Add {heroSets[id].name} Hero Set
-            </MenuItem>
-          );
-        })}
       </Menu>
     </React.Fragment>
   );

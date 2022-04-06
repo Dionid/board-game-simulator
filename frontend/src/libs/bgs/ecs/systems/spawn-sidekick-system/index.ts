@@ -13,37 +13,34 @@ import {
   PositionComponent,
   SizeComponentName,
   SizeComponent,
+  ViewChangeableComponentName,
+  SpawnGameObjectEventComponentName,
+  SpawnSideKickEventComponentName,
+  SidekickComponentName,
+  ViewChangeableComponent,
 } from '../../components';
-import { Vector2 } from '../../../../math';
 
 export const SpawnSidekickEventSystem = (): System<{
-  SpawnSideKickEventComponent: SpawnSideKickEventComponent;
-  SidekickComponent: SidekickComponent;
-  SpawnGameObjectEventComponent: SpawnGameObjectEventComponent;
+  [SpawnSideKickEventComponentName]: SpawnSideKickEventComponent;
+  [SidekickComponentName]: SidekickComponent;
+  [SpawnGameObjectEventComponentName]: SpawnGameObjectEventComponent;
   [CameraComponentName]: CameraComponent;
   [PlayerComponentName]: PlayerComponent;
   [PositionComponentName]: PositionComponent;
   [SizeComponentName]: SizeComponent;
+  [ViewChangeableComponentName]: ViewChangeableComponent;
 }> => {
   return {
     run: async ({ essence }) => {
-      const entities = Essence.filter(essence, ['SpawnSideKickEventComponent']);
+      const entities = Essence.filter(essence, [SpawnSideKickEventComponentName]);
       if (entities.length === 0) {
         return;
       }
 
-      const playerEntities = Essence.filter(essence, ['PlayerComponent', 'CameraComponent']);
-      const cameraPositionComponentPool = Essence.getOrAddPool(essence, 'PositionComponent');
-      const cameraSizeComponentPool = Essence.getOrAddPool(essence, 'SizeComponent');
-
-      // TODO. Refactor for collaboration
-      const playerEntity = playerEntities[0];
-      const cameraPositionC = Pool.get(cameraPositionComponentPool, playerEntity);
-      const cameraSizeC = Pool.get(cameraSizeComponentPool, playerEntity);
-
-      const spawnSidekickComponentPool = Essence.getOrAddPool(essence, 'SpawnSideKickEventComponent');
-      const sidekickComponentPool = Essence.getOrAddPool(essence, 'SidekickComponent');
-      const spawnGameObjectComponentPool = Essence.getOrAddPool(essence, 'SpawnGameObjectEventComponent');
+      const spawnSidekickComponentPool = Essence.getOrAddPool(essence, SpawnSideKickEventComponentName);
+      const sidekickComponentPool = Essence.getOrAddPool(essence, SidekickComponentName);
+      const spawnGameObjectComponentPool = Essence.getOrAddPool(essence, SpawnGameObjectEventComponentName);
+      const viewChangeableCP = Essence.getOrAddPool(essence, ViewChangeableComponentName);
 
       for (const sidekickEntity of entities) {
         const spawnComponent = Pool.get(spawnSidekickComponentPool, sidekickEntity);
@@ -58,23 +55,33 @@ export const SpawnSidekickEventSystem = (): System<{
           id: ComponentId.new(),
           name: 'SpawnGameObjectEventComponent',
           data: {
-            imageUrl: spawnComponent.data.url,
+            imageUrl: spawnComponent.data.views[0].url,
             draggable: true,
             selectable: true,
             lockable: true,
             deletable: false,
+            x: spawnComponent.data.x - size.width / 2,
+            y: spawnComponent.data.y - size.height / 2,
             ...size,
-            ...Vector2.sum(cameraPositionC.data, {
-              x: cameraSizeC.data.width / 2 - size.width / 2,
-              y: cameraSizeC.data.height / 2 - size.height / 2,
-            }),
           },
         });
+
+        if (spawnComponent.data.views.length > 1) {
+          Pool.add(viewChangeableCP, sidekickEntity, {
+            id: ComponentId.new(),
+            name: ViewChangeableComponentName,
+            data: {
+              current: 0,
+              views: spawnComponent.data.views,
+            },
+          });
+        }
 
         Pool.add(sidekickComponentPool, sidekickEntity, {
           id: ComponentId.new(),
           name: 'SidekickComponent',
           data: {
+            heroSetEntityId: spawnComponent.data.heroSetEntityId,
             sidekickId: spawnComponent.data.sidekickId,
           },
         });
