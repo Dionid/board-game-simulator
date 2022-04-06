@@ -100,6 +100,12 @@ import {
   HeroSetDeletableComponent,
   DeleteHeroSetEventComponentName,
   DeleteHeroSetEventComponent,
+  DecrementCurrentHealthEventComponentName,
+  IncrementCurrentHealthEventComponent,
+  IncrementCurrentHealthEventComponentName,
+  DecrementCurrentHealthEventComponent,
+  ReactHealthMeterComponentName,
+  ReactHealthMeterComponent,
 } from './components';
 import { HeroSets } from '../games/unmatched';
 
@@ -143,6 +149,8 @@ export type BgsWorldComponents = {
   [RuleCardComponentName]: RuleCardComponent;
   [HeroSetComponentName]: HeroSetComponent;
   [HealthMeterComponentName]: HealthMeterComponent;
+  [DecrementCurrentHealthEventComponentName]: DecrementCurrentHealthEventComponent;
+  [IncrementCurrentHealthEventComponentName]: IncrementCurrentHealthEventComponent;
 
   // . EVENTS
 
@@ -174,6 +182,7 @@ export type BgsWorldComponents = {
   [ReactGameMapComponentName]: ReactGameMapComponent;
   [ReactHeroComponentName]: ReactHeroComponent;
   [ReactScaleComponentName]: ReactScaleComponent;
+  [ReactHealthMeterComponentName]: ReactHealthMeterComponent;
 };
 
 export type BgsWorld = World<BgsWorldComponents, BgsWorldCtx>;

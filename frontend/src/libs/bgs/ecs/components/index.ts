@@ -251,6 +251,22 @@ export type HealthMeterComponent = Component<
   }
 >;
 
+export const DecrementCurrentHealthEventComponentName = 'DecrementCurrentHealthEventComponent';
+export type DecrementCurrentHealthEventComponent = Component<
+  typeof DecrementCurrentHealthEventComponentName,
+  {
+    healthMeterEntityId: EntityId;
+  }
+>;
+
+export const IncrementCurrentHealthEventComponentName = 'IncrementCurrentHealthEventComponent';
+export type IncrementCurrentHealthEventComponent = Component<
+  typeof IncrementCurrentHealthEventComponentName,
+  {
+    healthMeterEntityId: EntityId;
+  }
+>;
+
 export const HeroSetComponentName = 'HeroSetComponent';
 export type HeroSetComponent = Component<
   typeof HeroSetComponentName,
@@ -391,6 +407,14 @@ export type ReactImageComponentData = { url: string };
 export type ReactImageComponent = ReactComponent<typeof ReactImageComponentName, ReactImageComponentData>;
 
 export const ReactGameMapComponentName = 'ReactGameMapComponent';
-export type ReactGameMapComponent = Component<typeof ReactGameMapComponentName, {}>;
+export type ReactGameMapComponent = ReactComponent<typeof ReactGameMapComponentName, {}>;
+
 export const ReactHeroComponentName = 'ReactHeroComponent';
-export type ReactHeroComponent = Component<typeof ReactHeroComponentName, {}>;
+export type ReactHeroComponent = ReactComponent<typeof ReactHeroComponentName, {}>;
+
+export const ReactHealthMeterComponentName = 'ReactHealthMeterComponent';
+export type ReactHealthMeterComponentData = { current: number };
+export type ReactHealthMeterComponent = ReactComponent<
+  typeof ReactHealthMeterComponentName,
+  ReactHealthMeterComponentData
+>;

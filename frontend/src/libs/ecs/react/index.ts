@@ -8,7 +8,7 @@ export type ReactComponent<N extends string, D extends Record<any, any>> = Compo
   N,
   {
     state: D;
-    setState: (position: D) => void;
+    setState: (value: D) => void;
   }
 >;
 

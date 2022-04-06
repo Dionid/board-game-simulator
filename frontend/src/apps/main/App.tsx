@@ -33,6 +33,8 @@ import { TakeCardFromDeckEventSystem } from '../../libs/bgs/ecs/systems/take-car
 import { Flip } from '../../libs/bgs/ecs/systems/flip';
 import { ChangeView } from '../../libs/bgs/ecs/systems/change-view';
 import { DeleteHeroEventSet } from '../../libs/bgs/ecs/systems/delete-hero-set-event';
+import { IncDecHealthMeterEvent } from '../../libs/bgs/ecs/systems/inc-dec-health-meter-event';
+import { ChangeReactHealthMeter } from '../../libs/bgs/ecs/systems/change-react-health-meter';
 
 // TODO. Move
 const boardSize = {
@@ -81,6 +83,7 @@ function App() {
         TakeCardFromDeckEventSystem(),
         Flip(),
         ChangeView(),
+        IncDecHealthMeterEvent(),
 
         // SPAWN GAME OBJECT
         SpawnGameObjectSystem(),
@@ -93,6 +96,7 @@ function App() {
         ChangeReactImageSystem(),
         ChangeReactSizeSystem(),
         ChangeReactScaleSystem(),
+        ChangeReactHealthMeter(),
       ],
     };
 

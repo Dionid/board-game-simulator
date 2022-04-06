@@ -6,13 +6,16 @@ import React from 'react';
 import { Group } from 'react-konva';
 import { Html } from 'react-konva-utils';
 import {
+  DecrementCurrentHealthEventComponentName,
   HealthMeterComponentName,
+  IncrementCurrentHealthEventComponentName,
+  ReactHealthMeterComponentName,
   ReactImageComponentName,
   ReactPositionComponentName,
   ReactSizeComponentName,
 } from '../../../libs/bgs/ecs/components';
 import { Essence } from '../../../libs/ecs/essence';
-import { Pool } from '../../../libs/ecs/component';
+import { ComponentId, Pool } from '../../../libs/ecs/component';
 import { Size } from '../../../libs/math';
 
 function calcClipFunc(ctx: any, x: number, y: number, width: number, height: number, radius: number) {
@@ -33,6 +36,8 @@ export const ECSHealthMeter = React.memo((props: { entity: EntityId; world: BgsW
   const { entity, world, size } = props;
   const healthMeterCP = Essence.getOrAddPool(world.essence, HealthMeterComponentName);
   const healthMeterC = Pool.tryGet(healthMeterCP, entity);
+
+  const health = useEcsComponent(entity, { current: 0 }, ReactHealthMeterComponentName, world);
 
   if (healthMeterC && size.width) {
     return (
@@ -57,9 +62,43 @@ export const ECSHealthMeter = React.memo((props: { entity: EntityId; world: BgsW
           },
         }}
       >
-        <div style={{ cursor: 'pointer' }}>+</div>
-        <div>{healthMeterC.data.currentHealth}</div>
-        <div style={{ cursor: 'pointer' }}>-</div>
+        <div
+          onClick={() => {
+            const incrementCurrentHealthCP = Essence.getOrAddPool(
+              world.essence,
+              IncrementCurrentHealthEventComponentName
+            );
+            Pool.add(incrementCurrentHealthCP, EntityId.new(), {
+              id: ComponentId.new(),
+              name: IncrementCurrentHealthEventComponentName,
+              data: {
+                healthMeterEntityId: entity,
+              },
+            });
+          }}
+          style={{ cursor: 'pointer' }}
+        >
+          +
+        </div>
+        <div>{health.current}</div>
+        <div
+          onClick={() => {
+            const decrementCurrentHealthCP = Essence.getOrAddPool(
+              world.essence,
+              DecrementCurrentHealthEventComponentName
+            );
+            Pool.add(decrementCurrentHealthCP, EntityId.new(), {
+              id: ComponentId.new(),
+              name: DecrementCurrentHealthEventComponentName,
+              data: {
+                healthMeterEntityId: entity,
+              },
+            });
+          }}
+          style={{ cursor: 'pointer' }}
+        >
+          -
+        </div>
       </Html>
     );
   }
