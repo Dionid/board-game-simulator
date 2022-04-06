@@ -5,7 +5,11 @@ import React, { memo } from 'react';
 import { BgsWorld } from '../../../libs/bgs/ecs';
 import { useEcsComponent } from '../../../libs/ecs/react';
 import { Essence } from '../../../libs/ecs/essence';
-import { ReactPositionComponentName, ReactScaleComponentName } from '../../../libs/bgs/ecs/components';
+import {
+  GameObjectComponentName,
+  ReactPositionComponentName,
+  ReactScaleComponentName,
+} from '../../../libs/bgs/ecs/components';
 
 export const GameStage = memo(
   ({ world, playerEntity }: { forceUpdateState: string; world: BgsWorld; playerEntity: EntityId }) => {
@@ -15,7 +19,7 @@ export const GameStage = memo(
     const position = useEcsComponent(playerEntity, { x: 0, y: 0 }, ReactPositionComponentName, world);
     const scale = useEcsComponent(playerEntity, { x: 1, y: 1 }, ReactScaleComponentName, world);
 
-    const gameObjectComponentPool = Essence.getOrAddPool(world.essence, 'GameObjectComponent');
+    const gameObjectComponentPool = Essence.getOrAddPool(world.essence, GameObjectComponentName);
 
     return (
       <Stage style={{ backgroundColor: '#e1e1e1' }} width={surfaceWidth} height={surfaceHeight} scale={scale}>

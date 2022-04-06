@@ -246,6 +246,8 @@ export type HealthMeterComponent = Component<
   {
     heroSetEntityId: EntityId;
     healthMeterId: HealthMeterId;
+    maxHealth: number;
+    currentHealth: number;
   }
 >;
 
@@ -341,6 +343,7 @@ export type SpawnHealthMeterEventComponent = Component<
     heroSetEntityId: EntityId;
     url: string;
     healthMeterId: HealthMeterId;
+    maxValue: number;
     x: number;
     y: number;
   }

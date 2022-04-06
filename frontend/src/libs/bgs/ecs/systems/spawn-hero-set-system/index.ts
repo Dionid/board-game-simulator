@@ -144,6 +144,7 @@ export const SpawnHeroSetSystem = (): System<
               heroSetEntityId,
               url: healthMeter.frontImageUrl,
               healthMeterId: healthMeter.id,
+              maxValue: healthMeter.maxValue,
               x,
               y,
             },

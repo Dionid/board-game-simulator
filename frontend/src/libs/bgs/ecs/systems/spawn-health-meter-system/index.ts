@@ -68,6 +68,8 @@ export const SpawnHealthMeterEventSystem = (): System<{
           data: {
             heroSetEntityId: spawnComponent.data.heroSetEntityId,
             healthMeterId: spawnComponent.data.healthMeterId,
+            maxHealth: spawnComponent.data.maxValue,
+            currentHealth: spawnComponent.data.maxValue,
           },
         });
 
