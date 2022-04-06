@@ -34,25 +34,24 @@
 11. ~~Hero Set actions~~ 2. ~~Delete set~~
 12. ~~Health Meter actions~~
     1. ~~Increase & Decrease~~
-13. Fix context menu bag
-14. Depth system
-    1. Based on select
-15. Zoom in cards
-16. Spawn Hero Set in different spaces
-17. Authorization
-18. Persistence and collaboration
+13. ~~Depth system~~
+    1. ~~Based on select~~
+14. Zoom in cards
+15. Spawn Hero Set in different spaces
+16. Authorization
+17. Persistence and collaboration
     1. Room
     2. Player cursor
     3. Owner
     4. Sync
-19. Cards shown
-20. ~~Move Hero Set and Map creation to Context Menu~~
-21. ~~Remove entities~~
+18. Cards shown
+19. ~~Move Hero Set and Map creation to Context Menu~~
+20. ~~Remove entities~~
 
 ## Second
 
 1. Background grid
-2. Refactor SelectSystem
+2. Refactor Select + Drag + Depth systems
 3. Refactor Pan system
 4. Ipad version
 5. More `Essence.filter` operations (`in`, `notIn`, etc.)
