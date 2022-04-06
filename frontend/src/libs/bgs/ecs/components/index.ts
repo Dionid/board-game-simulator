@@ -107,6 +107,17 @@ export type DeletableComponent = Component<typeof DeletableComponentName, {}>;
 export const ScaleComponentName = 'ScaleComponent';
 export type ScaleComponent = Component<typeof ScaleComponentName, Vector2>;
 
+export const DynamicDepthComponentName = 'DynamicDepthComponent';
+export type DynamicDepthComponent = Component<typeof DynamicDepthComponentName, {}>;
+
+export const DepthComponentName = 'DepthComponent';
+export type DepthComponent = Component<
+  typeof DepthComponentName,
+  {
+    list: EntityId[];
+  }
+>;
+
 // .. SPAWN EVENTS
 
 export const SpawnGameObjectEventComponentName = 'SpawnGameObjectEventComponent';

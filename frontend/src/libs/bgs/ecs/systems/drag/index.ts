@@ -3,32 +3,39 @@ import {
   CameraComponent,
   CameraComponentName,
   DraggableComponent,
+  DraggableComponentName,
   HandComponent,
+  HandComponentName,
   IsDraggingComponent,
+  IsDraggingComponentName,
   IsLockedComponent,
   IsSelectedComponent,
   OwnerComponent,
+  OwnerComponentName,
   PanModeComponent,
   PanModeComponentName,
   PlayerComponent,
   PlayerComponentName,
+  PositionComponentName,
   PositionComponent,
   ScaleComponent,
   ScaleComponentName,
+  IsLockedComponentName,
+  IsSelectedComponentName,
 } from '../../components';
 import { Essence } from '../../../../ecs/essence';
 import { Pool } from '../../../../ecs/component';
 import { Vector2 } from '../../../../math';
 
 export const DragSystem = (): System<{
-  PlayerComponent: PlayerComponent;
-  OwnerComponent: OwnerComponent;
-  HandComponent: HandComponent;
-  DraggableComponent: DraggableComponent;
-  PositionComponent: PositionComponent;
-  IsDraggingComponent: IsDraggingComponent;
-  IsSelectedComponent: IsSelectedComponent;
-  IsLockedComponent: IsLockedComponent;
+  [PlayerComponentName]: PlayerComponent;
+  [OwnerComponentName]: OwnerComponent;
+  [HandComponentName]: HandComponent;
+  [DraggableComponentName]: DraggableComponent;
+  [PositionComponentName]: PositionComponent;
+  [IsDraggingComponentName]: IsDraggingComponent;
+  [IsSelectedComponentName]: IsSelectedComponent;
+  [IsLockedComponentName]: IsLockedComponent;
   [PanModeComponentName]: PanModeComponent;
   [CameraComponentName]: CameraComponent;
   [ScaleComponentName]: ScaleComponent;
@@ -50,25 +57,25 @@ export const DragSystem = (): System<{
         ScaleComponentName,
       ]);
       const playerCameraEntity = playerCameraEntities[0];
-      const playerMouseEntities = Essence.filter(essence, ['PlayerComponent', 'OwnerComponent', 'HandComponent']);
+      const playerMouseEntities = Essence.filter(essence, [PlayerComponentName, OwnerComponentName, HandComponentName]);
       let selectedAndDraggableEntities = Essence.filter(essence, [
-        'DraggableComponent',
-        'PositionComponent',
-        'IsSelectedComponent',
+        DraggableComponentName,
+        PositionComponentName,
+        IsSelectedComponentName,
       ]);
 
       // . Filter out locked entities
-      const isLockedEntities = Essence.filter(essence, ['IsLockedComponent']);
+      const isLockedEntities = Essence.filter(essence, [IsLockedComponentName]);
       selectedAndDraggableEntities = selectedAndDraggableEntities.filter((id) => isLockedEntities.indexOf(id) === -1);
 
       if (selectedAndDraggableEntities.length === 0) {
         return;
       }
 
-      const handPool = Essence.getOrAddPool(essence, 'HandComponent');
+      const handPool = Essence.getOrAddPool(essence, HandComponentName);
 
       selectedAndDraggableEntities.forEach((selectedAndDraggableEntity) => {
-        const positionCP = Essence.getOrAddPool(essence, 'PositionComponent');
+        const positionCP = Essence.getOrAddPool(essence, PositionComponentName);
         const positionC = Pool.get(positionCP, selectedAndDraggableEntity);
         const scaleCP = Essence.getOrAddPool(essence, ScaleComponentName);
         const cameraScaleC = Pool.get(scaleCP, playerCameraEntity);

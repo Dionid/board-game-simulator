@@ -106,6 +106,8 @@ import {
   DecrementCurrentHealthEventComponent,
   ReactHealthMeterComponentName,
   ReactHealthMeterComponent,
+  DepthComponentName,
+  DepthComponent,
 } from './components';
 import { HeroSets } from '../games/unmatched';
 
@@ -137,6 +139,8 @@ export type BgsWorldComponents = {
   [LockableComponentName]: LockableComponent;
   [IsLockedComponentName]: IsLockedComponent;
   [DeletableComponentName]: DeletableComponent;
+  [DepthComponentName]: DepthComponent;
+
   [FlippableComponentName]: FlippableComponent;
   [ViewChangeableComponentName]: ViewChangeableComponent;
   [GameMapComponentName]: GameMapComponent;
