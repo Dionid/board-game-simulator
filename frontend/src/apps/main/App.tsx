@@ -35,6 +35,7 @@ import { ChangeView } from '../../libs/bgs/ecs/systems/change-view';
 import { DeleteHeroEventSet } from '../../libs/bgs/ecs/systems/delete-hero-set-event';
 import { IncDecHealthMeterEvent } from '../../libs/bgs/ecs/systems/inc-dec-health-meter-event';
 import { ChangeReactHealthMeter } from '../../libs/bgs/ecs/systems/change-react-health-meter';
+import { DepthSystem } from '../../libs/bgs/ecs/systems/depth';
 
 // TODO. Move
 const boardSize = {
@@ -68,6 +69,7 @@ function App() {
         // INTERACTION
         SelectSystem(),
         DragSystem(),
+        DepthSystem(),
 
         // SPAWN
         SpawnGameMapSystem(),

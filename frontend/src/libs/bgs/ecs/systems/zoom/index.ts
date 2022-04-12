@@ -55,7 +55,7 @@ export const ZoomSystem = (): System<{
       });
 
       zoomInEntities.forEach((zoomInEntity) => {
-        if (scaleC.data.x < 1.4) {
+        if (scaleC.data.x < 3) {
           scaleC.data.x += 0.1;
           scaleC.data.y += 0.1;
           sizeC.data.width *= 0.9;

@@ -32,37 +32,38 @@
 10. ~~Hero actions~~
     1. ~~Change view~~
 11. ~~Hero Set actions~~ 2. ~~Delete set~~
-12. Health Meter actions
-    1. Increase & Decrease
-13. Depth system
-    1. Based on dragging
-    2. Based on y axis
-14. Authorization
-15. Persistence and collaboration
-    1. Room
-    2. Player cursor
-    3. Player actions
-16. Cards shown
-17. Zoom in cards
-18. Spawn Hero Set in different spaces
-19. ~~Move Hero Set and Map creation to Context Menu~~
-20. ~~Remove entities~~
+12. ~~Health Meter actions~~
+    1. ~~Increase & Decrease~~
+13. ~~Depth system~~
+    1. ~~Based on select~~
+14. Persistence and collaboration
+    1. Authorization
+    2. Room
+    3. Player cursor
+    4. Owner
+    5. Sync
+15. Cards shown
+16. Spawn Hero Set in different spaces
+17. Refactor Select + Drag + Depth systems
+18. Zoom in cards
+19. Refactor HealthMeter UI
+20. ~~Move Hero Set and Map creation to Context Menu~~
+21. ~~Remove entities~~
 
 ## Second
 
-2. Resize canvas on window resize
-1. Refactor SelectSystem
-1. Refactor Pan system
-1. Ipad version
-1. More `Essence.filter` operations (`in`, `notIn`, etc.)
-1. Rename Systems to "Input" and "Output"
-1. ~~Replace png with svg~~
-1. ~~Rename Systems to EventSystems~~
-1. ~~Make component names as constants~~
-1. ~~How to rerender on changes~~
+1. Place in the end of depth
+2. Background grid
+3. Refactor Pan system
+4. Ipad version
+5. More `Essence.filter` operations (`in`, `notIn`, etc.)
+6. Rename Systems to "Input" and "Output"
+7. ~~Replace png with svg~~
+8. ~~Rename Systems to EventSystems~~
+9. ~~Make component names as constants~~
+10. ~~How to rerender on changes~~
 
 ## Additional
 
 1. Mobile version
-2. Background grid
-3. History
+2. History & undo / redo

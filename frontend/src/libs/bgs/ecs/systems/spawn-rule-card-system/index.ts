@@ -49,13 +49,14 @@ export const SpawnRuleCardEventSystem = (): System<{
         };
         Pool.add(spawnGameObjectComponentPool, ruleCardEntity, {
           id: ComponentId.new(),
-          name: 'SpawnGameObjectEventComponent',
+          name: SpawnGameObjectEventComponentName,
           data: {
             imageUrl: spawnComponent.data.url,
             draggable: true,
             selectable: true,
             lockable: true,
             deletable: false,
+            dynamicDepth: true,
             x: spawnComponent.data.x - size.width / 2,
             y: spawnComponent.data.y - size.height / 2,
             ...size,
@@ -64,7 +65,7 @@ export const SpawnRuleCardEventSystem = (): System<{
 
         Pool.add(ruleCardComponentPool, ruleCardEntity, {
           id: ComponentId.new(),
-          name: 'RuleCardComponent',
+          name: RuleCardComponentName,
           data: {
             heroSetEntityId: spawnComponent.data.heroSetEntityId,
             ruleCardId: spawnComponent.data.ruleCardId,

@@ -18,21 +18,24 @@ import {
   LockableComponentName,
   DeletableComponentName,
   GameObjectComponentName,
+  DynamicDepthComponent,
+  DynamicDepthComponentName,
 } from '../../components';
 import { Essence } from '../../../../ecs/essence';
 import { ComponentId, Pool } from '../../../../ecs/component';
 
 export const SpawnGameObjectSystem = (): System<
   {
-    SpawnGameObjectEventComponent: SpawnGameObjectEventComponent;
-    ImageComponent: ImageComponent;
-    PositionComponent: PositionComponent;
-    SizeComponent: SizeComponent;
-    DraggableComponent: DraggableComponent;
-    SelectableComponent: SelectableComponent;
-    LockableComponent: LockableComponent;
-    GameObjectComponent: GameObjectComponent;
-    DeletableComponent: DeletableComponent;
+    [SpawnGameObjectEventComponentName]: SpawnGameObjectEventComponent;
+    [ImageComponentName]: ImageComponent;
+    [PositionComponentName]: PositionComponent;
+    [SizeComponentName]: SizeComponent;
+    [DraggableComponentName]: DraggableComponent;
+    [SelectableComponentName]: SelectableComponent;
+    [LockableComponentName]: LockableComponent;
+    [GameObjectComponentName]: GameObjectComponent;
+    [DeletableComponentName]: DeletableComponent;
+    [DynamicDepthComponentName]: DynamicDepthComponent;
   },
   {
     forceUpdate: () => void;
@@ -56,6 +59,7 @@ export const SpawnGameObjectSystem = (): System<
       const selectableComponentPool = Essence.getOrAddPool(essence, SelectableComponentName);
       const lockableComponentPool = Essence.getOrAddPool(essence, LockableComponentName);
       const deletableComponentPool = Essence.getOrAddPool(essence, DeletableComponentName);
+      const dynamicDepthComponentPool = Essence.getOrAddPool(essence, DynamicDepthComponentName);
       const gameObjectComponentPool = Essence.getOrAddPool(essence, GameObjectComponentName);
 
       for (const gameObjectEntity of entities) {
@@ -63,7 +67,7 @@ export const SpawnGameObjectSystem = (): System<
 
         Pool.add(gameObjectComponentPool, gameObjectEntity, {
           id: ComponentId.new(),
-          name: 'GameObjectComponent',
+          name: GameObjectComponentName,
           data: {},
         });
 
@@ -94,6 +98,14 @@ export const SpawnGameObjectSystem = (): System<
             height: spawnComponent.data.height,
           },
         });
+
+        if (spawnComponent.data.dynamicDepth) {
+          Pool.add(dynamicDepthComponentPool, gameObjectEntity, {
+            id: ComponentId.new(),
+            name: DynamicDepthComponentName,
+            data: {},
+          });
+        }
 
         if (spawnComponent.data.selectable) {
           Pool.add(selectableComponentPool, gameObjectEntity, {

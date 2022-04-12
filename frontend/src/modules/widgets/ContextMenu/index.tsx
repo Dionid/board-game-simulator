@@ -14,6 +14,7 @@ import {
   DeckComponentName,
   DeletableComponentName,
   DeleteHeroSetEventComponentName,
+  DepthComponentName,
   FlipEventComponentName,
   FlippableComponentName,
   HandComponentName,
@@ -150,18 +151,27 @@ export const ContextMenu: FC<{ world: BgsWorld; heroSets: HeroSets }> = (props) 
       return emptyActions;
     }
 
-    let lastZIndex = 0;
-    const maxZPositionEntity = mouseOnEntities.reduce((prev, cur) => {
-      const positionC = Pool.get(positionComponentPool, cur);
+    // let lastZIndex = 0;
+    // const maxZPositionEntity = mouseOnEntities.reduce((prev, cur) => {
+    //   const positionC = Pool.get(positionComponentPool, cur);
+    //
+    //   if (positionC.data.z > lastZIndex) {
+    //     lastZIndex = positionC.data.z;
+    //     return cur;
+    //   }
+    //
+    //   lastZIndex = positionC.data.z;
+    //   return prev;
+    // });
 
-      if (positionC.data.z > lastZIndex) {
-        lastZIndex = positionC.data.z;
-        return cur;
-      }
+    // TODO. REFACTORE TO SINGLETON
+    const depthCP = Essence.getOrAddPool(world.essence, DepthComponentName);
+    const depthE = Object.keys(depthCP.data).map((entity) => entity)[0] as EntityId;
+    const depthC = Pool.get(depthCP, depthE);
 
-      lastZIndex = positionC.data.z;
-      return prev;
-    });
+    const filtered = depthC.data.list.filter((id) => mouseOnEntities.includes(id));
+
+    const maxZPositionEntity = filtered[filtered.length - 1];
 
     if (maxZPositionEntity) {
       const deletableCP = Essence.getOrAddPool(world.essence, DeletableComponentName);
