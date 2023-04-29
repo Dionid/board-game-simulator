@@ -13,7 +13,7 @@ export type ReactComponent<N extends string, D extends Record<any, any>> = Compo
 >;
 
 export const useEcsComponent = <
-  S,
+  S extends Record<any, any>,
   CR extends Record<CN, ReactComponent<CN, S>>,
   CN extends keyof CR & string,
   Ctx extends Record<any, any>
@@ -29,14 +29,19 @@ export const useEcsComponent = <
     const reactCompPool = Essence.getOrAddPool(world.essence, componentName);
     const comp = Pool.tryGet(reactCompPool, entity);
     if (!comp) {
-      Pool.add<ReactComponent<CN, S>>(reactCompPool, entity, {
-        id: ComponentId.new(),
-        name: componentName,
-        data: {
-          state,
-          setState,
-        },
-      });
+      try {
+        Pool.add<ReactComponent<CN, S>>(reactCompPool, entity, {
+          id: ComponentId.new(),
+          name: componentName,
+          data: {
+            state,
+            setState,
+          },
+        });
+      } catch (e) {
+        console.log(e, comp, entity, reactCompPool, componentName);
+        console.log(reactCompPool.data[entity]);
+      }
     }
   }, []);
 

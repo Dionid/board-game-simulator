@@ -3,14 +3,18 @@ import { OwnerComponent, PlayerComponent } from '../../components';
 import { Essence } from '../../../../ecs/essence';
 import { ComponentId, Pool } from '../../../../ecs/component';
 import { EntityId } from '../../../../ecs/entity';
-import { UUID } from '../../../../branded-types';
 
-export const PlayerSystem = (): System<{
-  PlayerComponent: PlayerComponent;
-  OwnerComponent: OwnerComponent;
-}> => {
+export const PlayerSystem = (): System<
+  {
+    PlayerComponent: PlayerComponent;
+    OwnerComponent: OwnerComponent;
+  },
+  {
+    playerId: string;
+  }
+> => {
   return {
-    init: async ({ essence }) => {
+    init: async ({ essence, ctx }) => {
       const playerEntity = EntityId.new();
 
       const playerPool = Essence.getOrAddPool(essence, 'PlayerComponent');
@@ -18,7 +22,7 @@ export const PlayerSystem = (): System<{
         id: ComponentId.new(),
         name: 'PlayerComponent',
         data: {
-          id: UUID.new(),
+          id: ctx.playerId,
         },
       });
 
@@ -29,6 +33,5 @@ export const PlayerSystem = (): System<{
         data: {},
       });
     },
-    run: async ({ essence }) => {},
   };
 };

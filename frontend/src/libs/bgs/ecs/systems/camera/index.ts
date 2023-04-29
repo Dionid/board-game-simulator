@@ -47,7 +47,7 @@ export const CameraSystem = (): System<{
 
       playerEntityId.forEach((playerEntityId) => {
         const cameraComponent = {
-          name: 'CameraComponent',
+          name: CameraComponentName,
           id: ComponentId.new(),
           data: {},
         };
@@ -59,7 +59,7 @@ export const CameraSystem = (): System<{
         Pool.add(cameraCP, playerEntityId, cameraComponent);
         // POSITION
         const positionComponent = {
-          name: 'PositionComponent',
+          name: PositionComponentName,
           id: ComponentId.new(),
           data: {
             x: boardC.data.width / 2 - cameraSize.width / 2,
@@ -69,7 +69,7 @@ export const CameraSystem = (): System<{
         Pool.add(positionCP, playerEntityId, positionComponent);
         // SIZE
         const sizeComponent = {
-          name: 'SizeComponent',
+          name: SizeComponentName,
           id: ComponentId.new(),
           data: cameraSize,
         };
@@ -91,14 +91,14 @@ export const CameraSystem = (): System<{
       });
     },
     run: async ({ essence, timeDelta }) => {
-      const entities = Essence.filter(essence, ['PlayerComponent', 'HandComponent', 'CameraComponent']);
-      const panModeEntities = Essence.filter(essence, ['PanModeComponent']);
-      const positionCP = Essence.getOrAddPool(essence, 'PositionComponent');
-      const sizeCP = Essence.getOrAddPool(essence, 'SizeComponent');
-      const handPool = Essence.getOrAddPool(essence, 'HandComponent');
+      const entities = Essence.filter(essence, [PlayerComponentName, HandComponentName, CameraComponentName]);
+      const panModeEntities = Essence.filter(essence, [PanModeComponentName]);
+      const positionCP = Essence.getOrAddPool(essence, PositionComponentName);
+      const sizeCP = Essence.getOrAddPool(essence, SizeComponentName);
+      const handPool = Essence.getOrAddPool(essence, HandComponentName);
 
-      const boardEntity = Essence.filter(essence, ['BoardComponent']);
-      const boardCP = Essence.getOrAddPool(essence, 'BoardComponent');
+      const boardEntity = Essence.filter(essence, [BoardComponentName]);
+      const boardCP = Essence.getOrAddPool(essence, BoardComponentName);
 
       // TODO. Singleton entities
       const boardC = Pool.get(boardCP, boardEntity[0]);
