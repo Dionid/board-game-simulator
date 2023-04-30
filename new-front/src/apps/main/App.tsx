@@ -137,7 +137,7 @@ const GameStage = () => {
         <Board cameraEntity={playerEntity} />
       </ContextMenu>
       <MainMenu playerEntity={playerEntity} world={world} />
-      <Minimap playerEntity={playerEntity} world={world} boardSize={boardSize} />
+      <Minimap playerEntity={playerEntity} boardSize={boardSize} />
     </div>
   );
 };

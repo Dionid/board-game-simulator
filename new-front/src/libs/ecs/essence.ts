@@ -179,9 +179,7 @@ export const Essence = {
       if (activeEvents) {
         // essence.events.active![pendingEventKeys] = activeEvents.concat(pendingEvents);
         for (const event of pendingEvents) {
-          activeEvents.push({
-            ...event,
-          });
+          activeEvents.push(JSON.parse(JSON.stringify(event)));
         }
       } else {
         essence.events.active![pendingEventKeys] = [];

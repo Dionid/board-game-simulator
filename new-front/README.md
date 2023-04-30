@@ -9,11 +9,13 @@
    1. ~~Event system~~
       1. ~~MVP~~
       1. ~~Make sure they are created exactly before run start~~
+   1. State Sync
+      1. Now observable can fire even in between `Pool.add` (like adding GameObject, than Position).
+         Problem is: if I'm trying to get entity and think that that it will be with all components.
+      1. SyncStore
    1. Depth
       1. We can create index for every object + Add some system, that will resort than (1) new GameObject spawned
          and (2) object depth has changed
-   1. State Sync
-      1. SyncStore
 1. ESC
    1. Do I need Pools?
    1. Remove name from component
