@@ -7,7 +7,6 @@ import {
   PositionComponent,
   SizeComponent,
   ScaleComponent,
-  PlayerComponent,
   FingerComponent,
   PanModeComponent,
 } from '../../components';
@@ -15,30 +14,16 @@ import { EntityId } from '../../../../ecs/entity';
 
 export const CameraSystem = (): System<{
   boardSize: Size;
-  playerId: EntityId;
+  cameraEntity: EntityId;
 }> => {
   return {
-    init: ({ essence, ctx }) => {
-      const playerEntities = Essence.getEntitiesByComponents(essence, [PlayerComponent]);
-
-      const playerEntity = playerEntities.find((playerEntityId) => {
-        const playerPool = Essence.getOrAddPool(essence, PlayerComponent);
-
-        const playerComp = Pool.get(playerPool, playerEntityId);
-
-        return playerComp.props.id === ctx.playerId;
-      });
-
-      if (!playerEntity) {
-        throw new Error('No player entity');
-      }
-
+    init: ({ essence, ctx: { cameraEntity, boardSize } }) => {
       const cameraP = Essence.getOrAddPool(essence, CameraComponent);
       const positionP = Essence.getOrAddPool(essence, PositionComponent);
       const sizeP = Essence.getOrAddPool(essence, SizeComponent);
       const scaleP = Essence.getOrAddPool(essence, ScaleComponent);
 
-      Pool.add(cameraP, playerEntity, CameraComponent.new(undefined));
+      Pool.add(cameraP, cameraEntity, CameraComponent.new(undefined));
 
       const cameraSize = {
         // TODO. move somewhere (as deps or ctx)
@@ -49,16 +34,16 @@ export const CameraSystem = (): System<{
       // # POSITION
       Pool.add(
         positionP,
-        playerEntity,
+        cameraEntity,
         PositionComponent.new({
-          x: ctx.boardSize.width / 2 - cameraSize.width / 2,
-          y: ctx.boardSize.height / 2 - cameraSize.height / 2,
+          x: boardSize.width / 2 - cameraSize.width / 2,
+          y: boardSize.height / 2 - cameraSize.height / 2,
         })
       );
 
       // # SIZE
       const sizeComponent = SizeComponent.new(cameraSize);
-      Pool.add(sizeP, playerEntity, sizeComponent);
+      Pool.add(sizeP, cameraEntity, sizeComponent);
 
       // TODO. Move somewhere (as deps or ctx)
       window.addEventListener('resize', () => {
@@ -69,7 +54,7 @@ export const CameraSystem = (): System<{
       // # SCALE
       Pool.add(
         scaleP,
-        playerEntity,
+        cameraEntity,
         ScaleComponent.new({
           x: 1,
           y: 1,
@@ -79,40 +64,21 @@ export const CameraSystem = (): System<{
       // # PAN MODE
       Pool.add(
         Essence.getOrAddPool(essence, PanModeComponent),
-        playerEntity,
+        cameraEntity,
         PanModeComponent.new({
           activated: false,
         })
       );
     },
-    run: ({ essence, ctx }) => {
-      const playerEntities = Essence.getEntitiesByComponents(essence, [
-        PlayerComponent,
-        FingerComponent,
-        CameraComponent,
-        PanModeComponent,
-      ]);
-
-      const playerEntity = playerEntities.find((playerEntityId) => {
-        const playerPool = Essence.getOrAddPool(essence, PlayerComponent);
-
-        const playerComp = Pool.get(playerPool, playerEntityId);
-
-        return playerComp.props.id === ctx.playerId;
-      });
-
-      if (!playerEntity) {
-        throw new Error('Somehow no player entity');
-      }
-
+    run: ({ essence, ctx: { cameraEntity, boardSize } }) => {
       // const panModeEntities = Essence.getEntitiesByComponents(essence, [PanModeComponent]);
       const positionCP = Essence.getOrAddPool(essence, PositionComponent);
       const sizeCP = Essence.getOrAddPool(essence, SizeComponent);
       const panModeP = Essence.getOrAddPool(essence, PanModeComponent);
 
-      const cameraPositionC = Pool.get(positionCP, playerEntity);
-      const sizeC = Pool.get(sizeCP, playerEntity);
-      const panModeC = Pool.get(panModeP, playerEntity);
+      const cameraPositionC = Pool.get(positionCP, cameraEntity);
+      const sizeC = Pool.get(sizeCP, cameraEntity);
+      const panModeC = Pool.get(panModeP, cameraEntity);
 
       if (panModeC.props.activated) {
         const newCameraPosition: Vector2 = {
@@ -120,7 +86,7 @@ export const CameraSystem = (): System<{
         };
 
         const handPool = Essence.getOrAddPool(essence, FingerComponent);
-        const fingerC = Pool.get(handPool, playerEntity);
+        const fingerC = Pool.get(handPool, cameraEntity);
 
         if (fingerC.props.click.current.down) {
           const delta = Vector2.compareAndChange(
@@ -134,7 +100,7 @@ export const CameraSystem = (): System<{
         // . Restrict
         if (
           newCameraPosition.x > 0 &&
-          newCameraPosition.x + sizeC.props.width < ctx.boardSize.width &&
+          newCameraPosition.x + sizeC.props.width < boardSize.width &&
           cameraPositionC.props.x !== newCameraPosition.x
         ) {
           cameraPositionC.props.x = newCameraPosition.x;
@@ -142,7 +108,7 @@ export const CameraSystem = (): System<{
 
         if (
           newCameraPosition.y > 0 &&
-          newCameraPosition.y + sizeC.props.height < ctx.boardSize.height &&
+          newCameraPosition.y + sizeC.props.height < boardSize.height &&
           cameraPositionC.props.y !== newCameraPosition.y
         ) {
           cameraPositionC.props.y = newCameraPosition.y;

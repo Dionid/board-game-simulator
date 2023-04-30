@@ -1,9 +1,12 @@
 import { System } from '../../../../ecs/system';
 import { Essence } from '../../../../ecs/essence';
 import { Pool } from '../../../../ecs/component';
-import { CameraComponent, FingerComponent, PlayerComponent, PositionComponent, ScaleComponent } from '../../components';
+import { FingerComponent, PositionComponent, ScaleComponent } from '../../components';
+import { EntityId } from '../../../../ecs/entity';
 
-export const FingerInputSystem = (): System => {
+export const FingerInputSystem = (): System<{
+  playerEntity: EntityId;
+}> => {
   const lastMouseData = {
     x: 0,
     y: 0,
@@ -11,21 +14,7 @@ export const FingerInputSystem = (): System => {
   };
 
   return {
-    init: async ({ essence, ctx }) => {
-      const playerEntities = Essence.getEntitiesByComponents(essence, [PlayerComponent]);
-
-      const playerEntity = playerEntities.find((playerEntityId) => {
-        const playerPool = Essence.getOrAddPool(essence, PlayerComponent);
-
-        const playerComp = Pool.get(playerPool, playerEntityId);
-
-        return playerComp.props.id === ctx.playerId;
-      });
-
-      if (!playerEntity) {
-        throw new Error('No player entity');
-      }
-
+    init: async ({ essence, ctx: { playerEntity } }) => {
       const mousePool = Essence.getOrAddPool(essence, FingerComponent);
 
       Pool.add(
@@ -74,26 +63,7 @@ export const FingerInputSystem = (): System => {
         lastMouseData.y = event.pageY;
       };
     },
-    run: async ({ essence, ctx }) => {
-      const playerEntities = Essence.getEntitiesByComponents(essence, [
-        FingerComponent,
-        PlayerComponent,
-        CameraComponent,
-        ScaleComponent,
-      ]);
-
-      const playerEntity = playerEntities.find((playerEntityId) => {
-        const playerPool = Essence.getOrAddPool(essence, PlayerComponent);
-
-        const playerComp = Pool.get(playerPool, playerEntityId);
-
-        return playerComp.props.id === ctx.playerId;
-      });
-
-      if (!playerEntity) {
-        throw new Error('Somehow no player entity');
-      }
-
+    run: async ({ essence, ctx: { playerEntity } }) => {
       const fingerCP = Essence.getOrAddPool(essence, FingerComponent);
       const positionCP = Essence.getOrAddPool(essence, PositionComponent);
       const scaleCP = Essence.getOrAddPool(essence, ScaleComponent);

@@ -5,27 +5,25 @@ import { Pool } from '../../../../ecs/component';
 import { EntityId } from '../../../../ecs/entity';
 
 export const PlayerSystem = (): System<{
-  playerId: EntityId;
+  playerEntity: EntityId;
 }> => {
   return {
-    init: async ({ essence, ctx }) => {
-      // const playerEntity = EntityId.new();
-
+    init: async ({ essence, ctx: { playerEntity } }) => {
       const playerPool = Essence.getOrAddPool(essence, PlayerComponent);
       Pool.add(
         playerPool,
-        ctx.playerId,
+        playerEntity,
         PlayerComponent.new({
-          id: ctx.playerId,
+          id: playerEntity,
         })
       );
 
       const ownerPool = Essence.getOrAddPool(essence, OwnerComponent);
       Pool.add(
         ownerPool,
-        EntityId.ofString(ctx.playerId),
+        EntityId.ofString(playerEntity),
         OwnerComponent.new({
-          playerId: ctx.playerId,
+          playerId: playerEntity,
         })
       );
     },

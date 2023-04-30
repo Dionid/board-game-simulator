@@ -43,7 +43,7 @@ function App() {
     const world: BgsWorld = {
       essence: essence,
       ctx: {
-        playerId: playerEntity,
+        playerEntity: playerEntity,
         cameraEntity: playerEntity,
         heroSets: HeroSets,
         boardSize,
@@ -53,14 +53,13 @@ function App() {
         PlayerSystem(),
 
         // CAMERA
-        // BoardSystem(boardSize),
         CameraSystem(),
         ZoomSystem(),
 
         // INPUT
         FingerInputSystem(),
 
-        // // INTERACTION
+        // INTERACTION
         // SelectSystem(),
         // DragSystem(),
         // DepthSystem(),
@@ -106,11 +105,7 @@ function App() {
       const timeDelta = newTimeStamp.getMilliseconds() - lastTimeStamp.getMilliseconds();
       World.run(world, timeDelta < 0 ? 0 : timeDelta);
       lastTimeStamp = newTimeStamp;
-      // if (Math.random() < 0.001) {
-      //   console.log('AFTER RUN', world);
-      // }
       requestAnimationFrame(run);
-      // setTimeout(run, 3000)
     };
 
     requestAnimationFrame(run);

@@ -5,8 +5,7 @@ import { HeroSets } from '../games/unmatched';
 
 export type BgsWorldCtx = {
   heroSets: typeof HeroSets;
-  // forceUpdate: () => void;
-  playerId: EntityId;
+  playerEntity: EntityId;
   cameraEntity: EntityId;
   boardSize: Size;
 };
