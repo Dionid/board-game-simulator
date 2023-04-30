@@ -29,9 +29,21 @@ export const initStore = (roomId: string) => {
   if (doc instanceof AbstractType) {
     throw new Error(`Must be doc`);
   }
-  const webrtcProvider = new WebrtcProvider(roomId, doc);
+  return new WebrtcProvider(roomId, doc);
 
-  webrtcProvider.connect();
+  // console.log('webrtcProvider.connected', webrtcProvider.connected);
+
+  // webrtcProvider.on('connect', () => {
+  //   console.log('CONNECTED');
+  // });
+
+  // webrtcProvider.
+
+  // setInterval(() => {
+  //   console.log('webrtcProvider.connected', webrtcProvider.connected);
+  // }, 3000);
+
+  // webrtcProvider.connect();
 };
 
 // // (optional, define types for TypeScript)

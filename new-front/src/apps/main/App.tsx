@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import CssBaseline from '@mui/material/CssBaseline';
 import { BgsWorld } from '../../libs/bgs/ecs';
 import { World } from '../../libs/ecs/world';
@@ -12,12 +12,21 @@ import { essence, initStore } from './store';
 import { MainMenu } from '../../widgets/MainMenu';
 import { EntityId } from '../../libs/ecs/entity';
 import { ZoomSystem } from '../../libs/bgs/ecs/systems/zoom';
+import { v4 } from 'uuid';
 
 const getOrSetPlayerId = (): EntityId => {
   const key = 'bgs_player_id';
+
+  const params = new URLSearchParams(window.location.search);
+
+  if (params.has(key)) {
+    return EntityId.ofString(params.get(key)!);
+  }
+
   const playerId = localStorage.getItem(key);
   if (!playerId) {
-    localStorage.setItem(key, 'e33e6255-face-4402-a927-87cbb696c413');
+    // localStorage.setItem(key, 'e33e6255-face-4402-a927-87cbb696c413');
+    localStorage.setItem(key, v4());
     return getOrSetPlayerId();
   }
   return EntityId.ofString(playerId);
@@ -29,17 +38,23 @@ const boardSize = {
   height: 3000,
 };
 
-function App() {
+const GameStage = () => {
   const playerEntity = useMemo(() => {
     return getOrSetPlayerId();
   }, []);
 
+  console.log('playerEntity', playerEntity);
+
   const world = useMemo(() => {
+    console.log('FIRST RUN');
+
     // @ts-ignore
     if (window.world) {
+      console.log('WORLD EXIST');
       // @ts-ignore
       return window.world;
     }
+
     const world: BgsWorld = {
       essence: essence,
       ctx: {
@@ -85,8 +100,6 @@ function App() {
       ],
     };
 
-    initStore('91dd64b2-a908-4562-b6e2-eacb86548da0');
-
     // @ts-ignore
     window.world = world;
     // @ts-ignore
@@ -109,7 +122,6 @@ function App() {
     };
 
     requestAnimationFrame(run);
-    // run()
 
     return world;
   }, []);
@@ -124,6 +136,26 @@ function App() {
       <Minimap playerEntity={playerEntity} world={world} boardSize={boardSize} />
     </div>
   );
+};
+
+function App() {
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    const provider = initStore('91dd64b2-a908-4562-b6e2-eacb86548da0');
+    const int = setInterval(() => {
+      if (provider.connected) {
+        clearInterval(int);
+        setLoaded(true);
+      }
+    }, 100);
+  }, []);
+
+  if (!loaded) {
+    return <div>Loading...</div>;
+  }
+
+  return <GameStage />;
 }
 
 export default App;

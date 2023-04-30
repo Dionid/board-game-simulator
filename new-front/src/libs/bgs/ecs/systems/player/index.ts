@@ -9,6 +9,8 @@ export const PlayerSystem = (): System<{
 }> => {
   return {
     init: async ({ essence, ctx: { playerEntity } }) => {
+      console.log('PlayerSystem', playerEntity);
+
       const playerPool = Essence.getOrAddPool(essence, PlayerComponent);
       Pool.add(
         playerPool,
