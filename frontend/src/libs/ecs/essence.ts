@@ -31,9 +31,8 @@ export const Essence = {
     const pool = essence.pools[poolName];
 
     if (!pool) {
-      const newPool = { name: poolName, data: {} };
-      essence.pools[poolName] = newPool;
-      return newPool;
+      essence.pools[poolName] = { name: poolName, data: {} };
+      return Essence.getOrAddPool(essence, poolName);
     }
 
     return pool;
@@ -48,6 +47,7 @@ export const Essence = {
     for (let i = 0; i < componentNames.length; i++) {
       const compName = componentNames[i];
       const pool = essence.pools[compName];
+
       if (!pool) {
         return [];
       }
@@ -106,11 +106,13 @@ export const Essence = {
   destroyEntity: <CR extends Record<string, Component<any, any>>>(essence: Essence<CR>, entityId: EntityId): void => {
     Object.keys(essence.pools).forEach((poolName) => {
       const pool = essence.pools[poolName];
+
       if (!pool) {
         return;
       }
 
       const { [entityId]: omit, ...newData } = pool.data;
+
       pool.data = newData;
     });
   },

@@ -36,6 +36,18 @@ import { DeleteHeroEventSet } from '../../libs/bgs/ecs/systems/delete-hero-set-e
 import { IncDecHealthMeterEvent } from '../../libs/bgs/ecs/systems/inc-dec-health-meter-event';
 import { ChangeReactHealthMeter } from '../../libs/bgs/ecs/systems/change-react-health-meter';
 import { DepthSystem } from '../../libs/bgs/ecs/systems/depth';
+import { CameraComponentName, PlayerComponentName } from '../../libs/bgs/ecs/components';
+// import {YjsSyncedStoreSystem, YjsSyncedStoreToECSSystem} from "../../libs/bgs/ecs/systems/yjs-synced-store";
+
+const getOrSetPlayerId = (): string => {
+  const key = 'bgs_player_id';
+  const playerId = localStorage.getItem(key);
+  if (!playerId) {
+    localStorage.setItem(key, 'e33e6255-face-4402-a927-87cbb696c413');
+    return getOrSetPlayerId();
+  }
+  return playerId;
+};
 
 // TODO. Move
 const boardSize = {
@@ -53,8 +65,11 @@ function App() {
       },
       ctx: {
         forceUpdate,
+        playerId: getOrSetPlayerId(),
       } as BgsWorldCtx,
       systems: [
+        // YjsSyncedStoreToECSSystem(),
+
         // INIT
         PlayerSystem(),
 
@@ -99,6 +114,9 @@ function App() {
         ChangeReactSizeSystem(),
         ChangeReactScaleSystem(),
         ChangeReactHealthMeter(),
+
+        // // SYNC
+        // YjsSyncedStoreSystem()
       ],
     };
 
@@ -133,7 +151,7 @@ function App() {
   }, [heroSets]);
 
   // TODO. Refactor for collaboration
-  const playerEntities = Essence.filter(world.essence, ['PlayerComponent', 'CameraComponent']);
+  const playerEntities = Essence.filter(world.essence, [PlayerComponentName, CameraComponentName]);
   const playerEntity = playerEntities[0];
 
   return (

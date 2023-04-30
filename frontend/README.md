@@ -43,8 +43,8 @@
     4. Owner
     5. Sync
 15. Cards shown
-16. Spawn Hero Set in different spaces
-17. Refactor Select + Drag + Depth systems
+16. Refactor Select + Drag + Depth systems
+17. Spawn Hero Set in different spaces
 18. Zoom in cards
 19. Refactor HealthMeter UI
 20. ~~Move Hero Set and Map creation to Context Menu~~

@@ -33,7 +33,7 @@ export const Pool = {
   get: <C extends Component<any, any>>(pool: Pool<C>, entityId: EntityId): C => {
     const comp = pool.data[entityId];
     if (!comp) {
-      throw new Error(`...`);
+      throw new Error(`Can't get comp by entityId ${entityId} in ${pool.name}`);
     }
     return comp;
   },

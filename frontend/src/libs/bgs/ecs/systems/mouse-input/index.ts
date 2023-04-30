@@ -5,6 +5,7 @@ import {
   HandComponent,
   HandComponentName,
   OwnerComponent,
+  OwnerComponentName,
   PlayerComponent,
   PlayerComponentName,
   PositionComponent,
@@ -34,15 +35,15 @@ export const HandInputSystem = (): System<{
 
   return {
     init: async ({ essence }) => {
-      const entities = Essence.filter(essence, ['PlayerComponent']);
-      const mousePool = Essence.getOrAddPool(essence, 'HandComponent');
+      const entities = Essence.filter(essence, [PlayerComponentName]);
+      const mousePool = Essence.getOrAddPool(essence, HandComponentName);
 
       // TODO. Fix for collaboration
       const playerEntity = entities[0];
 
       Pool.add(mousePool, playerEntity, {
         id: ComponentId.new(),
-        name: 'HandComponent',
+        name: HandComponentName,
         data: {
           onBoardPosition: {
             current: {
@@ -88,10 +89,13 @@ export const HandInputSystem = (): System<{
       };
     },
     run: async ({ essence }) => {
-      const entities = Essence.filter(essence, ['HandComponent', 'PlayerComponent', 'OwnerComponent']);
+      const entities = Essence.filter(essence, [HandComponentName, PlayerComponentName, OwnerComponentName]);
+      if (entities.length === 0) {
+        return;
+      }
 
-      const mouseCP = Essence.getOrAddPool(essence, 'HandComponent');
-      const positionCP = Essence.getOrAddPool(essence, 'PositionComponent');
+      const mouseCP = Essence.getOrAddPool(essence, HandComponentName);
+      const positionCP = Essence.getOrAddPool(essence, PositionComponentName);
       const scaleCP = Essence.getOrAddPool(essence, ScaleComponentName);
 
       const playerCameraEntities = Essence.filter(essence, [
@@ -99,6 +103,9 @@ export const HandInputSystem = (): System<{
         CameraComponentName,
         ScaleComponentName,
       ]);
+      if (playerCameraEntities.length === 0) {
+        return;
+      }
       const playerCameraEntity = playerCameraEntities[0];
       const cameraScaleC = Pool.get(scaleCP, playerCameraEntity);
 

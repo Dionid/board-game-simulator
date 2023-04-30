@@ -118,6 +118,7 @@ import { HeroSets } from '../games/unmatched';
 export type BgsWorldCtx = {
   heroSets: typeof HeroSets;
   forceUpdate: () => void;
+  playerId: string;
 };
 
 export type BgsWorldComponents = {
