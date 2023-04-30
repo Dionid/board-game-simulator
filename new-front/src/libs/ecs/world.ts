@@ -21,6 +21,7 @@ export const World = {
     }
   },
   run: <Ctx extends Record<any, any> = Record<any, any>>(world: World<Ctx>, timeDelta: number): void => {
+    Essence.movePendingToActive(world.essence);
     for (let i = 0; i < world.systems.length; i++) {
       const system = world.systems[i];
       if (system.run) {

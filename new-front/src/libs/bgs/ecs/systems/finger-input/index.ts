@@ -6,6 +6,7 @@ import { EntityId } from '../../../../ecs/entity';
 
 export const FingerInputSystem = (): System<{
   playerEntity: EntityId;
+  cameraEntity: EntityId;
 }> => {
   const lastMouseData = {
     x: 0,
@@ -63,13 +64,13 @@ export const FingerInputSystem = (): System<{
         lastMouseData.y = event.pageY;
       };
     },
-    run: async ({ essence, ctx: { playerEntity } }) => {
+    run: async ({ essence, ctx: { playerEntity, cameraEntity } }) => {
       const fingerCP = Essence.getOrAddPool(essence, FingerComponent);
       const positionCP = Essence.getOrAddPool(essence, PositionComponent);
       const scaleCP = Essence.getOrAddPool(essence, ScaleComponent);
 
-      const cameraScaleC = Pool.get(scaleCP, playerEntity);
-      const cameraPositionC = Pool.get(positionCP, playerEntity);
+      const cameraScaleC = Pool.get(scaleCP, cameraEntity);
+      const cameraPositionC = Pool.get(positionCP, cameraEntity);
       const fingerC = Pool.get(fingerCP, playerEntity);
 
       // # Update

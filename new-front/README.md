@@ -6,7 +6,9 @@
 1. Maybe change playerEntityId to be playerId (than it will be simpler to check if we are this player)
 1. Maybe change EntityId and ComponentId just to string
 1. Three main goals
-   1. Event system
+   1. ~~Event system~~
+      1. ~~MVP~~
+      1. ~~Make sure they are created exactly before run start~~
    1. Depth
       1. We can create index for every object + Add some system, that will resort than (1) new GameObject spawned
          and (2) object depth has changed

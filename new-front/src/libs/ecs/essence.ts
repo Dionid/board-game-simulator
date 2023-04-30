@@ -9,9 +9,14 @@ export type EssencePools<CL extends Component<any, any>[]> = {
 };
 
 export type EssenceEvents<EL extends Event<any, any>[]> = {
-  events: {
-    [K in EL[number]['name']]?: Array<EL[number]>;
-  };
+  events: Partial<{
+    pending: {
+      [K in EL[number]['name']]?: Array<EL[number]>;
+    };
+    active: {
+      [K in EL[number]['name']]?: Array<EL[number]>;
+    };
+  }>;
 };
 
 export type Essence<CL extends Component<any, any>[], EL extends Event<any, any>[]> = EssencePools<CL> &
@@ -138,22 +143,55 @@ export const Essence = {
     essence: EssenceEvents<any>,
     eventFactory: EF
   ): Array<EventFromFactory<EF>> | undefined => {
-    return essence.events[eventFactory.name];
+    return essence.events.active![eventFactory.name];
   },
 
-  addEvent: <E extends Event<any, any>>(essence: EssenceEvents<any>, event: E): void => {
-    const map = essence.events[event.name];
+  addEvent: <E extends Event<any, any>>(essence: EssenceEvents<Event<any, any>[]>, event: E): void => {
+    const map = essence.events.pending![event.name];
 
     if (map) {
       map.push(event);
     } else {
-      essence.events[event.name] = [event];
+      essence.events.pending![event.name] = [event];
     }
   },
 
+  movePendingToActive: (essence: EssenceEvents<Event<any, any>[]>): void => {
+    // const map = essence.events.pending![event.name];
+
+    // if (map) {
+    //   map.push(event);
+    // } else {
+    //   essence.events.pending![event.name] = [event];
+    // }
+
+    for (const pendingEventKeys of Object.keys(essence.events.pending!)) {
+      const pendingEvents = essence.events.pending![pendingEventKeys]!;
+      const activeEvents = essence.events.active![pendingEventKeys];
+
+      if (activeEvents) {
+        // essence.events.active![pendingEventKeys] = activeEvents.concat(pendingEvents);
+        for (const event of pendingEvents) {
+          activeEvents.push({
+            ...event,
+          });
+        }
+      } else {
+        essence.events.active![pendingEventKeys] = [];
+        for (const event of pendingEvents) {
+          essence.events.active![pendingEventKeys]!.push({
+            ...event,
+          });
+        }
+      }
+    }
+
+    essence.events.pending! = {};
+  },
+
   clearEvents: (essence: EssenceEvents<Event<any, any>[]>): void => {
-    for (const eventName of Object.keys(essence.events)) {
-      const eventList = essence.events[eventName];
+    for (const eventName of Object.keys(essence.events.active!)) {
+      const eventList = essence.events.active![eventName];
 
       if (!eventList) {
         return;
@@ -171,7 +209,7 @@ export const Essence = {
       }
 
       if (newEventsList.length !== eventList.length) {
-        essence.events[eventName] = newEventsList;
+        essence.events.active![eventName] = newEventsList;
       }
     }
   },
