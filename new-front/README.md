@@ -12,3 +12,6 @@
          and (2) object depth has changed
    1. State Sync
       1. SyncStore
+1. ESC
+   1. Do I need Pools?
+   1. Add functionality on Essence to work without pools

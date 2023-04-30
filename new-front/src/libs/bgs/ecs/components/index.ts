@@ -7,7 +7,7 @@ import { Size, Vector2 } from '../../../math';
 export const PlayerComponent = ComponentFactory<
   'PlayerComponent',
   {
-    id: UUID;
+    id: string;
   }
 >('PlayerComponent');
 
@@ -17,7 +17,7 @@ export const PlayerComponent = ComponentFactory<
 export const OwnerComponent = ComponentFactory<
   'OwnerComponent',
   {
-    playerId: UUID;
+    playerId: string;
   }
 >('OwnerComponent');
 

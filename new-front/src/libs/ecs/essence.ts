@@ -1,5 +1,5 @@
 import { Component, ComponentFactory, ComponentFromFactory, Pool } from './component';
-import { Event } from './event';
+import { Event, EventFactory, EventFromFactory } from './event';
 import { EntityId } from './entity';
 
 export type EssencePools<CL extends Component<any, any>[]> = {
@@ -10,7 +10,7 @@ export type EssencePools<CL extends Component<any, any>[]> = {
 
 export type EssenceEvents<EL extends Event<any, any>[]> = {
   events: {
-    [K in EL[number]['name']]?: EL[number][];
+    [K in EL[number]['name']]?: Array<EL[number]>;
   };
 };
 
@@ -132,5 +132,47 @@ export const Essence = {
 
       pool.data = newData;
     });
+  },
+
+  getEvents: <EF extends EventFactory<any, any>>(
+    essence: EssenceEvents<any>,
+    eventFactory: EF
+  ): Array<EventFromFactory<EF>> | undefined => {
+    return essence.events[eventFactory.name];
+  },
+
+  addEvent: <E extends Event<any, any>>(essence: EssenceEvents<any>, event: E): void => {
+    const map = essence.events[event.name];
+
+    if (map) {
+      map.push(event);
+    } else {
+      essence.events[event.name] = [event];
+    }
+  },
+
+  clearEvents: (essence: EssenceEvents<Event<any, any>[]>): void => {
+    for (const eventName of Object.keys(essence.events)) {
+      const eventList = essence.events[eventName];
+
+      if (!eventList) {
+        return;
+      }
+
+      const newEventsList = [];
+
+      for (const event of eventList) {
+        if (event.liveFor) {
+          event.liveFor -= 1;
+          if (event.liveFor > 0) {
+            newEventsList.push(event);
+          }
+        }
+      }
+
+      if (newEventsList.length !== eventList.length) {
+        essence.events[eventName] = newEventsList;
+      }
+    }
   },
 };

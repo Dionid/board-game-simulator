@@ -11,11 +11,11 @@ import {
   FingerComponent,
   PanModeComponent,
 } from '../../components';
-import { UUID } from '../../../../branded-types';
+import { EntityId } from '../../../../ecs/entity';
 
 export const CameraSystem = (): System<{
   boardSize: Size;
-  playerId: UUID;
+  playerId: EntityId;
 }> => {
   return {
     init: ({ essence, ctx }) => {
@@ -81,7 +81,7 @@ export const CameraSystem = (): System<{
         Essence.getOrAddPool(essence, PanModeComponent),
         playerEntity,
         PanModeComponent.new({
-          activated: true,
+          activated: false,
         })
       );
     },

@@ -3,10 +3,9 @@ import { OwnerComponent, PlayerComponent } from '../../components';
 import { Essence } from '../../../../ecs/essence';
 import { Pool } from '../../../../ecs/component';
 import { EntityId } from '../../../../ecs/entity';
-import { UUID } from '../../../../branded-types';
 
 export const PlayerSystem = (): System<{
-  playerId: UUID;
+  playerId: EntityId;
 }> => {
   return {
     init: async ({ essence, ctx }) => {
@@ -15,7 +14,7 @@ export const PlayerSystem = (): System<{
       const playerPool = Essence.getOrAddPool(essence, PlayerComponent);
       Pool.add(
         playerPool,
-        EntityId.ofString(ctx.playerId),
+        ctx.playerId,
         PlayerComponent.new({
           id: ctx.playerId,
         })

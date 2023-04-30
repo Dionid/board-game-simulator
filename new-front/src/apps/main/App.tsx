@@ -7,20 +7,19 @@ import { FingerInputSystem } from '../../libs/bgs/ecs/systems/finger-input';
 import { PlayerSystem } from '../../libs/bgs/ecs/systems/player';
 import { HeroSets } from '../../libs/bgs/games/unmatched';
 import { CameraSystem } from '../../libs/bgs/ecs/systems/camera';
-import { UUID } from '../../libs/branded-types';
 import { Minimap } from '../../widgets/Minimap';
-import { PlayerComponent } from '../../libs/bgs/ecs/components';
-import { Pool } from '../../libs/ecs/component';
 import { essence, initStore } from './store';
+import { MainMenu } from '../../widgets/MainMenu';
+import { EntityId } from '../../libs/ecs/entity';
 
-const getOrSetPlayerId = (): UUID => {
+const getOrSetPlayerId = (): EntityId => {
   const key = 'bgs_player_id';
   const playerId = localStorage.getItem(key);
   if (!playerId) {
     localStorage.setItem(key, 'e33e6255-face-4402-a927-87cbb696c413');
     return getOrSetPlayerId();
   }
-  return UUID.ofString(playerId);
+  return EntityId.ofString(playerId);
 };
 
 // TODO. Move
@@ -30,6 +29,10 @@ const boardSize = {
 };
 
 function App() {
+  const playerEntity = useMemo(() => {
+    return getOrSetPlayerId();
+  }, []);
+
   const world = useMemo(() => {
     // @ts-ignore
     if (window.world) {
@@ -39,7 +42,7 @@ function App() {
     const world: BgsWorld = {
       essence: essence,
       ctx: {
-        playerId: getOrSetPlayerId(),
+        playerId: playerEntity,
         heroSets: HeroSets,
         boardSize,
       },
@@ -114,29 +117,13 @@ function App() {
     return world;
   }, []);
 
-  const playerEntities = Essence.getEntitiesByComponents(world.essence, [PlayerComponent]);
-
-  const playerEntity = playerEntities.find((playerEntityId) => {
-    const playerPool = Essence.getOrAddPool(world.essence, PlayerComponent);
-
-    const playerComp = Pool.get(playerPool, playerEntityId);
-
-    return playerComp.props.id === getOrSetPlayerId();
-  });
-
-  if (!playerEntity) {
-    return <div>Loading</div>;
-  }
-
-  console.log('playerEntity', playerEntity);
-
   return (
     <div style={{ width: '100vw', height: '100vh', backgroundColor: '#eee' }}>
       <CssBaseline />
       {/* <ContextMenu world={world} heroSets={heroSets}>
         {playerEntity && <GameStage forceUpdateState={forceUpdateState} world={world} playerEntity={playerEntity} />}
       </ContextMenu> */}
-      {/* <MainMenu world={world} /> */}
+      <MainMenu playerEntity={playerEntity} world={world} />
       <Minimap playerEntity={playerEntity} world={world} boardSize={boardSize} />
     </div>
   );
