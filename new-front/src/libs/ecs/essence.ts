@@ -1,11 +1,21 @@
 import { Component, ComponentFactory, ComponentFromFactory, Pool } from './component';
+import { Event } from './event';
 import { EntityId } from './entity';
 
-export type Essence<CL extends Component<any, any>[]> = {
+export type EssencePools<CL extends Component<any, any>[]> = {
   pools: {
     [K in CL[number]['name']]?: Pool<CL[number]>;
   };
 };
+
+export type EssenceEvents<EL extends Event<any, any>[]> = {
+  events: {
+    [K in EL[number]['name']]?: EL[number][];
+  };
+};
+
+export type Essence<CL extends Component<any, any>[], EL extends Event<any, any>[]> = EssencePools<CL> &
+  EssenceEvents<EL>;
 
 type EntityWithComponents = {
   id: EntityId;
@@ -14,18 +24,18 @@ type EntityWithComponents = {
 
 export const Essence = {
   getPool: <CF extends ComponentFactory<any, any>>(
-    essence: Essence<any>,
+    essence: EssencePools<any>,
     componentFactory: CF
   ): Pool<ComponentFromFactory<CF>> | undefined => {
     return essence.pools[componentFactory.name];
   },
 
-  addPool: <C extends Component<any, any>>(essence: Essence<[C]>, pool: Pool<C>): void => {
+  addPool: <C extends Component<any, any>>(essence: EssencePools<[C]>, pool: Pool<C>): void => {
     essence.pools[pool.name] = pool;
   },
 
   getOrAddPool: <CF extends ComponentFactory<any, any>>(
-    essence: Essence<any>,
+    essence: EssencePools<any>,
     componentFactory: CF
   ): Pool<ComponentFromFactory<CF>> => {
     const poolName = componentFactory.name;
@@ -42,7 +52,7 @@ export const Essence = {
   },
 
   getEntitiesByComponents: <CL extends Component<any, any>[]>(
-    essence: Essence<CL>,
+    essence: EssencePools<CL>,
     componentFactories: ComponentFactory<CL[number]['name'], CL[number]['props']>[]
   ): EntityId[] => {
     const entityIds: Record<EntityId, boolean> = {};
@@ -78,7 +88,7 @@ export const Essence = {
   },
 
   getEntityById: <C extends Component<any, any>>(
-    essence: Essence<[C]>,
+    essence: EssencePools<[C]>,
     entityId: EntityId
   ): EntityWithComponents | undefined => {
     const res = Object.keys(essence.pools).reduce<EntityWithComponents>(
@@ -108,7 +118,7 @@ export const Essence = {
     }
   },
 
-  destroyEntity: <C extends Component<any, any>>(essence: Essence<[C]>, entityId: EntityId): void => {
+  destroyEntity: <C extends Component<any, any>>(essence: EssencePools<[C]>, entityId: EntityId): void => {
     Object.keys(essence.pools).forEach((rPoolName) => {
       const poolName = rPoolName as keyof typeof essence.pools;
 

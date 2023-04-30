@@ -3,7 +3,7 @@ import { BgsWorld } from '../../libs/bgs/ecs';
 import { Size } from '../../libs/math';
 import { EntityId } from '../../libs/ecs/entity';
 import { useSyncedStore } from '@syncedstore/react';
-import { essenceStore } from '../../apps/main/store';
+import { essencePoolsStore } from '../../apps/main/store';
 import { Pool } from '../../libs/ecs/component';
 import { Essence } from '../../libs/ecs/essence';
 import { PositionComponent, SizeComponent } from '../../libs/bgs/ecs/components';
@@ -33,7 +33,7 @@ const coef = 30;
 // });
 
 export const MiniMapArea = memo(({ playerEntity }: { playerEntity: EntityId }) => {
-  const essence = useSyncedStore(essenceStore);
+  const essence = useSyncedStore(essencePoolsStore);
 
   const position = Pool.get(Essence.getOrAddPool(essence, PositionComponent), playerEntity);
 

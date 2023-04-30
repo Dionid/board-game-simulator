@@ -2,7 +2,7 @@ import { System } from './system';
 import { Essence } from './essence';
 
 export type World<Ctx extends Record<any, any> = Record<any, any>> = {
-  essence: Essence<any>;
+  essence: Essence<any, any>;
   systems: System<Ctx>[];
   ctx: Ctx;
 };

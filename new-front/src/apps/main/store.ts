@@ -1,17 +1,23 @@
 import { syncedStore, getYjsValue } from '@syncedstore/core';
 import { WebrtcProvider } from 'y-webrtc';
 import { AbstractType } from 'yjs';
-import { Essence } from '../../libs/ecs/essence';
+import { EssenceEvents, EssencePools } from '../../libs/ecs/essence';
 
 // Create your SyncedStore store
-export const essenceStore = syncedStore<Essence<any>>({ pools: {} });
+export const essencePoolsStore = syncedStore<EssencePools<any>>({ pools: {} });
+export const essenceEventsStore = syncedStore<EssenceEvents<any>>({ events: {} });
+
+export const essence = {
+  pools: essencePoolsStore.pools,
+  events: essenceEventsStore.events,
+};
 
 // @ts-ignore
-window.bgsStore = essenceStore;
+window.bgsStore = essence;
 
 export const initStore = (roomId: string) => {
   // Get the Yjs document and sync automatically using y-webrtc
-  const doc = getYjsValue(essenceStore);
+  const doc = getYjsValue(essencePoolsStore);
   if (!doc) {
     throw new Error(`No doc`);
   }

@@ -1,10 +1,10 @@
 import { UUID } from '../branded-types';
 import { EntityId } from './entity';
 
-export type ComponentId = UUID & { readonly ComponentId: unique symbol };
+export type ComponentId = string & { readonly ComponentId: unique symbol };
 export const ComponentId = {
   ofString: (value: string): ComponentId => {
-    return UUID.ofString(value) as ComponentId;
+    return value as ComponentId;
   },
   new: (): ComponentId => {
     return ComponentId.ofString(UUID.new());

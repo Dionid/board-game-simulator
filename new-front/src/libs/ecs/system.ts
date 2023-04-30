@@ -1,7 +1,7 @@
 import { Essence } from './essence';
 
 export type SystemProps<Ctx extends Record<any, any> = Record<any, any>> = {
-  essence: Essence<any>;
+  essence: Essence<any, any>;
   timeDelta: number;
   ctx: Ctx;
 };

@@ -11,7 +11,7 @@ import { UUID } from '../../libs/branded-types';
 import { Minimap } from '../../widgets/Minimap';
 import { PlayerComponent } from '../../libs/bgs/ecs/components';
 import { Pool } from '../../libs/ecs/component';
-import { essenceStore, initStore } from './store';
+import { essence, initStore } from './store';
 
 const getOrSetPlayerId = (): UUID => {
   const key = 'bgs_player_id';
@@ -37,15 +37,13 @@ function App() {
       return window.world;
     }
     const world: BgsWorld = {
-      essence: essenceStore,
+      essence: essence,
       ctx: {
         playerId: getOrSetPlayerId(),
         heroSets: HeroSets,
         boardSize,
       },
       systems: [
-        // YjsSyncedStoreToECSSystem(),
-
         // INIT
         PlayerSystem(),
 
@@ -80,13 +78,6 @@ function App() {
 
         // // SPAWN GAME OBJECT
         // SpawnGameObjectSystem(),
-
-        // // RENDER REACT
-        // ChangeReactPositionSystem(),
-        // ChangeReactImageSystem(),
-        // ChangeReactSizeSystem(),
-        // ChangeReactScaleSystem(),
-        // ChangeReactHealthMeter(),
       ],
     };
 
