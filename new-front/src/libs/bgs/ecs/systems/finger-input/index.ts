@@ -103,20 +103,63 @@ export const FingerInputSystem = (): System => {
       const fingerC = Pool.get(fingerCP, playerEntity);
 
       // # Update
-      fingerC.props.onCameraPosition.previous = fingerC.props.onCameraPosition.current;
-      fingerC.props.onBoardPosition.previous = fingerC.props.onBoardPosition.current;
-      fingerC.props.click.previous = fingerC.props.click.current;
-
-      fingerC.props.onCameraPosition.current = {
-        x: lastMouseData.x,
-        y: lastMouseData.y,
+      // if (fingerC.props.onCameraPosition.previous.x !== fingerC.props.onCameraPosition.current.x) {
+      //   fingerC.props.onCameraPosition.previous.x = fingerC.props.onCameraPosition.current.x;
+      // }
+      // if (fingerC.props.onCameraPosition.previous.y !== fingerC.props.onCameraPosition.current.y) {
+      //   fingerC.props.onCameraPosition.previous.y = fingerC.props.onCameraPosition.current.y;
+      // }
+      fingerC.props.onCameraPosition.previous = {
+        ...fingerC.props.onCameraPosition.current,
       };
 
+      // if (fingerC.props.onBoardPosition.previous.x !== fingerC.props.onBoardPosition.current.x) {
+      //   fingerC.props.onBoardPosition.previous.x = fingerC.props.onBoardPosition.current.x;
+      // }
+      // if (fingerC.props.onBoardPosition.previous.y !== fingerC.props.onBoardPosition.current.y) {
+      //   fingerC.props.onBoardPosition.previous.y = fingerC.props.onBoardPosition.current.y;
+      // }
+      fingerC.props.onBoardPosition.previous = {
+        ...fingerC.props.onBoardPosition.current,
+      };
+
+      // if (fingerC.props.click.previous.down !== fingerC.props.click.current.down) {
+      //   fingerC.props.click.previous.down = fingerC.props.click.current.down;
+      // }
+      fingerC.props.click.previous = {
+        ...fingerC.props.click.current,
+      };
+
+      // if (fingerC.props.onCameraPosition.current.x !== lastMouseData.x) {
+      //   fingerC.props.onCameraPosition.current.x = lastMouseData.x;
+      // }
+      // if (fingerC.props.onCameraPosition.current.y !== lastMouseData.y) {
+      //   fingerC.props.onCameraPosition.current.y = lastMouseData.y;
+      // }
+      fingerC.props.onCameraPosition.current = {
+        ...lastMouseData,
+      };
+
+      // if (
+      //   fingerC.props.onBoardPosition.current.x !==
+      //   lastMouseData.x / cameraScaleC.props.x + cameraPositionC.props.x
+      // ) {
+      //   fingerC.props.onBoardPosition.current.x = lastMouseData.x / cameraScaleC.props.x + cameraPositionC.props.x;
+      // }
+      // if (
+      //   fingerC.props.onBoardPosition.current.y !==
+      //   lastMouseData.y / cameraScaleC.props.y + cameraPositionC.props.y
+      // ) {
+      //   fingerC.props.onBoardPosition.current.y = lastMouseData.y / cameraScaleC.props.y + cameraPositionC.props.y;
+      // }
       fingerC.props.onBoardPosition.current = {
         x: lastMouseData.x / cameraScaleC.props.x + cameraPositionC.props.x,
         y: lastMouseData.y / cameraScaleC.props.y + cameraPositionC.props.y,
       };
 
+      // if (fingerC.props.click.current.down !== lastMouseData.down) {
+      //   fingerC.props.click.current.down = lastMouseData.down;
+      // }
       fingerC.props.click.current = {
         down: lastMouseData.down,
       };

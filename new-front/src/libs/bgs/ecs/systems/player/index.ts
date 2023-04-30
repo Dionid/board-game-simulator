@@ -10,12 +10,12 @@ export const PlayerSystem = (): System<{
 }> => {
   return {
     init: async ({ essence, ctx }) => {
-      const playerEntity = EntityId.new();
+      // const playerEntity = EntityId.new();
 
       const playerPool = Essence.getOrAddPool(essence, PlayerComponent);
       Pool.add(
         playerPool,
-        playerEntity,
+        EntityId.ofString(ctx.playerId),
         PlayerComponent.new({
           id: ctx.playerId,
         })
@@ -24,7 +24,7 @@ export const PlayerSystem = (): System<{
       const ownerPool = Essence.getOrAddPool(essence, OwnerComponent);
       Pool.add(
         ownerPool,
-        playerEntity,
+        EntityId.ofString(ctx.playerId),
         OwnerComponent.new({
           playerId: ctx.playerId,
         })

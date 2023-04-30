@@ -11,10 +11,7 @@ import { UUID } from '../../libs/branded-types';
 import { Minimap } from '../../widgets/Minimap';
 import { PlayerComponent } from '../../libs/bgs/ecs/components';
 import { Pool } from '../../libs/ecs/component';
-import { ChangeReactPositionSystem } from '../../libs/bgs/ecs/systems/change-react-position-system';
-import { ChangeReactSizeSystem } from '../../libs/bgs/ecs/systems/change-react-size';
-import { useForceUpdate } from '../../libs/react/hooks/use-force-update';
-// import {YjsSyncedStoreSystem, YjsSyncedStoreToECSSystem} from "../../libs/bgs/ecs/systems/yjs-synced-store";
+import { essenceStore, initStore } from './store';
 
 const getOrSetPlayerId = (): UUID => {
   const key = 'bgs_player_id';
@@ -33,14 +30,14 @@ const boardSize = {
 };
 
 function App() {
-  const [forceUpdateState] = useForceUpdate();
-  // const [heroSets] = useState(HeroSets);
-
   const world = useMemo(() => {
+    // @ts-ignore
+    if (window.world) {
+      // @ts-ignore
+      return window.world;
+    }
     const world: BgsWorld = {
-      essence: {
-        pools: {},
-      },
+      essence: essenceStore,
       ctx: {
         playerId: getOrSetPlayerId(),
         heroSets: HeroSets,
@@ -85,13 +82,15 @@ function App() {
         // SpawnGameObjectSystem(),
 
         // // RENDER REACT
-        ChangeReactPositionSystem(),
+        // ChangeReactPositionSystem(),
         // ChangeReactImageSystem(),
-        ChangeReactSizeSystem(),
+        // ChangeReactSizeSystem(),
         // ChangeReactScaleSystem(),
         // ChangeReactHealthMeter(),
       ],
     };
+
+    initStore('91dd64b2-a908-4562-b6e2-eacb86548da0');
 
     // @ts-ignore
     window.world = world;
@@ -115,9 +114,11 @@ function App() {
       //   console.log('AFTER RUN', world);
       // }
       requestAnimationFrame(run);
+      // setTimeout(run, 3000)
     };
 
     requestAnimationFrame(run);
+    // run()
 
     return world;
   }, []);
@@ -145,7 +146,7 @@ function App() {
         {playerEntity && <GameStage forceUpdateState={forceUpdateState} world={world} playerEntity={playerEntity} />}
       </ContextMenu> */}
       {/* <MainMenu world={world} /> */}
-      <Minimap forceUpdateState={forceUpdateState} playerEntity={playerEntity} world={world} boardSize={boardSize} />
+      <Minimap playerEntity={playerEntity} world={world} boardSize={boardSize} />
     </div>
   );
 }

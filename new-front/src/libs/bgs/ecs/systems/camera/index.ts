@@ -114,12 +114,11 @@ export const CameraSystem = (): System<{
       const sizeC = Pool.get(sizeCP, playerEntity);
       const panModeC = Pool.get(panModeP, playerEntity);
 
-      const newCameraPosition: Vector2 = {
-        x: cameraPositionC.props.x,
-        y: cameraPositionC.props.y,
-      };
-
       if (panModeC.props.activated) {
+        const newCameraPosition: Vector2 = {
+          ...cameraPositionC.props,
+        };
+
         const handPool = Essence.getOrAddPool(essence, FingerComponent);
         const fingerC = Pool.get(handPool, playerEntity);
 
@@ -130,6 +129,23 @@ export const CameraSystem = (): System<{
           );
           newCameraPosition.x -= delta.x;
           newCameraPosition.y -= delta.y;
+        }
+
+        // . Restrict
+        if (
+          newCameraPosition.x > 0 &&
+          newCameraPosition.x + sizeC.props.width < ctx.boardSize.width &&
+          cameraPositionC.props.x !== newCameraPosition.x
+        ) {
+          cameraPositionC.props.x = newCameraPosition.x;
+        }
+
+        if (
+          newCameraPosition.y > 0 &&
+          newCameraPosition.y + sizeC.props.height < ctx.boardSize.height &&
+          cameraPositionC.props.y !== newCameraPosition.y
+        ) {
+          cameraPositionC.props.y = newCameraPosition.y;
         }
       }
 
@@ -155,15 +171,6 @@ export const CameraSystem = (): System<{
       //   //   newPosition.y += velocity;
       //   // }
       // }
-
-      // . Restrict
-      if (newCameraPosition.x > 0 && newCameraPosition.x + sizeC.props.width < ctx.boardSize.width) {
-        cameraPositionC.props.x = newCameraPosition.x;
-      }
-
-      if (newCameraPosition.y > 0 && newCameraPosition.y + sizeC.props.height < ctx.boardSize.height) {
-        cameraPositionC.props.y = newCameraPosition.y;
-      }
     },
   };
 };

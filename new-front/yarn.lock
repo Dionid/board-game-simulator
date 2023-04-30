@@ -1599,17 +1599,17 @@
   resolved "https://registry.yarnpkg.com/@popperjs/core/-/core-2.11.5.tgz#db5a11bf66bdab39569719555b0f76e138d7bd64"
   integrity sha512-9X2obfABZuDVLCgPK9aX0a/x4jaOEweTTWE2+9sr0Qqqevj2Uv5XorvusThmc9XGYpS9yI+fhh8RTafBtGposw==
 
-"@reactivedata/react@0.1.16":
-  version "0.1.16"
-  resolved "https://registry.yarnpkg.com/@reactivedata/react/-/react-0.1.16.tgz#c9ea0ef369583f8e32cbe5d337e45d2668a7d03f"
-  integrity sha512-Z1LNGOUVJzT2vh3+ZNySnNB+5VfgQYkkS2MBwStQacP5e/TK5IO8EGtvo2uXxxX0825CZy5kvsNpngYOqw91Sw==
+"@reactivedata/react@0.2.1":
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/@reactivedata/react/-/react-0.2.1.tgz#886a1bea2dd8973baa45f75b76d17eaa847a9575"
+  integrity sha512-nNnZaT3MDisDicXIX5/YvXZoVE0uO5LB47zTIs+hBnDRUAAYAzD8l+RcIa1YzouaOLK0yIx3ffwIvfGy/bJWjg==
   dependencies:
-    "@reactivedata/reactive" "^0.1.16"
+    "@reactivedata/reactive" "^0.2.0"
 
-"@reactivedata/reactive@0.1.16", "@reactivedata/reactive@^0.1.16":
-  version "0.1.16"
-  resolved "https://registry.yarnpkg.com/@reactivedata/reactive/-/reactive-0.1.16.tgz#6792e25dc509c3dc82733f0c6f4fbce599339443"
-  integrity sha512-wiE5E7+eqh/oKGPHObcmUJRXUjEXGP4k9Ts3dGJCsQaf3h14nVAWWMwKBY5CTDlIhUViGI8IaehIZxNSziKHXA==
+"@reactivedata/reactive@0.2.0", "@reactivedata/reactive@^0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@reactivedata/reactive/-/reactive-0.2.0.tgz#1d370724bb0e3599b96b768bee96099f9326ed23"
+  integrity sha512-qWmVSmUrjKHBiD+ZS8TxNNzyk9J6rbcZSZJgcnKQpTLwORZoWuX5pYbl07aU0kzXGLaaVX2O/ZW+SZaBjRQW3g==
 
 "@reduxjs/toolkit@^1.8.0":
   version "1.8.1"
@@ -1790,27 +1790,27 @@
     "@svgr/plugin-svgo" "^5.5.0"
     loader-utils "^2.0.0"
 
-"@syncedstore/core@^0.3.7":
-  version "0.3.7"
-  resolved "https://registry.yarnpkg.com/@syncedstore/core/-/core-0.3.7.tgz#c29187b9722e246b3dc1114865375aef618067f4"
-  integrity sha512-uxer5y/2RpMVzPbTvRik6EsjPNRd+LhrX3paSTzNFvuc4SedT+GnJ3VMGDPLXkdhVA65F+E+2IkNrAEb+WAo3Q==
+"@syncedstore/core@^0.5.1":
+  version "0.5.1"
+  resolved "https://registry.yarnpkg.com/@syncedstore/core/-/core-0.5.1.tgz#6405153979d79b45e0932864805dfc240f1205c9"
+  integrity sha512-YTd6s2lQrkOYOooQkjKxBi41/4HxORnjiXxBU+fk+Qb7oq9ZD5XVaFkt8mrJcw4NQ/MZK3aGkaphdvETFPc7Kw==
   dependencies:
-    "@reactivedata/reactive" "0.1.16"
-    "@syncedstore/yjs-reactive-bindings" "^0.3.7"
+    "@reactivedata/reactive" "0.2.0"
+    "@syncedstore/yjs-reactive-bindings" "^0.5.1"
     "@types/eslint" "6.8.0"
 
-"@syncedstore/react@^0.3.5":
-  version "0.3.5"
-  resolved "https://registry.yarnpkg.com/@syncedstore/react/-/react-0.3.5.tgz#f7f6b77839633bc0477d559ab007b64dffb2ee96"
-  integrity sha512-P/G93lpd6bIzqYh3eLR2E7QiiMwNO1EyTy3TRqZbZ4+zLct8US2lLF2Z48luApgQs6rQYf9/s6VKIIuhiUN+Ng==
+"@syncedstore/react@^0.5.1":
+  version "0.5.1"
+  resolved "https://registry.yarnpkg.com/@syncedstore/react/-/react-0.5.1.tgz#c1817cb92e3e7c94038e066fbe90ae15e42c95ba"
+  integrity sha512-C1Er+u9utUjgZhjvAbWNHWrbJQTcqMy91Cz4i0pIwbU5Qkq7z4zgSzOszq7E0+HnDjJxODOJP0Ay37OOq+8oQQ==
   dependencies:
-    "@reactivedata/react" "0.1.16"
+    "@reactivedata/react" "0.2.1"
     "@types/eslint" "6.8.0"
 
-"@syncedstore/yjs-reactive-bindings@^0.3.7":
-  version "0.3.7"
-  resolved "https://registry.yarnpkg.com/@syncedstore/yjs-reactive-bindings/-/yjs-reactive-bindings-0.3.7.tgz#607da835559863eec29f4f6862481a46a90a88b8"
-  integrity sha512-qWZ6rwif7A+Ft9iOyWi4yqeu2BgxDIa3trRJHcmTsuxNd7HERpUuY4vFmQGHUlRMvYt8QlKxBjU5UrwAGxvdYA==
+"@syncedstore/yjs-reactive-bindings@^0.5.1":
+  version "0.5.1"
+  resolved "https://registry.yarnpkg.com/@syncedstore/yjs-reactive-bindings/-/yjs-reactive-bindings-0.5.1.tgz#0d7209d99356ecaa40b072780594230d53ce0d2b"
+  integrity sha512-M1/YrK0gAiQAhTCekXtp+qAq4DVUdPCsEdsJ2Tcqo176WHcsjr0yOqjAYrva1Phh4DPTVx1GPWTCUWpxUBR1ug==
   dependencies:
     "@types/eslint" "6.8.0"
 
@@ -5877,10 +5877,17 @@ levn@~0.3.0:
     prelude-ls "~1.1.2"
     type-check "~0.3.2"
 
-lib0@^0.2.42, lib0@^0.2.49:
+lib0@^0.2.42:
   version "0.2.49"
   resolved "https://registry.yarnpkg.com/lib0/-/lib0-0.2.49.tgz#7addb5075063d66ea2c55749e5aeaa48e36278c8"
   integrity sha512-ziwYLe/pmI9bjHsAehm4ApuVfZ+q+sbC+vO6Z5+KM+0Fe0MrTLwZSDkJ+cElnhFNQ0P6z/wVkRmc5+vTmImJ9A==
+  dependencies:
+    isomorphic.js "^0.2.4"
+
+lib0@^0.2.74:
+  version "0.2.74"
+  resolved "https://registry.yarnpkg.com/lib0/-/lib0-0.2.74.tgz#7a4cc816a0420e76de85009423c8ab63655ff817"
+  integrity sha512-roj9i46/JwG5ik5KNTkxP2IytlnrssAkD/OhlAVtE+GqectrdkfR+pttszVLrOzMDeXNs1MPt6yo66MUolWSiA==
   dependencies:
     isomorphic.js "^0.2.4"
 
@@ -9061,10 +9068,10 @@ y-protocols@^1.0.5:
   dependencies:
     lib0 "^0.2.42"
 
-y-webrtc@^10.2.2:
-  version "10.2.2"
-  resolved "https://registry.yarnpkg.com/y-webrtc/-/y-webrtc-10.2.2.tgz#9a44bb3d88fa4b70d45a23f4766e2d168325745c"
-  integrity sha512-RoN7FXbE90X2/sJhcExsqPTu9p5pPwQAD3u+LWyGo7bAd4vEezyTDDcXWD4lpl17klXokLwY+37wjXZ9VZglxw==
+y-webrtc@^10.2.5:
+  version "10.2.5"
+  resolved "https://registry.yarnpkg.com/y-webrtc/-/y-webrtc-10.2.5.tgz#ceb2f5d9bf9047ed56c290106b989ad95ed0ea18"
+  integrity sha512-ZyBNvTI5L28sQ2PQI0T/JvyWgvuTq05L21vGkIlcvNLNSJqAaLCBJRe3FHEqXoaogqWmRcEAKGfII4ErNXMnNw==
   dependencies:
     lib0 "^0.2.42"
     simple-peer "^9.11.0"
@@ -9105,12 +9112,12 @@ yargs@^16.2.0:
     y18n "^5.0.5"
     yargs-parser "^20.2.2"
 
-yjs@^13.5.34:
-  version "13.5.34"
-  resolved "https://registry.yarnpkg.com/yjs/-/yjs-13.5.34.tgz#ad9ddb8b6c0806e15b289ff0eabc4f06ba238952"
-  integrity sha512-w/XTk5vhCzbyd6uKKJWE6rPUBf9+heOTzgq8DBkcVgBMv7oeJVFQw2sRqY0YvuLZxURd/XVD2dcNnw8qeFH7Tw==
+yjs@^13.6.0:
+  version "13.6.0"
+  resolved "https://registry.yarnpkg.com/yjs/-/yjs-13.6.0.tgz#3ede38b3c57653c302fd63d7294e63892514fb0a"
+  integrity sha512-tFZtuQV6XamtDa9SfZhUsxchUcTBWe7fzpo1UWZDLXGejTZ5t9MCswGYzyvq7+BDzfEc9oX54QEbzI/4NyS6+g==
   dependencies:
-    lib0 "^0.2.49"
+    lib0 "^0.2.74"
 
 yocto-queue@^0.1.0:
   version "0.1.0"

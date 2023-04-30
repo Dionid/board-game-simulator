@@ -1,8 +1,7 @@
-import { useState } from 'react';
-import { v4 } from 'uuid';
+import { useReducer } from 'react';
 
 export const useForceUpdate = (): [string, () => void] => {
-  const [forceUpdateState, forceUpdate] = useState<string>(v4());
+  const [forceUpdateState, forceUpdate] = useReducer((c) => c + 1, 0);
 
-  return [forceUpdateState, () => forceUpdate(v4())];
+  return [forceUpdateState, () => forceUpdate()];
 };

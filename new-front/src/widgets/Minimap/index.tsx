@@ -1,9 +1,12 @@
 import { memo } from 'react';
 import { BgsWorld } from '../../libs/bgs/ecs';
 import { Size } from '../../libs/math';
-import { useEcsComponent } from '../../libs/ecs/react';
 import { EntityId } from '../../libs/ecs/entity';
-import { ReactPositionComponent, ReactSizeComponent } from '../../libs/ecs/react/components';
+import { useSyncedStore } from '@syncedstore/react';
+import { essenceStore } from '../../apps/main/store';
+import { Pool } from '../../libs/ecs/component';
+import { Essence } from '../../libs/ecs/essence';
+import { PositionComponent, SizeComponent } from '../../libs/bgs/ecs/components';
 
 const coef = 30;
 
@@ -29,35 +32,31 @@ const coef = 30;
 //   );
 // });
 
-export const MiniMapArea = memo(({ world, playerEntity }: { world: BgsWorld; playerEntity: EntityId }) => {
-  const position = useEcsComponent(world, playerEntity, { x: 0, y: 0 }, ReactPositionComponent);
-  const size = useEcsComponent(world, playerEntity, { width: 0, height: 0 }, ReactSizeComponent);
+export const MiniMapArea = memo(({ playerEntity }: { playerEntity: EntityId }) => {
+  const essence = useSyncedStore(essenceStore);
+
+  const position = Pool.get(Essence.getOrAddPool(essence, PositionComponent), playerEntity);
+
+  const size = Pool.get(Essence.getOrAddPool(essence, SizeComponent), playerEntity);
+
+  console.log('position, size', position.props.x, position.props.y, size.props.width, size.props.height);
 
   return (
     <div
       style={{
-        width: size.width / coef,
-        height: size.height / coef,
+        width: size.props.width / coef,
+        height: size.props.height / coef,
         outline: '2px red solid',
         position: 'absolute',
-        top: position.y / coef,
-        left: position.x / coef,
+        top: position.props.y / coef,
+        left: position.props.x / coef,
       }}
     />
   );
 });
 
 export const Minimap = memo(
-  ({
-    world,
-    boardSize,
-    playerEntity,
-  }: {
-    forceUpdateState: string;
-    world: BgsWorld;
-    boardSize: Size;
-    playerEntity: EntityId;
-  }) => {
+  ({ world, boardSize, playerEntity }: { world: BgsWorld; boardSize: Size; playerEntity: EntityId }) => {
     // const goCP = Essence.getOrAddPool(world.essence, 'GameObjectComponent');
 
     return (
@@ -72,7 +71,7 @@ export const Minimap = memo(
             position: 'relative',
           }}
         >
-          <MiniMapArea world={world} playerEntity={playerEntity} />
+          <MiniMapArea playerEntity={playerEntity} />
           {/* {Object.keys(goCP.data).map((entity) => {
             return <MinimapObject key={entity} world={world} entity={entity as EntityId} />;
           })} */}
