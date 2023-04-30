@@ -11,6 +11,7 @@ import { Minimap } from '../../widgets/Minimap';
 import { essence, initStore } from './store';
 import { MainMenu } from '../../widgets/MainMenu';
 import { EntityId } from '../../libs/ecs/entity';
+import { ZoomSystem } from '../../libs/bgs/ecs/systems/zoom';
 
 const getOrSetPlayerId = (): EntityId => {
   const key = 'bgs_player_id';
@@ -43,6 +44,7 @@ function App() {
       essence: essence,
       ctx: {
         playerId: playerEntity,
+        cameraEntity: playerEntity,
         heroSets: HeroSets,
         boardSize,
       },
@@ -53,7 +55,7 @@ function App() {
         // CAMERA
         // BoardSystem(boardSize),
         CameraSystem(),
-        // ZoomSystem(),
+        ZoomSystem(),
 
         // INPUT
         FingerInputSystem(),

@@ -31,6 +31,7 @@ export const World = {
         });
       }
     }
+    Essence.clearEvents(world.essence);
   },
   addToCtx: <K extends keyof Ctx, Ctx extends Record<K, any> = Record<K, any>>(
     world: World<Ctx>,

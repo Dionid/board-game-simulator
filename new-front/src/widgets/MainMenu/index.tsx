@@ -4,14 +4,15 @@ import Menu from '@mui/material/Menu';
 import { PersonAdd } from '@mui/icons-material';
 import AddIcon from '@mui/icons-material/Add';
 import PanToolIcon from '@mui/icons-material/PanTool';
-// import ZoomInIcon from '@mui/icons-material/ZoomIn';
-// import ZoomOutIcon from '@mui/icons-material/ZoomOut';
+import ZoomInIcon from '@mui/icons-material/ZoomIn';
+import ZoomOutIcon from '@mui/icons-material/ZoomOut';
 import { BgsWorld } from '../../libs/bgs/ecs';
 import { Essence } from '../../libs/ecs/essence';
 import { PanModeComponent } from '../../libs/bgs/ecs/components';
 import { Pool } from '../../libs/ecs/component';
 import { useEventListener } from '../../libs/react/hooks/use-event-listener';
 import { EntityId } from '../../libs/ecs/entity';
+import { ZoomInEvent, ZoomOutEvent } from '../../libs/bgs/ecs/events';
 
 export const MainMenu = memo(({ world, playerEntity }: { world: BgsWorld; playerEntity: EntityId }) => {
   const [mode, setMode] = useState<'pan' | null>(null);
@@ -47,29 +48,19 @@ export const MainMenu = memo(({ world, playerEntity }: { world: BgsWorld; player
 
   useEventListener('keydown', handler);
 
-  // const onZoomOutClick = () => {
-  //   const zoomOutCP = Essence.getOrAddPool(world.essence, ZoomOutEventComponentName);
-  //   Pool.add(zoomOutCP, EntityId.new(), {
-  //     id: ComponentId.new(),
-  //     name: ZoomOutEventComponentName,
-  //     data: {},
-  //   });
-  // };
-  // const onZoomInClick = () => {
-  //   const zoomInCP = Essence.getOrAddPool(world.essence, ZoomInEventComponentName);
-  //   Pool.add(zoomInCP, EntityId.new(), {
-  //     id: ComponentId.new(),
-  //     name: ZoomInEventComponentName,
-  //     data: {},
-  //   });
-  // };
+  const onZoomOutClick = () => {
+    Essence.addEvent(world.essence, ZoomOutEvent.new(undefined));
+  };
+  const onZoomInClick = () => {
+    Essence.addEvent(world.essence, ZoomInEvent.new(undefined));
+  };
 
   return (
     <>
       <Box
         sx={{ display: 'flex', alignItems: 'center', textAlign: 'center', position: 'fixed', bottom: 15, right: 15 }}
       >
-        {/* <Tooltip title="Zoom out">
+        <Tooltip title="Zoom out">
           <IconButton size="large" onClick={onZoomOutClick} sx={{ ml: 2, backgroundColor: '#bdbdbd' }}>
             <ZoomOutIcon />
           </IconButton>
@@ -78,7 +69,7 @@ export const MainMenu = memo(({ world, playerEntity }: { world: BgsWorld; player
           <IconButton size="large" onClick={onZoomInClick} sx={{ ml: 2, backgroundColor: '#bdbdbd' }}>
             <ZoomInIcon />
           </IconButton>
-        </Tooltip> */}
+        </Tooltip>
         <Tooltip title="Pan mode">
           <IconButton
             size="large"

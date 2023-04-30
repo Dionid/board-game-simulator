@@ -7,6 +7,7 @@ export type BgsWorldCtx = {
   heroSets: typeof HeroSets;
   // forceUpdate: () => void;
   playerId: EntityId;
+  cameraEntity: EntityId;
   boardSize: Size;
 };
 
