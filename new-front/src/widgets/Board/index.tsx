@@ -3,9 +3,16 @@ import { memo } from 'react';
 import { Essence } from '../../libs/ecs/essence';
 import { useSyncedStore } from '@syncedstore/react';
 import { essencePoolsStore } from '../../apps/main/store';
-import { PositionComponent, ScaleComponent } from '../../libs/bgs/ecs/components';
+import {
+  GameObjectComponent,
+  ImageComponent,
+  PositionComponent,
+  ScaleComponent,
+  SizeComponent,
+} from '../../libs/bgs/ecs/components';
 import { Pool } from '../../libs/ecs/component';
 import { EntityId } from '../../libs/ecs/entity';
+import { ECSCustomImage } from '../CustomImage/ecs';
 
 const surfaceWidth = window.innerWidth;
 const surfaceHeight = window.innerHeight;
@@ -16,6 +23,13 @@ export const Board = memo(({ cameraEntity }: { cameraEntity: EntityId }) => {
   const scale = Pool.get(Essence.getOrAddPool(essence, ScaleComponent), cameraEntity);
   const position = Pool.get(Essence.getOrAddPool(essence, PositionComponent), cameraEntity);
 
+  const gos = Essence.getEntitiesByComponents(essence, [
+    GameObjectComponent,
+    PositionComponent,
+    SizeComponent,
+    ImageComponent,
+  ]);
+
   return (
     <Stage
       style={{ backgroundColor: '#e1e1e1' }}
@@ -24,9 +38,9 @@ export const Board = memo(({ cameraEntity }: { cameraEntity: EntityId }) => {
       scale={{ ...scale.props }}
     >
       <Layer x={-position.props.x} y={-position.props.y}>
-        {/* {depthC.data.list.map((entity) => {
-            return <ECSCustomImage key={entity} entity={entity as EntityId} world={world} />;
-          })} */}
+        {gos.map((entity) => {
+          return <ECSCustomImage essence={essence} key={entity} entity={entity} />;
+        })}
       </Layer>
     </Stage>
   );
