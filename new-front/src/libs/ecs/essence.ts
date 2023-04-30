@@ -39,6 +39,21 @@ export const Essence = {
     essence.pools[pool.name] = pool;
   },
 
+  getOrAddPoolByName: <CF extends ComponentFactory<any, any>>(
+    essence: EssencePools<any>,
+    poolName: CF['name']
+  ): Pool<ComponentFromFactory<CF>> => {
+    const pool = essence.pools[poolName];
+
+    if (!pool) {
+      essence.pools[poolName] = { name: poolName, data: {} };
+
+      return Essence.getOrAddPoolByName(essence, poolName);
+    }
+
+    return pool;
+  },
+
   getOrAddPool: <CF extends ComponentFactory<any, any>>(
     essence: EssencePools<any>,
     componentFactory: CF
@@ -157,14 +172,6 @@ export const Essence = {
   },
 
   movePendingToActive: (essence: EssenceEvents<Event<any, any>[]>): void => {
-    // const map = essence.events.pending![event.name];
-
-    // if (map) {
-    //   map.push(event);
-    // } else {
-    //   essence.events.pending![event.name] = [event];
-    // }
-
     for (const pendingEventKeys of Object.keys(essence.events.pending!)) {
       const pendingEvents = essence.events.pending![pendingEventKeys]!;
       const activeEvents = essence.events.active![pendingEventKeys];
@@ -179,9 +186,8 @@ export const Essence = {
       } else {
         essence.events.active![pendingEventKeys] = [];
         for (const event of pendingEvents) {
-          essence.events.active![pendingEventKeys]!.push({
-            ...event,
-          });
+          // TODO: Remove JSON.parse(JSON.stringify()) after i get how to copy normally
+          essence.events.active![pendingEventKeys]!.push(JSON.parse(JSON.stringify(event)));
         }
       }
     }

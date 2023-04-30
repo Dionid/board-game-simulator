@@ -1,9 +1,19 @@
 import Menu from '@mui/material/Menu';
 import React, { FC } from 'react';
 import { BgsWorld } from '../../libs/bgs/ecs';
+import { Essence } from '../../libs/ecs/essence';
+import { CreateBGCGameObjectEvent } from '../../libs/bgs/ecs/events';
+import { ImageComponent } from '../../libs/bgs/ecs/components';
+import { PositionComponent } from '../../libs/bgs/ecs/components';
+import { SizeComponent } from '../../libs/bgs/ecs/components';
+import { PersonAdd } from '@mui/icons-material';
+import { MenuItem, ListItemIcon } from '@mui/material';
+import { v4 } from 'uuid';
+import { Pool } from '../../libs/ecs/component';
+import { EntityId } from '../../libs/ecs/entity';
 
-export const ContextMenu: FC<{ world: BgsWorld }> = (props) => {
-  const { children } = props;
+export const ContextMenu: FC<{ world: BgsWorld; cameraEntity: EntityId }> = (props) => {
+  const { children, world, cameraEntity } = props;
 
   // CONTEXT MENU
   const [contextMenu, setContextMenu] = React.useState<{
@@ -30,23 +40,47 @@ export const ContextMenu: FC<{ world: BgsWorld }> = (props) => {
     setContextMenu(null);
   };
 
-  // const spawnMap = () => {
-  //   if (!contextMenu) {
-  //     throw new Error(`Context menu must be not emtpy`);
-  //   }
-  //   const spawnGameMapComponentPool = Essence.getOrAddPool(world.essence, SpawnGameMapEventComponentName);
-  //   Pool.add(spawnGameMapComponentPool, EntityId.new(), {
-  //     name: SpawnGameMapEventComponentName,
-  //     id: ComponentId.new(),
-  //     data: {
-  //       url: '/maps/soho.png',
-  //       mapId: MapId.new(),
-  //       x: contextMenu.x,
-  //       y: contextMenu.y,
-  //     },
-  //   });
-  //   handleClose();
-  // };
+  const spawnMap = () => {
+    if (!contextMenu) {
+      throw new Error(`Context menu must be not emtpy`);
+    }
+
+    const positionCP = Essence.getOrAddPool(world.essence, PositionComponent);
+    const cameraPositionC = Pool.get(positionCP, cameraEntity);
+
+    const size = {
+      width: 750,
+      height: 500,
+    };
+    const position = {
+      x: contextMenu.x + cameraPositionC.props.x - size.width / 2,
+      y: contextMenu.y + cameraPositionC.props.y - size.height / 2,
+    };
+
+    Essence.addEvent(
+      world.essence,
+      CreateBGCGameObjectEvent.new({
+        components: [
+          {
+            componentName: ImageComponent.name,
+            component: ImageComponent.new({
+              url: '/maps/soho.png',
+            }),
+          },
+          {
+            componentName: PositionComponent.name,
+            component: PositionComponent.new(position),
+          },
+          {
+            componentName: SizeComponent.name,
+            component: SizeComponent.new(size),
+          },
+        ],
+      })
+    );
+
+    handleClose();
+  };
 
   // const spawnHeroSet = (setId: SetId) => {
   //   if (!contextMenu) {
@@ -66,25 +100,28 @@ export const ContextMenu: FC<{ world: BgsWorld }> = (props) => {
   // };
 
   const contextMenuActions = () => {
-    const actions: JSX.Element[] = [];
-    // const emptyActions = [
-    //   <MenuItem key={v4()} onClick={spawnMap}>
-    //     <ListItemIcon>
-    //       <PersonAdd fontSize="small" />
-    //     </ListItemIcon>
-    //     Add Soho map
-    //   </MenuItem>,
-    //   Object.keys(heroSets).map((id) => {
-    //     return (
-    //       <MenuItem key={id} onClick={() => spawnHeroSet(id as SetId)}>
-    //         <ListItemIcon>
-    //           <PersonAdd fontSize="small" />
-    //         </ListItemIcon>
-    //         Add {heroSets[id].name} Hero Set
-    //       </MenuItem>
-    //     );
-    //   }),
-    // ];
+    // const actions: JSX.Element[] = [];
+
+    const emptyActions = [
+      <MenuItem key={v4()} onClick={spawnMap}>
+        <ListItemIcon>
+          <PersonAdd fontSize="small" />
+        </ListItemIcon>
+        Add Soho map
+      </MenuItem>,
+      // Object.keys(heroSets).map((id) => {
+      //   return (
+      //     <MenuItem key={id} onClick={() => spawnHeroSet(id as SetId)}>
+      //       <ListItemIcon>
+      //         <PersonAdd fontSize="small" />
+      //       </ListItemIcon>
+      //       Add {heroSets[id].name} Hero Set
+      //     </MenuItem>
+      //   );
+      // }),
+    ];
+
+    return emptyActions;
 
     // if (!contextMenu) {
     //   return emptyActions;
@@ -324,7 +361,7 @@ export const ContextMenu: FC<{ world: BgsWorld }> = (props) => {
     //   }
     // }
 
-    return actions;
+    // return actions;
   };
 
   return (

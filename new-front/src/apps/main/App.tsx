@@ -15,6 +15,7 @@ import { ZoomSystem } from '../../libs/bgs/ecs/systems/zoom';
 import { v4 } from 'uuid';
 import { ContextMenu } from '../../widgets/ContextMenu';
 import { Board } from '../../widgets/Board';
+import { CreateBGCGameObjectEventSystem } from '../../libs/bgs/ecs/systems/create-bgs-game-object-event';
 
 const getOrSetPlayerId = (): EntityId => {
   const key = 'bgs_player_id';
@@ -82,6 +83,7 @@ const GameStage = () => {
         // DepthSystem(),
 
         // // SPAWN
+        CreateBGCGameObjectEventSystem(),
         // SpawnGameMapSystem(),
         // SpawnHeroSetSystem(),
         // SpawnHeroSystem(),
@@ -131,7 +133,7 @@ const GameStage = () => {
   return (
     <div style={{ width: '100vw', height: '100vh', backgroundColor: '#eee' }}>
       <CssBaseline />
-      <ContextMenu world={world}>
+      <ContextMenu world={world} cameraEntity={playerEntity}>
         <Board cameraEntity={playerEntity} />
       </ContextMenu>
       <MainMenu playerEntity={playerEntity} world={world} />

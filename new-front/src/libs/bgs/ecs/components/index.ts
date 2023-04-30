@@ -64,7 +64,7 @@ export const ScaleComponent = ComponentFactory<'ScaleComponent', Vector2>('Scale
 
 // . GAME OBJECT
 
-// export type GameObjectComponent = Component<typeof GameObjectComponentName, {}>;
+export const GameObjectComponent = ComponentFactory<'GameObject', undefined>('GameObject');
 
 export const ImageComponent = ComponentFactory<
   'ImageComponent',

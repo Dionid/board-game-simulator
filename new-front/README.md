@@ -16,4 +16,5 @@
       1. SyncStore
 1. ESC
    1. Do I need Pools?
-   1. Add functionality on Essence to work without pools
+   1. Remove name from component
+   1. Add functionality on Essence to get Entities and Component without getting Pools
