@@ -13,6 +13,8 @@ import { MainMenu } from '../../widgets/MainMenu';
 import { EntityId } from '../../libs/ecs/entity';
 import { ZoomSystem } from '../../libs/bgs/ecs/systems/zoom';
 import { v4 } from 'uuid';
+import { ContextMenu } from '../../widgets/ContextMenu';
+import { Board } from '../../widgets/Board';
 
 const getOrSetPlayerId = (): EntityId => {
   const key = 'bgs_player_id';
@@ -129,9 +131,9 @@ const GameStage = () => {
   return (
     <div style={{ width: '100vw', height: '100vh', backgroundColor: '#eee' }}>
       <CssBaseline />
-      {/* <ContextMenu world={world} heroSets={heroSets}>
-        {playerEntity && <GameStage forceUpdateState={forceUpdateState} world={world} playerEntity={playerEntity} />}
-      </ContextMenu> */}
+      <ContextMenu world={world}>
+        <Board cameraEntity={playerEntity} />
+      </ContextMenu>
       <MainMenu playerEntity={playerEntity} world={world} />
       <Minimap playerEntity={playerEntity} world={world} boardSize={boardSize} />
     </div>
