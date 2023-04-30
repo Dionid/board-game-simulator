@@ -142,7 +142,14 @@ function App() {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    const provider = initStore('91dd64b2-a908-4562-b6e2-eacb86548da0');
+    // @ts-ignore
+    if (window.world) {
+      return;
+    }
+    const params = new URLSearchParams(window.location.search);
+    const paramsRoomId = params.get('room-id');
+    const roomId = paramsRoomId ? paramsRoomId : '91dd64b2-a908-4562-b6e2-eacb86548da0';
+    const provider = initStore(roomId);
     const int = setInterval(() => {
       if (provider.connected) {
         clearInterval(int);
