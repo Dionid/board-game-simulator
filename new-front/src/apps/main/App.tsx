@@ -9,6 +9,11 @@ import { HeroSets } from '../../libs/bgs/games/unmatched';
 import { CameraSystem } from '../../libs/bgs/ecs/systems/camera';
 import { UUID } from '../../libs/branded-types';
 import { Minimap } from '../../widgets/Minimap';
+import { PlayerComponent } from '../../libs/bgs/ecs/components';
+import { Pool } from '../../libs/ecs/component';
+import { ChangeReactPositionSystem } from '../../libs/bgs/ecs/systems/change-react-position-system';
+import { ChangeReactSizeSystem } from '../../libs/bgs/ecs/systems/change-react-size';
+import { useForceUpdate } from '../../libs/react/hooks/use-force-update';
 // import {YjsSyncedStoreSystem, YjsSyncedStoreToECSSystem} from "../../libs/bgs/ecs/systems/yjs-synced-store";
 
 const getOrSetPlayerId = (): UUID => {
@@ -28,7 +33,7 @@ const boardSize = {
 };
 
 function App() {
-  // const [forceUpdateState, forceUpdate] = useForceUpdate();
+  const [forceUpdateState] = useForceUpdate();
   // const [heroSets] = useState(HeroSets);
 
   const world = useMemo(() => {
@@ -80,9 +85,9 @@ function App() {
         // SpawnGameObjectSystem(),
 
         // // RENDER REACT
-        // ChangeReactPositionSystem(),
+        ChangeReactPositionSystem(),
         // ChangeReactImageSystem(),
-        // ChangeReactSizeSystem(),
+        ChangeReactSizeSystem(),
         // ChangeReactScaleSystem(),
         // ChangeReactHealthMeter(),
       ],
@@ -106,9 +111,9 @@ function App() {
       const timeDelta = newTimeStamp.getMilliseconds() - lastTimeStamp.getMilliseconds();
       World.run(world, timeDelta < 0 ? 0 : timeDelta);
       lastTimeStamp = newTimeStamp;
-      if (Math.random() < 0.001) {
-        console.log('AFTER RUN', world);
-      }
+      // if (Math.random() < 0.001) {
+      //   console.log('AFTER RUN', world);
+      // }
       requestAnimationFrame(run);
     };
 
@@ -117,15 +122,21 @@ function App() {
     return world;
   }, []);
 
-  // useEffect(() => {
-  //   World.addToCtx(world, 'heroSets', heroSets);
-  // }, [heroSets]);
+  const playerEntities = Essence.getEntitiesByComponents(world.essence, [PlayerComponent]);
 
-  // TODO. Refactor for collaboration
-  // const playerEntities = Essence.filter(world.essence, [PlayerComponentName, CameraComponentName]);
-  // const playerEntity = playerEntities[0];
+  const playerEntity = playerEntities.find((playerEntityId) => {
+    const playerPool = Essence.getOrAddPool(world.essence, PlayerComponent);
 
-  // console.log("RENDER")
+    const playerComp = Pool.get(playerPool, playerEntityId);
+
+    return playerComp.props.id === getOrSetPlayerId();
+  });
+
+  if (!playerEntity) {
+    return <div>Loading</div>;
+  }
+
+  console.log('playerEntity', playerEntity);
 
   return (
     <div style={{ width: '100vw', height: '100vh', backgroundColor: '#eee' }}>
@@ -134,7 +145,7 @@ function App() {
         {playerEntity && <GameStage forceUpdateState={forceUpdateState} world={world} playerEntity={playerEntity} />}
       </ContextMenu> */}
       {/* <MainMenu world={world} /> */}
-      <Minimap world={world} boardSize={boardSize} />
+      <Minimap forceUpdateState={forceUpdateState} playerEntity={playerEntity} world={world} boardSize={boardSize} />
     </div>
   );
 }
