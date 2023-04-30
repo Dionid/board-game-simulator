@@ -9,6 +9,7 @@ import {
   ScaleComponent,
   PlayerComponent,
   FingerComponent,
+  PanModeComponent,
 } from '../../components';
 import { UUID } from '../../../../branded-types';
 
@@ -74,12 +75,22 @@ export const CameraSystem = (): System<{
           y: 1,
         })
       );
+
+      // # PAN MODE
+      Pool.add(
+        Essence.getOrAddPool(essence, PanModeComponent),
+        playerEntity,
+        PanModeComponent.new({
+          activated: true,
+        })
+      );
     },
     run: ({ essence, ctx }) => {
       const playerEntities = Essence.getEntitiesByComponents(essence, [
         PlayerComponent,
         FingerComponent,
         CameraComponent,
+        PanModeComponent,
       ]);
 
       const playerEntity = playerEntities.find((playerEntityId) => {
@@ -97,28 +108,34 @@ export const CameraSystem = (): System<{
       // const panModeEntities = Essence.getEntitiesByComponents(essence, [PanModeComponent]);
       const positionCP = Essence.getOrAddPool(essence, PositionComponent);
       const sizeCP = Essence.getOrAddPool(essence, SizeComponent);
-      const handPool = Essence.getOrAddPool(essence, FingerComponent);
+      const panModeP = Essence.getOrAddPool(essence, PanModeComponent);
 
-      // TODO. Filter only current player move
-      const handC = Pool.get(handPool, playerEntity);
-      const positionC = Pool.get(positionCP, playerEntity);
+      const cameraPositionC = Pool.get(positionCP, playerEntity);
       const sizeC = Pool.get(sizeCP, playerEntity);
+      const panModeC = Pool.get(panModeP, playerEntity);
 
-      const newPosition: Vector2 = {
-        x: positionC.props.x,
-        y: positionC.props.y,
+      const newCameraPosition: Vector2 = {
+        x: cameraPositionC.props.x,
+        y: cameraPositionC.props.y,
       };
+
+      if (panModeC.props.activated) {
+        const handPool = Essence.getOrAddPool(essence, FingerComponent);
+        const fingerC = Pool.get(handPool, playerEntity);
+
+        if (fingerC.props.click.current.down) {
+          const delta = Vector2.compareAndChange(
+            fingerC.props.onCameraPosition.previous,
+            fingerC.props.onCameraPosition.current
+          );
+          newCameraPosition.x -= delta.x;
+          newCameraPosition.y -= delta.y;
+        }
+      }
 
       // // . Pan mode
       // if (panModeEntities.length > 0) {
-      //   if (handC.props.click.current.down) {
-      //     const delta = Vector2.compareAndChange(
-      //       handC.props.onCameraPosition.previous,
-      //       handC.props.onCameraPosition.current
-      //     );
-      //     newPosition.x -= delta.x;
-      //     newPosition.y -= delta.y;
-      //   }
+
       // } else {
       //   // // . Hand near border feature
       //   // const margin = 20;
@@ -140,12 +157,12 @@ export const CameraSystem = (): System<{
       // }
 
       // . Restrict
-      if (newPosition.x > 0 && newPosition.x + sizeC.props.width < ctx.boardSize.width) {
-        positionC.props.x = newPosition.x;
+      if (newCameraPosition.x > 0 && newCameraPosition.x + sizeC.props.width < ctx.boardSize.width) {
+        cameraPositionC.props.x = newCameraPosition.x;
       }
 
-      if (newPosition.y > 0 && newPosition.y + sizeC.props.height < ctx.boardSize.height) {
-        positionC.props.y = newPosition.y;
+      if (newCameraPosition.y > 0 && newCameraPosition.y + sizeC.props.height < ctx.boardSize.height) {
+        cameraPositionC.props.y = newCameraPosition.y;
       }
     },
   };

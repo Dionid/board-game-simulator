@@ -1,13 +1,14 @@
 import { useMemo } from 'react';
 import CssBaseline from '@mui/material/CssBaseline';
-import { BgsWorld, BgsWorldCtx } from '../../libs/bgs/ecs';
+import { BgsWorld } from '../../libs/bgs/ecs';
 import { World } from '../../libs/ecs/world';
 import { Essence } from '../../libs/ecs/essence';
-import { FingerInputSystem } from '../../libs/bgs/ecs/systems/mouse-input';
+import { FingerInputSystem } from '../../libs/bgs/ecs/systems/finger-input';
 import { PlayerSystem } from '../../libs/bgs/ecs/systems/player';
 import { HeroSets } from '../../libs/bgs/games/unmatched';
 import { CameraSystem } from '../../libs/bgs/ecs/systems/camera';
 import { UUID } from '../../libs/branded-types';
+import { Minimap } from '../../widgets/Minimap';
 // import {YjsSyncedStoreSystem, YjsSyncedStoreToECSSystem} from "../../libs/bgs/ecs/systems/yjs-synced-store";
 
 const getOrSetPlayerId = (): UUID => {
@@ -96,7 +97,7 @@ function App() {
 
     World.init(world);
 
-    console.log("AFTER INIT", world)
+    console.log('AFTER INIT', world);
 
     let lastTimeStamp = new Date();
 
@@ -105,7 +106,9 @@ function App() {
       const timeDelta = newTimeStamp.getMilliseconds() - lastTimeStamp.getMilliseconds();
       World.run(world, timeDelta < 0 ? 0 : timeDelta);
       lastTimeStamp = newTimeStamp;
-      console.log("AFTER RUN", world)
+      if (Math.random() < 0.001) {
+        console.log('AFTER RUN', world);
+      }
       requestAnimationFrame(run);
     };
 
@@ -122,14 +125,16 @@ function App() {
   // const playerEntities = Essence.filter(world.essence, [PlayerComponentName, CameraComponentName]);
   // const playerEntity = playerEntities[0];
 
+  // console.log("RENDER")
+
   return (
-    <div>
+    <div style={{ width: '100vw', height: '100vh', backgroundColor: '#eee' }}>
       <CssBaseline />
       {/* <ContextMenu world={world} heroSets={heroSets}>
         {playerEntity && <GameStage forceUpdateState={forceUpdateState} world={world} playerEntity={playerEntity} />}
       </ContextMenu> */}
       {/* <MainMenu world={world} /> */}
-      {/* <Minimap world={world} boardSize={boardSize} playerEntity={playerEntity} /> */}
+      <Minimap world={world} boardSize={boardSize} />
     </div>
   );
 }

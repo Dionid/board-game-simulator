@@ -49,6 +49,13 @@ export const FingerComponent = ComponentFactory<
 
 export const CameraComponent = ComponentFactory<'CameraComponent', undefined>('CameraComponent');
 
+export const PanModeComponent = ComponentFactory<
+  'PanModeComponent',
+  {
+    activated: boolean;
+  }
+>('PanModeComponent');
+
 // # GEOMETRY
 
 export const PositionComponent = ComponentFactory<'PositionComponent', Vector2>('PositionComponent');
