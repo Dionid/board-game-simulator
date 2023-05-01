@@ -3,8 +3,8 @@ import { Essence } from '../../../../ecs/essence';
 import { Pool } from '../../../../ecs/component';
 import { FingerComponent, PositionComponent, ScaleComponent } from '../../components';
 import { EntityId } from '../../../../ecs/entity';
-import { useIsInitial } from '../../../../ecs/effect/use-init';
-import { useRef } from '../../../../ecs/effect/use-ref';
+import { useIsInitial } from '../../../../ecs/hooks/use-init';
+import { useRef } from '../../../../ecs/hooks/use-ref';
 
 export const FingerInputSystem = (): System<{
   playerEntity: EntityId;

@@ -11,7 +11,7 @@ import {
   PanModeComponent,
 } from '../../components';
 import { EntityId } from '../../../../ecs/entity';
-import { useIsInitial } from '../../../../ecs/effect/use-init';
+import { useIsInitial } from '../../../../ecs/hooks/use-init';
 
 export const CameraSystem = (): System<{
   boardSize: Size;

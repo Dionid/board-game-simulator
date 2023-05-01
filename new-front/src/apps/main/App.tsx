@@ -4,7 +4,6 @@ import { World } from '../../libs/ecs/world';
 import { Essence } from '../../libs/ecs/essence';
 import { FingerInputSystem } from '../../libs/bgs/ecs/systems/finger-input';
 import { PlayerSystem } from '../../libs/bgs/ecs/systems/player';
-import { HeroSets } from '../../libs/bgs/games/unmatched';
 import { CameraSystem } from '../../libs/bgs/ecs/systems/camera';
 import { Minimap } from '../../widgets/Minimap';
 import { essence, initStore } from './store';
@@ -62,7 +61,6 @@ const GameStage = () => {
       ctx: () => ({
         playerEntity: playerEntity,
         cameraEntity: playerEntity,
-        heroSets: HeroSets,
         boardSize,
       }),
       systems: [

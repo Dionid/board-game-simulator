@@ -1,6 +1,6 @@
-import { createEffect } from '../effect';
+import { createHook } from '../hook';
 
-export const useIsInitial = createEffect(() => {
+export const useIsInitial = createHook(() => {
   let initial = true;
 
   return function useInit() {

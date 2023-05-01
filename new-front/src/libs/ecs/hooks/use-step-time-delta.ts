@@ -1,6 +1,6 @@
-import { createEffect } from '../effect';
+import { createHook } from '../hook';
 
-export const useStepTimeDelta = createEffect(
+export const useStepTimeDelta = createHook(
   () => {
     let lastTime: number = Date.now();
     let timeDelta = 0;
@@ -14,6 +14,6 @@ export const useStepTimeDelta = createEffect(
     };
   },
   {
-    shared: true,
+    singletonPerStep: true,
   }
 );

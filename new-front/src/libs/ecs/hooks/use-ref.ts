@@ -1,11 +1,11 @@
-import { createEffect } from '../effect';
+import { createHook } from '../hook';
 import { useIsInitial } from './use-init';
 
 export type UseRefEffectApi<V> = {
   current: V;
 };
 
-export const useRef = createEffect((world) => {
+export const useRef = createHook((world) => {
   const ref: UseRefEffectApi<unknown> = {
     current: null,
   };
