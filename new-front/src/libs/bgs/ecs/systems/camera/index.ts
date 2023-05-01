@@ -1,4 +1,4 @@
-import { System } from '../../../../ecs/system';
+import { System, SystemProps } from '../../../../ecs/system';
 import { Essence } from '../../../../ecs/essence';
 import { Pool } from '../../../../ecs/component';
 import { Size, Vector2 } from '../../../../math';
@@ -11,66 +11,85 @@ import {
   PanModeComponent,
 } from '../../components';
 import { EntityId } from '../../../../ecs/entity';
+import { useIsInitial } from '../../../../ecs/effect/use-init';
 
 export const CameraSystem = (): System<{
   boardSize: Size;
   cameraEntity: EntityId;
 }> => {
+  const init = ({
+    essence,
+    ctx: { cameraEntity, boardSize },
+  }: SystemProps<{ cameraEntity: EntityId; boardSize: Size }>) => {
+    const cameraP = Essence.getOrAddPool(essence, CameraComponent);
+    const positionP = Essence.getOrAddPool(essence, PositionComponent);
+    const sizeP = Essence.getOrAddPool(essence, SizeComponent);
+    const scaleP = Essence.getOrAddPool(essence, ScaleComponent);
+
+    Pool.add(cameraP, cameraEntity, CameraComponent.new(undefined));
+
+    const cameraSize = {
+      // TODO. move somewhere (as deps or ctx)
+      width: window.innerWidth,
+      height: window.innerHeight,
+    };
+
+    // # POSITION
+    Pool.add(
+      positionP,
+      cameraEntity,
+      PositionComponent.new({
+        x: boardSize.width / 2 - cameraSize.width / 2,
+        y: boardSize.height / 2 - cameraSize.height / 2,
+      })
+    );
+
+    // # SIZE
+    const sizeComponent = SizeComponent.new(cameraSize);
+    Pool.add(sizeP, cameraEntity, sizeComponent);
+
+    // TODO. Move somewhere (as deps or ctx)
+    window.addEventListener('resize', () => {
+      sizeComponent.props.width = window.innerWidth;
+      sizeComponent.props.height = window.innerHeight;
+    });
+
+    // # SCALE
+    Pool.add(
+      scaleP,
+      cameraEntity,
+      ScaleComponent.new({
+        x: 1,
+        y: 1,
+      })
+    );
+
+    // # PAN MODE
+    Pool.add(
+      Essence.getOrAddPool(essence, PanModeComponent),
+      cameraEntity,
+      PanModeComponent.new({
+        activated: false,
+      })
+    );
+  };
+
   return {
-    init: ({ essence, ctx: { cameraEntity, boardSize } }) => {
-      const cameraP = Essence.getOrAddPool(essence, CameraComponent);
-      const positionP = Essence.getOrAddPool(essence, PositionComponent);
-      const sizeP = Essence.getOrAddPool(essence, SizeComponent);
-      const scaleP = Essence.getOrAddPool(essence, ScaleComponent);
+    run: (world) => {
+      const {
+        essence,
+        ctx: { cameraEntity, boardSize },
+      } = world;
+      const initial = useIsInitial();
 
-      Pool.add(cameraP, cameraEntity, CameraComponent.new(undefined));
+      if (initial) {
+        console.log('INITIAL CAMERA');
+        init(world);
+        return;
+      }
 
-      const cameraSize = {
-        // TODO. move somewhere (as deps or ctx)
-        width: window.innerWidth,
-        height: window.innerHeight,
-      };
+      // console.log('INITIAL', initial);
 
-      // # POSITION
-      Pool.add(
-        positionP,
-        cameraEntity,
-        PositionComponent.new({
-          x: boardSize.width / 2 - cameraSize.width / 2,
-          y: boardSize.height / 2 - cameraSize.height / 2,
-        })
-      );
-
-      // # SIZE
-      const sizeComponent = SizeComponent.new(cameraSize);
-      Pool.add(sizeP, cameraEntity, sizeComponent);
-
-      // TODO. Move somewhere (as deps or ctx)
-      window.addEventListener('resize', () => {
-        sizeComponent.props.width = window.innerWidth;
-        sizeComponent.props.height = window.innerHeight;
-      });
-
-      // # SCALE
-      Pool.add(
-        scaleP,
-        cameraEntity,
-        ScaleComponent.new({
-          x: 1,
-          y: 1,
-        })
-      );
-
-      // # PAN MODE
-      Pool.add(
-        Essence.getOrAddPool(essence, PanModeComponent),
-        cameraEntity,
-        PanModeComponent.new({
-          activated: false,
-        })
-      );
-    },
-    run: ({ essence, ctx: { cameraEntity, boardSize } }) => {
       // const panModeEntities = Essence.getEntitiesByComponents(essence, [PanModeComponent]);
       const positionCP = Essence.getOrAddPool(essence, PositionComponent);
       const sizeCP = Essence.getOrAddPool(essence, SizeComponent);

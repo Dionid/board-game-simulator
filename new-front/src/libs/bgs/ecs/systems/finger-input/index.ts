@@ -1,8 +1,9 @@
-import { System } from '../../../../ecs/system';
+import { System, SystemProps } from '../../../../ecs/system';
 import { Essence } from '../../../../ecs/essence';
 import { Pool } from '../../../../ecs/component';
 import { FingerComponent, PositionComponent, ScaleComponent } from '../../components';
 import { EntityId } from '../../../../ecs/entity';
+import { useIsInitial } from '../../../../ecs/effect/use-init';
 
 export const FingerInputSystem = (): System<{
   playerEntity: EntityId;
@@ -14,57 +15,69 @@ export const FingerInputSystem = (): System<{
     down: false,
   };
 
+  const init = ({ essence, ctx: { playerEntity } }: SystemProps<{ playerEntity: EntityId }>) => {
+    const mousePool = Essence.getOrAddPool(essence, FingerComponent);
+
+    Pool.add(
+      mousePool,
+      playerEntity,
+      FingerComponent.new({
+        onBoardPosition: {
+          current: {
+            x: window.innerWidth / 2,
+            y: window.innerHeight / 2,
+          },
+          previous: {
+            x: window.innerWidth / 2,
+            y: window.innerHeight / 2,
+          },
+        },
+        onCameraPosition: {
+          current: {
+            x: window.innerWidth / 2,
+            y: window.innerHeight / 2,
+          },
+          previous: {
+            x: window.innerWidth / 2,
+            y: window.innerHeight / 2,
+          },
+        },
+        click: {
+          previous: {
+            down: false,
+          },
+          current: {
+            down: false,
+          },
+        },
+      })
+    );
+
+    document.body.onmousedown = () => {
+      lastMouseData.down = true;
+    };
+    document.body.onmouseup = () => {
+      lastMouseData.down = false;
+    };
+    document.onmousemove = (event) => {
+      lastMouseData.x = event.pageX;
+      lastMouseData.y = event.pageY;
+    };
+  };
+
   return {
-    init: async ({ essence, ctx: { playerEntity } }) => {
-      const mousePool = Essence.getOrAddPool(essence, FingerComponent);
+    run: (world) => {
+      const { essence, ctx } = world;
+      const { playerEntity, cameraEntity } = ctx;
 
-      Pool.add(
-        mousePool,
-        playerEntity,
-        FingerComponent.new({
-          onBoardPosition: {
-            current: {
-              x: window.innerWidth / 2,
-              y: window.innerHeight / 2,
-            },
-            previous: {
-              x: window.innerWidth / 2,
-              y: window.innerHeight / 2,
-            },
-          },
-          onCameraPosition: {
-            current: {
-              x: window.innerWidth / 2,
-              y: window.innerHeight / 2,
-            },
-            previous: {
-              x: window.innerWidth / 2,
-              y: window.innerHeight / 2,
-            },
-          },
-          click: {
-            previous: {
-              down: false,
-            },
-            current: {
-              down: false,
-            },
-          },
-        })
-      );
+      const initial = useIsInitial();
 
-      document.body.onmousedown = () => {
-        lastMouseData.down = true;
-      };
-      document.body.onmouseup = () => {
-        lastMouseData.down = false;
-      };
-      document.onmousemove = (event) => {
-        lastMouseData.x = event.pageX;
-        lastMouseData.y = event.pageY;
-      };
-    },
-    run: async ({ essence, ctx: { playerEntity, cameraEntity } }) => {
+      if (initial) {
+        console.log('INITIAL FINGER');
+        init(world);
+        return;
+      }
+
       const fingerCP = Essence.getOrAddPool(essence, FingerComponent);
       const positionCP = Essence.getOrAddPool(essence, PositionComponent);
       const scaleCP = Essence.getOrAddPool(essence, ScaleComponent);

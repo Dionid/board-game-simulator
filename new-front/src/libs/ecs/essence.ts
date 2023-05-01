@@ -1,6 +1,7 @@
 import { Component, ComponentFactory, ComponentFromFactory, Pool } from './component';
-import { Event, EventFactory, EventFromFactory } from './event';
+import { Event, EventFactory, EventFromFactory, EventsRecord } from './event';
 import { EntityId } from './entity';
+import { TypedObject } from '../typed-object';
 
 export type EssencePools<CL extends Component<any, any>[]> = {
   pools: {
@@ -10,12 +11,8 @@ export type EssencePools<CL extends Component<any, any>[]> = {
 
 export type EssenceEvents<EL extends Event<any, any>[]> = {
   events: Partial<{
-    pending: {
-      [K in EL[number]['name']]?: Array<EL[number]>;
-    };
-    active: {
-      [K in EL[number]['name']]?: Array<EL[number]>;
-    };
+    pending: EventsRecord<EL>;
+    active: EventsRecord<EL>;
   }>;
 };
 
@@ -75,7 +72,7 @@ export const Essence = {
     essence: EssencePools<CL>,
     componentFactories: ComponentFactory<CL[number]['name'], CL[number]['props']>[]
   ): EntityId[] => {
-    const entityIds: Record<EntityId, boolean> = {};
+    const pools: Pool<any>[] = [];
 
     for (let i = 0; i < componentFactories.length; i++) {
       const compName = componentFactories[i].name;
@@ -85,26 +82,35 @@ export const Essence = {
         return [];
       }
 
+      pools.push(pool);
+    }
+
+    const entityIds: Record<EntityId, boolean> = {};
+
+    for (let i = 0; i < pools.length; i++) {
+      const pool = pools[i];
+
+      // # On first iteration we extract entities
       if (i === 0) {
-        // TODO. Fix types
-        const ids = Object.keys(pool.data) as EntityId[];
+        const ids = TypedObject.keys(pool.data);
         for (let j = 0; j < ids.length; j++) {
           const id = ids[j];
           entityIds[id] = true;
         }
-      } else {
-        // TODO. Fix types
-        const ids = Object.keys(entityIds) as EntityId[];
-        for (let j = 0; j < ids.length; j++) {
-          const id = ids[j];
-          if (!pool.data[id]) {
-            delete entityIds[id];
-          }
+        continue;
+      }
+
+      // # On second and further iterations we filter entities
+      const ids = TypedObject.keys(entityIds);
+      for (let j = 0; j < ids.length; j++) {
+        const id = ids[j];
+        if (!pool.data[id]) {
+          delete entityIds[id];
         }
       }
     }
 
-    return Object.keys(entityIds) as EntityId[];
+    return TypedObject.keys(entityIds);
   },
 
   getEntityById: <C extends Component<any, any>>(
@@ -161,13 +167,27 @@ export const Essence = {
     return essence.events.active![eventFactory.name];
   },
 
-  addEvent: <E extends Event<any, any>>(essence: EssenceEvents<Event<any, any>[]>, event: E): void => {
-    const map = essence.events.pending![event.name];
+  addEvent: <E extends Event<any, any>>(
+    essence: EssenceEvents<Event<any, any>[]>,
+    event: E,
+    options?: {
+      immediately?: boolean;
+    }
+  ): void => {
+    let eventList: EventsRecord<Event<any, any>[]>;
+
+    if (options?.immediately) {
+      eventList = essence.events.active!;
+    } else {
+      eventList = essence.events.pending!;
+    }
+
+    const map = eventList[event.name];
 
     if (map) {
       map.push(event);
     } else {
-      essence.events.pending![event.name] = [event];
+      eventList[event.name] = [event];
     }
   },
 

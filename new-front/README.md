@@ -16,7 +16,15 @@
    1. Depth
       1. We can create index for every object + Add some system, that will resort than (1) new GameObject spawned
          and (2) object depth has changed
+      1.
 1. ESC
+   1. Move world to delta
    1. Do I need Pools?
-   1. Remove name from component
+   1. Optimize component
+      1. Remove name
+      1. Remove id (but this can be problem for sync)
    1. Add functionality on Essence to get Entities and Component without getting Pools
+   1. ~~Add events immediately~~
+1. Maybe sync on redux?
+   1. Best part of it: we can sync just actions and every client will accept it on store
+   - we can

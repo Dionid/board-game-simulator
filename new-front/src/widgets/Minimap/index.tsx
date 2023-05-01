@@ -36,7 +36,7 @@ export const MiniMapArea = memo(({ playerEntity }: { playerEntity: EntityId }) =
 
   const size = Pool.get(Essence.getOrAddPool(essence, SizeComponent), playerEntity);
 
-  console.log('position, size', position.props.x, position.props.y, size.props.width, size.props.height);
+  // console.log('position, size', position.props.x, position.props.y, size.props.width, size.props.height);
 
   return (
     <div

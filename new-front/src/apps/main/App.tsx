@@ -58,7 +58,7 @@ const GameStage = () => {
       return window.world;
     }
 
-    const world: BgsWorld = {
+    const world: BgsWorld = World.new({
       essence: essence,
       ctx: {
         playerEntity: playerEntity,
@@ -102,7 +102,7 @@ const GameStage = () => {
         // // SPAWN GAME OBJECT
         // SpawnGameObjectSystem(),
       ],
-    };
+    });
 
     // @ts-ignore
     window.world = world;
@@ -117,7 +117,7 @@ const GameStage = () => {
 
     let lastTimeStamp = new Date();
 
-    const run = async () => {
+    const run = () => {
       const newTimeStamp = new Date();
       const timeDelta = newTimeStamp.getMilliseconds() - lastTimeStamp.getMilliseconds();
       World.run(world, timeDelta < 0 ? 0 : timeDelta);
@@ -125,7 +125,7 @@ const GameStage = () => {
       requestAnimationFrame(run);
     };
 
-    requestAnimationFrame(run);
+    run();
 
     return world;
   }, []);

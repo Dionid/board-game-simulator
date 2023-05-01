@@ -45,3 +45,7 @@ export const EventFactory = <
 };
 
 export type EventFromFactory<CF extends EventFactory<any, any>> = ReturnType<CF['new']>;
+
+export type EventsRecord<EL extends Event<any, any>[]> = {
+  [K in EL[number]['name']]?: Array<EL[number]>;
+};
