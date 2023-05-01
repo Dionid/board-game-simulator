@@ -4,18 +4,22 @@ import { Pool } from '../../../../ecs/component';
 import { FingerComponent, PositionComponent, ScaleComponent } from '../../components';
 import { EntityId } from '../../../../ecs/entity';
 import { useIsInitial } from '../../../../ecs/effect/use-init';
+import { useRef } from '../../../../ecs/effect/use-ref';
 
 export const FingerInputSystem = (): System<{
   playerEntity: EntityId;
   cameraEntity: EntityId;
 }> => {
-  const lastMouseData = {
-    x: 0,
-    y: 0,
-    down: false,
-  };
+  // const lastMouseData = {
+  //   x: 0,
+  //   y: 0,
+  //   down: false,
+  // };
 
-  const init = ({ essence, ctx: { playerEntity } }: SystemProps<{ playerEntity: EntityId }>) => {
+  const init = (
+    { essence, ctx: { playerEntity } }: SystemProps<{ playerEntity: EntityId }>,
+    lastMouseData: { x: number; y: number; down: boolean }
+  ) => {
     const mousePool = Essence.getOrAddPool(essence, FingerComponent);
 
     Pool.add(
@@ -67,6 +71,15 @@ export const FingerInputSystem = (): System<{
 
   return {
     run: (world) => {
+      const lastMouseData = useRef({
+        x: 0,
+        y: 0,
+        down: false,
+      });
+
+      // const timeDelta = useTimeDelta();
+      // console.log(timeDelta);
+
       const { essence, ctx } = world;
       const { playerEntity, cameraEntity } = ctx;
 
@@ -74,7 +87,7 @@ export const FingerInputSystem = (): System<{
 
       if (initial) {
         console.log('INITIAL FINGER');
-        init(world);
+        init(world, lastMouseData.current);
         return;
       }
 
@@ -121,7 +134,7 @@ export const FingerInputSystem = (): System<{
       //   fingerC.props.onCameraPosition.current.y = lastMouseData.y;
       // }
       fingerC.props.onCameraPosition.current = {
-        ...lastMouseData,
+        ...lastMouseData.current,
       };
 
       // if (
@@ -137,15 +150,15 @@ export const FingerInputSystem = (): System<{
       //   fingerC.props.onBoardPosition.current.y = lastMouseData.y / cameraScaleC.props.y + cameraPositionC.props.y;
       // }
       fingerC.props.onBoardPosition.current = {
-        x: lastMouseData.x / cameraScaleC.props.x + cameraPositionC.props.x,
-        y: lastMouseData.y / cameraScaleC.props.y + cameraPositionC.props.y,
+        x: lastMouseData.current.x / cameraScaleC.props.x + cameraPositionC.props.x,
+        y: lastMouseData.current.y / cameraScaleC.props.y + cameraPositionC.props.y,
       };
 
       // if (fingerC.props.click.current.down !== lastMouseData.down) {
       //   fingerC.props.click.current.down = lastMouseData.down;
       // }
       fingerC.props.click.current = {
-        down: lastMouseData.down,
+        down: lastMouseData.current.down,
       };
     },
   };

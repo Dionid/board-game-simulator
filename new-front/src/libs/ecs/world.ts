@@ -40,18 +40,6 @@ export const World = {
 
     return newWorld;
   },
-  init: <Ctx extends Record<any, any> = Record<any, any>>(world: World<Ctx>): void => {
-    for (let i = 0; i < world.systems.length; i++) {
-      const system = world.systems[i];
-      if (system.init) {
-        system.init({
-          essence: world.essence,
-          ctx: world.ctx,
-          timeDelta: 0,
-        });
-      }
-    }
-  },
   run: <Ctx extends Record<any, any> = Record<any, any>>(world: World<Ctx>, timeDelta: number): void => {
     let prevWorld = UNSAFE_internals.currentWorldId;
     UNSAFE_internals.currentWorldId = world.id;

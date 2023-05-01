@@ -3,12 +3,19 @@ import { OwnerComponent, PlayerComponent } from '../../components';
 import { Essence } from '../../../../ecs/essence';
 import { Pool } from '../../../../ecs/component';
 import { EntityId } from '../../../../ecs/entity';
+import { useIsInitial } from '../../../../ecs/effect/use-init';
 
 export const PlayerSystem = (): System<{
   playerEntity: EntityId;
 }> => {
   return {
-    init: async ({ essence, ctx: { playerEntity } }) => {
+    run: ({ essence, ctx: { playerEntity } }) => {
+      const isInitial = useIsInitial();
+
+      if (!isInitial) {
+        return;
+      }
+
       console.log('PlayerSystem', playerEntity);
 
       const playerPool = Essence.getOrAddPool(essence, PlayerComponent);

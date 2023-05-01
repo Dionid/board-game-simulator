@@ -1,4 +1,4 @@
-import { createEffect } from '.';
+import { createEffect } from '../effect';
 
 export const useIsInitial = createEffect(() => {
   let initial = true;

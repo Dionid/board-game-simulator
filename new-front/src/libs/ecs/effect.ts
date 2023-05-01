@@ -1,5 +1,5 @@
-import { UNSAFE_internals } from '../internals';
-import { World } from '../world';
+import { UNSAFE_internals } from './internals';
+import { World } from './world';
 
 export type EffectExecutor<$Return, $Args extends unknown[]> = (...args: $Args) => $Return;
 

@@ -88,8 +88,6 @@ export const CameraSystem = (): System<{
         return;
       }
 
-      // console.log('INITIAL', initial);
-
       // const panModeEntities = Essence.getEntitiesByComponents(essence, [PanModeComponent]);
       const positionCP = Essence.getOrAddPool(essence, PositionComponent);
       const sizeCP = Essence.getOrAddPool(essence, SizeComponent);

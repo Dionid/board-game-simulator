@@ -111,10 +111,6 @@ const GameStage = () => {
     // @ts-ignore
     window.Essence = Essence;
 
-    World.init(world);
-
-    console.log('AFTER INIT', world);
-
     let lastTimeStamp = new Date();
 
     const run = () => {
@@ -126,6 +122,8 @@ const GameStage = () => {
     };
 
     run();
+
+    console.log('AFTER INIT', world);
 
     return world;
   }, []);
