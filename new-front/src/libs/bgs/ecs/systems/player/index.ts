@@ -9,7 +9,8 @@ export const PlayerSystem = (): System<{
   playerEntity: EntityId;
 }> => {
   return {
-    run: ({ essence, ctx: { playerEntity } }) => {
+    run: ({ essence, ctx }) => {
+      const { playerEntity } = ctx();
       const isInitial = useIsInitial();
 
       if (!isInitial) {

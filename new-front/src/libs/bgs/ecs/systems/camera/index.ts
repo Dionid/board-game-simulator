@@ -17,10 +17,9 @@ export const CameraSystem = (): System<{
   boardSize: Size;
   cameraEntity: EntityId;
 }> => {
-  const init = ({
-    essence,
-    ctx: { cameraEntity, boardSize },
-  }: SystemProps<{ cameraEntity: EntityId; boardSize: Size }>) => {
+  const init = ({ essence, ctx }: SystemProps<{ cameraEntity: EntityId; boardSize: Size }>) => {
+    const { cameraEntity, boardSize } = ctx();
+
     const cameraP = Essence.getOrAddPool(essence, CameraComponent);
     const positionP = Essence.getOrAddPool(essence, PositionComponent);
     const sizeP = Essence.getOrAddPool(essence, SizeComponent);
@@ -76,10 +75,8 @@ export const CameraSystem = (): System<{
 
   return {
     run: (world) => {
-      const {
-        essence,
-        ctx: { cameraEntity, boardSize },
-      } = world;
+      const { essence, ctx } = world;
+      const { cameraEntity, boardSize } = ctx();
       const initial = useIsInitial();
 
       if (initial) {

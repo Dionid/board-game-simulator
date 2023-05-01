@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
 import CssBaseline from '@mui/material/CssBaseline';
-import { BgsWorld } from '../../libs/bgs/ecs';
 import { World } from '../../libs/ecs/world';
 import { Essence } from '../../libs/ecs/essence';
 import { FingerInputSystem } from '../../libs/bgs/ecs/systems/finger-input';
@@ -58,23 +57,23 @@ const GameStage = () => {
       return window.world;
     }
 
-    const world: BgsWorld = World.new({
+    const world = World.new({
       essence: essence,
-      ctx: {
+      ctx: () => ({
         playerEntity: playerEntity,
         cameraEntity: playerEntity,
         heroSets: HeroSets,
         boardSize,
-      },
+      }),
       systems: [
-        // INIT
+        // # INIT
         PlayerSystem(),
 
-        // CAMERA
+        // # CAMERA
         CameraSystem(),
         ZoomSystem(),
 
-        // INPUT
+        // # INPUT
         FingerInputSystem(),
 
         // INTERACTION
@@ -82,7 +81,7 @@ const GameStage = () => {
         // DragSystem(),
         // DepthSystem(),
 
-        // // SPAWN
+        // # SPAWN
         CreateBGCGameObjectEventSystem(),
         // SpawnGameMapSystem(),
         // SpawnHeroSetSystem(),

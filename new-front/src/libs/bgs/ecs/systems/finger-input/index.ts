@@ -17,9 +17,16 @@ export const FingerInputSystem = (): System<{
   // };
 
   const init = (
-    { essence, ctx: { playerEntity } }: SystemProps<{ playerEntity: EntityId }>,
+    {
+      essence,
+      ctx,
+    }: SystemProps<{
+      playerEntity: EntityId;
+      cameraEntity: EntityId;
+    }>,
     lastMouseData: { x: number; y: number; down: boolean }
   ) => {
+    const { playerEntity } = ctx();
     const mousePool = Essence.getOrAddPool(essence, FingerComponent);
 
     Pool.add(
@@ -77,11 +84,8 @@ export const FingerInputSystem = (): System<{
         down: false,
       });
 
-      // const timeDelta = useTimeDelta();
-      // console.log(timeDelta);
-
       const { essence, ctx } = world;
-      const { playerEntity, cameraEntity } = ctx;
+      const { playerEntity, cameraEntity } = ctx();
 
       const initial = useIsInitial();
 

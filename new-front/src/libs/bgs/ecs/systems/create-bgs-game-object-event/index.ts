@@ -5,11 +5,9 @@ import { System } from '../../../../ecs/system';
 import { GameObjectComponent } from '../../components';
 import { CreateBGCGameObjectEvent } from '../../events';
 
-export const CreateBGCGameObjectEventSystem = (): System<{
-  playerEntity: EntityId;
-}> => {
+export const CreateBGCGameObjectEventSystem = (): System => {
   return {
-    run: ({ essence, ctx }) => {
+    run: ({ essence }) => {
       const events = Essence.getEvents(essence, CreateBGCGameObjectEvent);
 
       if (!events) {

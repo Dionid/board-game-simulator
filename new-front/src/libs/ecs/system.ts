@@ -1,16 +1,10 @@
-import { Essence } from './essence';
+import { World } from './world';
 
 export const $systemId = Symbol('ecs_system_id');
 
-export type SystemProps<Ctx extends Record<any, any> = Record<any, any>> = {
-  essence: Essence<any, any>;
-  timeDelta: number;
-  ctx: Ctx;
-};
+export type SystemProps<Ctx extends Record<any, any> | unknown = unknown> = Omit<World<Ctx>, 'systems'>;
 
-export type System<Ctx extends Record<any, any> = Record<any, any>> = {
+export type System<Ctx extends Record<any, any> | unknown = unknown> = {
+  run: (props: SystemProps<Ctx>) => void;
   [$systemId]?: number;
-  init?: (props: SystemProps<Ctx>) => void;
-  run?: (props: SystemProps<Ctx>) => void;
-  destroy?: (props: SystemProps<Ctx>) => void;
 };

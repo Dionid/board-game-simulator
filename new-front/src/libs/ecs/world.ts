@@ -4,20 +4,24 @@ import { UNSAFE_internals } from './internals';
 
 // # Code
 
-export type World<Ctx extends Record<any, any> = Record<any, any>> = {
+export type World<Ctx extends Record<any, any> | unknown> = {
   id: number;
   step: number;
   systemIds: number;
   latestSystemId: number;
-  ctx: Ctx;
+  ctx: () => Ctx;
   essence: Essence<any, any>;
-  systems: System<Ctx>[];
+  systems: Array<System<Ctx>>;
 };
 
 export const World = {
-  new: <Ctx extends Record<any, any> = Record<any, any>>(
-    world: Partial<World<Ctx>> & { essence: Essence<any, any>; ctx: Ctx }
-  ): World<Ctx> => {
+  new: <Ctx extends Record<any, any>>(world: {
+    essence: Essence<any, any>;
+    ctx: () => Ctx;
+    systems?: Array<System<Ctx>>;
+    systemIds?: number;
+    step?: number;
+  }): World<Ctx> => {
     const systems = world.systems || [];
     let systemIds = world.systemIds || 0;
 
@@ -48,11 +52,7 @@ export const World = {
       const system = world.systems[i];
       if (system.run) {
         world.latestSystemId = system[$systemId]!;
-        system.run({
-          essence: world.essence,
-          ctx: world.ctx,
-          timeDelta,
-        });
+        system.run(world);
       }
     }
     Essence.clearEvents(world.essence);

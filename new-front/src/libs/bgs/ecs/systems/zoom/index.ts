@@ -9,7 +9,8 @@ export const ZoomSystem = (): System<{
   cameraEntity: EntityId;
 }> => {
   return {
-    run: async ({ essence, ctx: { cameraEntity } }) => {
+    run: async ({ essence, ctx }) => {
+      const { cameraEntity } = ctx();
       const zoomOutEvents = Essence.getEvents(essence, ZoomOutEvent);
       const zoomInEvents = Essence.getEvents(essence, ZoomInEvent);
 
