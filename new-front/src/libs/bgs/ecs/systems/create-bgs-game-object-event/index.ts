@@ -6,28 +6,26 @@ import { GameObjectComponent } from '../../components';
 import { CreateBGCGameObjectEvent } from '../../events';
 
 export const CreateBGCGameObjectEventSystem = (): System => {
-  return {
-    run: ({ essence }) => {
-      const events = Essence.getEvents(essence, CreateBGCGameObjectEvent);
+  return ({ essence }) => {
+    const events = Essence.getEvents(essence, CreateBGCGameObjectEvent);
 
-      if (!events) {
-        return;
+    if (!events) {
+      return;
+    }
+
+    const gameObjectP = Essence.getOrAddPool(essence, GameObjectComponent);
+
+    for (const event of events) {
+      const bgcGameObjectEntity = EntityId.new();
+
+      // # Add GameObject Component
+      Pool.add(gameObjectP, bgcGameObjectEntity, GameObjectComponent.new(undefined));
+
+      for (const gameObjectComponent of event.payload.components) {
+        const pool = Essence.getOrAddPoolByName(essence, gameObjectComponent.componentName);
+        // TODO: Remove JSON.parse(JSON.stringify()) after i get how to copy normally
+        Pool.add(pool, bgcGameObjectEntity, JSON.parse(JSON.stringify(gameObjectComponent.component)));
       }
-
-      const gameObjectP = Essence.getOrAddPool(essence, GameObjectComponent);
-
-      for (const event of events) {
-        const bgcGameObjectEntity = EntityId.new();
-
-        // # Add GameObject Component
-        Pool.add(gameObjectP, bgcGameObjectEntity, GameObjectComponent.new(undefined));
-
-        for (const gameObjectComponent of event.payload.components) {
-          const pool = Essence.getOrAddPoolByName(essence, gameObjectComponent.componentName);
-          // TODO: Remove JSON.parse(JSON.stringify()) after i get how to copy normally
-          Pool.add(pool, bgcGameObjectEntity, JSON.parse(JSON.stringify(gameObjectComponent.component)));
-        }
-      }
-    },
+    }
   };
 };

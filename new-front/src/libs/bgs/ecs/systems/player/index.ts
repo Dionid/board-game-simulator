@@ -8,35 +8,33 @@ import { useIsInitial } from '../../../../ecs/hooks/use-init';
 export const PlayerSystem = (): System<{
   playerEntity: EntityId;
 }> => {
-  return {
-    run: ({ essence, ctx }) => {
-      const isInitial = useIsInitial();
+  return ({ essence, ctx }) => {
+    const isInitial = useIsInitial();
 
-      if (!isInitial) {
-        return;
-      }
+    if (!isInitial) {
+      return;
+    }
 
-      const { playerEntity } = ctx();
+    const { playerEntity } = ctx();
 
-      console.log('PlayerSystem', playerEntity);
+    console.log('PlayerSystem', playerEntity);
 
-      const playerCP = Essence.getOrAddPool(essence, PlayerComponent);
-      Pool.add(
-        playerCP,
-        playerEntity,
-        PlayerComponent.new({
-          id: playerEntity,
-        })
-      );
+    const playerCP = Essence.getOrAddPool(essence, PlayerComponent);
+    Pool.add(
+      playerCP,
+      playerEntity,
+      PlayerComponent.new({
+        id: playerEntity,
+      })
+    );
 
-      const ownerPool = Essence.getOrAddPool(essence, OwnerComponent);
-      Pool.add(
-        ownerPool,
-        EntityId.ofString(playerEntity),
-        OwnerComponent.new({
-          playerId: playerEntity,
-        })
-      );
-    },
+    const ownerPool = Essence.getOrAddPool(essence, OwnerComponent);
+    Pool.add(
+      ownerPool,
+      EntityId.ofString(playerEntity),
+      OwnerComponent.new({
+        playerId: playerEntity,
+      })
+    );
   };
 };

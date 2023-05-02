@@ -73,58 +73,56 @@ export const CameraSystem = (): System<{
     );
   };
 
-  return {
-    run: (world) => {
-      const { essence, ctx } = world;
-      const { cameraEntity, boardSize } = ctx();
-      const initial = useIsInitial();
+  return (world) => {
+    const { essence, ctx } = world;
+    const { cameraEntity, boardSize } = ctx();
+    const initial = useIsInitial();
 
-      if (initial) {
-        console.log('INITIAL CAMERA');
-        init(world);
-        return;
+    if (initial) {
+      console.log('INITIAL CAMERA');
+      init(world);
+      return;
+    }
+
+    // const panModeEntities = Essence.getEntitiesByComponents(essence, [PanModeComponent]);
+    const positionCP = Essence.getOrAddPool(essence, PositionComponent);
+    const sizeCP = Essence.getOrAddPool(essence, SizeComponent);
+    const panModeP = Essence.getOrAddPool(essence, PanModeComponent);
+
+    const cameraPositionC = Pool.get(positionCP, cameraEntity);
+    const cameraSizeC = Pool.get(sizeCP, cameraEntity);
+    const cameraPanModeC = Pool.get(panModeP, cameraEntity);
+
+    if (cameraPanModeC.activated) {
+      const newCameraPosition: Vector2 = {
+        ...cameraPositionC,
+      };
+
+      const handPool = Essence.getOrAddPool(essence, FingerComponent);
+      const fingerC = Pool.get(handPool, cameraEntity);
+
+      if (fingerC.click.current.down) {
+        const delta = Vector2.compareAndChange(fingerC.onCameraPosition.previous, fingerC.onCameraPosition.current);
+        newCameraPosition.x -= delta.x;
+        newCameraPosition.y -= delta.y;
       }
 
-      // const panModeEntities = Essence.getEntitiesByComponents(essence, [PanModeComponent]);
-      const positionCP = Essence.getOrAddPool(essence, PositionComponent);
-      const sizeCP = Essence.getOrAddPool(essence, SizeComponent);
-      const panModeP = Essence.getOrAddPool(essence, PanModeComponent);
-
-      const cameraPositionC = Pool.get(positionCP, cameraEntity);
-      const cameraSizeC = Pool.get(sizeCP, cameraEntity);
-      const cameraPanModeC = Pool.get(panModeP, cameraEntity);
-
-      if (cameraPanModeC.activated) {
-        const newCameraPosition: Vector2 = {
-          ...cameraPositionC,
-        };
-
-        const handPool = Essence.getOrAddPool(essence, FingerComponent);
-        const fingerC = Pool.get(handPool, cameraEntity);
-
-        if (fingerC.click.current.down) {
-          const delta = Vector2.compareAndChange(fingerC.onCameraPosition.previous, fingerC.onCameraPosition.current);
-          newCameraPosition.x -= delta.x;
-          newCameraPosition.y -= delta.y;
-        }
-
-        // . Restrict
-        if (
-          newCameraPosition.x > 0 &&
-          newCameraPosition.x + cameraSizeC.width < boardSize.width &&
-          cameraPositionC.x !== newCameraPosition.x
-        ) {
-          cameraPositionC.x = newCameraPosition.x;
-        }
-
-        if (
-          newCameraPosition.y > 0 &&
-          newCameraPosition.y + cameraSizeC.height < boardSize.height &&
-          cameraPositionC.y !== newCameraPosition.y
-        ) {
-          cameraPositionC.y = newCameraPosition.y;
-        }
+      // . Restrict
+      if (
+        newCameraPosition.x > 0 &&
+        newCameraPosition.x + cameraSizeC.width < boardSize.width &&
+        cameraPositionC.x !== newCameraPosition.x
+      ) {
+        cameraPositionC.x = newCameraPosition.x;
       }
-    },
+
+      if (
+        newCameraPosition.y > 0 &&
+        newCameraPosition.y + cameraSizeC.height < boardSize.height &&
+        cameraPositionC.y !== newCameraPosition.y
+      ) {
+        cameraPositionC.y = newCameraPosition.y;
+      }
+    }
   };
 };

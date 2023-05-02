@@ -56,7 +56,7 @@ export const World = {
       // # Assign current system
       world.latestSystemId = system[$systemId]!;
       // # Run system
-      system.run(world);
+      system(world);
     }
     // # Remove done events
     Essence.clearEvents(world.essence);

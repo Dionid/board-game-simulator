@@ -76,94 +76,92 @@ export const FingerInputSystem = (): System<{
     };
   };
 
-  return {
-    run: (world) => {
-      const lastMouseData = useRef({
-        x: 0,
-        y: 0,
-        down: false,
-      });
+  return (world) => {
+    const lastMouseData = useRef({
+      x: 0,
+      y: 0,
+      down: false,
+    });
 
-      const { essence, ctx } = world;
-      const { playerEntity, cameraEntity } = ctx();
+    const { essence, ctx } = world;
+    const { playerEntity, cameraEntity } = ctx();
 
-      const initial = useIsInitial();
+    const initial = useIsInitial();
 
-      if (initial) {
-        console.log('INITIAL FINGER');
-        init(world, lastMouseData.current);
-        return;
-      }
+    if (initial) {
+      console.log('INITIAL FINGER');
+      init(world, lastMouseData.current);
+      return;
+    }
 
-      const fingerCP = Essence.getOrAddPool(essence, FingerComponent);
-      const positionCP = Essence.getOrAddPool(essence, PositionComponent);
-      const scaleCP = Essence.getOrAddPool(essence, ScaleComponent);
+    const fingerCP = Essence.getOrAddPool(essence, FingerComponent);
+    const positionCP = Essence.getOrAddPool(essence, PositionComponent);
+    const scaleCP = Essence.getOrAddPool(essence, ScaleComponent);
 
-      const cameraScaleC = Pool.get(scaleCP, cameraEntity);
-      const cameraPositionC = Pool.get(positionCP, cameraEntity);
-      const fingerC = Pool.get(fingerCP, playerEntity);
+    const cameraScaleC = Pool.get(scaleCP, cameraEntity);
+    const cameraPositionC = Pool.get(positionCP, cameraEntity);
+    const fingerC = Pool.get(fingerCP, playerEntity);
 
-      // # Update
-      // if (fingerC.onCameraPosition.previous.x !== fingerC.onCameraPosition.current.x) {
-      //   fingerC.onCameraPosition.previous.x = fingerC.onCameraPosition.current.x;
-      // }
-      // if (fingerC.onCameraPosition.previous.y !== fingerC.onCameraPosition.current.y) {
-      //   fingerC.onCameraPosition.previous.y = fingerC.onCameraPosition.current.y;
-      // }
-      fingerC.onCameraPosition.previous = {
-        ...fingerC.onCameraPosition.current,
-      };
+    // # Update
+    // if (fingerC.onCameraPosition.previous.x !== fingerC.onCameraPosition.current.x) {
+    //   fingerC.onCameraPosition.previous.x = fingerC.onCameraPosition.current.x;
+    // }
+    // if (fingerC.onCameraPosition.previous.y !== fingerC.onCameraPosition.current.y) {
+    //   fingerC.onCameraPosition.previous.y = fingerC.onCameraPosition.current.y;
+    // }
+    fingerC.onCameraPosition.previous = {
+      ...fingerC.onCameraPosition.current,
+    };
 
-      // if (fingerC.onBoardPosition.previous.x !== fingerC.onBoardPosition.current.x) {
-      //   fingerC.onBoardPosition.previous.x = fingerC.onBoardPosition.current.x;
-      // }
-      // if (fingerC.onBoardPosition.previous.y !== fingerC.onBoardPosition.current.y) {
-      //   fingerC.onBoardPosition.previous.y = fingerC.onBoardPosition.current.y;
-      // }
-      fingerC.onBoardPosition.previous = {
-        ...fingerC.onBoardPosition.current,
-      };
+    // if (fingerC.onBoardPosition.previous.x !== fingerC.onBoardPosition.current.x) {
+    //   fingerC.onBoardPosition.previous.x = fingerC.onBoardPosition.current.x;
+    // }
+    // if (fingerC.onBoardPosition.previous.y !== fingerC.onBoardPosition.current.y) {
+    //   fingerC.onBoardPosition.previous.y = fingerC.onBoardPosition.current.y;
+    // }
+    fingerC.onBoardPosition.previous = {
+      ...fingerC.onBoardPosition.current,
+    };
 
-      // if (fingerC.click.previous.down !== fingerC.click.current.down) {
-      //   fingerC.click.previous.down = fingerC.click.current.down;
-      // }
-      fingerC.click.previous = {
-        ...fingerC.click.current,
-      };
+    // if (fingerC.click.previous.down !== fingerC.click.current.down) {
+    //   fingerC.click.previous.down = fingerC.click.current.down;
+    // }
+    fingerC.click.previous = {
+      ...fingerC.click.current,
+    };
 
-      // if (fingerC.onCameraPosition.current.x !== lastMouseData.x) {
-      //   fingerC.onCameraPosition.current.x = lastMouseData.x;
-      // }
-      // if (fingerC.onCameraPosition.current.y !== lastMouseData.y) {
-      //   fingerC.onCameraPosition.current.y = lastMouseData.y;
-      // }
-      fingerC.onCameraPosition.current = {
-        ...lastMouseData.current,
-      };
+    // if (fingerC.onCameraPosition.current.x !== lastMouseData.x) {
+    //   fingerC.onCameraPosition.current.x = lastMouseData.x;
+    // }
+    // if (fingerC.onCameraPosition.current.y !== lastMouseData.y) {
+    //   fingerC.onCameraPosition.current.y = lastMouseData.y;
+    // }
+    fingerC.onCameraPosition.current = {
+      ...lastMouseData.current,
+    };
 
-      // if (
-      //   fingerC.onBoardPosition.current.x !==
-      //   lastMouseData.x / cameraScaleC.x + cameraPositionC.x
-      // ) {
-      //   fingerC.onBoardPosition.current.x = lastMouseData.x / cameraScaleC.x + cameraPositionC.x;
-      // }
-      // if (
-      //   fingerC.onBoardPosition.current.y !==
-      //   lastMouseData.y / cameraScaleC.y + cameraPositionC.y
-      // ) {
-      //   fingerC.onBoardPosition.current.y = lastMouseData.y / cameraScaleC.y + cameraPositionC.y;
-      // }
-      fingerC.onBoardPosition.current = {
-        x: lastMouseData.current.x / cameraScaleC.x + cameraPositionC.x,
-        y: lastMouseData.current.y / cameraScaleC.y + cameraPositionC.y,
-      };
+    // if (
+    //   fingerC.onBoardPosition.current.x !==
+    //   lastMouseData.x / cameraScaleC.x + cameraPositionC.x
+    // ) {
+    //   fingerC.onBoardPosition.current.x = lastMouseData.x / cameraScaleC.x + cameraPositionC.x;
+    // }
+    // if (
+    //   fingerC.onBoardPosition.current.y !==
+    //   lastMouseData.y / cameraScaleC.y + cameraPositionC.y
+    // ) {
+    //   fingerC.onBoardPosition.current.y = lastMouseData.y / cameraScaleC.y + cameraPositionC.y;
+    // }
+    fingerC.onBoardPosition.current = {
+      x: lastMouseData.current.x / cameraScaleC.x + cameraPositionC.x,
+      y: lastMouseData.current.y / cameraScaleC.y + cameraPositionC.y,
+    };
 
-      // if (fingerC.click.current.down !== lastMouseData.down) {
-      //   fingerC.click.current.down = lastMouseData.down;
-      // }
-      fingerC.click.current = {
-        down: lastMouseData.current.down,
-      };
-    },
+    // if (fingerC.click.current.down !== lastMouseData.down) {
+    //   fingerC.click.current.down = lastMouseData.down;
+    // }
+    fingerC.click.current = {
+      down: lastMouseData.current.down,
+    };
   };
 };
