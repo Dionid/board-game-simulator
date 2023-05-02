@@ -25,7 +25,7 @@ export const CameraSystem = (): System<{
     const sizeP = Essence.getOrAddPool(essence, SizeComponent);
     const scaleP = Essence.getOrAddPool(essence, ScaleComponent);
 
-    Pool.add(cameraP, cameraEntity, CameraComponent.new(undefined));
+    Pool.add(cameraP, cameraEntity, CameraComponent.new(true));
 
     const cameraSize = {
       // TODO. move somewhere (as deps or ctx)

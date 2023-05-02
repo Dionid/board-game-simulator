@@ -19,12 +19,17 @@ export const CreateBGCGameObjectEventSystem = (): System => {
       const bgcGameObjectEntity = EntityId.new();
 
       // # Add GameObject Component
-      Pool.add(gameObjectP, bgcGameObjectEntity, GameObjectComponent.new(undefined));
+      Pool.add(gameObjectP, bgcGameObjectEntity, GameObjectComponent.new(true));
 
       for (const gameObjectComponent of event.payload.components) {
         const pool = Essence.getOrAddPoolByName(essence, gameObjectComponent.componentName);
-        // TODO: Remove JSON.parse(JSON.stringify()) after i get how to copy normally
-        Pool.add(pool, bgcGameObjectEntity, JSON.parse(JSON.stringify(gameObjectComponent.component)));
+        if (typeof gameObjectComponent.component === 'object') {
+          // TODO: Remove JSON.parse(JSON.stringify()) after i get how to copy normally
+          Pool.add(pool, bgcGameObjectEntity, JSON.parse(JSON.stringify(gameObjectComponent.component)));
+        } else {
+          // TODO: Remove JSON.parse(JSON.stringify()) after i get how to copy normally
+          Pool.add(pool, bgcGameObjectEntity, gameObjectComponent.component);
+        }
       }
     }
   };

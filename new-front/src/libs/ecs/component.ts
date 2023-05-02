@@ -1,6 +1,6 @@
 import { EntityId } from './entity';
 
-export type Component = Record<any, any> | boolean | string | number | undefined;
+export type Component = Record<any, any> | boolean | string | number;
 
 export type ComponentFactory<Name extends string, C extends Component> = {
   name: Name;
@@ -44,8 +44,9 @@ export const Pool = {
     return pool.components[entityId]!;
   },
   remove: <C extends Component>(pool: Pool<C>, entityId: EntityId) => {
-    const { [entityId]: omit, ...newData } = pool.components;
-    pool.components = newData;
+    // const { [entityId]: omit, ...newData } = pool.components;
+    // pool.components = newData;
+    delete pool.components[entityId];
     pool.entityIds.splice(pool.entityIds.indexOf(entityId), 1);
   },
 };

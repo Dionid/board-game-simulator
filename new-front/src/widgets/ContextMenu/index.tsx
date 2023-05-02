@@ -3,7 +3,13 @@ import React, { FC } from 'react';
 import { BgsWorld } from '../../libs/bgs/ecs';
 import { Essence } from '../../libs/ecs/essence';
 import { CreateBGCGameObjectEvent } from '../../libs/bgs/ecs/events';
-import { DepthComponent, ImageComponent } from '../../libs/bgs/ecs/components';
+import {
+  DeletableComponent,
+  DepthComponent,
+  FingerComponent,
+  GameObjectComponent,
+  ImageComponent,
+} from '../../libs/bgs/ecs/components';
 import { PositionComponent } from '../../libs/bgs/ecs/components';
 import { SizeComponent } from '../../libs/bgs/ecs/components';
 import { PersonAdd } from '@mui/icons-material';
@@ -78,6 +84,10 @@ export const ContextMenu: FC<{ world: BgsWorld; cameraEntity: EntityId; playerEn
             componentName: SizeComponent.name,
             component: SizeComponent.new(size),
           },
+          {
+            componentName: DeletableComponent.name,
+            component: DeletableComponent.new(true),
+          },
         ],
       })
     );
@@ -103,7 +113,7 @@ export const ContextMenu: FC<{ world: BgsWorld; cameraEntity: EntityId; playerEn
   // };
 
   const contextMenuActions = () => {
-    // const actions: JSX.Element[] = [];
+    const actions: JSX.Element[] = [];
 
     const emptyActions = [
       <MenuItem key={v4()} onClick={spawnMap}>
@@ -124,70 +134,63 @@ export const ContextMenu: FC<{ world: BgsWorld; cameraEntity: EntityId; playerEn
       // }),
     ];
 
-    return emptyActions;
+    if (!contextMenu) {
+      return emptyActions;
+    }
 
-    // if (!contextMenu) {
-    //   return emptyActions;
-    // }
+    const gos = Essence.getEntitiesByComponents(world.essence, [GameObjectComponent, PositionComponent, SizeComponent]);
+    const positionCP = Essence.getOrAddPool(world.essence, PositionComponent);
+    const sizeCP = Essence.getOrAddPool(world.essence, SizeComponent);
+    const fingerPool = Essence.getOrAddPool(world.essence, FingerComponent);
+    const playerFinger = Pool.get(fingerPool, playerEntity);
 
-    // const positionEntities = Essence.filter(world.essence, [
-    //   'GameObjectComponent',
-    //   'PositionComponent',
-    //   'SizeComponent',
-    // ]);
-    // const positionComponentPool = Essence.getOrAddPool(world.essence, PositionComponentName);
-    // const sizeComponentPool = Essence.getOrAddPool(world.essence, SizeComponentName);
+    let maximalZ = -1;
+    let targetEntity: EntityId | undefined = undefined;
 
-    // const playerMouseEntities = Essence.filter(world.essence, [PlayerComponentName, HandComponentName]);
-    // const handPool = Essence.getOrAddPool(world.essence, HandComponentName);
-    // const playerMouseComponent = Pool.get(handPool, playerMouseEntities[0]);
+    for (const entity of gos) {
+      const positionC = Pool.get(positionCP, entity);
+      const sizeC = Pool.get(sizeCP, entity);
 
-    // const mouseOnEntities: EntityId[] = [];
+      if (
+        positionC.x <= playerFinger.onBoardPosition.current.x &&
+        positionC.x + sizeC.width >= playerFinger.onBoardPosition.current.x &&
+        positionC.y <= playerFinger.onBoardPosition.current.y &&
+        positionC.y + sizeC.height >= playerFinger.onBoardPosition.current.y
+      ) {
+        if (positionC.z > maximalZ) {
+          targetEntity = entity;
+        }
+      }
+    }
 
-    // positionEntities.forEach((entity) => {
-    //   const positionComponent = Pool.get(positionComponentPool, entity);
-    //   const sizeComponent = Pool.get(sizeComponentPool, entity);
-    //   // . Is inside object zone, including camera position
-    //   if (
-    //     Square.isInside(
-    //       { ...positionComponent.data, ...sizeComponent.data },
-    //       playerMouseComponent.data.onBoardPosition.current
-    //     )
-    //   ) {
-    //     mouseOnEntities.push(entity);
-    //   }
-    // });
+    // debugger
 
-    // if (mouseOnEntities.length === 0) {
-    //   return emptyActions;
-    // }
+    if (!targetEntity) {
+      return emptyActions;
+    }
 
-    // // TODO. REFACTORE TO SINGLETON
-    // const depthCP = Essence.getOrAddPool(world.essence, DepthComponentName);
-    // const depthE = Object.keys(depthCP.data).map((entity) => entity)[0] as EntityId;
-    // const depthC = Pool.get(depthCP, depthE);
+    // # From now on there is target entity
 
-    // const filtered = depthC.data.list.filter((id) => mouseOnEntities.includes(id));
+    const deletableCP = Essence.getOrAddPool(world.essence, DeletableComponent);
 
-    // const maxZPositionEntity = filtered[filtered.length - 1];
+    if (Pool.tryGet(deletableCP, targetEntity)) {
+      // . DELETE BUTTON
+      actions.push(
+        <MenuItem
+          key={targetEntity + ':delete_button'}
+          onClick={() => {
+            if (!targetEntity) {
+              return;
+            }
 
-    // if (maxZPositionEntity) {
-    //   const deletableCP = Essence.getOrAddPool(world.essence, DeletableComponentName);
-    //   if (Pool.tryGet(deletableCP, maxZPositionEntity)) {
-    //     // . DELETE BUTTON
-    //     actions.push(
-    //       <MenuItem
-    //         key={maxZPositionEntity + ':delete_button'}
-    //         onClick={() => {
-    //           handleClose();
-    //           Essence.destroyEntity(world.essence, maxZPositionEntity);
-    //           world.ctx.forceUpdate();
-    //         }}
-    //       >
-    //         Delete
-    //       </MenuItem>
-    //     );
-    //   }
+            handleClose();
+            Essence.destroyEntity(world.essence, targetEntity);
+          }}
+        >
+          Delete
+        </MenuItem>
+      );
+    }
 
     //   // . DECK ACTIONS
     //   const deckComponentPool = Essence.getOrAddPool(world.essence, DeckComponentName);
@@ -364,7 +367,7 @@ export const ContextMenu: FC<{ world: BgsWorld; cameraEntity: EntityId; playerEn
     //   }
     // }
 
-    // return actions;
+    return actions;
   };
 
   return (

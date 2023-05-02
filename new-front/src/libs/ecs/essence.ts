@@ -112,7 +112,9 @@ export const Essence = {
         return;
       }
 
-      Pool.remove(pool, entityId);
+      if (pool.components[entityId]) {
+        Pool.remove(pool, entityId);
+      }
     });
   },
 

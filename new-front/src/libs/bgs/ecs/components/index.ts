@@ -47,7 +47,7 @@ export const FingerComponent = ComponentFactory<
 
 // # CAMERA
 
-export const CameraComponent = ComponentFactory<'CameraComponent', undefined>('CameraComponent');
+export const CameraComponent = ComponentFactory<'CameraComponent', boolean>('CameraComponent');
 
 export const PanModeComponent = ComponentFactory<
   'PanModeComponent',
@@ -64,7 +64,7 @@ export const ScaleComponent = ComponentFactory<'ScaleComponent', Vector2>('Scale
 
 // . GAME OBJECT
 
-export const GameObjectComponent = ComponentFactory<'GameObject', undefined>('GameObject');
+export const GameObjectComponent = ComponentFactory<'GameObject', boolean>('GameObject');
 
 export const DepthComponent = ComponentFactory<
   'DepthComponent',
@@ -108,13 +108,13 @@ export const GroupComponent = ComponentFactory<
 
 // # ACTIONS ON GO
 
-export const SelectableComponent = ComponentFactory<'SelectableComponent', undefined>('SelectableComponent');
-export const IsSelectedComponent = ComponentFactory<'IsSelectedComponent', undefined>('IsSelectedComponent');
-export const LockableComponent = ComponentFactory<'LockableComponent', undefined>('LockableComponent');
-export const IsLockedComponent = ComponentFactory<'IsLockedComponent', undefined>('IsLockedComponent');
-export const DraggableComponent = ComponentFactory<'DraggableComponent', undefined>('DraggableComponent');
-export const IsDraggingComponent = ComponentFactory<'IsDraggingComponent', undefined>('IsDraggingComponent');
-export const DeletableComponent = ComponentFactory<'DeletableComponent', undefined>('DeletableComponent');
+export const SelectableComponent = ComponentFactory<'SelectableComponent', boolean>('SelectableComponent');
+export const IsSelectedComponent = ComponentFactory<'IsSelectedComponent', boolean>('IsSelectedComponent');
+export const LockableComponent = ComponentFactory<'LockableComponent', boolean>('LockableComponent');
+export const IsLockedComponent = ComponentFactory<'IsLockedComponent', boolean>('IsLockedComponent');
+export const DraggableComponent = ComponentFactory<'DraggableComponent', boolean>('DraggableComponent');
+export const IsDraggingComponent = ComponentFactory<'IsDraggingComponent', boolean>('IsDraggingComponent');
+export const DeletableComponent = ComponentFactory<'DeletableComponent', boolean>('DeletableComponent');
 
 // # BOARD GAME SPECIFICS
 
