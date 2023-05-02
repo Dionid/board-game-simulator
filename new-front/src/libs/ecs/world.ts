@@ -44,19 +44,25 @@ export const World = {
 
     return newWorld;
   },
-  run: <Ctx extends Record<any, any> = Record<any, any>>(world: World<Ctx>, timeDelta: number): void => {
+  run: <Ctx extends Record<any, any> = Record<any, any>>(world: World<Ctx>): void => {
+    // # Store previous world
     let prevWorld = UNSAFE_internals.currentWorldId;
+    // # Assign current one
     UNSAFE_internals.currentWorldId = world.id;
-    Essence.movePendingToActive(world.essence);
-    for (let i = 0; i < world.systems.length; i++) {
-      const system = world.systems[i];
-      if (system.run) {
-        world.latestSystemId = system[$systemId]!;
-        system.run(world);
-      }
+    // # Activate pending events
+    Essence.flushEvents(world.essence);
+    // # Run systems
+    for (const system of world.systems) {
+      // # Assign current system
+      world.latestSystemId = system[$systemId]!;
+      // # Run system
+      system.run(world);
     }
+    // # Remove done events
     Essence.clearEvents(world.essence);
+    // # Increment step
     world.step++;
+    // # Restore previous world
     UNSAFE_internals.currentWorldId = prevWorld;
   },
 };

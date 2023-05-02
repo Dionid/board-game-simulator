@@ -91,10 +91,10 @@ export const CameraSystem = (): System<{
       const panModeP = Essence.getOrAddPool(essence, PanModeComponent);
 
       const cameraPositionC = Pool.get(positionCP, cameraEntity);
-      const sizeC = Pool.get(sizeCP, cameraEntity);
-      const panModeC = Pool.get(panModeP, cameraEntity);
+      const cameraSizeC = Pool.get(sizeCP, cameraEntity);
+      const cameraPanModeC = Pool.get(panModeP, cameraEntity);
 
-      if (panModeC.props.activated) {
+      if (cameraPanModeC.props.activated) {
         const newCameraPosition: Vector2 = {
           ...cameraPositionC.props,
         };
@@ -114,7 +114,7 @@ export const CameraSystem = (): System<{
         // . Restrict
         if (
           newCameraPosition.x > 0 &&
-          newCameraPosition.x + sizeC.props.width < boardSize.width &&
+          newCameraPosition.x + cameraSizeC.props.width < boardSize.width &&
           cameraPositionC.props.x !== newCameraPosition.x
         ) {
           cameraPositionC.props.x = newCameraPosition.x;
@@ -122,35 +122,12 @@ export const CameraSystem = (): System<{
 
         if (
           newCameraPosition.y > 0 &&
-          newCameraPosition.y + sizeC.props.height < boardSize.height &&
+          newCameraPosition.y + cameraSizeC.props.height < boardSize.height &&
           cameraPositionC.props.y !== newCameraPosition.y
         ) {
           cameraPositionC.props.y = newCameraPosition.y;
         }
       }
-
-      // // . Pan mode
-      // if (panModeEntities.length > 0) {
-
-      // } else {
-      //   // // . Hand near border feature
-      //   // const margin = 20;
-      //   // const velocity = timeDelta * 0.5;
-      //   // // . Check that camera position is more than 0 and less than board size
-      //   // if (handC.props.onCameraPosition.current.x > sizeC.props.width - margin) {
-      //   //   // console.log('RIGHT');
-      //   //   newPosition.x += velocity;
-      //   // } else if (handC.props.onCameraPosition.current.x < margin) {
-      //   //   // console.log('LEFT');
-      //   //   newPosition.x -= velocity;
-      //   // } else if (handC.props.onCameraPosition.current.y < margin) {
-      //   //   // console.log('TOP');
-      //   //   newPosition.y -= velocity;
-      //   // } else if (handC.props.onCameraPosition.current.y > sizeC.props.height - margin) {
-      //   //   // console.log('DOWN');
-      //   //   newPosition.y += velocity;
-      //   // }
-      // }
     },
   };
 };

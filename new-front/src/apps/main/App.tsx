@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import CssBaseline from '@mui/material/CssBaseline';
 import { World } from '../../libs/ecs/world';
-import { Essence } from '../../libs/ecs/essence';
 import { FingerInputSystem } from '../../libs/bgs/ecs/systems/finger-input';
 import { PlayerSystem } from '../../libs/bgs/ecs/systems/player';
 import { CameraSystem } from '../../libs/bgs/ecs/systems/camera';
@@ -103,18 +102,9 @@ const GameStage = () => {
 
     // @ts-ignore
     window.world = world;
-    // @ts-ignore
-    window.World = World;
-    // @ts-ignore
-    window.Essence = Essence;
-
-    let lastTimeStamp = new Date();
 
     const run = () => {
-      const newTimeStamp = new Date();
-      const timeDelta = newTimeStamp.getMilliseconds() - lastTimeStamp.getMilliseconds();
-      World.run(world, timeDelta < 0 ? 0 : timeDelta);
-      lastTimeStamp = newTimeStamp;
+      World.run(world);
       requestAnimationFrame(run);
     };
 
@@ -145,6 +135,7 @@ function App() {
     if (window.world) {
       return;
     }
+
     const params = new URLSearchParams(window.location.search);
     const paramsRoomId = params.get('room-id');
     const roomId = paramsRoomId ? paramsRoomId : '91dd64b2-a908-4562-b6e2-eacb86548da0';

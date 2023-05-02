@@ -10,18 +10,19 @@ export const PlayerSystem = (): System<{
 }> => {
   return {
     run: ({ essence, ctx }) => {
-      const { playerEntity } = ctx();
       const isInitial = useIsInitial();
 
       if (!isInitial) {
         return;
       }
 
+      const { playerEntity } = ctx();
+
       console.log('PlayerSystem', playerEntity);
 
-      const playerPool = Essence.getOrAddPool(essence, PlayerComponent);
+      const playerCP = Essence.getOrAddPool(essence, PlayerComponent);
       Pool.add(
-        playerPool,
+        playerCP,
         playerEntity,
         PlayerComponent.new({
           id: playerEntity,
