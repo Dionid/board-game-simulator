@@ -43,7 +43,7 @@ export const Essence = {
     const pool = essence.pools[poolName];
 
     if (!pool) {
-      essence.pools[poolName] = { name: poolName, data: {} };
+      Essence.addPool(essence, { name: poolName, data: {} });
 
       return Essence.getOrAddPoolByName(essence, poolName);
     }
@@ -55,17 +55,7 @@ export const Essence = {
     essence: EssencePools<any>,
     componentFactory: CF
   ): Pool<ComponentFromFactory<CF>> => {
-    const poolName = componentFactory.name;
-
-    const pool = essence.pools[poolName];
-
-    if (!pool) {
-      essence.pools[poolName] = { name: poolName, data: {} };
-
-      return Essence.getOrAddPool(essence, componentFactory);
-    }
-
-    return pool;
+    return Essence.getOrAddPoolByName(essence, componentFactory.name);
   },
 
   getEntitiesByComponents: <CL extends Component<any, any>[]>(
@@ -191,7 +181,7 @@ export const Essence = {
     }
   },
 
-  movePendingToActive: (essence: EssenceEvents<Event<any, any>[]>): void => {
+  flushEvents: (essence: EssenceEvents<Event<any, any>[]>): void => {
     for (const pendingEventKeys of Object.keys(essence.events.pending!)) {
       const pendingEvents = essence.events.pending![pendingEventKeys]!;
       const activeEvents = essence.events.active![pendingEventKeys];
