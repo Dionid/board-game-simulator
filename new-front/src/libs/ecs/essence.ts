@@ -1,11 +1,11 @@
-import { Component, ComponentFactory, ComponentFromFactory, Pool } from './component';
+import { ComponentFactory, ComponentFromFactory, Pool } from './component';
 import { Event, EventFactory, EventFromFactory, EventsRecord } from './event';
 import { EntityId } from './entity';
 import { TypedObject } from '../typed-object';
 
-export type EssencePools<CL extends Component<any, any>[]> = {
+export type EssencePools<CF extends ComponentFactory<any, any>[]> = {
   pools: {
-    [K in CL[number]['name']]?: Pool<CL[number]>;
+    [K in CF[number]['name']]?: Pool<ComponentFromFactory<CF[number]>>;
   };
 };
 
@@ -16,13 +16,8 @@ export type EssenceEvents<EL extends Event<any, any>[]> = {
   }>;
 };
 
-export type Essence<CL extends Component<any, any>[], EL extends Event<any, any>[]> = EssencePools<CL> &
+export type Essence<CF extends ComponentFactory<any, any>[], EL extends Event<any, any>[]> = EssencePools<CF> &
   EssenceEvents<EL>;
-
-type EntityWithComponents = {
-  id: EntityId;
-  components: Component<any, any>[];
-};
 
 export const Essence = {
   getPool: <CF extends ComponentFactory<any, any>>(
@@ -32,18 +27,22 @@ export const Essence = {
     return essence.pools[componentFactory.name];
   },
 
-  addPool: <C extends Component<any, any>>(essence: EssencePools<[C]>, pool: Pool<C>): void => {
-    essence.pools[pool.name] = pool;
+  addPool: <CF extends ComponentFactory<any, any>>(
+    essence: EssencePools<[CF]>,
+    poolName: CF['name'],
+    pool: Pool<ComponentFromFactory<CF>>
+  ): void => {
+    essence.pools[poolName] = pool;
   },
 
   getOrAddPoolByName: <CF extends ComponentFactory<any, any>>(
-    essence: EssencePools<any>,
+    essence: EssencePools<[CF]>,
     poolName: CF['name']
   ): Pool<ComponentFromFactory<CF>> => {
     const pool = essence.pools[poolName];
 
     if (!pool) {
-      Essence.addPool(essence, { name: poolName, data: {} });
+      Essence.addPool(essence, poolName, { components: {}, entityIds: [] });
 
       return Essence.getOrAddPoolByName(essence, poolName);
     }
@@ -58,14 +57,14 @@ export const Essence = {
     return Essence.getOrAddPoolByName(essence, componentFactory.name);
   },
 
-  getEntitiesByComponents: <CL extends Component<any, any>[]>(
-    essence: EssencePools<CL>,
-    componentFactories: ComponentFactory<CL[number]['name'], CL[number]['props']>[]
+  getEntitiesByComponents: <CFL extends ComponentFactory<string, any>[]>(
+    essence: EssencePools<CFL>,
+    componentFactories: CFL
   ): EntityId[] => {
     const pools: Pool<any>[] = [];
 
     for (let i = 0; i < componentFactories.length; i++) {
-      const compName = componentFactories[i].name;
+      const compName = componentFactories[i].name as CFL[number]['name'];
       const pool = essence.pools[compName];
 
       if (!pool) {
@@ -82,7 +81,7 @@ export const Essence = {
 
       // # On first iteration we extract entities
       if (i === 0) {
-        const ids = TypedObject.keys(pool.data);
+        const ids = pool.entityIds;
         for (let j = 0; j < ids.length; j++) {
           const id = ids[j];
           entityIds[id] = true;
@@ -94,7 +93,7 @@ export const Essence = {
       const ids = TypedObject.keys(entityIds);
       for (let j = 0; j < ids.length; j++) {
         const id = ids[j];
-        if (!pool.data[id]) {
+        if (!pool.components[id]) {
           delete entityIds[id];
         }
       }
@@ -103,38 +102,7 @@ export const Essence = {
     return TypedObject.keys(entityIds);
   },
 
-  getEntityById: <C extends Component<any, any>>(
-    essence: EssencePools<[C]>,
-    entityId: EntityId
-  ): EntityWithComponents | undefined => {
-    const res = Object.keys(essence.pools).reduce<EntityWithComponents>(
-      (acc, rPoolName) => {
-        const poolName = rPoolName as keyof typeof essence.pools;
-
-        const pool = essence.pools[poolName];
-        if (!pool) {
-          return acc;
-        }
-
-        const component = pool.data[entityId];
-
-        if (component) {
-          acc.components.push(component);
-        }
-
-        return acc;
-      },
-      { id: entityId, components: [] }
-    );
-
-    if (res.components.length === 0) {
-      return undefined;
-    } else {
-      return res;
-    }
-  },
-
-  destroyEntity: <C extends Component<any, any>>(essence: EssencePools<[C]>, entityId: EntityId): void => {
+  destroyEntity: (essence: EssencePools<any>, entityId: EntityId): void => {
     Object.keys(essence.pools).forEach((rPoolName) => {
       const poolName = rPoolName as keyof typeof essence.pools;
 
@@ -144,11 +112,11 @@ export const Essence = {
         return;
       }
 
-      const { [entityId]: omit, ...newData } = pool.data;
-
-      pool.data = newData;
+      Pool.remove(pool, entityId);
     });
   },
+
+  // # EVENTS
 
   getEvents: <EF extends EventFactory<any, any>>(
     essence: EssenceEvents<any>,

@@ -2,9 +2,10 @@ import { syncedStore, getYjsValue } from '@syncedstore/core';
 import { WebrtcProvider } from 'y-webrtc';
 import { AbstractType } from 'yjs';
 import { Essence, EssenceEvents, EssencePools } from '../../libs/ecs/essence';
+import { Component, ComponentFactory } from '../../libs/ecs/component';
 
 // Create your SyncedStore store
-export const essencePoolsStore = syncedStore<EssencePools<any>>({ pools: {} });
+export const essencePoolsStore = syncedStore<EssencePools<ComponentFactory<string, Component>[]>>({ pools: {} });
 export const essenceEventsStore = syncedStore<EssenceEvents<any>>({
   events: {},
 });

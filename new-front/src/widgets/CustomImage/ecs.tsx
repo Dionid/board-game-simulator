@@ -99,20 +99,16 @@ export const ECSCustomImage = ({ entity, essence }: { entity: EntityId; essence:
   const size = Pool.get(Essence.getOrAddPool(essence, SizeComponent), entity);
 
   return (
-    <Group
-      clipFunc={(ctx: any) =>
-        calcClipFunc(ctx, position.props.x, position.props.y, size.props.width, size.props.height, 3)
-      }
-    >
-      <Group x={position.props.x} y={position.props.y}>
+    <Group clipFunc={(ctx: any) => calcClipFunc(ctx, position.x, position.y, size.width, size.height, 3)}>
+      <Group x={position.x} y={position.y}>
         {/* <ECSHealthMeter size={size} world={world} entity={entity} /> */}
         <CustomImage
           key={entity}
           isSelected={false}
           onSelect={() => {}}
-          url={image.props.url}
-          width={size.props.width}
-          height={size.props.height}
+          url={image.url}
+          width={size.width}
+          height={size.height}
           // x={position.x}
           // y={position.y}
           // stroke={'#fff'}

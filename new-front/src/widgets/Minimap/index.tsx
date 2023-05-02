@@ -17,13 +17,13 @@ const MinimapObject = memo(({ entity, essence }: { entity: EntityId; essence: Es
     <div
       key={entity}
       style={{
-        width: size.props.width / coef,
-        height: size.props.height / coef,
+        width: size.width / coef,
+        height: size.height / coef,
         position: 'absolute',
         backgroundColor: 'blue',
         opacity: 0.5,
-        top: position.props.y / coef,
-        left: position.props.x / coef,
+        top: position.y / coef,
+        left: position.x / coef,
       }}
     />
   );
@@ -36,17 +36,17 @@ export const MiniMapArea = memo(({ playerEntity }: { playerEntity: EntityId }) =
 
   const size = Pool.get(Essence.getOrAddPool(essence, SizeComponent), playerEntity);
 
-  // console.log('position, size', position.props.x, position.props.y, size.props.width, size.props.height);
+  // console.log('position, size', position.x, position.y, size.width, size.height);
 
   return (
     <div
       style={{
-        width: size.props.width / coef,
-        height: size.props.height / coef,
+        width: size.width / coef,
+        height: size.height / coef,
         outline: '2px red solid',
         position: 'absolute',
-        top: position.props.y / coef,
-        left: position.props.x / coef,
+        top: position.y / coef,
+        left: position.x / coef,
       }}
     />
   );

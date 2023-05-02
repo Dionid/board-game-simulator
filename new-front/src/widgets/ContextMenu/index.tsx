@@ -53,8 +53,8 @@ export const ContextMenu: FC<{ world: BgsWorld; cameraEntity: EntityId }> = (pro
       height: 500,
     };
     const position = {
-      x: contextMenu.x + cameraPositionC.props.x - size.width / 2,
-      y: contextMenu.y + cameraPositionC.props.y - size.height / 2,
+      x: contextMenu.x + cameraPositionC.x - size.width / 2,
+      y: contextMenu.y + cameraPositionC.y - size.height / 2,
     };
 
     Essence.addEvent(

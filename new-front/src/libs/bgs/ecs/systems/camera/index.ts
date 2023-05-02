@@ -49,8 +49,8 @@ export const CameraSystem = (): System<{
 
     // TODO. Move somewhere (as deps or ctx)
     window.addEventListener('resize', () => {
-      sizeComponent.props.width = window.innerWidth;
-      sizeComponent.props.height = window.innerHeight;
+      sizeComponent.width = window.innerWidth;
+      sizeComponent.height = window.innerHeight;
     });
 
     // # SCALE
@@ -94,19 +94,16 @@ export const CameraSystem = (): System<{
       const cameraSizeC = Pool.get(sizeCP, cameraEntity);
       const cameraPanModeC = Pool.get(panModeP, cameraEntity);
 
-      if (cameraPanModeC.props.activated) {
+      if (cameraPanModeC.activated) {
         const newCameraPosition: Vector2 = {
-          ...cameraPositionC.props,
+          ...cameraPositionC,
         };
 
         const handPool = Essence.getOrAddPool(essence, FingerComponent);
         const fingerC = Pool.get(handPool, cameraEntity);
 
-        if (fingerC.props.click.current.down) {
-          const delta = Vector2.compareAndChange(
-            fingerC.props.onCameraPosition.previous,
-            fingerC.props.onCameraPosition.current
-          );
+        if (fingerC.click.current.down) {
+          const delta = Vector2.compareAndChange(fingerC.onCameraPosition.previous, fingerC.onCameraPosition.current);
           newCameraPosition.x -= delta.x;
           newCameraPosition.y -= delta.y;
         }
@@ -114,18 +111,18 @@ export const CameraSystem = (): System<{
         // . Restrict
         if (
           newCameraPosition.x > 0 &&
-          newCameraPosition.x + cameraSizeC.props.width < boardSize.width &&
-          cameraPositionC.props.x !== newCameraPosition.x
+          newCameraPosition.x + cameraSizeC.width < boardSize.width &&
+          cameraPositionC.x !== newCameraPosition.x
         ) {
-          cameraPositionC.props.x = newCameraPosition.x;
+          cameraPositionC.x = newCameraPosition.x;
         }
 
         if (
           newCameraPosition.y > 0 &&
-          newCameraPosition.y + cameraSizeC.props.height < boardSize.height &&
-          cameraPositionC.props.y !== newCameraPosition.y
+          newCameraPosition.y + cameraSizeC.height < boardSize.height &&
+          cameraPositionC.y !== newCameraPosition.y
         ) {
-          cameraPositionC.props.y = newCameraPosition.y;
+          cameraPositionC.y = newCameraPosition.y;
         }
       }
     },

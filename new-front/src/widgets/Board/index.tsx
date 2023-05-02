@@ -31,13 +31,8 @@ export const Board = memo(({ cameraEntity }: { cameraEntity: EntityId }) => {
   ]);
 
   return (
-    <Stage
-      style={{ backgroundColor: '#e1e1e1' }}
-      width={surfaceWidth}
-      height={surfaceHeight}
-      scale={{ ...scale.props }}
-    >
-      <Layer x={-position.props.x} y={-position.props.y}>
+    <Stage style={{ backgroundColor: '#e1e1e1' }} width={surfaceWidth} height={surfaceHeight} scale={{ ...scale }}>
+      <Layer x={-position.x} y={-position.y}>
         {gos.map((entity) => {
           return <ECSCustomImage essence={essence} key={entity} entity={entity} />;
         })}

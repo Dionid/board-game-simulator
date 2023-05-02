@@ -33,10 +33,10 @@ export const MainMenu = memo(({ world, playerEntity }: { world: BgsWorld; player
 
     if (mode === 'pan') {
       setMode(null);
-      panMode.props.activated = false;
+      panMode.activated = false;
     } else {
       setMode('pan');
-      panMode.props.activated = true;
+      panMode.activated = true;
     }
   };
 

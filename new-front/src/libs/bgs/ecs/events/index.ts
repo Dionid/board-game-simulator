@@ -9,7 +9,7 @@ export const CreateBGCGameObjectEvent = EventFactory<
   {
     components: {
       componentName: string;
-      component: Component<any, any>;
+      component: Component;
     }[];
   }
 >('CreateBGCGameObject');

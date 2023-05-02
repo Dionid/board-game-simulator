@@ -26,22 +26,22 @@ export const ZoomSystem = (): System<{
 
       if (zoomOutEvents) {
         zoomOutEvents.forEach(() => {
-          if (scaleC.props.x > 0.6) {
-            scaleC.props.x -= 0.1;
-            scaleC.props.y -= 0.1;
-            sizeC.props.width *= 1.1;
-            sizeC.props.height *= 1.1;
+          if (scaleC.x > 0.6) {
+            scaleC.x -= 0.1;
+            scaleC.y -= 0.1;
+            sizeC.width *= 1.1;
+            sizeC.height *= 1.1;
           }
         });
       }
 
       if (zoomInEvents) {
         zoomInEvents.forEach(() => {
-          if (scaleC.props.x < 3) {
-            scaleC.props.x += 0.1;
-            scaleC.props.y += 0.1;
-            sizeC.props.width *= 0.9;
-            sizeC.props.height *= 0.9;
+          if (scaleC.x < 3) {
+            scaleC.x += 0.1;
+            scaleC.y += 0.1;
+            sizeC.width *= 0.9;
+            sizeC.height *= 0.9;
           }
         });
       }
