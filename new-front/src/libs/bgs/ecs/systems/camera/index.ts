@@ -45,8 +45,14 @@ export const CameraSystem = (): System<{
     );
 
     // # SIZE
-    const sizeComponent = SizeComponent.new(cameraSize);
-    Pool.add(sizeP, cameraEntity, sizeComponent);
+    const sizeComponent = Pool.add(
+      sizeP,
+      cameraEntity,
+      SizeComponent.new({
+        width: cameraSize.width,
+        height: cameraSize.height,
+      })
+    );
 
     // TODO. Move somewhere (as deps or ctx)
     window.addEventListener('resize', () => {

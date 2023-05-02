@@ -37,9 +37,11 @@ export const Pool = {
     }
     return comp;
   },
-  add: <C extends Component>(pool: Pool<C>, entityId: EntityId, component: C): void => {
+  add: <C extends Component>(pool: Pool<C>, entityId: EntityId, component: C): C => {
     pool.components[entityId] = component;
     pool.entityIds.push(entityId);
+
+    return pool.components[entityId]!;
   },
   remove: <C extends Component>(pool: Pool<C>, entityId: EntityId) => {
     const { [entityId]: omit, ...newData } = pool.components;

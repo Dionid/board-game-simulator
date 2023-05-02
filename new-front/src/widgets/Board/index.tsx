@@ -14,14 +14,12 @@ import { Pool } from '../../libs/ecs/component';
 import { EntityId } from '../../libs/ecs/entity';
 import { ECSCustomImage } from '../CustomImage/ecs';
 
-const surfaceWidth = window.innerWidth;
-const surfaceHeight = window.innerHeight;
-
 export const Board = memo(({ cameraEntity }: { cameraEntity: EntityId }) => {
   const essence = useSyncedStore(essencePoolsStore);
 
   const scale = Pool.get(Essence.getOrAddPool(essence, ScaleComponent), cameraEntity);
   const position = Pool.get(Essence.getOrAddPool(essence, PositionComponent), cameraEntity);
+  const size = Pool.get(Essence.getOrAddPool(essence, SizeComponent), cameraEntity);
 
   const gos = Essence.getEntitiesByComponents(essence, [
     GameObjectComponent,
@@ -39,7 +37,7 @@ export const Board = memo(({ cameraEntity }: { cameraEntity: EntityId }) => {
   });
 
   return (
-    <Stage style={{ backgroundColor: '#e1e1e1' }} width={surfaceWidth} height={surfaceHeight} scale={{ ...scale }}>
+    <Stage style={{ backgroundColor: '#e1e1e1' }} width={size.width} height={size.height} scale={{ ...scale }}>
       <Layer x={-position.x} y={-position.y}>
         {gos.map((entity) => {
           return <ECSCustomImage essence={essence} key={entity} entity={entity} />;
