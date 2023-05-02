@@ -3,7 +3,7 @@ import React, { FC } from 'react';
 import { BgsWorld } from '../../libs/bgs/ecs';
 import { Essence } from '../../libs/ecs/essence';
 import { CreateBGCGameObjectEvent } from '../../libs/bgs/ecs/events';
-import { ImageComponent } from '../../libs/bgs/ecs/components';
+import { DepthComponent, ImageComponent } from '../../libs/bgs/ecs/components';
 import { PositionComponent } from '../../libs/bgs/ecs/components';
 import { SizeComponent } from '../../libs/bgs/ecs/components';
 import { PersonAdd } from '@mui/icons-material';
@@ -12,8 +12,8 @@ import { v4 } from 'uuid';
 import { Pool } from '../../libs/ecs/component';
 import { EntityId } from '../../libs/ecs/entity';
 
-export const ContextMenu: FC<{ world: BgsWorld; cameraEntity: EntityId }> = (props) => {
-  const { children, world, cameraEntity } = props;
+export const ContextMenu: FC<{ world: BgsWorld; cameraEntity: EntityId; playerEntity: EntityId }> = (props) => {
+  const { children, world, cameraEntity, playerEntity } = props;
 
   // CONTEXT MENU
   const [contextMenu, setContextMenu] = React.useState<{
@@ -45,8 +45,10 @@ export const ContextMenu: FC<{ world: BgsWorld; cameraEntity: EntityId }> = (pro
       throw new Error(`Context menu must be not emtpy`);
     }
 
+    const depthCP = Essence.getOrAddPool(world.essence, DepthComponent);
     const positionCP = Essence.getOrAddPool(world.essence, PositionComponent);
     const cameraPositionC = Pool.get(positionCP, cameraEntity);
+    const gameObjectsDepthC = Pool.get(depthCP, playerEntity);
 
     const size = {
       width: 750,
@@ -55,6 +57,7 @@ export const ContextMenu: FC<{ world: BgsWorld; cameraEntity: EntityId }> = (pro
     const position = {
       x: contextMenu.x + cameraPositionC.x - size.width / 2,
       y: contextMenu.y + cameraPositionC.y - size.height / 2,
+      z: ++gameObjectsDepthC.highest,
     };
 
     Essence.addEvent(

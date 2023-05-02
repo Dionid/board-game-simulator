@@ -1,6 +1,6 @@
 import { ComponentFactory } from '../../../ecs/component';
 import { UUID } from '../../../branded-types';
-import { Size, Vector2 } from '../../../math';
+import { Size, Vector2, Vector3 } from '../../../math';
 
 // # PLAYERS
 
@@ -58,13 +58,20 @@ export const PanModeComponent = ComponentFactory<
 
 // # GEOMETRY
 
-export const PositionComponent = ComponentFactory<'PositionComponent', Vector2>('PositionComponent');
+export const PositionComponent = ComponentFactory<'PositionComponent', Vector3>('PositionComponent');
 export const SizeComponent = ComponentFactory<'SizeComponent', Size>('SizeComponent');
 export const ScaleComponent = ComponentFactory<'ScaleComponent', Vector2>('ScaleComponent');
 
 // . GAME OBJECT
 
 export const GameObjectComponent = ComponentFactory<'GameObject', undefined>('GameObject');
+
+export const DepthComponent = ComponentFactory<
+  'DepthComponent',
+  {
+    highest: number;
+  }
+>('DepthComponent');
 
 export const ImageComponent = ComponentFactory<
   'ImageComponent',

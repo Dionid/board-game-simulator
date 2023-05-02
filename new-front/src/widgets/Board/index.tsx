@@ -30,6 +30,14 @@ export const Board = memo(({ cameraEntity }: { cameraEntity: EntityId }) => {
     ImageComponent,
   ]);
 
+  const positionComponentPool = Essence.getOrAddPool(essence, PositionComponent);
+
+  gos.sort((a, b) => {
+    const aPosition = Pool.get(positionComponentPool, a);
+    const bPosition = Pool.get(positionComponentPool, b);
+    return aPosition.z - bPosition.z;
+  });
+
   return (
     <Stage style={{ backgroundColor: '#e1e1e1' }} width={surfaceWidth} height={surfaceHeight} scale={{ ...scale }}>
       <Layer x={-position.x} y={-position.y}>

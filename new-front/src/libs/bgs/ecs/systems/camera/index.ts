@@ -40,6 +40,7 @@ export const CameraSystem = (): System<{
       PositionComponent.new({
         x: boardSize.width / 2 - cameraSize.width / 2,
         y: boardSize.height / 2 - cameraSize.height / 2,
+        z: 0,
       })
     );
 
