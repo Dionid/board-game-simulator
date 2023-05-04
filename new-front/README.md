@@ -9,12 +9,14 @@
 
 1. Remove float numbers
 1. ESC
-   1. Restructure Essence
-      1. Distinct Shared and Local data
-         1. There can be Shared component pools and maybe queries in the future
-         1. Local data: events + local component pools + ? queries
+   1. Distinct Shared and Local data
+      1. There can be Shared component pools and maybe queries in the future
+      1. Local data: events + local component pools + ? queries
+1. Deffer entity and component creation to next loop
+1. UseMonitor / Query entered
 1. Queries
-   1. On every
+1. Serverside Entity Ids
+1. SoA instead of AoS
 
 # Done
 
@@ -32,3 +34,15 @@
    1. ~~Optimize pools (remove names and no nested)~~
    1. ~~Optimize component~~
    1. ~~Add events immediately~~
+
+I need to decide right now about EntityId:
+
+1. If i use uint32, than i need some kind of decision of how to generate them:
+   1. It can be done locally if this is singleplayer
+   1. It can be done on server if this is multiplayer
+
+Main benefits i get from using uint32:
+
+1. I can store all components in arrays where eid will be index
+1. It will give me ability to implement SoA
+1. It will be standard

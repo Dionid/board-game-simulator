@@ -32,7 +32,7 @@ export const Pool = {
   },
   get: <C extends Component>(pool: Pool<C>, entityId: EntityId): C => {
     const comp = pool.components[entityId];
-    if (!comp) {
+    if (comp === undefined) {
       throw new Error(`Can't get comp by entityId ${entityId}`);
     }
     return comp;
