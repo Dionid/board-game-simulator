@@ -46,3 +46,18 @@ Main benefits i get from using uint32:
 1. I can store all components in arrays where eid will be index
 1. It will give me ability to implement SoA
 1. It will be standard
+
+1. Get entity ids by components
+   1. Cache of components intersection (add component / remove component / delete entity)
+   1. In all this operations we can form not only entities, but also components
+1. Get components by entity and check / change them
+   1. ...
+1. Add components
+   1. Invalidate queries
+1. Remove components
+1. Remove entities
+1. Add entities
+
+AoS
+
+1. I don't need to save every component on entity
