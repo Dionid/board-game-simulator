@@ -102,9 +102,7 @@ entitySparseSet.sparse[newEntityId] = entitySparseSet.dense.push(newEntityId) - 
 
 */
 
-export type Entity = number;
-
-type ComponentType = number;
+// # Sparse Set
 
 type SparseSet = {
   sparse: number[];
@@ -115,38 +113,65 @@ const SparseSet = {
   has: (sSet: SparseSet, x: number) => {
     return sSet.dense[sSet.sparse[x]] === x;
   },
-  add: (sSet: SparseSet, x: number) => {
-    sSet.sparse[x] = sSet.dense.push(x) - 1;
+  add: (sSet: SparseSet, value: number) => {
+    if (
+      value >= sSet.sparse.length ||
+      sSet.sparse[value] === undefined ||
+      sSet.sparse[value]! >= sSet.dense.length ||
+      sSet.dense[sSet.sparse[value]!] !== value
+    ) {
+      sSet.sparse[value] = sSet.dense.length;
+      sSet.dense.push(value);
+    }
+    // sSet.sparse[x] = sSet.dense.push(x) - 1;
   },
-  remove: (sSet: SparseSet, x: number) => {
-    const last = sSet.dense.pop()!;
-    if (last !== x) {
-      sSet.sparse[last] = sSet.sparse[x];
-      sSet.dense[sSet.sparse[x]] = last;
+  remove: (sSet: SparseSet, value: number) => {
+    if (sSet.dense[sSet.sparse[value]!] === value) {
+      const swap = sSet.dense.pop()!;
+      if (swap !== value) {
+        sSet.dense[sSet.sparse[value]!] = swap;
+        sSet.sparse[swap] = sSet.sparse[value]!;
+      }
     }
   },
 };
 
+// # Entity
+
+export type Entity = number;
+
+// # Component
+
+type ComponentType = number;
+type ComponentId = number;
+
+type Component = ComponentId | { readonly id: ComponentId };
+
+// # Archetype
+
 type ArchetypeMask = ComponentType;
 
 type Archetype = {
+  id: string;
   mask: ArchetypeMask;
   entitySet: SparseSet;
   entities: Entity[];
-  //   readonly adjacent: InternalArchetype[]
+  readonly adjacent: Archetype[];
 };
 
 const Archetype = {
-  new: (mask: ArchetypeMask): Archetype => {
+  new: (id: string, mask: ArchetypeMask): Archetype => {
     const dense: ArchetypeMask[] = [];
 
     return Object.freeze({
+      id,
       entitySet: {
         sparse: [],
         dense,
       },
       entities: dense,
       mask,
+      adjacent: [],
     });
   },
   hasComponent: (arch: Archetype, componentType: ComponentType) => {
@@ -161,139 +186,228 @@ const Archetype = {
   removeEntity: (arch: Archetype, entity: Entity) => {
     return SparseSet.remove(arch.entitySet, entity);
   },
+  transform: (archetype: Archetype, componentId: number): Archetype => {
+    if (archetype.adjacent[componentId] !== undefined) {
+      return archetype.adjacent[componentId]!;
+    }
+
+    // Mutate the current mask in order to avoid creating garbage (in case the archetype already exists)
+    const mask = archetype.mask;
+    // mask.xor(componentId);
+    archetype.mask ^= componentId;
+    const nextId = mask.toString();
+
+    let existingArchetype: Archetype | null = null;
+    Archetype.traverseGraph(archetype, (node) => {
+      if (node === archetype) return;
+      if (node.id === nextId) {
+        existingArchetype = node;
+        return false;
+      }
+      return existingArchetype === null;
+    });
+
+    const transformed = existingArchetype || Archetype.new(nextId, mask);
+    // reset current mask of input archetype, see comment above
+    // mask.xor(componentId);
+    archetype.mask ^= componentId;
+    transformed.adjacent[componentId] = archetype;
+    archetype.adjacent[componentId] = transformed;
+    return transformed;
+  },
+  traverseGraph: (
+    archetype: Archetype,
+    callback: (archetype: Archetype) => boolean | void,
+    traversed = new Set<Archetype>()
+  ): boolean => {
+    traversed.add(archetype);
+    if (callback(archetype) === false) return false;
+    const adjacent = archetype.adjacent;
+    for (let i = 0, l = adjacent.length; i < l; i++) {
+      const arch = adjacent[i];
+      // adjacent is sparse, so there can be empty slots
+      if (arch === undefined) continue;
+      // graph is doubly linked, so need to prevent infinite recursion
+      if (traversed.has(arch)) continue;
+      if (Archetype.traverseGraph(arch, callback, traversed) === false) return false;
+    }
+    return true;
+  },
 };
 
-const emptyArchetype = Archetype.new(0);
+// # System
+
+export type System = (world: World) => void;
+
+// # World
+
+const rootArchetype = Archetype.new('root', 0);
 
 type World = {
-  entityId: number;
-  //   archetypes: Map<ArchetypeMask, Archetype>;
-
-  archetypes: Archetype[];
-  archetypesByMask: ArchetypeMask[];
-
+  entityGraveyard: Entity[];
+  nextEntityId: Entity;
+  nextComponentId: number;
+  rootArchetype: Archetype;
   archetypesByEntities: Archetype[];
+  initialized: boolean;
+  deferred: (() => any)[];
+  //   archetypes: Archetype[];
+  //   archetypesByMask: ArchetypeMask[];
 };
 
-const getOrCreateArchetype = (world: World, mask: ArchetypeMask) => {
-  let i = world.archetypesByMask.indexOf(mask);
+export class EntityUndefinedError extends Error {
+  constructor() {
+    super(`
+Seems like you're iterating entities from 0..N and transforming entities.
+This may remove the entity from the query results passed to your system.
+Try iterating entities backwards:
+\`for (let i = entities.length -1; i >= 0; i--) {...}\`
+You can also wrap the transformation in \`world.defer(() => {...})\`
+`);
+  }
+}
+export class EntityDeletedError extends Error {
+  constructor(entity: number) {
+    super(`Entity ${entity} is deleted`);
+  }
+}
+export class EntityNotExistError extends Error {
+  constructor(entity: number) {
+    super(`Entity ${entity} does not exist`);
+  }
+}
+export class WorldNotInitializedError extends Error {
+  constructor() {
+    super('World not initialized');
+  }
+}
 
-  if (i === -1) {
-    const newArchetype = Archetype.new(mask);
-    i = world.archetypes.push(newArchetype) - 1;
+const _transformEntityForComponent = (world: World, current: Archetype, entity: Entity, componentId: ComponentId) => {
+  Archetype.removeEntity(current, entity);
+
+  if (current.adjacent[componentId] !== undefined) {
+    current = current.adjacent[componentId]!;
+  } else {
+    current = Archetype.transform(current, componentId);
+    if (world.initialized) {
+      //   _tryAddArchetypeToQueries(current);
+    }
   }
 
-  return world.archetypes[i];
+  Archetype.addEntity(current, entity);
+  world.archetypesByEntities[entity] = current;
+};
+
+const _assertEntity = (world: World, entity: number) => {
+  if (world.archetypesByEntities[entity] === undefined) {
+    if (entity === undefined) {
+      throw new EntityUndefinedError();
+    } else if (world.entityGraveyard.includes(entity)) {
+      throw new EntityDeletedError(entity);
+    }
+    throw new EntityNotExistError(entity);
+  }
+};
+
+function getComponentId(component: Component): number {
+  return typeof component === 'number' ? component : component.id;
+}
+
+const _executeDeferred = (world: World) => {
+  if (world.deferred.length === 0) return;
+
+  for (const action of world.deferred) {
+    action();
+  }
+  world.deferred.length = 0;
 };
 
 const World = {
-  createEntity: (world: World) => {
-    const id = world.entityId++;
-
-    world.archetypesByEntities[id] = emptyArchetype;
-
-    return id;
+  new: (): World => {
+    return {
+      entityGraveyard: [],
+      nextEntityId: 0,
+      nextComponentId: 0,
+      rootArchetype,
+      archetypesByEntities: [],
+      initialized: false,
+      deferred: [],
+    };
   },
-  addComponent: (world: World, entity: Entity, componentType: ComponentType) => {
-    const arch = world.archetypesByEntities[entity];
+  hasEntity(world: World, entity: Entity): boolean {
+    return world.archetypesByEntities[entity] !== undefined;
+  },
+  createEntity: (world: World, archetype: Archetype = world.rootArchetype) => {
+    const entity = world.entityGraveyard.length > 0 ? world.entityGraveyard.pop()! : world.nextEntityId++;
 
-    // # If current entity archetype doesn't have this component,
-    // then change archetype
-    if ((arch.mask & componentType) !== componentType) {
-      Archetype.removeEntity(arch, entity);
-      const newArchetype = getOrCreateArchetype(world, arch.mask | componentType);
-      Archetype.addEntity(newArchetype, entity);
-      world.archetypesByEntities[entity] = newArchetype;
+    Archetype.addEntity(archetype, entity);
+    world.archetypesByEntities[entity] = archetype;
+    return entity;
+  },
+  deleteEntity(world: World, entity: number) {
+    _assertEntity(world, entity);
+
+    const archetype = world.archetypesByEntities[entity]!;
+    Archetype.removeEntity(archetype, entity);
+    // much faster than delete operator, but achieves the same (ish)
+    // an alternative is to leave it be, and use archetype.entitySet.has(entity) as a check for entity being deleted, but that too is a little slower.
+    world.archetypesByEntities[entity] = undefined as any;
+    world.entityGraveyard.push(entity);
+  },
+  createComponentId(world: World) {
+    return world.nextComponentId++;
+  },
+  initialize(world: World) {
+    if (world.initialized) return;
+    world.initialized = true;
+
+    Archetype.traverseGraph(world.rootArchetype, (arch) => {
+      // _tryAddArchetypeToQueries(arch)
+    });
+  },
+  addComponent<T extends Component>(world: World, entity: number, component: T) {
+    _assertEntity(world, entity);
+
+    const cid = getComponentId(component);
+    const archetype = world.archetypesByEntities[entity]!;
+
+    if (!(archetype.mask & cid)) {
+      _transformEntityForComponent(world, archetype, entity, cid);
     }
   },
+  removeComponent<T extends Component>(world: World, entity: number, component: T) {
+    _assertEntity(world, entity);
+
+    const cid = getComponentId(component);
+    const archetype = world.archetypesByEntities[entity]!;
+
+    if (archetype.mask & cid) {
+      _transformEntityForComponent(world, archetype, entity, cid);
+    }
+  },
+  defer(world: World, action: () => void) {
+    world.deferred.push(action);
+  },
+  step(world: World, systems: System[]) {
+    if (!world.initialized) {
+      throw new WorldNotInitializedError();
+    }
+
+    for (let s = 0, sl = systems.length; s < sl; s++) {
+      const system = systems[s]!;
+      system(world);
+      //   const archetypes = (system.query as InternalQuery).archetypes;
+      //   if (system.type === 1) {
+      //     system(archetypes, this, ...args);
+      //   } else {
+      //     // reverse iterating in case a system adds/removes component resulting in new archetype that matches query for the system
+      //     for (let a = archetypes.length - 1; a >= 0; a--) {
+      //       const entities = archetypes[a]!.entities;
+      //       system.execute(entities, this, ...args);
+      //     }
+      //   }
+    }
+
+    _executeDeferred(world);
+  },
 };
-
-// enum Components {
-//   Position,
-//   Velocity,
-// }
-
-// const Has: Record<string, ArchetypeMask> = {
-//   Position: 1 << Components.Position,
-//   Velocity: 1 << Components.Velocity,
-// };
-
-// type Vector2Component = {
-//   x: number[];
-//   y: number[];
-// };
-
-// const PositionComponent: Vector2Component = {
-//   x: [],
-//   y: [],
-// };
-
-// const VelocityComponent: Vector2Component = {
-//   x: [],
-//   y: [],
-// };
-
-// const world: World = {
-//   entityId: 0,
-//   archetypes: new Map(),
-//   archetypesByEntities: [],
-// };
-
-// const positionVelocityQuery = Has.Position | Has.Velocity;
-
-// const moveSystem = () => {
-//   return (world: World) => {
-//     const entities = world.archetypes.get(positionVelocityQuery)?.entities;
-
-//     if (!entities) {
-//       return;
-//     }
-
-//     for (let archetypes of world.archetypesByEntities) {
-//       if ((archetypes.mask & positionVelocityQuery) === positionVelocityQuery) {
-//         for (const entity of archetypes.entities) {
-//           PositionComponent.x[entity] += VelocityComponent.x[entity];
-//           PositionComponent.y[entity] += VelocityComponent.y[entity];
-//           VelocityComponent.x[entity] -= 1;
-//           VelocityComponent.y[entity] -= 1;
-//         }
-//       }
-//     }
-//   };
-// };
-
-// console.log('world', world);
-// console.log('PositionComponent', PositionComponent);
-// console.log('VelocityComponent', VelocityComponent);
-
-// moveSystem()(world);
-
-// console.log('world', world);
-// console.log('PositionComponent', PositionComponent);
-// console.log('VelocityComponent', VelocityComponent);
-
-// const entity = World.createEntity(world);
-// World.addComponent(world, entity, Has.Position);
-// PositionComponent.x[entity] = 1;
-// PositionComponent.y[entity] = 1;
-// World.addComponent(world, entity, Has.Velocity);
-// VelocityComponent.x[entity] = 2;
-// VelocityComponent.y[entity] = 2;
-
-// console.log('world', world);
-// console.log('PositionComponent', PositionComponent);
-// console.log('VelocityComponent', VelocityComponent);
-
-// moveSystem()(world);
-
-// console.log('world', world);
-// console.log('PositionComponent', PositionComponent);
-// console.log('VelocityComponent', VelocityComponent);
-
-// moveSystem()(world);
-
-// console.log('world', world);
-// console.log('PositionComponent', PositionComponent);
-// console.log('VelocityComponent', VelocityComponent);
-
-// console.log('world.archetypesByEntities[entity]', world.archetypesByEntities[entity]);
