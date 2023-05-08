@@ -1,42 +1,4 @@
-// # Sparse Set
-
-export type SparseSet<T extends number> = {
-  sparse: T[];
-  dense: T[];
-};
-
-export const SparseSet = {
-  new: () => {
-    return {
-      sparse: [],
-      dense: [],
-    };
-  },
-  has: <T extends number>(sSet: SparseSet<T>, x: T) => {
-    return sSet.dense[sSet.sparse[x]] === x;
-  },
-  add: <T extends number>(sSet: SparseSet<T>, value: T) => {
-    if (
-      value >= sSet.sparse.length ||
-      sSet.sparse[value] === undefined ||
-      sSet.sparse[value]! >= sSet.dense.length ||
-      sSet.dense[sSet.sparse[value]!] !== value
-    ) {
-      sSet.sparse[value] = sSet.dense.length as T;
-      sSet.dense.push(value);
-    }
-    // sSet.sparse[x] = sSet.dense.push(x) - 1;
-  },
-  remove: <T extends number>(sSet: SparseSet<T>, value: T) => {
-    if (sSet.dense[sSet.sparse[value]!] === value) {
-      const swap = sSet.dense.pop()!;
-      if (swap !== value) {
-        sSet.dense[sSet.sparse[value]!] = swap;
-        sSet.sparse[swap] = sSet.sparse[value]!;
-      }
-    }
-  },
-};
+import { SparseSet } from './sparse-set';
 
 // # ECS
 
@@ -77,7 +39,7 @@ export type Archetype = {
 };
 
 export const Archetype = {
-  new: function (id: ArchetypeId): Archetype {
+  new: (id: ArchetypeId): Archetype => {
     const sSet = SparseSet.new();
     return {
       sSet: sSet,
@@ -100,48 +62,32 @@ export const Archetype = {
   },
 };
 
-export type Query = {
-  mask: Mask;
-  //   sSet: SparseSet<ArchetypeId>;
-  archetypes: Archetype[];
-};
-
 export const Query = {
-  new: (mask: Mask): Query => {
-    // const sSet = SparseSet.new();
-
-    return {
-      mask: mask,
-      //   sSet,
-      archetypes: [],
-    };
-  },
-  every: (componentsIds: ComponentId[]): Mask => {
+  every: (components: ComponentId[]): Mask => {
     let mask = 0;
 
-    for (let i = 0; i < componentsIds.length; i++) {
-      const componentId = componentsIds[i];
-      mask |= componentId;
+    for (let i = 0; i < components.length; i++) {
+      mask |= components[i];
     }
 
     return mask;
   },
 };
 
-const emptyArchetype = Archetype.new(0);
-
 export type World = {
+  size: number;
   nextComponentId: number;
   components: Component[];
+  emptyArchetype: Archetype;
   nextEntityId: Entity; // 100% number
   entityGraveyard: Entity[]; // 100% array
-  queries: Query[];
   archetypes: Archetype[]; // 100% array
   archetypesIndexById: Record<ArchetypeId, number>;
   archetypesByEntities: Archetype[]; // Maybe, change to Map / Record?
+  resizeSubscribers: ((newSize: number) => void)[];
 };
 
-const getOrCreateArchetype = function (world: World, archetypeId: ArchetypeId) {
+const getOrCreateArchetype = (world: World, archetypeId: ArchetypeId) => {
   let archetypeIndex = world.archetypesIndexById[archetypeId];
 
   if (archetypeIndex === undefined) {
@@ -154,43 +100,89 @@ const getOrCreateArchetype = function (world: World, archetypeId: ArchetypeId) {
 };
 
 export const World = {
-  new: (): World => {
+  new: (props?: { size?: number }): World => {
     return {
-      nextComponentId: 1,
+      size: props?.size ?? 100000,
+      nextComponentId: 0,
       nextEntityId: 0,
       components: [],
       archetypes: [],
-      queries: [],
+      emptyArchetype: Archetype.new(0),
       entityGraveyard: [],
       archetypesIndexById: {},
       archetypesByEntities: [],
+      resizeSubscribers: [],
     };
   },
-  registerComponent: <T>(world: World, data: T): Component & T => {
+  subscribeOnResize: (world: World, callback: (newSize: number) => void) => {
+    world.resizeSubscribers.push(callback);
+  },
+  step: (world: World, systems: System[]) => {
+    for (let i = 0; i < systems.length; i++) {
+      const system = systems[i];
+      system(world);
+    }
+  },
+  // DEPRECATED: because of performance
+  // findEntities: (world: World, archetypeId: Mask, callback: (entity: Entity) => void) => {
+  //   for (let i = world.archetypes.length - 1; i >= 0; i--) {
+  //     const archetype = world.archetypes[i];
+  //     if ((archetype.id & archetypeId) === archetypeId) {
+  //       const entities = archetype.entities;
+  //       for (let j = entities.length - 1; j >= 0; j--) {
+  //         callback(entities[j]);
+  //       }
+  //     }
+  //   }
+  // },
+  findArchetypes: (world: World, archetypeId: Mask, callback: (archetype: Archetype) => void) => {
+    for (let i = world.archetypes.length - 1; i >= 0; i--) {
+      const archetype = world.archetypes[i];
+      if ((archetype.id & archetypeId) === archetypeId) {
+        callback(archetype);
+      }
+    }
+  },
+  // # Archetype
+  getOrCreateArchetype,
+  // # Component
+  registerComponentId: (world: World): ComponentId => {
     const componentId = world.nextComponentId++;
-    const component = {
-      id: 1 << componentId,
-      ...data,
-    };
-    world.components.push(component);
-    return component;
+    return 1 << componentId;
   },
-  createEntity: function (world: World, prefabricate?: Archetype) {
-    const entity = world.entityGraveyard.length > 0 ? world.entityGraveyard.pop()! : world.nextEntityId++;
-    const archetype = prefabricate ?? emptyArchetype;
+  // # Entity
+  allocateEntityId: (world: World): Entity => {
+    if (world.entityGraveyard.length > 0) {
+      return world.entityGraveyard.pop()!;
+    }
+
+    // # Resize world
+    if (world.nextEntityId >= world.size) {
+      const newSize = world.size * 2;
+      console.log(`Resizing world from ${world.size} to ${newSize}`);
+      world.size = newSize;
+      for (let i = 0; i < world.resizeSubscribers.length; i++) {
+        world.resizeSubscribers[i](newSize);
+      }
+    }
+
+    return world.nextEntityId++;
+  },
+  createEntity: (world: World, prefabricate?: Archetype) => {
+    const entity = World.allocateEntityId(world);
+    const archetype = prefabricate ?? world.emptyArchetype;
     Archetype.addEntity(archetype, entity);
     world.archetypesByEntities[entity] = archetype;
     return entity;
   },
-  getOrCreateArchetype,
-  destroyEntity: function (world: World, entity: Entity) {
+  destroyEntity: (world: World, entity: Entity) => {
     const archetype = world.archetypesByEntities[entity];
     Archetype.removeEntity(archetype, entity);
     world.archetypesByEntities[entity] = undefined as unknown as Archetype; // QUESTION: see in piecs
     world.entityGraveyard.push(entity);
   },
-  addComponent: function (world: World, entity: Entity, componentId: ComponentId) {
-    const arch = world.archetypesByEntities[entity];
+  addComponent: (world: World, entity: Entity, componentId: ComponentId, archetype?: Archetype) => {
+    const arch = archetype ?? world.archetypesByEntities[entity];
     // # If current entity archetype doesn't have this component,
     // then change archetype
     if ((arch.id & componentId) !== componentId) {
@@ -200,8 +192,8 @@ export const World = {
       world.archetypesByEntities[entity] = newArchetype;
     }
   },
-  removeComponent: function (world: World, entity: Entity, componentId: ComponentId) {
-    const arch = world.archetypesByEntities[entity];
+  removeComponent: (world: World, entity: Entity, componentId: ComponentId, archetype?: Archetype) => {
+    const arch = archetype ?? world.archetypesByEntities[entity];
     // # If current entity archetype doesn't have this component,
     // then change archetype
     if ((arch.id & componentId) === componentId) {
@@ -209,39 +201,6 @@ export const World = {
       const newArchetype = getOrCreateArchetype(world, arch.id & ~componentId);
       Archetype.addEntity(newArchetype, entity);
       world.archetypesByEntities[entity] = newArchetype;
-    }
-  },
-  step: (world: World, systems: System[]) => {
-    for (let i = 0; i < systems.length; i++) {
-      const system = systems[i];
-      system(world);
-    }
-  },
-  findEntities: (world: World, archetypeId: Mask, callback: (entity: Entity) => void) => {
-    for (let i = 0; i < world.archetypes.length; i++) {
-      const archetype = world.archetypes[i];
-      if ((archetype.id & archetypeId) === archetypeId) {
-        const entities = archetype.entities;
-        for (let j = 0; j < entities.length; j++) {
-          callback(entities[j]);
-        }
-      }
-    }
-  },
-  createQuery: (world: World, archetypeId: ArchetypeId): Archetype[] => {
-    const query = Query.new(archetypeId);
-    world.queries.push(query);
-    World.fulfillQuery(world, query);
-    return query.archetypes;
-  },
-  fulfillQuery: (world: World, query: Query) => {
-    const { archetypes, mask } = query;
-    for (let i = 0; i < world.archetypes.length; i++) {
-      const archetype = world.archetypes[i];
-      if ((archetype.id & mask) === mask) {
-        // SparseSet.add(sSet, archetype.id);
-        archetypes.push(archetype);
-      }
     }
   },
 };

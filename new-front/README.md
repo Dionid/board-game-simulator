@@ -70,6 +70,7 @@ AoS
 1. ~~Archetype Query~~
 1. ~~Create systems~~
 1. ~~World step~~
+1. REVERSE FOR LOOP ORDER
 1. Beautiful components
 1. Prefabricate (does piecs prefabricate ALL variants)
 1. Ctx
@@ -80,4 +81,4 @@ AoS
 ## Components
 
 1. Must be created in harcoded sequence -> Can be done by `world.registerComponent`
-1. !!! We must somehow resize components
+1. !!! We must somehow resize components -> Then we need to create Schema
