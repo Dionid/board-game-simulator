@@ -61,3 +61,17 @@ Main benefits i get from using uint32:
 AoS
 
 1. I don't need to save every component on entity
+1. ...
+
+# TECS
+
+1. ~~Graveyard~~
+1. ~~? SparseSet for archetypeByMask~~ to big mask in key
+1. Archetype Query
+1. Create systems
+1. World step
+1. Beautiful components
+1. Prefabricate
+1. Ctx
+1. Events
+1. ? Deffer create / delete / addComponent / removeComponent
