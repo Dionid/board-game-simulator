@@ -61,11 +61,11 @@ export const Archetype = {
 };
 export const Query = {
   new: (mask) => {
-    const sSet = SparseSet.new();
+    // const sSet = SparseSet.new();
     return {
       mask: mask,
-      sSet,
-      archetypes: sSet.dense,
+      //   sSet,
+      archetypes: [],
     };
   },
   every: (componentsIds) => {
@@ -92,6 +92,7 @@ export const World = {
     return {
       nextEntityId: 0,
       archetypes: [],
+      queries: [],
       entityGraveyard: [],
       archetypesIndexById: {},
       archetypesByEntities: [],
@@ -106,12 +107,9 @@ export const World = {
   },
   getOrCreateArchetype,
   destroyEntity: function (world, entity) {
-    // const archetype = world.archetypesByEntities[entity];
-    // Archetype.removeEntity(archetype, entity);
-    // world.archetypesByEntities[entity] = emptyArchetype;
     const archetype = world.archetypesByEntities[entity];
     Archetype.removeEntity(archetype, entity);
-    world.archetypesByEntities[entity] = undefined;
+    world.archetypesByEntities[entity] = undefined; // QUESTION: see in piecs
     world.entityGraveyard.push(entity);
   },
   addComponent: function (world, entity, componentId) {
@@ -134,6 +132,28 @@ export const World = {
       const newArchetype = getOrCreateArchetype(world, arch.id & ~componentId);
       Archetype.addEntity(newArchetype, entity);
       world.archetypesByEntities[entity] = newArchetype;
+    }
+  },
+  step: (world, systems) => {
+    for (let i = 0; i < systems.length; i++) {
+      const system = systems[i];
+      system(world);
+    }
+  },
+  createQuery: (world, archetypeId) => {
+    const query = Query.new(archetypeId);
+    world.queries.push(query);
+    World.fulfillQuery(world, query);
+    return query.archetypes;
+  },
+  fulfillQuery: (world, query) => {
+    const { archetypes, mask } = query;
+    for (let i = 0; i < world.archetypes.length; i++) {
+      const archetype = world.archetypes[i];
+      if ((archetype.id & mask) === mask) {
+        // SparseSet.add(sSet, archetype.id);
+        archetypes.push(archetype);
+      }
     }
   },
 };

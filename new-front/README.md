@@ -67,11 +67,17 @@ AoS
 
 1. ~~Graveyard~~
 1. ~~? SparseSet for archetypeByMask~~ to big mask in key
-1. Archetype Query
-1. Create systems
-1. World step
+1. ~~Archetype Query~~
+1. ~~Create systems~~
+1. ~~World step~~
 1. Beautiful components
-1. Prefabricate
+1. Prefabricate (does piecs prefabricate ALL variants)
 1. Ctx
 1. Events
 1. ? Deffer create / delete / addComponent / removeComponent
+1. useMonitor alternative
+
+## Components
+
+1. Must be created in harcoded sequence -> Can be done by `world.registerComponent`
+1. !!! We must somehow resize components

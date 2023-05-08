@@ -1,3 +1,5 @@
+// # Sparse Set
+
 export type SparseSet<T extends number> = {
   sparse: T[];
   dense: T[];
@@ -40,9 +42,15 @@ export const SparseSet = {
 
 export type Mask = number;
 
+// # Entity
+
 export type Entity = number;
 
-export type Archetype = Mask;
+// # System
+
+export type System = (world: World) => void;
+
+// # Component
 
 export type ComponentId = Mask;
 
@@ -58,128 +66,150 @@ export const Component = {
   },
 };
 
-export type System = (world: World) => void;
+// # Archetype
+
+export type ArchetypeId = Mask;
+
+export type Archetype = {
+  sSet: SparseSet<Entity>;
+  entities: Entity[];
+  id: ArchetypeId;
+};
+
+export const Archetype = {
+  new: function (id: ArchetypeId): Archetype {
+    const sSet = SparseSet.new();
+    return {
+      sSet: sSet,
+      entities: sSet.dense,
+      id,
+    };
+  },
+  hasComponent: (arch: Archetype, componentId: ComponentId) => {
+    // const componentId = Component.getComponentId(component);
+    return (arch.id & componentId) === componentId;
+  },
+  hasEntity: (arch: Archetype, entity: Entity) => {
+    return SparseSet.has(arch.sSet, entity);
+  },
+  addEntity: (arch: Archetype, entity: Entity) => {
+    return SparseSet.add(arch.sSet, entity);
+  },
+  removeEntity: (arch: Archetype, entity: Entity) => {
+    return SparseSet.remove(arch.sSet, entity);
+  },
+};
 
 export type Query = {
   mask: Mask;
-  sSet: SparseSet<Entity>;
-  entities: Entity[];
+  //   sSet: SparseSet<ArchetypeId>;
+  archetypes: Archetype[];
 };
 
 export const Query = {
-  new: (mask: Mask) => {
-    const sSet = SparseSet.new();
+  new: (mask: Mask): Query => {
+    // const sSet = SparseSet.new();
 
     return {
       mask: mask,
-      sSet,
-      entities: sSet.dense,
+      //   sSet,
+      archetypes: [],
     };
   },
-  every: (components: Component[]): Mask => {
+  every: (componentsIds: ComponentId[]): Mask => {
     let mask = 0;
 
-    for (let i = 0; i < components.length; i++) {
-      const component = components[i];
-      mask |= Component.getComponentId(component);
+    for (let i = 0; i < componentsIds.length; i++) {
+      const componentId = componentsIds[i];
+      mask |= componentId;
     }
 
     return mask;
   },
 };
 
+const emptyArchetype = Archetype.new(0);
+
 export type World = {
-  nextEntity: number;
-  entityGraveyard: Entity[];
+  nextComponentId: number;
+  components: Component[];
+  nextEntityId: Entity; // 100% number
+  entityGraveyard: Entity[]; // 100% array
   queries: Query[];
-  archetypeByEntity: Archetype[];
-  emptyArchetype: Archetype;
+  archetypes: Archetype[]; // 100% array
+  archetypesIndexById: Record<ArchetypeId, number>;
+  archetypesByEntities: Archetype[]; // Maybe, change to Map / Record?
+};
+
+const getOrCreateArchetype = function (world: World, archetypeId: ArchetypeId) {
+  let archetypeIndex = world.archetypesIndexById[archetypeId];
+
+  if (archetypeIndex === undefined) {
+    const newArchetype = Archetype.new(archetypeId);
+    archetypeIndex = world.archetypes.push(newArchetype) - 1;
+    world.archetypesIndexById[archetypeId] = archetypeIndex;
+  }
+
+  return world.archetypes[archetypeIndex];
 };
 
 export const World = {
-  new: (props?: { rootArchetype?: Archetype }): World => {
+  new: (): World => {
     return {
-      nextEntity: 0,
-      entityGraveyard: [],
+      nextComponentId: 1,
+      nextEntityId: 0,
+      components: [],
+      archetypes: [],
       queries: [],
-      archetypeByEntity: [],
-      emptyArchetype: props?.rootArchetype ?? 0,
+      entityGraveyard: [],
+      archetypesIndexById: {},
+      archetypesByEntities: [],
     };
   },
-  createEntity: (world: World) => {
-    if (world.entityGraveyard.length > 0) {
-      return world.entityGraveyard.pop()!;
-    }
-
-    const entity = world.nextEntity++;
-    const archetype = world.emptyArchetype;
-    world.archetypeByEntity[entity] = archetype;
-
-    World.recalculateQueries(world, entity, archetype);
-
+  registerComponent: <T>(world: World, data: T): Component & T => {
+    const componentId = world.nextComponentId++;
+    const component = {
+      id: 1 << componentId,
+      ...data,
+    };
+    world.components.push(component);
+    return component;
+  },
+  createEntity: function (world: World, prefabricate?: Archetype) {
+    const entity = world.entityGraveyard.length > 0 ? world.entityGraveyard.pop()! : world.nextEntityId++;
+    const archetype = prefabricate ?? emptyArchetype;
+    Archetype.addEntity(archetype, entity);
+    world.archetypesByEntities[entity] = archetype;
     return entity;
   },
-  destroyEntity: (world: World, entity: Entity) => {
+  getOrCreateArchetype,
+  destroyEntity: function (world: World, entity: Entity) {
+    const archetype = world.archetypesByEntities[entity];
+    Archetype.removeEntity(archetype, entity);
+    world.archetypesByEntities[entity] = undefined as unknown as Archetype; // QUESTION: see in piecs
     world.entityGraveyard.push(entity);
-
-    world.archetypeByEntity[entity] = world.emptyArchetype;
-
-    World.removeFromQueries(world, entity);
   },
-  addComponent: (world: World, entity: Entity, component: Component) => {
-    const archetype = world.archetypeByEntity[entity];
-    const componentId = Component.getComponentId(component);
-    const newArchetype = archetype | componentId;
-
-    if (archetype !== newArchetype) {
-      world.archetypeByEntity[entity] = newArchetype;
-      World.recalculateQueries(world, entity, newArchetype);
+  addComponent: function (world: World, entity: Entity, componentId: ComponentId) {
+    const arch = world.archetypesByEntities[entity];
+    // # If current entity archetype doesn't have this component,
+    // then change archetype
+    if ((arch.id & componentId) !== componentId) {
+      Archetype.removeEntity(arch, entity);
+      const newArchetype = getOrCreateArchetype(world, arch.id | componentId);
+      Archetype.addEntity(newArchetype, entity);
+      world.archetypesByEntities[entity] = newArchetype;
     }
   },
-  removeComponent: (world: World, entity: Entity, component: Component) => {
-    const archetype = world.archetypeByEntity[entity];
-    const componentId = Component.getComponentId(component);
-    const newArchetype = archetype & ~componentId;
-
-    if (archetype !== newArchetype) {
-      world.archetypeByEntity[entity] = newArchetype;
-      World.recalculateQueries(world, entity, newArchetype);
+  removeComponent: function (world: World, entity: Entity, componentId: ComponentId) {
+    const arch = world.archetypesByEntities[entity];
+    // # If current entity archetype doesn't have this component,
+    // then change archetype
+    if ((arch.id & componentId) === componentId) {
+      Archetype.removeEntity(arch, entity);
+      const newArchetype = getOrCreateArchetype(world, arch.id & ~componentId);
+      Archetype.addEntity(newArchetype, entity);
+      world.archetypesByEntities[entity] = newArchetype;
     }
-  },
-  recalculateQueries: (world: World, entity: Entity, archetype: Archetype) => {
-    for (let i = 0; i < world.queries.length; i++) {
-      const query = world.queries[i];
-
-      if ((archetype & query.mask) === query.mask) {
-        SparseSet.add(query.sSet, entity);
-      } else if (SparseSet.has(query.sSet, entity)) {
-        SparseSet.remove(query.sSet, entity);
-      }
-    }
-  },
-  removeFromQueries: (world: World, entity: Entity) => {
-    for (let i = 0; i < world.queries.length; i++) {
-      const query = world.queries[i];
-
-      if (SparseSet.has(query.sSet, entity)) {
-        SparseSet.remove(query.sSet, entity);
-      }
-    }
-  },
-  fulfillQuery: (world: World, query: Query) => {
-    const { sSet, mask } = query;
-    for (let entity = 0; entity < world.archetypeByEntity.length; entity++) {
-      const archetype = world.archetypeByEntity[entity];
-      if ((archetype & mask) === mask) {
-        SparseSet.add(sSet, entity);
-      }
-    }
-  },
-  createQuery: (world: World, mask: Mask): Entity[] => {
-    const query = Query.new(mask);
-    world.queries.push(query);
-    World.fulfillQuery(world, query);
-    return query.entities;
   },
   step: (world: World, systems: System[]) => {
     for (let i = 0; i < systems.length; i++) {
@@ -187,70 +217,31 @@ export const World = {
       system(world);
     }
   },
-};
-
-// # Example
-
-enum Components {
-  Position,
-  Velocity,
-}
-
-type Vector2 = {
-  x: number[];
-  y: number[];
-};
-
-const Position: Component & Vector2 = {
-  id: 1 << Components.Position,
-  x: [],
-  y: [],
-};
-
-const Velocity: Component & Vector2 = {
-  id: 1 << Components.Velocity,
-  x: [],
-  y: [],
-};
-
-const moveSystem = (world: World) => {
-  const entities = World.createQuery(world, Query.every([Position, Velocity]));
-
-  return (world: World) => {
-    for (let i = 0; i < entities.length; i++) {
-      const entity = entities[i];
-
-      console.log('entity', entity);
-
-      const velX = Velocity.x[entity];
-      const velY = Velocity.y[entity];
-
-      Position.x[entity] += velX;
-      Position.y[entity] += velY;
-      if (velX > 0) Velocity.x[entity] -= 1;
-      if (velY > 0) Velocity.y[entity] -= 1;
+  findEntities: (world: World, archetypeId: Mask, callback: (entity: Entity) => void) => {
+    for (let i = 0; i < world.archetypes.length; i++) {
+      const archetype = world.archetypes[i];
+      if ((archetype.id & archetypeId) === archetypeId) {
+        const entities = archetype.entities;
+        for (let j = 0; j < entities.length; j++) {
+          callback(entities[j]);
+        }
+      }
     }
-  };
+  },
+  createQuery: (world: World, archetypeId: ArchetypeId): Archetype[] => {
+    const query = Query.new(archetypeId);
+    world.queries.push(query);
+    World.fulfillQuery(world, query);
+    return query.archetypes;
+  },
+  fulfillQuery: (world: World, query: Query) => {
+    const { archetypes, mask } = query;
+    for (let i = 0; i < world.archetypes.length; i++) {
+      const archetype = world.archetypes[i];
+      if ((archetype.id & mask) === mask) {
+        // SparseSet.add(sSet, archetype.id);
+        archetypes.push(archetype);
+      }
+    }
+  },
 };
-
-const world = World.new();
-
-const systems = [moveSystem(world)];
-
-const entity = World.createEntity(world);
-World.addComponent(world, entity, Position);
-World.addComponent(world, entity, Velocity);
-Position.x[entity] = 1;
-Position.y[entity] = 1;
-Velocity.x[entity] = 2;
-Velocity.y[entity] = 2;
-
-console.log(world);
-
-console.log(Position, Velocity);
-
-World.step(world, systems);
-
-console.log(world);
-
-console.log(Position, Velocity);
