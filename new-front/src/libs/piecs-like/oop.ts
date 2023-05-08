@@ -1,35 +1,42 @@
 // # Sparse Set
 
-type SparseSet = {
-  sparse: number[];
-  dense: number[];
+export type SparseSet = {
+  readonly values: ArrayLike<number>;
+  has(value: number): boolean;
+  add(value: number): void;
+  remove(value: number): void;
 };
 
-const SparseSet = {
-  has: (sSet: SparseSet, x: number) => {
-    return sSet.dense[sSet.sparse[x]] === x;
-  },
-  add: (sSet: SparseSet, value: number) => {
-    if (
-      value >= sSet.sparse.length ||
-      sSet.sparse[value] === undefined ||
-      sSet.sparse[value]! >= sSet.dense.length ||
-      sSet.dense[sSet.sparse[value]!] !== value
-    ) {
-      sSet.sparse[value] = sSet.dense.length;
-      sSet.dense.push(value);
-    }
-    // sSet.sparse[x] = sSet.dense.push(x) - 1;
-  },
-  remove: (sSet: SparseSet, value: number) => {
-    if (sSet.dense[sSet.sparse[value]!] === value) {
-      const swap = sSet.dense.pop()!;
-      if (swap !== value) {
-        sSet.dense[sSet.sparse[value]!] = swap;
-        sSet.sparse[swap] = sSet.sparse[value]!;
+export const createSparseSet = (): SparseSet => {
+  const values: number[] = [];
+  const indices: number[] = [];
+
+  return Object.freeze({
+    values,
+    has(value: number): boolean {
+      return values[indices[value]!] === value;
+    },
+    add(value: number) {
+      if (
+        value >= indices.length ||
+        indices[value] === undefined ||
+        indices[value]! >= values.length ||
+        values[indices[value]!] !== value
+      ) {
+        indices[value] = values.length;
+        values.push(value);
       }
-    }
-  },
+    },
+    remove(value: number) {
+      if (values[indices[value]!] === value) {
+        const swap = values.pop()!;
+        if (swap !== value) {
+          values[indices[value]!] = swap;
+          indices[swap] = indices[value]!;
+        }
+      }
+    },
+  });
 };
 
 // # Entity
@@ -51,37 +58,33 @@ type Archetype = {
   id: string;
   mask: ArchetypeMask;
   entitySet: SparseSet;
-  entities: Entity[];
+  entities: ArrayLike<Entity>;
   readonly adjacent: Archetype[];
+  hasEntity: (entity: Entity) => boolean;
 };
 
 const Archetype = {
   new: (id: string, mask: ArchetypeMask): Archetype => {
-    const dense: ArchetypeMask[] = [];
+    const ss = createSparseSet();
 
     return {
       id,
-      entitySet: {
-        sparse: [],
-        dense,
-      },
-      entities: dense,
+      entitySet: ss,
+      entities: ss.values,
       mask,
       adjacent: [],
+      hasEntity: ss.has,
     };
   },
-  hasComponent: (arch: Archetype, componentType: ComponentType) => {
-    return (arch.mask & componentType) === componentType;
-  },
-  hasEntity: (arch: Archetype, entity: Entity) => {
-    return SparseSet.has(arch.entitySet, entity);
-  },
-  addEntity: (arch: Archetype, entity: Entity) => {
-    return SparseSet.add(arch.entitySet, entity);
-  },
-  removeEntity: (arch: Archetype, entity: Entity) => {
-    return SparseSet.remove(arch.entitySet, entity);
-  },
+  // hasComponent: (arch: Archetype, componentType: ComponentType) => {
+  //   return (arch.mask & componentType) === componentType;
+  // },
+  // addEntity: (arch: Archetype, entity: Entity) => {
+  //   return arch.entitySet.add(entity);
+  // },
+  // removeEntity: (arch: Archetype, entity: Entity) => {
+  //   return arch.entitySet.remove(entity);
+  // },
   transform: (archetype: Archetype, componentId: number): Archetype => {
     if (archetype.adjacent[componentId] !== undefined) {
       return archetype.adjacent[componentId]!;
@@ -286,18 +289,18 @@ export function createQuery(callback: (builder: QueryBuilder) => QueryBuilder): 
 
 const rootArchetype = Archetype.new('root', 0);
 
-type World = {
-  entityGraveyard: Entity[];
-  nextEntityId: Entity;
-  nextComponentId: number;
-  rootArchetype: Archetype;
-  archetypesByEntities: Archetype[];
-  initialized: boolean;
-  deferred: (() => any)[];
-  queries: Query[];
-  //   archetypes: Archetype[];
-  //   archetypesByMask: ArchetypeMask[];
-};
+// type World = {
+//   entityGraveyard: Entity[];
+//   nextEntityId: Entity;
+//   nextComponentId: number;
+//   rootArchetype: Archetype;
+//   archetypesByEntities: Archetype[];
+//   initialized: boolean;
+//   deferred: (() => any)[];
+//   queries: Query[];
+//   //   archetypes: Archetype[];
+//   //   archetypesByMask: ArchetypeMask[];
+// };
 
 export class EntityUndefinedError extends Error {
   constructor() {
@@ -326,103 +329,122 @@ export class WorldNotInitializedError extends Error {
   }
 }
 
-const _tryAddArchetypeToQueries = (world: World, archetype: Archetype) => {
-  for (const query of world.queries) {
-    (query as InternalQuery).tryAdd(archetype);
-  }
-};
-
-const _transformEntityForComponent = (world: World, current: Archetype, entity: Entity, componentId: ComponentId) => {
-  Archetype.removeEntity(current, entity);
-
-  if (current.adjacent[componentId] !== undefined) {
-    current = current.adjacent[componentId]!;
-  } else {
-    current = Archetype.transform(current, componentId);
-    if (world.initialized) {
-      _tryAddArchetypeToQueries(world, current);
-    }
-  }
-
-  Archetype.addEntity(current, entity);
-  world.archetypesByEntities[entity] = current;
-};
-
-const _assertEntity = (world: World, entity: number) => {
-  if (world.archetypesByEntities[entity] === undefined) {
-    if (entity === undefined) {
-      throw new EntityUndefinedError();
-    } else if (world.entityGraveyard.includes(entity)) {
-      throw new EntityDeletedError(entity);
-    }
-    throw new EntityNotExistError(entity);
-  }
-};
-
 function getComponentId(component: Component): number {
   return typeof component === 'number' ? component : component.id;
 }
 
-const _executeDeferred = (world: World) => {
-  if (world.deferred.length === 0) return;
+export class World {
+  private rootArchetype = rootArchetype;
+  private archetypesByEntities: Archetype[] = [];
+  private entityGraveyard: number[] = [];
+  private nextEntityId = 0 >>> 0;
+  private nextComponentId = 0 >>> 0;
+  private deferred: (() => void)[] = [];
+  private initialized = false;
+  queries: Query[] = [];
 
-  for (const action of world.deferred) {
-    action();
+  // new: (): World => {
+  //   return {
+  //     entityGraveyard: [],
+  //     nextEntityId: 0,
+  //     nextComponentId: 0,
+  //     rootArchetype,
+  //     archetypesByEntities: [],
+  //     initialized: false,
+  //     deferred: [],
+  //     queries: [],
+  //   };
+  // }
+
+  private _executeDeferred() {
+    if (this.deferred.length === 0) return;
+
+    for (const action of this.deferred) {
+      action();
+    }
+    this.deferred.length = 0;
   }
-  world.deferred.length = 0;
-};
 
-const World = {
-  new: (): World => {
-    return {
-      entityGraveyard: [],
-      nextEntityId: 0,
-      nextComponentId: 0,
-      rootArchetype,
-      archetypesByEntities: [],
-      initialized: false,
-      deferred: [],
-      queries: [],
-    };
-  },
-  hasEntity(world: World, entity: Entity): boolean {
-    return world.archetypesByEntities[entity] !== undefined;
-  },
-  createEntity: (world: World, archetype: Archetype = world.rootArchetype) => {
-    const entity = world.entityGraveyard.length > 0 ? world.entityGraveyard.pop()! : world.nextEntityId++;
+  private _tryAddArchetypeToQueries(archetype: Archetype) {
+    for (const query of this.queries) {
+      (query as InternalQuery).tryAdd(archetype);
+    }
+  }
 
-    Archetype.addEntity(archetype, entity);
-    world.archetypesByEntities[entity] = archetype;
+  private _transformEntityForComponent(current: Archetype, entity: Entity, componentId: ComponentId) {
+    // Archetype.removeEntity(current, entity);
+    current.entitySet.remove(entity);
+
+    if (current.adjacent[componentId] !== undefined) {
+      current = current.adjacent[componentId]!;
+    } else {
+      current = Archetype.transform(current, componentId);
+      if (this.initialized) {
+        this._tryAddArchetypeToQueries(current);
+      }
+    }
+
+    // Archetype.addEntity(current, entity);
+    current.entitySet.add(entity);
+    this.archetypesByEntities[entity] = current;
+  }
+
+  private _assertEntity(entity: number) {
+    if (this.archetypesByEntities[entity] === undefined) {
+      if (entity === undefined) {
+        throw new EntityUndefinedError();
+      } else if (this.entityGraveyard.includes(entity)) {
+        throw new EntityDeletedError(entity);
+      }
+      throw new EntityNotExistError(entity);
+    }
+  }
+
+  hasEntity(entity: Entity): boolean {
+    return this.archetypesByEntities[entity] !== undefined;
+  }
+
+  createEntity(archetype: Archetype = this.rootArchetype) {
+    const entity = this.entityGraveyard.length > 0 ? this.entityGraveyard.pop()! : this.nextEntityId++;
+
+    // Archetype.addEntity(archetype, entity);
+    archetype.entitySet.add(entity);
+    this.archetypesByEntities[entity] = archetype;
     return entity;
-  },
-  deleteEntity(world: World, entity: number) {
-    _assertEntity(world, entity);
+  }
 
-    const archetype = world.archetypesByEntities[entity]!;
-    Archetype.removeEntity(archetype, entity);
+  deleteEntity(entity: number) {
+    this._assertEntity(entity);
+
+    const archetype = this.archetypesByEntities[entity]!;
+    // Archetype.removeEntity(archetype, entity);
+    archetype.entitySet.remove(entity);
     // much faster than delete operator, but achieves the same (ish)
     // an alternative is to leave it be, and use archetype.entitySet.has(entity) as a check for entity being deleted, but that too is a little slower.
-    world.archetypesByEntities[entity] = undefined as any;
-    world.entityGraveyard.push(entity);
-  },
-  createComponentId(world: World) {
-    return world.nextComponentId++;
-  },
-  initialize(world: World) {
-    if (world.initialized) return;
-    world.initialized = true;
+    this.archetypesByEntities[entity] = undefined as any;
+    this.entityGraveyard.push(entity);
+  }
 
-    Archetype.traverseGraph(world.rootArchetype, (arch) => {
-      _tryAddArchetypeToQueries(world, arch);
+  createComponentId() {
+    return this.nextComponentId++;
+  }
+
+  initialize() {
+    if (this.initialized) return;
+    this.initialized = true;
+
+    Archetype.traverseGraph(this.rootArchetype, (arch) => {
+      this._tryAddArchetypeToQueries(arch);
     });
-  },
-  prefabricate<T extends Component>(world: World, components: T[]): Archetype {
+  }
+
+  prefabricate<T extends Component>(components: T[]): Archetype {
     const ids = components.map(getComponentId);
     const max = Math.max(...ids);
-    if (max >= world.nextComponentId) {
-      world.nextComponentId = (max + 1) >>> 0;
+    if (max >= this.nextComponentId) {
+      this.nextComponentId = (max + 1) >>> 0;
     }
-    let archetype = world.rootArchetype;
+    let archetype = this.rootArchetype;
 
     for (let i = 0, l = ids.length; i < l; i++) {
       const componentId = ids[i]!;
@@ -431,55 +453,171 @@ const World = {
         archetype = archetype.adjacent[componentId]!;
       } else {
         archetype = Archetype.transform(archetype, componentId);
-        if (world.initialized) {
-          _tryAddArchetypeToQueries(world, archetype);
+        if (this.initialized) {
+          this._tryAddArchetypeToQueries(archetype);
         }
       }
     }
     return archetype;
-  },
-  addComponent<T extends Component>(world: World, entity: number, component: T) {
-    _assertEntity(world, entity);
+  }
+
+  addComponent<T extends Component>(entity: number, component: T) {
+    this._assertEntity(entity);
 
     const cid = getComponentId(component);
-    const archetype = world.archetypesByEntities[entity]!;
+    const archetype = this.archetypesByEntities[entity]!;
 
     if (!(archetype.mask & cid)) {
-      _transformEntityForComponent(world, archetype, entity, cid);
+      this._transformEntityForComponent(archetype, entity, cid);
     }
-  },
-  removeComponent<T extends Component>(world: World, entity: number, component: T) {
-    _assertEntity(world, entity);
+  }
+
+  removeComponent<T extends Component>(entity: number, component: T) {
+    this._assertEntity(entity);
 
     const cid = getComponentId(component);
-    const archetype = world.archetypesByEntities[entity]!;
+    const archetype = this.archetypesByEntities[entity]!;
 
     if (archetype.mask & cid) {
-      _transformEntityForComponent(world, archetype, entity, cid);
+      this._transformEntityForComponent(archetype, entity, cid);
     }
-  },
-  defer(world: World, action: () => void) {
-    world.deferred.push(action);
-  },
-  step(world: World, systems: System[]) {
-    if (!world.initialized) {
+  }
+
+  defer(action: () => void) {
+    this.deferred.push(action);
+  }
+
+  step(systems: System[]) {
+    if (!this.initialized) {
       throw new WorldNotInitializedError();
     }
 
     for (let s = 0, sl = systems.length; s < sl; s++) {
       const system = systems[s]!;
-      system(world);
+      system(this);
     }
 
-    _executeDeferred(world);
-  },
-  createQuery: (world: World, callback: (builder: QueryBuilder) => QueryBuilder) => {
+    this._executeDeferred();
+  }
+
+  createQuery(callback: (builder: QueryBuilder) => QueryBuilder) {
     const query = createQuery(callback);
-    world.queries.push(query);
+    this.queries.push(query);
 
     return query;
-  },
-};
+  }
+}
+
+// export const World = {
+//   new: (): World => {
+//     return {
+//       entityGraveyard: [],
+//       nextEntityId: 0,
+//       nextComponentId: 0,
+//       rootArchetype,
+//       archetypesByEntities: [],
+//       initialized: false,
+//       deferred: [],
+//       queries: [],
+//     };
+//   },
+//   hasEntity(world: World, entity: Entity): boolean {
+//     return this.archetypesByEntities[entity] !== undefined;
+//   },
+//   createEntity: (world: World, archetype: Archetype = this.rootArchetype) => {
+//     const entity = world.entityGraveyard.length > 0 ? world.entityGraveyard.pop()! : world.nextEntityId++;
+
+//     // Archetype.addEntity(archetype, entity);
+//     archetype.entitySet.add(entity);
+//     world.archetypesByEntities[entity] = archetype;
+//     return entity;
+//   },
+//   deleteEntity(world: World, entity: number) {
+//     _assertEntity(world, entity);
+
+//     const archetype = world.archetypesByEntities[entity]!;
+//     // Archetype.removeEntity(archetype, entity);
+//     archetype.entitySet.remove(entity);
+//     // much faster than delete operator, but achieves the same (ish)
+//     // an alternative is to leave it be, and use archetype.entitySet.has(entity) as a check for entity being deleted, but that too is a little slower.
+//     world.archetypesByEntities[entity] = undefined as any;
+//     world.entityGraveyard.push(entity);
+//   },
+//   createComponentId() {
+//     return world.nextComponentId++;
+//   },
+//   initialize(world: World) {
+//     if (world.initialized) return;
+//     world.initialized = true;
+
+//     Archetype.traverseGraph(world.rootArchetype, (arch) => {
+//       _tryAddArchetypeToQueries(world, arch);
+//     });
+//   },
+//   prefabricate<T extends Component>(world: World, components: T[]): Archetype {
+//     const ids = components.map(getComponentId);
+//     const max = Math.max(...ids);
+//     if (max >= world.nextComponentId) {
+//       world.nextComponentId = (max + 1) >>> 0;
+//     }
+//     let archetype = world.rootArchetype;
+
+//     for (let i = 0, l = ids.length; i < l; i++) {
+//       const componentId = ids[i]!;
+
+//       if (archetype.adjacent[componentId] !== undefined) {
+//         archetype = archetype.adjacent[componentId]!;
+//       } else {
+//         archetype = Archetype.transform(archetype, componentId);
+//         if (world.initialized) {
+//           _tryAddArchetypeToQueries(world, archetype);
+//         }
+//       }
+//     }
+//     return archetype;
+//   },
+//   addComponent<T extends Component>(world: World, entity: number, component: T) {
+//     _assertEntity(world, entity);
+
+//     const cid = getComponentId(component);
+//     const archetype = world.archetypesByEntities[entity]!;
+
+//     if (!(archetype.mask & cid)) {
+//       _transformEntityForComponent(world, archetype, entity, cid);
+//     }
+//   },
+//   removeComponent<T extends Component>(world: World, entity: number, component: T) {
+//     _assertEntity(world, entity);
+
+//     const cid = getComponentId(component);
+//     const archetype = world.archetypesByEntities[entity]!;
+
+//     if (archetype.mask & cid) {
+//       _transformEntityForComponent(world, archetype, entity, cid);
+//     }
+//   },
+//   defer(world: World, action: () => void) {
+//     world.deferred.push(action);
+//   },
+//   step(world: World, systems: System[]) {
+//     if (!world.initialized) {
+//       throw new WorldNotInitializedError();
+//     }
+
+//     for (let s = 0, sl = systems.length; s < sl; s++) {
+//       const system = systems[s]!;
+//       system(world);
+//     }
+
+//     _executeDeferred(world);
+//   },
+//   createQuery: (world: World, callback: (builder: QueryBuilder) => QueryBuilder) => {
+//     const query = createQuery(callback);
+//     world.queries.push(query);
+
+//     return query;
+//   },
+// };
 
 // # Example
 
