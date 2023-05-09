@@ -73,10 +73,8 @@ AoS
 1. ~~Beautiful components~~
 1. ~~REVERSE FOR LOOP ORDER~~
 1. ~~Deffer create / delete / addComponent / removeComponent~~
-1. useMonitor alternative
-   1. useChanged: we can store last version of archetypes entities and compare it with current
-   1. We can store changed on archetypes level
 1. Prefabricate (does piecs prefabricate ALL variants)
+1. CFC
 1. Ctx
 1. Events
 1. Hooks
@@ -114,6 +112,8 @@ This can be done by:
 
 ### Archetype way
 
+100% NO: allocations on every archetype is so massive, that it will kill performance
+
 - in the end of every step we need to clear "newEntities" and "deletedEntities"
 
 * we can assign entity storages size
@@ -121,4 +121,7 @@ This can be done by:
 
 ### useChangedHook way
 
-- this will be done every time we call useChangedHook
+- ~~this will be done every time we call useChangedHook~~ –> This can be mitigated by calculating this only once per step (useMemo like)
+
+* Only on needed archetypes
+* Query mask can be used as id, so I can store all of them globally (like on world), to reuse them

@@ -17,8 +17,9 @@ export const SparseSet = {
     ) {
       sSet.sparse[value] = sSet.dense.length;
       sSet.dense.push(value);
+      return true;
     }
-    // sSet.sparse[x] = sSet.dense.push(x) - 1;
+    return false;
   },
   remove: (sSet, value) => {
     if (sSet.dense[sSet.sparse[value]] === value) {
@@ -27,6 +28,8 @@ export const SparseSet = {
         sSet.dense[sSet.sparse[value]] = swap;
         sSet.sparse[swap] = sSet.sparse[value];
       }
+      return true;
     }
+    return false;
   },
 };

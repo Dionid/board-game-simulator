@@ -55,10 +55,10 @@ export const Archetype = {
     return SparseSet.has(arch.sSet, entity);
   },
   addEntity: (arch: Archetype, entity: Entity) => {
-    return SparseSet.add(arch.sSet, entity);
+    SparseSet.add(arch.sSet, entity);
   },
   removeEntity: (arch: Archetype, entity: Entity) => {
-    return SparseSet.remove(arch.sSet, entity);
+    SparseSet.remove(arch.sSet, entity);
   },
 };
 
@@ -139,7 +139,9 @@ export const World = {
       const system = systems[i];
       system(world);
     }
-    World.applyDeferred(world);
+    if (world.deferred.length > 0) {
+      World.applyDeferred(world);
+    }
   },
   selectArchetypes: (world: World, archetypeId: Mask, callback: (archetype: Archetype) => void) => {
     for (let i = world.archetypes.length - 1; i >= 0; i--) {
@@ -176,11 +178,6 @@ export const World = {
   },
   spawnEntity: (world: World, prefabricate?: Archetype) => {
     const entity = World.allocateEntityId(world);
-    // # What if already deleted or archetype changed?
-    const currentArchetype = world.archetypesByEntities[entity];
-    if (currentArchetype) {
-      return;
-    }
     const archetype = prefabricate ?? world.emptyArchetype;
     Archetype.addEntity(archetype, entity);
     world.archetypesByEntities[entity] = archetype;

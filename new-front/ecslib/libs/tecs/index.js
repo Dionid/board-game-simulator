@@ -4,6 +4,8 @@ export const Component = {
     return typeof component === 'number' ? component : component.id;
   },
 };
+export const $changed = Symbol('changed');
+export const $changedPending = Symbol('changed-pending');
 export const Archetype = {
   new: (id) => {
     const sSet = SparseSet.new();
@@ -11,6 +13,8 @@ export const Archetype = {
       sSet: sSet,
       entities: sSet.dense,
       id,
+      [$changed]: false,
+      [$changedPending]: false,
     };
   },
   hasComponent: (arch, componentId) => {
@@ -21,10 +25,18 @@ export const Archetype = {
     return SparseSet.has(arch.sSet, entity);
   },
   addEntity: (arch, entity) => {
-    return SparseSet.add(arch.sSet, entity);
+    if (SparseSet.add(arch.sSet, entity)) {
+      arch[$changedPending] = true;
+    }
   },
   removeEntity: (arch, entity) => {
-    return SparseSet.remove(arch.sSet, entity);
+    if (SparseSet.remove(arch.sSet, entity)) {
+      arch[$changedPending] = true;
+    }
+  },
+  flushChanged: (arch) => {
+    arch[$changed] = arch[$changedPending];
+    arch[$changedPending] = false;
   },
 };
 export const Query = {
@@ -54,6 +66,7 @@ export const World = {
       components: [],
       archetypes: [],
       emptyArchetype: Archetype.new(0),
+      graveyardArchetype: Archetype.new(0),
       entityGraveyard: [],
       archetypesIndexById: {},
       archetypesByEntities: [],
@@ -64,17 +77,28 @@ export const World = {
   subscribeOnResize: (world, callback) => {
     world.resizeSubscribers.push(callback);
   },
-  step: (world, systems) => {
-    for (let i = 0; i < systems.length; i++) {
-      const system = systems[i];
-      system(world);
-    }
+  defer: (world, callback) => {
+    world.deferred.push(callback);
+  },
+  applyDeferred: (world) => {
     for (let i = 0; i < world.deferred.length; i++) {
       world.deferred[i](world);
     }
     world.deferred = [];
   },
-  findArchetypes: (world, archetypeId, callback) => {
+  step: (world, systems) => {
+    for (let i = 0; i < world.archetypes.length; i++) {
+      Archetype.flushChanged(world.archetypes[i]);
+    }
+    for (let i = 0; i < systems.length; i++) {
+      const system = systems[i];
+      system(world);
+    }
+    if (world.deferred.length > 0) {
+      World.applyDeferred(world);
+    }
+  },
+  selectArchetypes: (world, archetypeId, callback) => {
     for (let i = world.archetypes.length - 1; i >= 0; i--) {
       const archetype = world.archetypes[i];
       if ((archetype.id & archetypeId) === archetypeId) {
@@ -105,39 +129,28 @@ export const World = {
     }
     return world.nextEntityId++;
   },
-  createEntity: (world, prefabricate) => {
+  spawnEntity: (world, prefabricate) => {
     const entity = World.allocateEntityId(world);
-    world.deferred.push(() => {
-      // # What if already deleted or archetype changed?
-      const currentArchetype = world.archetypesByEntities[entity];
-      if (currentArchetype || currentArchetype === undefined) {
-        return;
-      }
-      const archetype = prefabricate ?? world.emptyArchetype;
-      Archetype.addEntity(archetype, entity);
-      world.archetypesByEntities[entity] = archetype;
-    });
+    const archetype = prefabricate ?? world.emptyArchetype;
+    Archetype.addEntity(archetype, entity);
+    world.archetypesByEntities[entity] = archetype;
     return entity;
   },
   destroyEntity: (world, entity) => {
-    world.deferred.push(() => {
-      const archetype = world.archetypesByEntities[entity];
-      Archetype.removeEntity(archetype, entity);
-      world.archetypesByEntities[entity] = undefined; // QUESTION: see in piecs
-      world.entityGraveyard.push(entity);
-    });
+    const archetype = world.archetypesByEntities[entity];
+    Archetype.removeEntity(archetype, entity);
+    world.archetypesByEntities[entity] = world.graveyardArchetype; // QUESTION: see in piecs
+    world.entityGraveyard.push(entity);
   },
   addComponent: (world, entity, componentId, archetype) => {
     const arch = archetype ?? world.archetypesByEntities[entity];
     // # If current entity archetype doesn't have this component,
     // then change archetype
     if ((arch.id & componentId) !== componentId) {
-      world.deferred.push(() => {
-        Archetype.removeEntity(arch, entity);
-        const newArchetype = getOrCreateArchetype(world, arch.id | componentId);
-        Archetype.addEntity(newArchetype, entity);
-        world.archetypesByEntities[entity] = newArchetype;
-      });
+      Archetype.removeEntity(arch, entity);
+      const newArchetype = getOrCreateArchetype(world, arch.id | componentId);
+      Archetype.addEntity(newArchetype, entity);
+      world.archetypesByEntities[entity] = newArchetype;
     }
   },
   removeComponent: (world, entity, componentId, archetype) => {
@@ -145,12 +158,10 @@ export const World = {
     // # If current entity archetype doesn't have this component,
     // then change archetype
     if ((arch.id & componentId) === componentId) {
-      world.deferred.push(() => {
-        Archetype.removeEntity(arch, entity);
-        const newArchetype = getOrCreateArchetype(world, arch.id & ~componentId);
-        Archetype.addEntity(newArchetype, entity);
-        world.archetypesByEntities[entity] = newArchetype;
-      });
+      Archetype.removeEntity(arch, entity);
+      const newArchetype = getOrCreateArchetype(world, arch.id & ~componentId);
+      Archetype.addEntity(newArchetype, entity);
+      world.archetypesByEntities[entity] = newArchetype;
     }
   },
 };
