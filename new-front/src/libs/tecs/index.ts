@@ -75,16 +75,20 @@ export const Query = {
 };
 
 export type World = {
+  // # Size
   size: number;
+  resizeSubscribers: ((newSize: number) => void)[];
+  // # Components
   nextComponentId: number;
   components: Component[];
-  emptyArchetype: Archetype;
+  // # Entities
   nextEntityId: Entity; // 100% number
   entityGraveyard: Entity[]; // 100% array
+  // # Archetypes
+  emptyArchetype: Archetype;
   archetypes: Archetype[]; // 100% array
   archetypesIndexById: Record<ArchetypeId, number>;
   archetypesByEntities: Archetype[]; // Maybe, change to Map / Record?
-  resizeSubscribers: ((newSize: number) => void)[];
 };
 
 const getOrCreateArchetype = (world: World, archetypeId: ArchetypeId) => {

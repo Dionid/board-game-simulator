@@ -70,13 +70,18 @@ AoS
 1. ~~Archetype Query~~
 1. ~~Create systems~~
 1. ~~World step~~
-1. REVERSE FOR LOOP ORDER
-1. Beautiful components
+1. ~~Beautiful components~~
+1. ~~REVERSE FOR LOOP ORDER~~
+1. ? Deffer create / delete / addComponent / removeComponent
+   1. Harmony uses Cash to destroy entities, add and remove components (https://github.com/3mcd/harmony-ecs/blob/main/lib/src/cache.ts)
+   1. Javeline do it by default (https://github.com/3mcd/javelin/blob/master/packages/ecs/src/world.ts)
+1. useMonitor alternative
+1. ? Save component stores alonside with archetypes
 1. Prefabricate (does piecs prefabricate ALL variants)
 1. Ctx
 1. Events
-1. ? Deffer create / delete / addComponent / removeComponent
-1. useMonitor alternative
+1. Hooks
+1. ? Sparse Map (https://github.com/3mcd/harmony-ecs/blob/main/lib/src/sparse_map.ts)
 
 ## Components
 
