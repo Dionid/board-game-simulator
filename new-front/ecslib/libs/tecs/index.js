@@ -48,7 +48,7 @@ const getOrCreateArchetype = (world, archetypeId) => {
 export const World = {
   new: (props) => {
     return {
-      size: props?.size ?? 10000,
+      size: props?.size ?? 100000,
       nextComponentId: 0,
       nextEntityId: 0,
       components: [],
@@ -58,6 +58,7 @@ export const World = {
       archetypesIndexById: {},
       archetypesByEntities: [],
       resizeSubscribers: [],
+      deferred: [],
     };
   },
   subscribeOnResize: (world, callback) => {
@@ -68,20 +69,13 @@ export const World = {
       const system = systems[i];
       system(world);
     }
-  },
-  findEntities: (world, archetypeId, callback) => {
-    for (let i = 0; i < world.archetypes.length; i++) {
-      const archetype = world.archetypes[i];
-      if ((archetype.id & archetypeId) === archetypeId) {
-        const entities = archetype.entities;
-        for (let j = 0; j < entities.length; j++) {
-          callback(entities[j]);
-        }
-      }
+    for (let i = 0; i < world.deferred.length; i++) {
+      world.deferred[i](world);
     }
+    world.deferred = [];
   },
   findArchetypes: (world, archetypeId, callback) => {
-    for (let i = 0; i < world.archetypes.length; i++) {
+    for (let i = world.archetypes.length - 1; i >= 0; i--) {
       const archetype = world.archetypes[i];
       if ((archetype.id & archetypeId) === archetypeId) {
         callback(archetype);
@@ -102,46 +96,61 @@ export const World = {
     }
     // # Resize world
     if (world.nextEntityId >= world.size) {
-      world.size *= 2;
+      const newSize = world.size * 2;
+      console.log(`Resizing world from ${world.size} to ${newSize}`);
+      world.size = newSize;
       for (let i = 0; i < world.resizeSubscribers.length; i++) {
-        world.resizeSubscribers[i](world.size);
+        world.resizeSubscribers[i](newSize);
       }
     }
     return world.nextEntityId++;
   },
   createEntity: (world, prefabricate) => {
     const entity = World.allocateEntityId(world);
-    const archetype = prefabricate ?? world.emptyArchetype;
-    Archetype.addEntity(archetype, entity);
-    world.archetypesByEntities[entity] = archetype;
+    world.deferred.push(() => {
+      // # What if already deleted or archetype changed?
+      const currentArchetype = world.archetypesByEntities[entity];
+      if (currentArchetype || currentArchetype === undefined) {
+        return;
+      }
+      const archetype = prefabricate ?? world.emptyArchetype;
+      Archetype.addEntity(archetype, entity);
+      world.archetypesByEntities[entity] = archetype;
+    });
     return entity;
   },
   destroyEntity: (world, entity) => {
-    const archetype = world.archetypesByEntities[entity];
-    Archetype.removeEntity(archetype, entity);
-    world.archetypesByEntities[entity] = undefined; // QUESTION: see in piecs
-    world.entityGraveyard.push(entity);
+    world.deferred.push(() => {
+      const archetype = world.archetypesByEntities[entity];
+      Archetype.removeEntity(archetype, entity);
+      world.archetypesByEntities[entity] = undefined; // QUESTION: see in piecs
+      world.entityGraveyard.push(entity);
+    });
   },
-  addComponent: (world, entity, componentId) => {
-    const arch = world.archetypesByEntities[entity];
+  addComponent: (world, entity, componentId, archetype) => {
+    const arch = archetype ?? world.archetypesByEntities[entity];
     // # If current entity archetype doesn't have this component,
     // then change archetype
     if ((arch.id & componentId) !== componentId) {
-      Archetype.removeEntity(arch, entity);
-      const newArchetype = getOrCreateArchetype(world, arch.id | componentId);
-      Archetype.addEntity(newArchetype, entity);
-      world.archetypesByEntities[entity] = newArchetype;
+      world.deferred.push(() => {
+        Archetype.removeEntity(arch, entity);
+        const newArchetype = getOrCreateArchetype(world, arch.id | componentId);
+        Archetype.addEntity(newArchetype, entity);
+        world.archetypesByEntities[entity] = newArchetype;
+      });
     }
   },
-  removeComponent: (world, entity, componentId) => {
-    const arch = world.archetypesByEntities[entity];
+  removeComponent: (world, entity, componentId, archetype) => {
+    const arch = archetype ?? world.archetypesByEntities[entity];
     // # If current entity archetype doesn't have this component,
     // then change archetype
     if ((arch.id & componentId) === componentId) {
-      Archetype.removeEntity(arch, entity);
-      const newArchetype = getOrCreateArchetype(world, arch.id & ~componentId);
-      Archetype.addEntity(newArchetype, entity);
-      world.archetypesByEntities[entity] = newArchetype;
+      world.deferred.push(() => {
+        Archetype.removeEntity(arch, entity);
+        const newArchetype = getOrCreateArchetype(world, arch.id & ~componentId);
+        Archetype.addEntity(newArchetype, entity);
+        world.archetypesByEntities[entity] = newArchetype;
+      });
     }
   },
 };

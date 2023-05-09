@@ -75,6 +75,7 @@ export const Query = {
 };
 
 export type World = {
+  deferred: ((world: World) => void)[];
   // # Size
   size: number;
   resizeSubscribers: ((newSize: number) => void)[];
@@ -86,6 +87,7 @@ export type World = {
   entityGraveyard: Entity[]; // 100% array
   // # Archetypes
   emptyArchetype: Archetype;
+  graveyardArchetype: Archetype;
   archetypes: Archetype[]; // 100% array
   archetypesIndexById: Record<ArchetypeId, number>;
   archetypesByEntities: Archetype[]; // Maybe, change to Map / Record?
@@ -112,34 +114,34 @@ export const World = {
       components: [],
       archetypes: [],
       emptyArchetype: Archetype.new(0),
+      graveyardArchetype: Archetype.new(0),
       entityGraveyard: [],
       archetypesIndexById: {},
       archetypesByEntities: [],
       resizeSubscribers: [],
+      deferred: [],
     };
   },
   subscribeOnResize: (world: World, callback: (newSize: number) => void) => {
     world.resizeSubscribers.push(callback);
+  },
+  defer: (world: World, callback: (world: World) => void) => {
+    world.deferred.push(callback);
+  },
+  applyDeferred: (world: World) => {
+    for (let i = 0; i < world.deferred.length; i++) {
+      world.deferred[i](world);
+    }
+    world.deferred = [];
   },
   step: (world: World, systems: System[]) => {
     for (let i = 0; i < systems.length; i++) {
       const system = systems[i];
       system(world);
     }
+    World.applyDeferred(world);
   },
-  // DEPRECATED: because of performance
-  // findEntities: (world: World, archetypeId: Mask, callback: (entity: Entity) => void) => {
-  //   for (let i = world.archetypes.length - 1; i >= 0; i--) {
-  //     const archetype = world.archetypes[i];
-  //     if ((archetype.id & archetypeId) === archetypeId) {
-  //       const entities = archetype.entities;
-  //       for (let j = entities.length - 1; j >= 0; j--) {
-  //         callback(entities[j]);
-  //       }
-  //     }
-  //   }
-  // },
-  findArchetypes: (world: World, archetypeId: Mask, callback: (archetype: Archetype) => void) => {
+  selectArchetypes: (world: World, archetypeId: Mask, callback: (archetype: Archetype) => void) => {
     for (let i = world.archetypes.length - 1; i >= 0; i--) {
       const archetype = world.archetypes[i];
       if ((archetype.id & archetypeId) === archetypeId) {
@@ -172,8 +174,13 @@ export const World = {
 
     return world.nextEntityId++;
   },
-  createEntity: (world: World, prefabricate?: Archetype) => {
+  spawnEntity: (world: World, prefabricate?: Archetype) => {
     const entity = World.allocateEntityId(world);
+    // # What if already deleted or archetype changed?
+    const currentArchetype = world.archetypesByEntities[entity];
+    if (currentArchetype) {
+      return;
+    }
     const archetype = prefabricate ?? world.emptyArchetype;
     Archetype.addEntity(archetype, entity);
     world.archetypesByEntities[entity] = archetype;
@@ -182,7 +189,7 @@ export const World = {
   destroyEntity: (world: World, entity: Entity) => {
     const archetype = world.archetypesByEntities[entity];
     Archetype.removeEntity(archetype, entity);
-    world.archetypesByEntities[entity] = undefined as unknown as Archetype; // QUESTION: see in piecs
+    world.archetypesByEntities[entity] = world.graveyardArchetype; // QUESTION: see in piecs
     world.entityGraveyard.push(entity);
   },
   addComponent: (world: World, entity: Entity, componentId: ComponentId, archetype?: Archetype) => {

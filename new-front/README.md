@@ -72,18 +72,53 @@ AoS
 1. ~~World step~~
 1. ~~Beautiful components~~
 1. ~~REVERSE FOR LOOP ORDER~~
-1. ? Deffer create / delete / addComponent / removeComponent
-   1. Harmony uses Cash to destroy entities, add and remove components (https://github.com/3mcd/harmony-ecs/blob/main/lib/src/cache.ts)
-   1. Javeline do it by default (https://github.com/3mcd/javelin/blob/master/packages/ecs/src/world.ts)
+1. ~~Deffer create / delete / addComponent / removeComponent~~
 1. useMonitor alternative
-1. ? Save component stores alonside with archetypes
+   1. useChanged: we can store last version of archetypes entities and compare it with current
+   1. We can store changed on archetypes level
 1. Prefabricate (does piecs prefabricate ALL variants)
 1. Ctx
 1. Events
 1. Hooks
+1. ? Save component stores alonside with archetypes
 1. ? Sparse Map (https://github.com/3mcd/harmony-ecs/blob/main/lib/src/sparse_map.ts)
 
 ## Components
 
 1. Must be created in harcoded sequence -> Can be done by `world.registerComponent`
 1. !!! We must somehow resize components -> Then we need to create Schema
+
+## Defer
+
+1. Harmony uses Cash to destroy entities, add and remove components (https://github.com/3mcd/harmony-ecs/blob/main/lib/src/cache.ts)
+1. Javeline do it by default (https://github.com/3mcd/javelin/blob/master/packages/ecs/src/world.ts)
+
+## Tecs
+
+TECS is mainly indexed entities by archetypes:
+
+1. When we create entity we (1) allocate new entityID (from graveyard or create new one), (2) assign in to EmptyArchetype;
+1. When we delete entity we put it in GraveyardArchetype
+1. When we add / remove component, we move entity to another archetype (meaning it's just tagging)
+
+Actual data is stored as developer wish it, BUT it must somehow be indexed by entity id.
+
+## CDC
+
+Main idea is: check if there is new entity or one of them were deleted.
+
+This can be done by:
+
+1. Storing "newEntities" and "deletedEntities" in archetype
+1. Using functions that will calculate this delta (like useChangedHook)
+
+### Archetype way
+
+- in the end of every step we need to clear "newEntities" and "deletedEntities"
+
+* we can assign entity storages size
+* this will be done once per step
+
+### useChangedHook way
+
+- this will be done every time we call useChangedHook
