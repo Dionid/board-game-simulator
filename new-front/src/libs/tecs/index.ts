@@ -153,6 +153,18 @@ export const World = {
   },
   // # Archetype
   getOrCreateArchetype,
+  prefabricate: (world: World, componentIdsList: ComponentId[]): Archetype => {
+    let mask = 0;
+    let archetype = world.emptyArchetype;
+
+    for (let i = 0; i < componentIdsList.length; i++) {
+      mask |= componentIdsList[i];
+
+      archetype = getOrCreateArchetype(world, mask);
+    }
+
+    return archetype;
+  },
   // # Component
   registerComponentId: (world: World): ComponentId => {
     const componentId = world.nextComponentId++;

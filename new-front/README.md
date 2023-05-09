@@ -73,6 +73,7 @@ AoS
 1. ~~Beautiful components~~
 1. ~~REVERSE FOR LOOP ORDER~~
 1. ~~Deffer create / delete / addComponent / removeComponent~~
+1. Bitwise is just 31 components...
 1. Prefabricate (does piecs prefabricate ALL variants)
 1. CFC
 1. Ctx

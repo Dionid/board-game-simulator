@@ -4,8 +4,6 @@ export const Component = {
     return typeof component === 'number' ? component : component.id;
   },
 };
-export const $changed = Symbol('changed');
-export const $changedPending = Symbol('changed-pending');
 export const Archetype = {
   new: (id) => {
     const sSet = SparseSet.new();
@@ -13,8 +11,6 @@ export const Archetype = {
       sSet: sSet,
       entities: sSet.dense,
       id,
-      [$changed]: false,
-      [$changedPending]: false,
     };
   },
   hasComponent: (arch, componentId) => {
@@ -25,18 +21,10 @@ export const Archetype = {
     return SparseSet.has(arch.sSet, entity);
   },
   addEntity: (arch, entity) => {
-    if (SparseSet.add(arch.sSet, entity)) {
-      arch[$changedPending] = true;
-    }
+    SparseSet.add(arch.sSet, entity);
   },
   removeEntity: (arch, entity) => {
-    if (SparseSet.remove(arch.sSet, entity)) {
-      arch[$changedPending] = true;
-    }
-  },
-  flushChanged: (arch) => {
-    arch[$changed] = arch[$changedPending];
-    arch[$changedPending] = false;
+    SparseSet.remove(arch.sSet, entity);
   },
 };
 export const Query = {
@@ -87,9 +75,6 @@ export const World = {
     world.deferred = [];
   },
   step: (world, systems) => {
-    for (let i = 0; i < world.archetypes.length; i++) {
-      Archetype.flushChanged(world.archetypes[i]);
-    }
     for (let i = 0; i < systems.length; i++) {
       const system = systems[i];
       system(world);
@@ -108,6 +93,13 @@ export const World = {
   },
   // # Archetype
   getOrCreateArchetype,
+  prefabricate: (world, componentIdsList) => {
+    let mask = 0;
+    for (let i = 0; i < componentIdsList.length; i++) {
+      mask |= componentIdsList[i];
+      getOrCreateArchetype(world, mask);
+    }
+  },
   // # Component
   registerComponentId: (world) => {
     const componentId = world.nextComponentId++;
