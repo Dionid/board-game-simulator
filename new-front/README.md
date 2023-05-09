@@ -75,6 +75,7 @@ AoS
 1. ~~Deffer create / delete / addComponent / removeComponent~~
 1. Bitwise is just 31 components...
 1. Prefabricate (does piecs prefabricate ALL variants)
+1. Archetype Queries (I can reuse them by name in world.queriesByName)
 1. CFC
 1. Ctx
 1. Events
