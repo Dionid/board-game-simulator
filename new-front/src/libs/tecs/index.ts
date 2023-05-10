@@ -247,10 +247,6 @@ export const World = {
 
     if (archetypeIndex === undefined) {
       const newArchetype = Archetype.new(nextId, BitSet.copy(mask));
-      for (let i = 0; i < world.queries.length; i++) {
-        const query = world.queries[i];
-        query.tryAdd(newArchetype);
-      }
       archetypeIndex = world.archetypes.push(newArchetype) - 1;
       world.archetypesIndexById[newArchetype.id] = archetypeIndex;
       current.adjacent[componentId] = newArchetype;

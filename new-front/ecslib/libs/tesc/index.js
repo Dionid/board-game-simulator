@@ -1,2 +1,0 @@
-// // AoS string
-export {};
