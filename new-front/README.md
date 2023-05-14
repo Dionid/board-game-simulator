@@ -80,6 +80,7 @@ AoS
 1. Ctx
 1. Events
 1. Hooks
+1. World method to add systems (with Phase)
 1. ? Save component stores alonside with archetypes
 1. ? Sparse Map (https://github.com/3mcd/harmony-ecs/blob/main/lib/src/sparse_map.ts)
 
