@@ -1,54 +1,20 @@
 import { safeGuard } from '../switch';
 import { BitSet } from './bit-set';
-import {
-  ComponentFromSchema,
-  ComponentListFromSchemaList,
-  ComponentSchema,
-  ComponentSchemaId,
-  ComponentSchemaKind,
-} from './component';
-import { Entity } from './entity';
+import { ComponentSchemaKind } from './component';
 import { SparseSet } from './sparse-set';
-
-export type ArchetypeId = string;
-
-export type Archetype<CSL extends ReadonlyArray<ComponentSchema> = ReadonlyArray<ComponentSchema>> = {
-  // # Identifiers
-  id: ArchetypeId;
-  mask: BitSet;
-
-  // # Archetypes graph
-  adjacent: Archetype<any>[];
-
-  // # Entities
-  sSet: SparseSet<Entity>;
-  entities: Entity[];
-
-  // # Components
-  components: ComponentListFromSchemaList<CSL>;
-};
-
 export const Archetype = {
   // TODO: Pass component schemas to prefabricate components
-  new: <CSL extends ReadonlyArray<ComponentSchema>>(
-    id: ArchetypeId,
-    componentSchemas: CSL,
-    mask: BitSet
-  ): Archetype<CSL> => {
+  new: (id, componentSchemas, mask) => {
     const sSet = SparseSet.new();
-
     const components = [];
-
     for (let i = 0; i < componentSchemas.length; i++) {
       const componentSchema = componentSchemas[i];
-
       switch (componentSchema.kind) {
         case ComponentSchemaKind.SoA: {
           components[componentSchema.id] = {
             schema: componentSchema,
             data: componentSchema.default(),
           };
-
           break;
         }
         case ComponentSchemaKind.Tag: {
@@ -56,7 +22,6 @@ export const Archetype = {
             schema: componentSchema,
             data: undefined,
           };
-
           break;
         }
         default: {
@@ -64,25 +29,19 @@ export const Archetype = {
         }
       }
     }
-
     return {
       sSet: sSet,
       entities: sSet.dense,
       id,
       mask,
       adjacent: [],
-      components: components as ComponentListFromSchemaList<CSL>,
+      components: components,
     };
   },
-
-  hasComponent: (arch: Archetype, componentId: ComponentSchemaId) => {
+  hasComponent: (arch, componentId) => {
     return BitSet.has(arch.mask, componentId);
   },
-
-  getComponent: <CS extends ComponentSchema>(
-    arch: Archetype<ReadonlyArray<CS>>,
-    componentSchema: CS
-  ): ComponentFromSchema<CS> => {
+  getComponent: (arch, componentSchema) => {
     const componentId = componentSchema.id;
     const component = arch.components[componentId];
     if (!component) {
@@ -90,20 +49,16 @@ export const Archetype = {
     }
     return component;
   },
-
-  hasEntity: (arch: Archetype, entity: Entity) => {
+  hasEntity: (arch, entity) => {
     return SparseSet.has(arch.sSet, entity);
   },
-
-  removeEntity: (arch: Archetype, entity: Entity) => {
-    const swapEntityId = arch.sSet.dense.pop()!;
-
+  removeEntity: (arch, entity) => {
+    const swapEntityId = arch.sSet.dense.pop();
     if (swapEntityId !== entity) {
       // # If we popped incorrect entity, than pop it from all components and swap with correct
-      const swapIndexInDense = arch.sSet.sparse[entity]!;
+      const swapIndexInDense = arch.sSet.sparse[entity];
       arch.sSet.dense[swapIndexInDense] = swapEntityId;
       arch.sSet.sparse[swapEntityId] = swapIndexInDense;
-
       for (let i = 0; i < arch.components.length; i++) {
         const component = arch.components[i];
         if (!component) continue;
@@ -113,7 +68,7 @@ export const Archetype = {
             // # Get shape keys (like x, y in Position)
             for (let i = 0; i < component.schema.shape.length; i++) {
               const key = component.schema.shape[i];
-              const array = component.data![key];
+              const array = component.data[key];
               const val = array.pop();
               // # Swap
               array[swapIndexInDense] = val;
@@ -139,7 +94,7 @@ export const Archetype = {
             // # Get shape keys (like x, y in Position)
             for (let i = 0; i < component.schema.shape.length; i++) {
               const key = component.schema.shape[i];
-              const array = component.data![key];
+              const array = component.data[key];
               array.pop();
             }
             break;
@@ -154,12 +109,10 @@ export const Archetype = {
       }
     }
   },
-
-  addEntity: (arch: Archetype, entity: Entity) => {
+  addEntity: (arch, entity) => {
     arch.sSet.dense.push(entity);
     const archDenseIndex = arch.sSet.dense.length - 1;
     arch.sSet.sparse[entity] = archDenseIndex;
-
     for (let i = 0; i < arch.components.length; i++) {
       const component = arch.components[i];
       if (!component) continue;
@@ -170,7 +123,7 @@ export const Archetype = {
           // # Get shape keys (like x, y in Position)
           for (let i = 0; i < component.schema.shape.length; i++) {
             const key = component.schema.shape[i];
-            const array = component.data![key];
+            const array = component.data[key];
             array[archDenseIndex] = def[key];
           }
           break;
@@ -185,37 +138,26 @@ export const Archetype = {
       }
     }
   },
-
-  moveEntity: (from: Archetype, to: Archetype, entity: Entity) => {
+  moveEntity: (from, to, entity) => {
     // # Check if entity is in `to` or not in `from`
-    if (to.sSet.dense[to.sSet.sparse[entity]!] === entity || from.sSet.dense[from.sSet.sparse[entity]!] !== entity) {
+    if (to.sSet.dense[to.sSet.sparse[entity]] === entity || from.sSet.dense[from.sSet.sparse[entity]] !== entity) {
       return false;
     }
-
     // # Add to new archetype
-    const swapIndexInDense = from.sSet.sparse[entity]!;
-
+    const swapIndexInDense = from.sSet.sparse[entity];
     to.sSet.dense.push(entity);
     const toDenseIndex = to.sSet.dense.length - 1;
     to.sSet.sparse[entity] = toDenseIndex;
-
     for (let i = 0; i < to.components.length; i++) {
       const component = to.components[i];
       if (!component) continue;
-
-      const fromComponent = from.components[component.schema.id];
-
       switch (component.schema.kind) {
         case ComponentSchemaKind.SoA: {
           // # Get shape keys (like x, y in Position)
           for (let i = 0; i < component.schema.shape.length; i++) {
             const key = component.schema.shape[i];
-            const array = component.data![key];
-            if (fromComponent) {
-              array[toDenseIndex] = fromComponent.data![key][swapIndexInDense];
-            } else {
-              array[toDenseIndex] = component.schema.defaultValues()[key];
-            }
+            const array = component.data[key];
+            array[toDenseIndex] = from.components[component.schema.id].data[key][swapIndexInDense];
           }
           break;
         }
@@ -228,10 +170,8 @@ export const Archetype = {
         }
       }
     }
-
     // # Remove it from `from` entities (sSet dense) and components
     Archetype.removeEntity(from, entity);
-
     return true;
   },
 };

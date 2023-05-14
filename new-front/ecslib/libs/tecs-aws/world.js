@@ -1,11 +1,6 @@
-import { Component } from 'react';
-import { System } from './system';
-import { Entity } from './entity';
-import { Archetype, ArchetypeId } from './archetype';
+import { Archetype } from './archetype';
 import { BitSet } from './bit-set';
-import { ComponentSchema, ComponentSchemaId } from './component';
 import { Query } from './query';
-
 // export function spawnEntity(world: World): [Entity, Archetype<[]>];
 // export function spawnEntity<Arch extends Archetype>(world: World, prefabricate: Arch): [Entity, Arch];
 // export function spawnEntity<Arch extends Archetype>(world: World, prefabricate?: Arch) {
@@ -15,39 +10,16 @@ import { Query } from './query';
 //   world.archetypesByEntities[entity] = archetype;
 //   return [entity, archetype];
 // }
-
-export function spawnEntity<Arch extends Archetype>(world: World, prefabricate?: Arch) {
+export function spawnEntity(world, prefabricate) {
   const entity = World.allocateEntityId(world);
   const archetype = prefabricate ?? world.emptyArchetype;
   Archetype.addEntity(archetype, entity);
   world.archetypesByEntities[entity] = archetype;
   return entity;
 }
-
-export type World = {
-  deferred: ((world: World) => void)[];
-  queries: Query<any>[];
-  // # Size
-  size: number;
-  resizeSubscribers: ((newSize: number) => void)[];
-  // # Components
-  nextComponentId: number;
-  components: Component<any>[];
-  // # Entities
-  nextEntityId: Entity; // 100% number
-  entityGraveyard: Entity[]; // 100% array
-  // # Archetypes
-  emptyArchetype: Archetype<[]>;
-  // graveyardArchetype: Archetype;
-  archetypes: Archetype[]; // 100% array
-  archetypesIndexById: Record<ArchetypeId, number>;
-  archetypesByEntities: Archetype<any>[]; // Maybe, change to Map / Record?
-};
-
 export const World = {
-  new: (props?: { size?: number }): World => {
+  new: (props) => {
     const emptyBitSet = BitSet.new(8);
-
     return {
       size: props?.size ?? 100000,
       nextComponentId: 0,
@@ -64,19 +36,19 @@ export const World = {
       deferred: [],
     };
   },
-  subscribeOnResize: (world: World, callback: (newSize: number) => void) => {
+  subscribeOnResize: (world, callback) => {
     world.resizeSubscribers.push(callback);
   },
-  defer: (world: World, callback: (world: World) => void) => {
+  defer: (world, callback) => {
     world.deferred.push(callback);
   },
-  applyDeferred: (world: World) => {
+  applyDeferred: (world) => {
     for (let i = 0; i < world.deferred.length; i++) {
       world.deferred[i](world);
     }
     world.deferred = [];
   },
-  step: (world: World, systems: System[]) => {
+  step: (world, systems) => {
     for (let i = 0; i < systems.length; i++) {
       const system = systems[i];
       system(world);
@@ -85,22 +57,16 @@ export const World = {
       World.applyDeferred(world);
     }
   },
-
   // # Query
-
-  registerQuery: <C extends ReadonlyArray<ComponentSchema<any>>>(world: World, components: C) => {
+  registerQuery: (world, components) => {
     const query = Query.new(components);
-
     world.queries.push(query);
-
     for (let i = 0; i < world.archetypes.length; i++) {
       const archetype = world.archetypes[i];
       query.tryAdd(archetype);
     }
-
     return query.result;
   },
-
   // # Archetype
   // TODO: Return
   // selectArchetypes: (world: World, componentIds: ComponentId[], callback: (archetype: Archetype) => void) => {
@@ -112,28 +78,22 @@ export const World = {
   //     }
   //   }
   // },
-  prefabricate: <CSL extends ReadonlyArray<ComponentSchema>>(world: World, componentSchemas: CSL): Archetype<CSL> => {
-    let archetype: Archetype<any> = world.emptyArchetype;
-
+  prefabricate: (world, componentSchemas) => {
+    let archetype = world.emptyArchetype;
     for (let i = 0; i < componentSchemas.length; i++) {
       archetype = World.getOrCreateArchetype(world, archetype, componentSchemas[i]);
     }
-
-    return archetype as Archetype<CSL>;
+    return archetype;
   },
-
   // # Component
-
-  registerComponentSchemaId: (world: World): ComponentSchemaId => {
+  registerComponentSchemaId: (world) => {
     return world.nextComponentId++;
   },
-
   // # Entity
-  allocateEntityId: (world: World): Entity => {
+  allocateEntityId: (world) => {
     if (world.entityGraveyard.length > 0) {
-      return world.entityGraveyard.pop()!;
+      return world.entityGraveyard.pop();
     }
-
     // # Resize world
     if (world.nextEntityId >= world.size) {
       const newSize = world.size * 2;
@@ -143,65 +103,42 @@ export const World = {
         world.resizeSubscribers[i](newSize);
       }
     }
-
     return world.nextEntityId++;
   },
-
   spawnEntity,
-
-  destroyEntity: (world: World, entity: Entity) => {
+  destroyEntity: (world, entity) => {
     const archetype = world.archetypesByEntities[entity];
     Archetype.removeEntity(archetype, entity);
-    world.archetypesByEntities[entity] = undefined as unknown as Archetype<any>; // QUESTION: see in piecs
+    world.archetypesByEntities[entity] = undefined; // QUESTION: see in piecs
     world.entityGraveyard.push(entity);
   },
-
-  getOrCreateArchetype: <CS extends ComponentSchema<any>>(
-    world: World,
-    current: Archetype<CS[]>,
-    componentSchema: CS
-  ) => {
+  getOrCreateArchetype: (world, current, componentSchema) => {
     const componentId = componentSchema.id;
-
     if (current.adjacent[componentId] !== undefined) {
       return current.adjacent[componentId];
     }
-
     const mask = current.mask;
     BitSet.xor(mask, componentId);
     const nextId = BitSet.toString(mask);
     let archetypeIndex = world.archetypesIndexById[nextId];
-
     if (archetypeIndex === undefined) {
       // TODO: In one case we need to add, in another to remove
-      const components: ComponentSchema[] = [componentSchema];
-
+      const components = [componentSchema];
       for (let i = 0; i < current.components.length; i++) {
         const component = current.components[i];
-
         if (!component) continue;
-
         components.push(component.schema);
       }
-
       const newArchetype = Archetype.new(nextId, components, BitSet.copy(mask));
       archetypeIndex = world.archetypes.push(newArchetype) - 1;
       world.archetypesIndexById[newArchetype.id] = archetypeIndex;
       current.adjacent[componentId] = newArchetype;
       newArchetype.adjacent[componentId] = current;
     }
-
     BitSet.xor(mask, componentId);
-
     return world.archetypes[archetypeIndex];
   },
-
-  addComponent: <CS extends ComponentSchema<any>>(
-    world: World,
-    entity: Entity,
-    componentSchema: CS,
-    archetype?: Archetype<[CS]>
-  ) => {
+  addComponent: (world, entity, componentSchema, archetype) => {
     const arch = archetype ?? world.archetypesByEntities[entity];
     // # If current entity archetype doesn't have this component,
     // then change archetype
@@ -211,13 +148,7 @@ export const World = {
       world.archetypesByEntities[entity] = newArchetype;
     }
   },
-
-  removeComponent: <CS extends ComponentSchema<any>>(
-    world: World,
-    entity: Entity,
-    componentSchema: CS,
-    archetype?: Archetype<CS[]>
-  ) => {
+  removeComponent: (world, entity, componentSchema, archetype) => {
     const arch = archetype ?? world.archetypesByEntities[entity];
     // # If current entity archetype doesn't have this component,
     // then change archetype

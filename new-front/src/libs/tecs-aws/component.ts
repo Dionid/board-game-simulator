@@ -11,6 +11,9 @@ export type ComponentSchemaSoA<Data extends Record<string, any[]> = Record<strin
   kind: ComponentSchemaKind.SoA;
   shape: (keyof Data)[];
   default: () => Data;
+  defaultValues: () => {
+    [K in keyof Data]: Data[K][number]; // TODO: Fix this with Schema
+  };
 };
 
 export type ComponentSchemaTag = {
@@ -21,10 +24,10 @@ export type ComponentSchemaTag = {
 export type ComponentSchema<Data extends Record<string, any[]> | undefined = Record<string, any[]> | undefined> =
   Data extends Record<string, any[]> ? ComponentSchemaSoA<Data> : ComponentSchemaTag;
 
-export type DataFromComponentSchemas<$Type extends ReadonlyArray<ComponentSchema>> = {
-  [K in keyof $Type]: $Type[K] extends ComponentSchema
-    ? $Type[K] extends ComponentSchemaSoA<any>
-      ? ReturnType<$Type[K]['default']>
+export type DataFromComponentSchemas<CSL extends ReadonlyArray<ComponentSchema>> = {
+  [K in keyof CSL]: CSL[K] extends ComponentSchema
+    ? CSL[K] extends ComponentSchemaSoA<any>
+      ? ReturnType<CSL[K]['default']>
       : undefined
     : never;
 };
@@ -38,8 +41,10 @@ export type Component<Data extends Record<string, any[]> | undefined = Record<st
 
 export type ComponentFromSchema<C extends ComponentSchema> = C extends ComponentSchemaSoA<infer Data>
   ? Component<Data>
-  : Component<undefined>;
+  : C extends ComponentSchemaTag
+  ? Component<undefined>
+  : never;
 
-export type ComponentListFromSchemaList<C extends ReadonlyArray<ComponentSchema>> = {
-  [K in keyof C]: ComponentFromSchema<C[K]>;
+export type ComponentListFromSchemaList<CSL extends ReadonlyArray<ComponentSchema>> = {
+  [K in keyof CSL]: ComponentFromSchema<CSL[K]>;
 };
