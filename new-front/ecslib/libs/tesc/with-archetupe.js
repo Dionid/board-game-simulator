@@ -1,2 +1,0 @@
-// // type ComponentId = number;
-export {};

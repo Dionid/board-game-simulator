@@ -1,7 +1,7 @@
 import { Archetype, ComponentSchema, ComponentSchemaKind, ComponentSchemaTag, World } from './index';
 
 describe('aws', () => {
-  it.skip('should be true', () => {
+  it('should be true', () => {
     const world = World.new();
 
     const A: ComponentSchemaTag = {
@@ -14,8 +14,8 @@ describe('aws', () => {
       kind: ComponentSchemaKind.Tag,
     };
 
-    const aPrefab = World.prefabricate(world, [A]);
-    const bPrefab = World.prefabricate(world, [B]);
+    const aPrefab = World.prefabricate(world, [A] as const);
+    const bPrefab = World.prefabricate(world, [B] as const);
 
     const systemA = (world: World) => {
       const aArchetypes = World.registerQuery(world, [A] as const);
@@ -64,17 +64,13 @@ describe('aws', () => {
       id: World.registerComponentSchemaId(world),
       kind: ComponentSchemaKind.SoA,
       shape: ['x', 'y'],
-      defaultValues: () => {
-        return {
-          x: 0,
-          y: 0,
-        };
+      defaultValues: {
+        x: 0,
+        y: 0,
       },
-      default: () => {
-        return {
-          x: [],
-          y: [],
-        };
+      default: {
+        x: [],
+        y: [],
       },
     };
 
@@ -82,15 +78,11 @@ describe('aws', () => {
       id: World.registerComponentSchemaId(world),
       kind: ComponentSchemaKind.SoA,
       shape: ['width'],
-      defaultValues: () => {
-        return {
-          width: 0,
-        };
+      defaultValues: {
+        width: 0,
       },
-      default: () => {
-        return {
-          width: [],
-        };
+      default: {
+        width: [],
       },
     };
 
@@ -118,8 +110,31 @@ describe('aws', () => {
     };
 
     for (let i = 0; i < 100; i++) {
-      const entity = World.spawnEntity(world, mainPrefab);
-      const arch = world.archetypesByEntities[entity];
+      // # Simple
+      World.spawnEntity(world);
+    }
+
+    for (let i = 0; i < 100; i++) {
+      // # With prefab
+      World.spawnEntity(world, mainPrefab);
+    }
+
+    for (let i = 0; i < 100; i++) {
+      // # With prefab and initial values
+      World.spawnEntity(world, mainPrefab, [{ x: 10, y: 10 }, { width: 100 }, undefined]);
+    }
+
+    for (let i = 0; i < 100; i++) {
+      // # Archetype can be grabbed from result (type-safe)
+      const [entity, arch] = World.spawnEntity(world, mainPrefab, [{ x: 10, y: 10 }, { width: 100 }, undefined]);
+      const size = Archetype.getComponent(arch, Size);
+      size.data.width[entity] = 1;
+    }
+
+    for (let i = 0; i < 100; i++) {
+      // # Or you can find archetype by entity (not type-safe)
+      const [entity] = World.spawnEntity(world, mainPrefab, [{ x: 10, y: 10 }, { width: 100 }, undefined]);
+      const arch = World.getEntityArchetype(world, entity);
       const size = Archetype.getComponent(arch, Size);
       size.data.width[entity] = 1;
     }

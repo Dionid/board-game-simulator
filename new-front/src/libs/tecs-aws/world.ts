@@ -3,25 +3,29 @@ import { System } from './system';
 import { Entity } from './entity';
 import { Archetype, ArchetypeId } from './archetype';
 import { BitSet } from './bit-set';
-import { ComponentSchema, ComponentSchemaId } from './component';
+import { ComponentSchema, ComponentSchemaId, DataValuesFromComponentSchemas } from './component';
 import { Query } from './query';
 
-// export function spawnEntity(world: World): [Entity, Archetype<[]>];
-// export function spawnEntity<Arch extends Archetype>(world: World, prefabricate: Arch): [Entity, Arch];
-// export function spawnEntity<Arch extends Archetype>(world: World, prefabricate?: Arch) {
-//   const entity = World.allocateEntityId(world);
-//   const archetype = prefabricate ?? world.emptyArchetype;
-//   Archetype.addEntity(archetype, entity);
-//   world.archetypesByEntities[entity] = archetype;
-//   return [entity, archetype];
-// }
-
-export function spawnEntity<Arch extends Archetype>(world: World, prefabricate?: Arch) {
+export function spawnEntity(world: World): [Entity, Archetype<[]>];
+export function spawnEntity<CSL extends ReadonlyArray<ComponentSchema>>(
+  world: World,
+  prefabricate: Archetype<CSL>,
+  initialComponentData: DataValuesFromComponentSchemas<CSL>
+): [Entity, Archetype<CSL>];
+export function spawnEntity<CSL extends ReadonlyArray<ComponentSchema>>(
+  world: World,
+  prefabricate: Archetype<CSL>
+): [Entity, Archetype<CSL>];
+export function spawnEntity<CSL extends ReadonlyArray<ComponentSchema>>(
+  world: World,
+  prefabricate?: Archetype<CSL>,
+  initialComponentData?: DataValuesFromComponentSchemas<CSL>
+) {
   const entity = World.allocateEntityId(world);
   const archetype = prefabricate ?? world.emptyArchetype;
   Archetype.addEntity(archetype, entity);
   world.archetypesByEntities[entity] = archetype;
-  return entity;
+  return [entity, archetype];
 }
 
 export type World = {
@@ -102,16 +106,16 @@ export const World = {
   },
 
   // # Archetype
-  // TODO: Return
-  // selectArchetypes: (world: World, componentIds: ComponentId[], callback: (archetype: Archetype) => void) => {
-  //   const queryMask = Query.makeMask(componentIds);
-  //   for (let i = world.archetypes.length - 1; i >= 0; i--) {
-  //     const archetype = world.archetypes[i];
-  //     if (BitSet.contains(archetype.mask, queryMask)) {
-  //       callback(archetype);
-  //     }
-  //   }
-  // },
+  getEntityArchetype: (world: World, entity: Entity): Archetype<any> => {
+    const arch = world.archetypesByEntities[entity];
+
+    if (!arch) {
+      throw new Error(`Entity ${entity} doesn't have an archetype (so it must be destroyed)`);
+    }
+
+    return arch;
+  },
+
   prefabricate: <CSL extends ReadonlyArray<ComponentSchema>>(world: World, componentSchemas: CSL): Archetype<CSL> => {
     let archetype: Archetype<any> = world.emptyArchetype;
 

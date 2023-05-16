@@ -6,6 +6,7 @@ import {
   ComponentSchema,
   ComponentSchemaId,
   ComponentSchemaKind,
+  DataValuesFromComponentSchemas,
 } from './component';
 import { Entity } from './entity';
 import { SparseSet } from './sparse-set';
@@ -25,7 +26,7 @@ export type Archetype<CSL extends ReadonlyArray<ComponentSchema> = ReadonlyArray
   entities: Entity[];
 
   // # Components
-  components: ComponentListFromSchemaList<CSL>;
+  components: ComponentListFromSchemaList<CSL>; // components sparse array
 };
 
 export const Archetype = {
@@ -46,7 +47,7 @@ export const Archetype = {
         case ComponentSchemaKind.SoA: {
           components[componentSchema.id] = {
             schema: componentSchema,
-            data: componentSchema.default(),
+            data: componentSchema.default,
           };
 
           break;
@@ -79,8 +80,8 @@ export const Archetype = {
     return BitSet.has(arch.mask, componentId);
   },
 
-  getComponent: <CS extends ComponentSchema>(
-    arch: Archetype<ReadonlyArray<CS>>,
+  getComponent: <CSL extends ReadonlyArray<ComponentSchema>, CS extends CSL[number]>(
+    arch: Archetype<CSL>,
     componentSchema: CS
   ): ComponentFromSchema<CS> => {
     const componentId = componentSchema.id;
@@ -88,7 +89,7 @@ export const Archetype = {
     if (!component) {
       throw new Error(`Can't find component ${componentSchema.id} on this archetype ${arch.id}`);
     }
-    return component;
+    return component as ComponentFromSchema<CS>;
   },
 
   hasEntity: (arch: Archetype, entity: Entity) => {
@@ -155,7 +156,12 @@ export const Archetype = {
     }
   },
 
-  addEntity: (arch: Archetype, entity: Entity) => {
+  addEntity: <CSL extends ReadonlyArray<ComponentSchema>>(
+    arch: Archetype,
+    entity: Entity,
+    initialComponentData?: DataValuesFromComponentSchemas<CSL>
+  ) => {
+    // Add entity to sSet
     arch.sSet.dense.push(entity);
     const archDenseIndex = arch.sSet.dense.length - 1;
     arch.sSet.sparse[entity] = archDenseIndex;
@@ -165,12 +171,15 @@ export const Archetype = {
       if (!component) continue;
       switch (component.schema.kind) {
         case ComponentSchemaKind.SoA: {
-          // # Create default
-          const def = component.schema.defaultValues();
+          // # TODO: Test this
+          // # Create initial from initialComponentData or default
+          const def =
+            initialComponentData && initialComponentData[i] ? initialComponentData[i]! : component.schema.defaultValues;
           // # Get shape keys (like x, y in Position)
           for (let i = 0; i < component.schema.shape.length; i++) {
             const key = component.schema.shape[i];
             const array = component.data![key];
+            // # Put entity default value on the same index as entity in dense array
             array[archDenseIndex] = def[key];
           }
           break;
@@ -214,7 +223,7 @@ export const Archetype = {
             if (fromComponent) {
               array[toDenseIndex] = fromComponent.data![key][swapIndexInDense];
             } else {
-              array[toDenseIndex] = component.schema.defaultValues()[key];
+              array[toDenseIndex] = component.schema.defaultValues[key];
             }
           }
           break;

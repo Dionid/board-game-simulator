@@ -25,7 +25,7 @@ export const Query = {
 
         for (let i = 0; i < components.length; i++) {
           const componentId = components[i].id;
-          resultComponents.push(archetype.components[componentId]!.data);
+          resultComponents.push(archetype.components[componentId].data);
         }
 
         result.push([archetype, resultComponents as DataFromComponentSchemas<CSL>]);

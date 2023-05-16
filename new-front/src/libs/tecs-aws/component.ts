@@ -9,10 +9,10 @@ export enum ComponentSchemaKind {
 export type ComponentSchemaSoA<Data extends Record<string, any[]> = Record<string, any[]>> = {
   id: ComponentSchemaId;
   kind: ComponentSchemaKind.SoA;
-  shape: (keyof Data)[];
-  default: () => Data;
-  defaultValues: () => {
-    [K in keyof Data]: Data[K][number]; // TODO: Fix this with Schema
+  shape: ReadonlyArray<keyof Data>;
+  default: Data;
+  defaultValues: {
+    [K in keyof Data]: Data[K][number];
   };
 };
 
@@ -27,7 +27,15 @@ export type ComponentSchema<Data extends Record<string, any[]> | undefined = Rec
 export type DataFromComponentSchemas<CSL extends ReadonlyArray<ComponentSchema>> = {
   [K in keyof CSL]: CSL[K] extends ComponentSchema
     ? CSL[K] extends ComponentSchemaSoA<any>
-      ? ReturnType<CSL[K]['default']>
+      ? CSL[K]['default']
+      : undefined
+    : never;
+};
+
+export type DataValuesFromComponentSchemas<CSL extends ReadonlyArray<ComponentSchema>> = {
+  [K in keyof CSL]: CSL[K] extends ComponentSchema
+    ? CSL[K] extends ComponentSchemaSoA<any>
+      ? CSL[K]['defaultValues']
       : undefined
     : never;
 };
