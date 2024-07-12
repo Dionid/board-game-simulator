@@ -2,15 +2,13 @@ import { SparseSet } from '../tecs-aws';
 
 export type SoAComponentPool<Data extends Record<string, any[]>> = {
   id: number;
-  entitiesSSet: SparseSet<number>;
-  entities: number[];
+  entities: SparseSet<number>;
   data: Data;
 };
 
 export type TagComponentPool = {
   id: number;
-  entitiesSSet: SparseSet<number>;
-  entities: number[];
+  entities: SparseSet<number>;
 };
 
 export type ComponentPool<Data extends Record<string, any[]> | undefined> = Data extends Record<string, any[]>
@@ -50,9 +48,8 @@ const main = () => {
   const world = newWorld();
 
   const PositionPool: SoAComponentPool<Vector2> = {
-    id: world.nextComponentId++,
-    entitiesSSet: SparseSet.new(),
-    entities: [],
+    id: 1,
+    entities: SparseSet.new(),
     data: {
       x: [],
       y: [],
@@ -60,39 +57,38 @@ const main = () => {
   };
 
   const VelocityPool: SoAComponentPool<Vector2> = {
-    id: world.nextComponentId++,
-    entitiesSSet: SparseSet.new(),
-    entities: [],
+    id: 2,
+    entities: SparseSet.new(),
     data: {
       x: [],
       y: [],
     },
   };
 
-  world.essence.pools.push(PositionPool);
-  world.essence.pools.push(VelocityPool);
+  world.essence.pools[PositionPool.id] = PositionPool;
+  world.essence.pools[VelocityPool.id] = VelocityPool;
 
   const moveSystem = (world: World) => {
-    for (let i = 0; i < PositionPool.entities.length; i++) {
-      const entity = PositionPool.entities[i];
+    for (let posEntityId = 0; posEntityId < PositionPool.entities.dense.length; posEntityId++) {
+      const entity = PositionPool.entities.dense[posEntityId];
 
       // # Check if entity has velocity
-      if (!SparseSet.has(VelocityPool.entitiesSSet, entity)) {
+      if (!SparseSet.has(VelocityPool.entities, entity)) {
         continue;
       }
 
-      const velocityEntityIndex = VelocityPool.entitiesSSet.sparse[entity];
+      const velocityEntId = VelocityPool.entities.sparse[entity];
 
-      const velocityX = VelocityPool.data.x[velocityEntityIndex];
-      const velocityY = VelocityPool.data.y[velocityEntityIndex];
+      const velocityX = VelocityPool.data.x[velocityEntId];
+      const velocityY = VelocityPool.data.y[velocityEntId];
 
       if (velocityX > 0 || velocityY > 0) {
         // # Entity moved
-        PositionPool.data.x[i] += velocityX;
-        PositionPool.data.y[i] += velocityY;
+        PositionPool.data.x[posEntityId] += velocityX;
+        PositionPool.data.y[posEntityId] += velocityY;
 
-        VelocityPool.data.x[velocityEntityIndex] -= 1;
-        VelocityPool.data.y[velocityEntityIndex] -= 1;
+        VelocityPool.data.x[velocityEntId] -= 1;
+        VelocityPool.data.y[velocityEntId] -= 1;
       }
     }
   };
