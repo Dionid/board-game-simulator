@@ -9,9 +9,16 @@
 
 # TODO
 
+1. Add Component (with Archetype shift)
+1. Tags
+1. ? Change Component back to Schema
+1. ...
+1. BitMask
 1. Singleton Component
 1. Component pools
 1. Custom Errors
+1. ...
+1. World size
 1. ...
 
 # Goals

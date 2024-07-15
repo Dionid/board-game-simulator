@@ -1,6 +1,7 @@
 // # Types
 
 export const kind = Symbol('kind');
+export const defaultFn = Symbol('defaultFn');
 
 export const numberK = Symbol('number');
 export const float64K = Symbol('float64');
@@ -42,6 +43,7 @@ export const FieldKind = {
 
 export type Field = {
   [kind]: FieldKind;
+  [defaultFn]: () => ExtractSchemaType<FieldKind>;
 };
 
 // # Schema
