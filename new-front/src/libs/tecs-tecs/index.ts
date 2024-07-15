@@ -1,18 +1,25 @@
-import { ExtractSchemaType, number, Component } from './schema';
+import { ExtractSchemaType, Schema } from './schema';
 import { ArrayContains } from './ts-types';
+
+// # Component
+
+export type Component = Schema;
+export type ExtractComponentType<C> = ExtractSchemaType<C>;
 
 // # Archetype
 
-type ArchetypeTablesList<CL extends ReadonlyArray<Component>> = {
-  [K in keyof CL]: ExtractSchemaType<CL[K]>[];
+export type ArchetypeTableRow<C extends Component> = ExtractComponentType<C>[];
+
+export type ArchetypeTable<CL extends ReadonlyArray<Component>> = {
+  [K in keyof CL]: ArchetypeTableRow<CL[K]>;
 };
 
-type Archetype<CL extends ReadonlyArray<Component>> = {
+export type Archetype<CL extends ReadonlyArray<Component>> = {
   id: number;
   type: CL;
   entitiesSparse: number[];
   entities: number[]; // dense
-  tablesList: ArchetypeTablesList<CL>;
+  table: ArchetypeTable<CL>;
 };
 
 // # World
@@ -30,7 +37,18 @@ export type World = {
   nextArchetypeId: number;
 };
 
-const World = {
+export const World = {
+  new: (): World => ({
+    componentIdByComponent: new WeakMap(),
+    componentById: new Map(),
+    nextComponentId: 0,
+
+    archetypesIdByArchetype: new WeakMap(),
+    archetypesByComponents: new Map(),
+    archetypesById: new Map(),
+    nextArchetypeId: 0,
+  }),
+
   // # Components
   registerComponent: (world: World, component: Component, componentId?: number) => {
     let type: number | undefined = world.componentIdByComponent.get(component);
@@ -63,7 +81,7 @@ const World = {
   },
 
   // # Archetypes
-  registerArchetype: <CL extends Component[]>(world: World, components: CL): Archetype<CL> => {
+  registerArchetype: <CL extends Component[]>(world: World, ...components: CL): Archetype<CL> => {
     const type = components
       .map((component) => World.getComponentId(world, component))
       .sort((a, b) => a - b)
@@ -77,7 +95,7 @@ const World = {
         type: components,
         entitiesSparse: [],
         entities: [],
-        tablesList: {} as ArchetypeTablesList<CL>,
+        table: {} as ArchetypeTable<CL>,
       };
       world.archetypesByComponents.set(type, newArchetype);
       world.archetypesById.set(newArchetype.id, newArchetype);
@@ -88,87 +106,51 @@ const World = {
   },
 
   // # Archetype Entities Components
-  getComponentsTableList: <CL extends ReadonlyArray<Component>, A extends Archetype<any>>(
+  getComponentsTable: <C extends Component, A extends Archetype<any>>(
+    world: World,
+    archetype: A,
+    component: A extends Archetype<infer iCL> ? (ArrayContains<iCL, [C]> extends true ? C : never) : never
+  ) => {
+    const componentId = World.getComponentId(world, component);
+    return archetype.table[componentId] as ArchetypeTableRow<C>;
+  },
+
+  getComponentsTablesList: <CL extends ReadonlyArray<Component>, A extends Archetype<any>>(
     world: World,
     archetype: A,
     ...components: A extends Archetype<infer iCL> ? (ArrayContains<iCL, CL> extends true ? CL : never) : never
   ) => {
     return components.map((component) => {
       const componentId = World.getComponentId(world, component);
-      return archetype.tablesList[componentId];
+      return archetype.table[componentId];
     }) as {
-      [K in keyof CL]: ExtractSchemaType<CL[K]>[];
+      [K in keyof CL]: ExtractComponentType<CL[K]>[];
     };
   },
 
-  getComponents: <CL extends ReadonlyArray<Component>>(
+  getComponent: <C extends Component, A extends Archetype<any>>(
     world: World,
-    archetype: Archetype<any>,
+    archetype: A,
     entity: number,
-    ...components: CL
+    component: A extends Archetype<infer iCL> ? (ArrayContains<iCL, [C]> extends true ? C : never) : never
+  ) => {
+    const componentId = World.getComponentId(world, component);
+    const componentIndex = archetype.entitiesSparse[entity];
+    return archetype.table[componentId][componentIndex] as ExtractComponentType<C>;
+  },
+
+  getComponents: <CL extends ReadonlyArray<Component>, A extends Archetype<any>>(
+    world: World,
+    archetype: A,
+    entity: number,
+    ...components: A extends Archetype<infer iCL> ? (ArrayContains<iCL, CL> extends true ? CL : never) : never
   ) => {
     return components.map((component) => {
       const componentId = World.getComponentId(world, component);
       const componentIndex = archetype.entitiesSparse[entity];
-      return archetype.tablesList[componentId][componentIndex];
+      return archetype.table[componentId][componentIndex];
     }) as {
-      [K in keyof CL]: ExtractSchemaType<CL[K]>;
+      [K in keyof CL]: ExtractComponentType<CL[K]>;
     };
   },
-};
-
-// # TEST
-
-const Position = {
-  x: number,
-  y: number,
-};
-
-const Velocity = {
-  x: number,
-  y: number,
-  z: number,
-};
-
-const Speed = {
-  value: number,
-};
-
-const world: World = {
-  componentIdByComponent: new WeakMap(),
-  componentById: new Map(),
-  nextComponentId: 0,
-
-  archetypesIdByArchetype: new WeakMap(),
-  archetypesByComponents: new Map(),
-  archetypesById: new Map(),
-  nextArchetypeId: 0,
-};
-
-const archetype1 = World.registerArchetype(world, [Position, Speed] as const);
-
-const byGetComponentTable = () => {
-  const [position] = World.getComponentsTableList(world, archetype1, Position);
-  const [speed, position2] = World.getComponentsTableList(world, archetype1, Speed, Position);
-
-  for (let i = 0; i < archetype1.entities.length; i++) {
-    position[i].x += 1;
-    position[i].y += 1;
-
-    speed[i].value += 1;
-  }
-};
-
-const byGetComponent = () => {
-  for (const entity of archetype1.entities) {
-    const [position, speed, velocity] = World.getComponents(world, archetype1, entity, Position, Speed, Velocity);
-    position.x += 1;
-    position.y += 1;
-
-    speed.value += 1;
-
-    velocity.x += 1;
-    velocity.y += 1;
-    velocity.z += 1;
-  }
 };

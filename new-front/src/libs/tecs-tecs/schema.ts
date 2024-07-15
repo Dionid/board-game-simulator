@@ -55,9 +55,3 @@ export type ExtractSchemaType<T> = T extends typeof float64 | typeof number
   : T extends Schema
   ? { [K in keyof T]: ExtractSchemaType<T[K]> }
   : never;
-
-// # Component
-
-export type Component = Schema;
-
-export type ExtractComponentType<C> = ExtractSchemaType<C>;
