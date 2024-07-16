@@ -45,17 +45,17 @@ export const FieldKind = {
 
 export type Field = {
   [kind]: FieldKind;
-  [defaultFn]: () => ExtractSchemaType<Types>;
+  [defaultFn]: () => SchemaType<Types>;
 };
 
 // # Schema
 
 export type Schema = { [key: string]: Field | Schema };
 
-export type ExtractSchemaType<T> = T extends typeof float64 | typeof number
+export type SchemaType<T> = T extends typeof float64 | typeof number
   ? number
   : T extends typeof string
   ? string
   : T extends Schema
-  ? { [K in keyof T]: ExtractSchemaType<T[K]> }
+  ? { [K in keyof T]: SchemaType<T[K]> }
   : never;
