@@ -30,12 +30,16 @@ export type World = {
 
 // # Entity
 
-export const spawnEntity = (world: World) => {
+export const spawnEntity = <SL extends Schema[]>(world: World, arch?: Archetype<SL>) => {
   let entity: number;
   if (world.entityGraveyard.length > 0) {
     entity = world.entityGraveyard.pop()!;
   } else {
     entity = world.nextEntityId++;
+  }
+  if (arch) {
+    Archetype.addEntity(arch, entity);
+    world.archetypeByEntity.set(entity, arch);
   }
   return entity;
 };
