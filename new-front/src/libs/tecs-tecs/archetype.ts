@@ -49,17 +49,17 @@ export const removeArchetypeEntity = <CL extends Schema[]>(
   return componentsData;
 };
 
-export const hasSchema = (arch: Archetype<any>, schemaId: SchemaId) => {
+export const isSchemaInArchetype = (arch: Archetype<any>, schemaId: SchemaId) => {
   return arch.table[schemaId] !== undefined;
 };
 
-export const hasEntity = (arch: Archetype<any>, schemaId: SchemaId) => {
+export const isEntityInArchetype = (arch: Archetype<any>, schemaId: SchemaId) => {
   return arch.table[schemaId] !== undefined;
 };
 
 export const Archetype = {
-  hasSchema,
-  hasEntity,
+  isSchemaInArchetype,
+  isEntityInArchetype,
   setComponent: <C extends Schema>(arch: Archetype<any>, entity: Entity, schemaId: SchemaId, props: SchemaType<C>) => {
     // # Add component to archetype
     const componentTable = arch.table[schemaId];

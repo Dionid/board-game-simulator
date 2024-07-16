@@ -122,6 +122,18 @@ export const componentsListByArchetype = <SL extends ReadonlyArray<Schema>, A ex
   };
 };
 
+/**
+ *
+ * By setting component to Entity, we will find / create Archetype, that
+ * will contain this Component Schema, move Entity and Components to this new
+ * Archetype.
+ *
+ * @param world
+ * @param entity
+ * @param schema
+ * @param component
+ * @returns
+ */
 export const setComponent = <S extends Schema>(world: World, entity: Entity, schema: S, component?: SchemaType<S>) => {
   // # Fill props with default
   if (component === undefined) {
@@ -139,7 +151,7 @@ export const setComponent = <S extends Schema>(world: World, entity: Entity, sch
   const schemaId = World.getSchemaId(world, schema);
 
   // # Get current archetype
-  let archetype = world.archetypeByEntity.get(entity);
+  let archetype = world.archetypeByEntity.get(entity) as Archetype<[S]> | undefined;
   if (archetype === undefined) {
     // # If there were no archetype, create new one
     const newArchetype = World.registerArchetype(world, schema);
@@ -153,21 +165,25 @@ export const setComponent = <S extends Schema>(world: World, entity: Entity, sch
     return [archetype, component];
   }
 
-  // # Check if component is already in archetype
-  if (Archetype.hasSchema(archetype, schemaId)) {
+  // # If Schema is already in archetype, than just set Component
+  if (Archetype.isSchemaInArchetype(archetype, schemaId)) {
     Archetype.setComponent(archetype, entity, schemaId, component);
 
     return [archetype, component];
   }
 
-  // # Create new archetype
+  // # If not, create new Archetype
   const newArchetype = World.registerArchetype(world, schema, ...archetype.type);
 
   // # Index archetype by entity
   world.archetypeByEntity.set(entity, newArchetype);
 
-  // # Move entity to new archetype
-  Archetype.setComponent(newArchetype, entity, schemaId, component);
+  // # Move Entity to new Archetype
+  const componentsList = Archetype.removeEntity(archetype, entity);
+  for (const component of componentsList) {
+    const schemaId = World.getSchemaId(world, schema);
+    Archetype.setComponent(newArchetype, entity, schemaId, component);
+  }
 
   return [newArchetype, component];
 };
@@ -195,15 +211,12 @@ export const removeComponent = <S extends Schema>(world: World, entity: Entity, 
   }
 
   // # Check if component in archetype
-  if (!Archetype.hasSchema(archetype, schemaId)) {
+  if (!Archetype.isSchemaInArchetype(archetype, schemaId)) {
     throw new Error(`Can't find component ${schemaId} on this archetype ${archetype.id}`);
   }
 
   // # Remove component from archetype
   const componentsList = Archetype.removeEntity(archetype, entity);
-  if (!componentsList) {
-    throw new Error(`Can't find component ${schemaId} on this archetype ${archetype.id}`);
-  }
 
   // # Find or create new archetype
   const newArchetype = World.registerArchetype(world, ...archetype.type.filter((c) => c !== schema));
