@@ -10,8 +10,19 @@ export type ArchetypeTable<SL extends ReadonlyArray<Schema>> = {
   [K in keyof SL]: ArchetypeTableRow<SL[K]>;
 };
 
+export type ArchetypeId = string;
+
+export const ArchetypeId = {
+  create: (schemas: Schema[]) => {
+    return schemas
+      .map((component) => Internals.getSchemaId(component))
+      .sort((a, b) => a - b)
+      .join(',');
+  },
+};
+
 export type Archetype<SL extends ReadonlyArray<Schema> = ReadonlyArray<Schema>> = {
-  id: number;
+  id: ArchetypeId;
   type: SL;
   entitiesSS: SparseSet;
   entities: number[]; // dense

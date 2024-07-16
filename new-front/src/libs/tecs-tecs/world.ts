@@ -1,6 +1,6 @@
 import { Entity } from './core';
 import { SparseSet } from './sparse-set';
-import { Archetype, ArchetypeTable, ArchetypeTableRow } from './archetype';
+import { Archetype, ArchetypeId, ArchetypeTable, ArchetypeTableRow } from './archetype';
 import { Internals } from './internals';
 import { Schema, SchemaType } from './schema';
 import { ArrayContains } from './ts-types';
@@ -17,9 +17,7 @@ export type World = {
 
   // # Archetypes
   // archetypesIdByArchetype: WeakMap<Archetype<any>, number>;
-  archetypesById: Map<number, Archetype<any>>;
-  archetypesByComponentsType: Map<string, Archetype<any>>;
-  nextArchetypeId: number;
+  archetypesById: Map<string, Archetype<any>>;
 
   // Entity Archetype
   archetypeByEntity: Array<Archetype<any> | undefined>;
@@ -67,12 +65,9 @@ export const getSchemaId = (schema: Schema) => {
 // # Archetype
 
 export const registerArchetype = <SL extends Schema[]>(world: World, ...schemas: SL): Archetype<SL> => {
-  const type = schemas
-    .map((component) => getSchemaId(component))
-    .sort((a, b) => a - b)
-    .join(',');
+  const archId = ArchetypeId.create(schemas);
 
-  let archetype = world.archetypesByComponentsType.get(type) as Archetype<SL> | undefined;
+  let archetype = world.archetypesById.get(archId) as Archetype<SL> | undefined;
 
   if (archetype !== undefined) {
     return archetype;
@@ -81,7 +76,7 @@ export const registerArchetype = <SL extends Schema[]>(world: World, ...schemas:
   // # Create new Archetype
   const ss = SparseSet.new();
   const newArchetype: Archetype<SL> = {
-    id: world.nextArchetypeId++,
+    id: archId,
     type: schemas,
     entitiesSS: ss,
     entities: ss.dense,
@@ -92,7 +87,6 @@ export const registerArchetype = <SL extends Schema[]>(world: World, ...schemas:
   };
 
   // # Index new Archetype
-  world.archetypesByComponentsType.set(type, newArchetype);
   world.archetypesById.set(newArchetype.id, newArchetype);
 
   // # Add to queries
@@ -250,13 +244,8 @@ export const World = {
   new: (): World => ({
     nextEntityId: 1,
     entityGraveyard: [],
-
-    // archetypesIdByArchetype: new WeakMap(),
-    archetypesByComponentsType: new Map(),
     archetypesById: new Map(),
-    nextArchetypeId: 0,
     archetypeByEntity: [],
-
     queries: [],
   }),
 
