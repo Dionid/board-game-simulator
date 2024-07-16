@@ -1,10 +1,11 @@
-import { Entity } from './core';
-import { SparseSet } from './sparse-set';
-import { Archetype, ArchetypeTable, ArchetypeTableRow } from './archetype';
-import { Internals } from './internals';
-import { Schema, SchemaType, defaultFn } from './schema';
-import { ArrayContains } from './ts-types';
-import { Query } from './query';
+import { Entity } from './core.js';
+import { SparseSet } from './sparse-set.js';
+import { Archetype, ArchetypeTable, ArchetypeTableRow } from './archetype.js';
+import { Internals } from './internals.js';
+import { Schema, SchemaType, defaultFn } from './schema.js';
+import { ArrayContains } from './ts-types.js';
+import { Query } from './query.js';
+import { Handler } from './handler.js';
 
 /**
  * World is a container for Entities, Components and Archetypes.
@@ -21,7 +22,7 @@ export type World = {
   nextArchetypeId: number;
 
   // Entity Archetype
-  archetypeByEntity: Map<Entity, Archetype<any>>;
+  archetypeByEntity: Map<Entity, Archetype<any> | undefined>;
 
   // Queries
   queries: Query<any>[];
@@ -41,6 +42,12 @@ export const spawnEntity = (world: World) => {
 
 export const killEntity = (world: World, entity: number) => {
   world.entityGraveyard.push(entity);
+
+  const archetype = world.archetypeByEntity.get(entity);
+  if (archetype) {
+    Archetype.removeEntity(archetype, entity);
+  }
+  world.archetypeByEntity.set(entity, undefined);
 };
 
 // # Schema
@@ -152,7 +159,12 @@ export const componentsListByArchetype = <SL extends ReadonlyArray<Schema>, A ex
  * @param component
  * @returns
  */
-export const setComponent = <S extends Schema>(world: World, entity: Entity, schema: S, component?: SchemaType<S>) => {
+export const setComponent = <S extends Schema>(
+  world: World,
+  entity: Entity,
+  schema: S,
+  component?: SchemaType<S>
+): [Archetype<[S]>, SchemaType<S>] => {
   // # Fill props with default
   if (component === undefined) {
     component = {} as SchemaType<S>;
@@ -180,7 +192,7 @@ export const setComponent = <S extends Schema>(world: World, entity: Entity, sch
     // # Add entity to archetype
     Archetype.setComponent(newArchetype, entity, schemaId, component);
 
-    return [archetype, component];
+    return [newArchetype, component];
   }
 
   // # If Schema is already in archetype, than just set Component
@@ -191,17 +203,21 @@ export const setComponent = <S extends Schema>(world: World, entity: Entity, sch
   }
 
   // # If not, create new Archetype
-  const newArchetype = World.registerArchetype(world, schema, ...archetype.type);
+  const newArchetype = World.registerArchetype(world, schema, ...archetype.type) as unknown as Archetype<[S]>;
 
   // # Index archetype by entity
   world.archetypeByEntity.set(entity, newArchetype);
 
   // # Move Entity to new Archetype
   const componentsList = Archetype.removeEntity(archetype, entity);
-  for (const component of componentsList) {
+  // # Move old data
+  for (const [schema, component] of componentsList) {
     const schemaId = World.getSchemaId(world, schema);
     Archetype.setComponent(newArchetype, entity, schemaId, component);
   }
+
+  // # Move new data
+  Archetype.setComponent(newArchetype, entity, schemaId, component);
 
   return [newArchetype, component];
 };
@@ -239,7 +255,7 @@ export const removeComponent = <S extends Schema>(world: World, entity: Entity, 
   // # Find or create new archetype
   const newArchetype = World.registerArchetype(world, ...archetype.type.filter((c) => c !== schema));
 
-  for (const component of componentsList) {
+  for (const [schema, component] of componentsList) {
     const schemaId = World.getSchemaId(world, schema);
     Archetype.setComponent(newArchetype, entity, schemaId, component);
   }
@@ -247,7 +263,7 @@ export const removeComponent = <S extends Schema>(world: World, entity: Entity, 
   return newArchetype;
 };
 
-// # Qieries
+// # Queries
 
 export function registerQuery<SL extends ReadonlyArray<Schema>>(world: World, ...schemas: SL) {
   const query = Query.new(...schemas);
@@ -261,9 +277,21 @@ export function registerQuery<SL extends ReadonlyArray<Schema>>(world: World, ..
   return query;
 }
 
+export function step(world: World, systems: Handler[]) {
+  for (let i = 0; i < systems.length; i++) {
+    const system = systems[i];
+    system({
+      world,
+      event: {
+        type: 'update',
+      },
+    });
+  }
+}
+
 export const World = {
   new: (): World => ({
-    nextEntityId: 0,
+    nextEntityId: 1,
     entityGraveyard: [],
 
     archetypesIdByArchetype: new WeakMap(),
@@ -299,4 +327,7 @@ export const World = {
 
   // # Query
   registerQuery,
+
+  // # Step
+  step,
 };

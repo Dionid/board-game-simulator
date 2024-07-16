@@ -1,5 +1,5 @@
-import { Schema, SchemaId } from './schema';
-import { World } from './world';
+import { Schema, SchemaId } from './schema.js';
+import { World } from './world.js';
 
 export type Internals = {
   // # Worlds
@@ -26,7 +26,7 @@ export const UNSAFE_internals: Internals = {
 };
 
 export const Internals = {
-  registerSchema: (world: World, schema: Schema, schemaId?: SchemaId) => {
+  registerSchema: (schema: Schema, schemaId?: SchemaId) => {
     let type: number | undefined = UNSAFE_internals.schemaIdBySchema.get(schema);
     if (type !== undefined) {
       return type;
@@ -43,15 +43,12 @@ export const Internals = {
     UNSAFE_internals.schemaById.set(type, schema);
     UNSAFE_internals.schemaIdBySchema.set(schema, type);
 
-    // # Create Archetype
-    World.registerArchetype(world, schema);
-
     return type;
   },
-  getSchemaId: (world: World, schema: Schema) => {
+  getSchemaId: (schema: Schema) => {
     let type = UNSAFE_internals.schemaIdBySchema.get(schema);
     if (type === undefined) {
-      type = Internals.registerSchema(world, schema);
+      type = Internals.registerSchema(schema);
     }
     return type;
   },

@@ -1,6 +1,6 @@
 // # Types
 
-import { Id } from './core';
+import { Id } from './core.js';
 
 export const kind = Symbol('kind');
 export const defaultFn = Symbol('defaultFn');

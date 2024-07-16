@@ -89,3 +89,29 @@ export const withoutQuery = () => {
 
   byGetComponent();
 };
+
+describe('aws', () => {
+  it('should be true', () => {
+    expect(true).toBe(true);
+
+    const world = World.new();
+
+    const PositionArchetype = World.registerArchetype(world, Position);
+    const SpeedArchetype = World.registerArchetype(world, Speed);
+    const MovementArchetype = World.registerArchetype(world, Position, Speed);
+
+    console.log('MovementArchetype', MovementArchetype);
+
+    const entity = World.spawnEntity(world);
+
+    World.setComponent(world, entity, Position, { x: 10, y: 20 });
+
+    console.log('PositionArchetype', PositionArchetype.entities, PositionArchetype.table);
+
+    World.setComponent(world, entity, Speed, { value: 5 });
+
+    console.log('PositionArchetype', PositionArchetype.entities, PositionArchetype.table);
+    console.log('SpeedArchetype', SpeedArchetype.entities, SpeedArchetype.table);
+    console.log('MovementArchetype', MovementArchetype.entities, MovementArchetype.table);
+  });
+});

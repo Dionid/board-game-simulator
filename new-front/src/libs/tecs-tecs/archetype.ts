@@ -1,6 +1,7 @@
-import { Entity } from './core';
-import { SparseSet } from './sparse-set';
-import { Schema, SchemaType, SchemaId } from './schema';
+import { Entity } from './core.js';
+import { SparseSet } from './sparse-set.js';
+import { Schema, SchemaType, SchemaId } from './schema.js';
+import { Internals } from './internals.js';
 
 export type ArchetypeTableRow<S extends Schema> = SchemaType<S>[];
 
@@ -20,21 +21,27 @@ export const removeArchetypeEntity = <CL extends Schema[]>(
   arch: Archetype<CL>,
   entity: Entity
 ): {
-  [K in keyof CL]: SchemaType<CL[K]>;
+  [K in keyof CL]: [Schema, SchemaType<CL[K]>];
 } => {
   // # Remove entity and component to archetype
   const sSet = arch.entitiesSS;
 
   const componentsData = [] as {
-    [K in keyof CL]: SchemaType<CL[K]>;
+    [K in keyof CL]: [Schema, SchemaType<CL[K]>];
   };
 
   const denseInd = sSet.sparse[entity];
   if (sSet.dense[denseInd] === entity && sSet.dense.length > 0) {
     const swapEntity = sSet.dense.pop()!;
 
-    for (const componentTable of arch.table) {
-      componentsData.push(componentTable[denseInd] as SchemaType<CL[number]>);
+    for (let i = 0; i < arch.table.length; i++) {
+      const componentTable = arch.table[i];
+      if (!componentTable) {
+        continue;
+      }
+      const oldComponent = componentTable[denseInd] as SchemaType<CL[number]>;
+      const schema = arch.type[i];
+      componentsData.push([schema, oldComponent]);
       const component = componentTable.pop()!;
       if (swapEntity !== entity) {
         componentTable[denseInd] = component;
@@ -48,6 +55,42 @@ export const removeArchetypeEntity = <CL extends Schema[]>(
 
   return componentsData;
 };
+
+export function moveEntity<CL extends Schema[]>(from: Archetype<CL>, to: Archetype<CL>, entity: Entity) {
+  // # Check if entity is in `to` or not in `from`
+  if (
+    to.entitiesSS.dense[to.entitiesSS.sparse[entity]!] === entity ||
+    from.entitiesSS.dense[from.entitiesSS.sparse[entity]!] !== entity
+  ) {
+    return false;
+  }
+
+  // # Add to new archetype
+  const swapIndexInDense = from.entitiesSS.sparse[entity]!;
+  to.entitiesSS.dense.push(entity);
+  const toDenseIndex = to.entitiesSS.dense.length - 1;
+  to.entitiesSS.sparse[entity] = toDenseIndex;
+
+  for (let i = 0; i < to.table.length; i++) {
+    const component = to.table[i];
+    if (!component) continue;
+
+    const componentId = Internals.getSchemaId(component);
+
+    const fromComponent = from.table[componentId];
+
+    // # Get shape keys (like x, y in Position)
+    const array = component.data![key];
+    if (fromComponent) {
+      array[toDenseIndex] = fromComponent.data![key][swapIndexInDense];
+    } else {
+      array[toDenseIndex] = component.schema.defaultValues[key];
+    }
+  }
+
+  // # Remove it from `from` entities (sSet dense) and components
+  Archetype.removeEntity(from, entity);
+}
 
 export function isSchemaInArchetype(arch: Archetype<any>, schema: Schema): boolean;
 export function isSchemaInArchetype(arch: Archetype<any>, schemaId: SchemaId): boolean;

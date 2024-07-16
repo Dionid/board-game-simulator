@@ -24,12 +24,11 @@
 1. ~~Has Component~~
 1. ~~Remove Component (with Archetype shift)~~
 1. ~~Prefabricate Archetype~~
-1. ? Do I need to create / remove every archetype component per entity, when it added / removed
-    1. What happens when I remove component
-1. Query
+1. ~~Query~~
 1. Tags
 1. Types: Boolean, Array, Object, Set, Map [link](https://github.com/3mcd/javelin/blob/2b64cfa78e016675e698da8299c36b9d4f431e27/packages/pack/src/views.ts)
-1. ? Change Component back to Schema
+1. ? Component with Id from Schema
+1. ? Add and remove on the same World.step or deferred
 1. ...
 1. Events
 1. ...
