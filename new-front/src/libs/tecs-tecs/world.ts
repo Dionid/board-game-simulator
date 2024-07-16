@@ -5,6 +5,9 @@ import { Internals } from './internals';
 import { Schema, SchemaType, defaultFn } from './schema';
 import { ArrayContains } from './ts-types';
 
+/**
+ * World is a container for Entities, Components and Archetypes.
+ */
 export type World = {
   // # Entity
   nextEntityId: number;
@@ -20,6 +23,8 @@ export type World = {
   archetypeByEntity: Map<Entity, Archetype<any>>;
 };
 
+// # Entity
+
 export const spawnEntity = (world: World) => {
   let entity: number;
   if (world.entityGraveyard.length > 0) {
@@ -34,13 +39,17 @@ export const killEntity = (world: World, entity: number) => {
   world.entityGraveyard.push(entity);
 };
 
-export const registerComponent = (world: World, schema: Schema, schemaId?: number) => {
+// # Schema
+
+export const registerSchema = (world: World, schema: Schema, schemaId?: number) => {
   return Internals.registerSchema(world, schema, schemaId);
 };
 
 export const getSchemaId = (world: World, schema: Schema) => {
   return Internals.getSchemaId(world, schema);
 };
+
+// # Archetype
 
 export const registerArchetype = <SL extends Schema[]>(world: World, ...schemas: SL): Archetype<SL> => {
   const type = schemas
@@ -247,7 +256,7 @@ export const World = {
   killEntity,
 
   // # Components
-  registerComponent,
+  registerSchema,
   getSchemaId,
 
   // # Archetypes

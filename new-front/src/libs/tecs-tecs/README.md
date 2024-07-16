@@ -1,5 +1,16 @@
 
 
+# Design
+
+1. Id – number id
+1. Entity – number id to bind Components to
+1. Schema – describes component shape (data structure) and Component serialization / deserialization rules
+1. Component – instance of Schema
+1. Archetype – identified by Components and contains dense Entities and Components
+1. Query – described by Component filters, returns Archetype pointers containing
+1. World – contains Entities, Archetypes, Queries and indexes
+1. Internals – contains registered Schemas
+
 # Decision
 
 1. BitSet 100%

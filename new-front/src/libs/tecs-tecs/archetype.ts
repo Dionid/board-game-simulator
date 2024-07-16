@@ -49,9 +49,15 @@ export const removeArchetypeEntity = <CL extends Schema[]>(
   return componentsData;
 };
 
-export const isSchemaInArchetype = (arch: Archetype<any>, schemaId: SchemaId) => {
-  return arch.table[schemaId] !== undefined;
-};
+export function isSchemaInArchetype(arch: Archetype<any>, schema: Schema): boolean;
+export function isSchemaInArchetype(arch: Archetype<any>, schemaId: SchemaId): boolean;
+export function isSchemaInArchetype(arch: Archetype<any>, schema: SchemaId | Schema): boolean {
+  if (typeof schema === 'number') {
+    return arch.table[schema] !== undefined;
+  }
+
+  return arch.type.includes(schema);
+}
 
 export const isEntityInArchetype = (arch: Archetype<any>, schemaId: SchemaId) => {
   return arch.table[schemaId] !== undefined;
