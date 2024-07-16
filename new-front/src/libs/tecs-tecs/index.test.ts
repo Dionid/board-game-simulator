@@ -58,10 +58,10 @@ export const withoutQuery = () => {
 
   const byGetComponentsList = () => {
     for (const entity of archetype1.entities) {
-      const [position, speed] = World.componentsListByArchetype(world, archetype1, entity, Position, Speed);
+      const [position, speed] = World.componentsList(archetype1, entity, Position, Speed);
       // @ts-expect-error: Velocity is not in the archetype
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const [velocity] = World.componentsListByArchetype(world, archetype1, entity, Velocity);
+      const [velocity] = World.componentsList(world, archetype1, entity, Velocity);
 
       position.x += 1;
       position.y += 1;
@@ -74,11 +74,11 @@ export const withoutQuery = () => {
 
   const byGetComponent = () => {
     for (const entity of archetype1.entities) {
-      const position = World.componentByArchetype(world, archetype1, entity, Position);
-      const speed = World.componentByArchetype(world, archetype1, entity, Speed);
+      const position = World.component(archetype1, entity, Position);
+      const speed = World.component(archetype1, entity, Speed);
       // @ts-expect-error: Velocity is not in the archetype
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const [velocity] = World.componentByArchetype(world, archetype1, entity, Velocity);
+      const [velocity] = World.component(archetype1, entity, Velocity);
 
       position.x += 1;
       position.y += 1;

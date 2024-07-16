@@ -1,12 +1,6 @@
 import { Schema, SchemaId } from './schema.js';
-import { World } from './world.js';
 
 export type Internals = {
-  // # Worlds
-  worlds: World[];
-  currentWorldId: number;
-  worldIds: number;
-
   // # Components
   schemaIdBySchema: WeakMap<Schema, number>;
   schemaById: Map<number, Schema>;
@@ -14,11 +8,6 @@ export type Internals = {
 };
 
 export const UNSAFE_internals: Internals = {
-  // # Worlds
-  worlds: [],
-  currentWorldId: -1,
-  worldIds: 0,
-
   // # Schema
   schemaIdBySchema: new WeakMap(),
   schemaById: new Map(),
@@ -27,7 +16,7 @@ export const UNSAFE_internals: Internals = {
 
 export const Internals = {
   registerSchema: (schema: Schema, schemaId?: SchemaId) => {
-    let type: number | undefined = UNSAFE_internals.schemaIdBySchema.get(schema);
+    let type = UNSAFE_internals.schemaIdBySchema.get(schema);
     if (type !== undefined) {
       return type;
     }

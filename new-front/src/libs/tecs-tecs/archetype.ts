@@ -2,6 +2,7 @@ import { Entity } from './core.js';
 import { SparseSet } from './sparse-set.js';
 import { Schema, SchemaType, SchemaId } from './schema.js';
 import { Internals } from './internals.js';
+import { ArrayContains } from './ts-types.js';
 
 export type ArchetypeTableRow<S extends Schema> = SchemaType<S>[];
 
@@ -17,31 +18,59 @@ export type Archetype<SL extends ReadonlyArray<Schema> = ReadonlyArray<Schema>> 
   table: ArchetypeTable<SL>;
 };
 
-export const removeArchetypeEntity = <CL extends Schema[]>(
-  arch: Archetype<CL>,
-  entity: Entity
-): {
-  [K in keyof CL]: [Schema, SchemaType<CL[K]>];
-} => {
+// OK, BUT can be changed to bitmask
+export function isSchemaInArchetype(arch: Archetype<any>, schema: Schema): boolean;
+export function isSchemaInArchetype(arch: Archetype<any>, schemaId: SchemaId): boolean;
+export function isSchemaInArchetype(arch: Archetype<any>, schema: SchemaId | Schema): boolean {
+  const schemaId = typeof schema === 'number' ? schema : Internals.getSchemaId(schema);
+  return arch.table[schemaId] !== undefined;
+}
+
+// OK
+export function isEntityInArchetype(arch: Archetype<any>, entity: Entity) {
+  const denseInd = arch.entitiesSS.sparse[entity];
+  if (!denseInd) {
+    return false;
+  }
+  return arch.entitiesSS.dense[denseInd] === entity;
+}
+
+// OK
+export function addEntity<CL extends Schema[]>(arch: Archetype<CL>, entity: Entity) {
+  // # Add entity to archetype
+  SparseSet.add(arch.entitiesSS, entity);
+
+  for (let i = 0; i < arch.type.length; i++) {
+    const schema = arch.type[i];
+    const schemaId = Internals.getSchemaId(schema);
+
+    const componentTable = arch.table[schemaId];
+
+    if (!componentTable) {
+      throw new Error(`Can't find component ${schemaId} on this archetype ${arch.id}`);
+    }
+
+    const component = Schema.default(schema);
+
+    componentTable.push(component);
+  }
+}
+
+// OK
+export function removeEntity<CL extends Schema[]>(arch: Archetype<CL>, entity: Entity) {
   // # Remove entity and component to archetype
   const sSet = arch.entitiesSS;
-
-  const componentsData = [] as {
-    [K in keyof CL]: [Schema, SchemaType<CL[K]>];
-  };
 
   const denseInd = sSet.sparse[entity];
   if (sSet.dense[denseInd] === entity && sSet.dense.length > 0) {
     const swapEntity = sSet.dense.pop()!;
 
     for (let i = 0; i < arch.table.length; i++) {
-      const componentTable = arch.table[i];
+      const componentId = i;
+      const componentTable = arch.table[componentId];
       if (!componentTable) {
         continue;
       }
-      const oldComponent = componentTable[denseInd] as SchemaType<CL[number]>;
-      const schema = arch.type[i];
-      componentsData.push([schema, oldComponent]);
       const component = componentTable.pop()!;
       if (swapEntity !== entity) {
         componentTable[denseInd] = component;
@@ -53,96 +82,122 @@ export const removeArchetypeEntity = <CL extends Schema[]>(
     }
   }
 
-  return componentsData;
-};
+  return;
+}
 
+// OK
 export function moveEntity<CL extends Schema[]>(from: Archetype<CL>, to: Archetype<CL>, entity: Entity) {
   // # Check if entity is in `to` or not in `from`
   if (
-    to.entitiesSS.dense[to.entitiesSS.sparse[entity]!] === entity ||
-    from.entitiesSS.dense[from.entitiesSS.sparse[entity]!] !== entity
+    to.entitiesSS.dense[to.entitiesSS.sparse[entity]] === entity ||
+    from.entitiesSS.dense[from.entitiesSS.sparse[entity]] !== entity
   ) {
     return false;
   }
 
   // # Add to new archetype
-  const swapIndexInDense = from.entitiesSS.sparse[entity]!;
-  to.entitiesSS.dense.push(entity);
-  const toDenseIndex = to.entitiesSS.dense.length - 1;
-  to.entitiesSS.sparse[entity] = toDenseIndex;
+  const fromDenseEntityInd = from.entitiesSS.sparse[entity]!;
 
+  SparseSet.add(to.entitiesSS, entity);
+
+  // # Move all Components to new Archetype Table
   for (let i = 0; i < to.table.length; i++) {
-    const component = to.table[i];
-    if (!component) continue;
+    const componentId = i;
 
-    const componentId = Internals.getSchemaId(component);
-
-    const fromComponent = from.table[componentId];
-
-    // # Get shape keys (like x, y in Position)
-    const array = component.data![key];
-    if (fromComponent) {
-      array[toDenseIndex] = fromComponent.data![key][swapIndexInDense];
-    } else {
-      array[toDenseIndex] = component.schema.defaultValues[key];
+    const toComponentTable = to.table[componentId];
+    if (!toComponentTable) {
+      continue;
     }
+
+    const fromComponentTable = from.table[componentId];
+    if (!fromComponentTable) {
+      continue;
+    }
+
+    setArchetypeComponent(to, entity, componentId, fromComponentTable[fromDenseEntityInd]);
   }
 
   // # Remove it from `from` entities (sSet dense) and components
   Archetype.removeEntity(from, entity);
 }
 
-export function isSchemaInArchetype(arch: Archetype<any>, schema: Schema): boolean;
-export function isSchemaInArchetype(arch: Archetype<any>, schemaId: SchemaId): boolean;
-export function isSchemaInArchetype(arch: Archetype<any>, schema: SchemaId | Schema): boolean {
-  if (typeof schema === 'number') {
-    return arch.table[schema] !== undefined;
+// OK
+export function setArchetypeComponent<C extends Schema>(
+  arch: Archetype<any>,
+  entity: Entity,
+  schema: SchemaId | Schema,
+  component: SchemaType<C>
+) {
+  const schemaId = typeof schema === 'number' ? schema : Internals.getSchemaId(schema);
+
+  // # Add component to archetype
+  const componentTable = arch.table[schemaId];
+
+  if (!componentTable) {
+    throw new Error(`Can't find component ${schemaId} on this archetype ${arch.id}`);
   }
 
-  return arch.type.includes(schema);
+  const sSet = arch.entitiesSS;
+
+  const denseInd = sSet.sparse[entity] as number | undefined;
+  if (
+    entity >= sSet.sparse.length ||
+    denseInd === undefined ||
+    denseInd >= sSet.dense.length ||
+    sSet.dense[denseInd] !== entity
+  ) {
+    sSet.sparse[entity] = sSet.dense.length;
+    sSet.dense.push(entity);
+    componentTable.push(component);
+    return true;
+  }
+
+  if (
+    entity < sSet.sparse.length &&
+    denseInd !== undefined &&
+    denseInd < sSet.dense.length &&
+    sSet.dense[denseInd] === entity
+  ) {
+    componentTable[denseInd] = component;
+    return true;
+  }
+
+  return false;
 }
 
-export const isEntityInArchetype = (arch: Archetype<any>, schemaId: SchemaId) => {
-  return arch.table[schemaId] !== undefined;
-};
+// OK
+export function componentsList<SL extends ReadonlyArray<Schema>, A extends Archetype<any>>(
+  archetype: A,
+  entity: Entity,
+  ...schemas: A extends Archetype<infer iCL> ? (ArrayContains<iCL, SL> extends true ? SL : never) : never
+) {
+  return schemas.map((component) => {
+    const schemaId = Internals.getSchemaId(component);
+    const componentIndex = archetype.entitiesSS.sparse[entity];
+    return archetype.table[schemaId][componentIndex];
+  }) as {
+    [K in keyof SL]: SchemaType<SL[K]>;
+  };
+}
+
+// OK
+export function component<S extends Schema, A extends Archetype<any>>(
+  archetype: A,
+  entity: Entity,
+  component: A extends Archetype<infer iCL> ? (ArrayContains<iCL, [S]> extends true ? S : never) : never
+) {
+  const componentId = Internals.getSchemaId(component);
+  const componentIndex = archetype.entitiesSS.sparse[entity];
+  return archetype.table[componentId][componentIndex] as SchemaType<S>;
+}
 
 export const Archetype = {
   isSchemaInArchetype,
   isEntityInArchetype,
-  setComponent: <C extends Schema>(arch: Archetype<any>, entity: Entity, schemaId: SchemaId, props: SchemaType<C>) => {
-    // # Add component to archetype
-    const componentTable = arch.table[schemaId];
-
-    if (!componentTable) {
-      throw new Error(`Can't find component ${schemaId} on this archetype ${arch.id}`);
-    }
-
-    const sSet = arch.entitiesSS;
-
-    const denseInd = sSet.sparse[entity] as number | undefined;
-    if (
-      entity >= sSet.sparse.length ||
-      denseInd === undefined ||
-      denseInd >= sSet.dense.length ||
-      sSet.dense[denseInd] !== entity
-    ) {
-      sSet.sparse[entity] = sSet.dense.length;
-      sSet.dense.push(entity);
-      componentTable.push(props);
-      return true;
-    }
-
-    if (
-      entity < sSet.sparse.length &&
-      denseInd !== undefined &&
-      denseInd < sSet.dense.length &&
-      sSet.dense[denseInd] === entity
-    ) {
-      componentTable[denseInd] = props;
-      return true;
-    }
-
-    return false;
-  },
-  removeEntity: removeArchetypeEntity,
+  componentsList,
+  component,
+  setComponent: setArchetypeComponent,
+  addEntity,
+  removeEntity,
+  moveEntity,
 };

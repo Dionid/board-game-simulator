@@ -1,5 +1,6 @@
 // # Types
 
+import { component } from './archetype.js';
 import { Id } from './core.js';
 
 export const kind = Symbol('kind');
@@ -62,3 +63,18 @@ export type SchemaType<T> = T extends typeof float64 | typeof number
   : T extends Schema
   ? { [K in keyof T]: SchemaType<T[K]> }
   : never;
+
+export const Schema = {
+  default: <S extends Schema>(schema: S): SchemaType<S> => {
+    const component = {} as SchemaType<S>;
+    // TODO: How to add tags
+    // TODO: Add recursive default props
+    for (const key in schema) {
+      const sss = schema[key];
+      if (defaultFn in sss) {
+        component[key] = sss[defaultFn]() as any;
+      }
+    }
+    return component;
+  },
+};

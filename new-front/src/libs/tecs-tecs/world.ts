@@ -2,7 +2,7 @@ import { Entity } from './core.js';
 import { SparseSet } from './sparse-set.js';
 import { Archetype, ArchetypeTable, ArchetypeTableRow } from './archetype.js';
 import { Internals } from './internals.js';
-import { Schema, SchemaType, defaultFn } from './schema.js';
+import { Schema, SchemaType } from './schema.js';
 import { ArrayContains } from './ts-types.js';
 import { Query } from './query.js';
 import { Handler } from './handler.js';
@@ -52,19 +52,19 @@ export const killEntity = (world: World, entity: number) => {
 
 // # Schema
 
-export const registerSchema = (world: World, schema: Schema, schemaId?: number) => {
-  return Internals.registerSchema(world, schema, schemaId);
+export const registerSchema = (schema: Schema, schemaId?: number) => {
+  return Internals.registerSchema(schema, schemaId);
 };
 
-export const getSchemaId = (world: World, schema: Schema) => {
-  return Internals.getSchemaId(world, schema);
+export const getSchemaId = (schema: Schema) => {
+  return Internals.getSchemaId(schema);
 };
 
 // # Archetype
 
 export const registerArchetype = <SL extends Schema[]>(world: World, ...schemas: SL): Archetype<SL> => {
   const type = schemas
-    .map((component) => World.getSchemaId(world, component))
+    .map((component) => getSchemaId(component))
     .sort((a, b) => a - b)
     .join(',');
 
@@ -82,7 +82,7 @@ export const registerArchetype = <SL extends Schema[]>(world: World, ...schemas:
     entitiesSS: ss,
     entities: ss.dense,
     table: schemas.reduce((acc, component) => {
-      acc[World.getSchemaId(world, component)] = [];
+      acc[getSchemaId(component)] = [];
       return acc;
     }, [] as ArchetypeTable<SL>),
   };
@@ -104,7 +104,7 @@ export const archetypeTable = <S extends Schema, A extends Archetype<any>>(
   archetype: A,
   schema: A extends Archetype<infer iCL> ? (ArrayContains<iCL, [S]> extends true ? S : never) : never
 ) => {
-  const componentId = World.getSchemaId(world, schema);
+  const componentId = World.getSchemaId(schema);
   return archetype.table[componentId] as ArchetypeTableRow<S>;
 };
 
@@ -114,39 +114,14 @@ export const archetypeTablesList = <SL extends ReadonlyArray<Schema>, A extends 
   ...components: A extends Archetype<infer iCL> ? (ArrayContains<iCL, SL> extends true ? SL : never) : never
 ) => {
   return components.map((component) => {
-    const componentId = World.getSchemaId(world, component);
+    const componentId = World.getSchemaId(component);
     return archetype.table[componentId];
   }) as {
     [K in keyof SL]: SchemaType<SL[K]>[];
   };
 };
 
-export const componentByArchetype = <S extends Schema, A extends Archetype<any>>(
-  world: World,
-  archetype: A,
-  entity: Entity,
-  component: A extends Archetype<infer iCL> ? (ArrayContains<iCL, [S]> extends true ? S : never) : never
-) => {
-  const componentId = World.getSchemaId(world, component);
-  const componentIndex = archetype.entitiesSS.sparse[entity];
-  return archetype.table[componentId][componentIndex] as SchemaType<S>;
-};
-
-export const componentsListByArchetype = <SL extends ReadonlyArray<Schema>, A extends Archetype<any>>(
-  world: World,
-  archetype: A,
-  entity: Entity,
-  ...schemas: A extends Archetype<infer iCL> ? (ArrayContains<iCL, SL> extends true ? SL : never) : never
-) => {
-  return schemas.map((component) => {
-    const schemaId = World.getSchemaId(world, component);
-    const schemaIndex = archetype.entitiesSS.sparse[entity];
-    return archetype.table[schemaId][schemaIndex];
-  }) as {
-    [K in keyof SL]: SchemaType<SL[K]>;
-  };
-};
-
+// OK
 /**
  *
  * By setting component to Entity, we will find / create Archetype, that
@@ -167,18 +142,10 @@ export const setComponent = <S extends Schema>(
 ): [Archetype<[S]>, SchemaType<S>] => {
   // # Fill props with default
   if (component === undefined) {
-    component = {} as SchemaType<S>;
-    // TODO: How to add tags
-    // TODO: Add recursive default props
-    for (const key in schema) {
-      const sss = schema[key];
-      if (defaultFn in sss) {
-        component[key] = sss[defaultFn]() as any;
-      }
-    }
+    component = Schema.default(schema);
   }
 
-  const schemaId = World.getSchemaId(world, schema);
+  const schemaId = World.getSchemaId(schema);
 
   // # Get current archetype
   let archetype = world.archetypeByEntity.get(entity) as Archetype<[S]> | undefined;
@@ -209,19 +176,15 @@ export const setComponent = <S extends Schema>(
   world.archetypeByEntity.set(entity, newArchetype);
 
   // # Move Entity to new Archetype
-  const componentsList = Archetype.removeEntity(archetype, entity);
-  // # Move old data
-  for (const [schema, component] of componentsList) {
-    const schemaId = World.getSchemaId(world, schema);
-    Archetype.setComponent(newArchetype, entity, schemaId, component);
-  }
+  Archetype.moveEntity(archetype, newArchetype, entity);
 
-  // # Move new data
+  // # Add new data
   Archetype.setComponent(newArchetype, entity, schemaId, component);
 
   return [newArchetype, component];
 };
 
+// OK
 /**
  *
  * By removing component from entity, we will find / create Archetype, that
@@ -236,7 +199,7 @@ export const setComponent = <S extends Schema>(
  * @example
  */
 export const removeComponent = <S extends Schema>(world: World, entity: Entity, schema: S) => {
-  const schemaId = World.getSchemaId(world, schema);
+  const schemaId = World.getSchemaId(schema);
 
   // # Get current archetype
   let archetype = world.archetypeByEntity.get(entity) as Archetype<[S]> | undefined;
@@ -249,16 +212,11 @@ export const removeComponent = <S extends Schema>(world: World, entity: Entity, 
     throw new Error(`Can't find component ${schemaId} on this archetype ${archetype.id}`);
   }
 
-  // # Remove component from archetype
-  const componentsList = Archetype.removeEntity(archetype, entity);
-
   // # Find or create new archetype
   const newArchetype = World.registerArchetype(world, ...archetype.type.filter((c) => c !== schema));
 
-  for (const [schema, component] of componentsList) {
-    const schemaId = World.getSchemaId(world, schema);
-    Archetype.setComponent(newArchetype, entity, schemaId, component);
-  }
+  // # Move entity to new archetype
+  Archetype.moveEntity(archetype, newArchetype, entity);
 
   return newArchetype;
 };
@@ -318,8 +276,8 @@ export const World = {
   // ## Get
   archetypeTable,
   archetypeTablesList,
-  componentByArchetype,
-  componentsListByArchetype,
+  component: Archetype.component,
+  componentsList: Archetype.componentsList,
 
   // ## Set
   setComponent,
