@@ -4,6 +4,7 @@ import { Archetype, ArchetypeTable, ArchetypeTableRow } from './archetype';
 import { Internals } from './internals';
 import { Schema, SchemaType, defaultFn } from './schema';
 import { ArrayContains } from './ts-types';
+import { Query } from './query';
 
 /**
  * World is a container for Entities, Components and Archetypes.
@@ -21,6 +22,9 @@ export type World = {
 
   // Entity Archetype
   archetypeByEntity: Map<Entity, Archetype<any>>;
+
+  // Queries
+  queries: Query<any>[];
 };
 
 // # Entity
@@ -79,6 +83,11 @@ export const registerArchetype = <SL extends Schema[]>(world: World, ...schemas:
   // # Index new Archetype
   world.archetypesByComponentsType.set(type, newArchetype);
   world.archetypesById.set(newArchetype.id, newArchetype);
+
+  // # Add to queries
+  world.queries.forEach((query) => {
+    query.tryAdd(newArchetype);
+  });
 
   return newArchetype;
 };
@@ -238,6 +247,20 @@ export const removeComponent = <S extends Schema>(world: World, entity: Entity, 
   return newArchetype;
 };
 
+// # Qieries
+
+export function registerQuery<SL extends ReadonlyArray<Schema>>(world: World, ...schemas: SL) {
+  const query = Query.new(...schemas);
+
+  world.queries.push(query);
+
+  world.archetypesById.forEach((archetype) => {
+    query.tryAdd(archetype);
+  });
+
+  return query;
+}
+
 export const World = {
   new: (): World => ({
     nextEntityId: 0,
@@ -247,8 +270,9 @@ export const World = {
     archetypesByComponentsType: new Map(),
     archetypesById: new Map(),
     nextArchetypeId: 0,
-
     archetypeByEntity: new Map(),
+
+    queries: [],
   }),
 
   // # Entity
@@ -272,4 +296,7 @@ export const World = {
   // ## Set
   setComponent,
   removeComponent,
+
+  // # Query
+  registerQuery,
 };
