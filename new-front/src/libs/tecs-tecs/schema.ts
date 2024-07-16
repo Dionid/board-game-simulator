@@ -10,20 +10,22 @@ export const stringK = Symbol('string');
 export const number = {
   [kind]: numberK,
   byteLength: 2,
-  default: () => 0,
+  [defaultFn]: () => 0,
 } as const;
 
 export const float64 = {
   [kind]: float64K,
   byteLength: 2,
-  default: () => 0,
+  [defaultFn]: () => 0,
 } as const;
 
 export const string = {
   [kind]: stringK,
   byteLength: 2,
-  default: () => '',
+  [defaultFn]: () => '',
 };
+
+export type Types = typeof number | typeof float64 | typeof string;
 
 export const Types = {
   number,
@@ -43,7 +45,7 @@ export const FieldKind = {
 
 export type Field = {
   [kind]: FieldKind;
-  [defaultFn]: () => ExtractSchemaType<FieldKind>;
+  [defaultFn]: () => ExtractSchemaType<Types>;
 };
 
 // # Schema
