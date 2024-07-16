@@ -20,6 +20,8 @@
 1. Types: Boolean, Array, Object, Set, Map [link](https://github.com/3mcd/javelin/blob/2b64cfa78e016675e698da8299c36b9d4f431e27/packages/pack/src/views.ts)
 1. ? Change Component back to Schema
 1. ...
+1. Events
+1. ...
 1. BitMask
 1. Singleton Component
 1. Component pools

@@ -1,5 +1,7 @@
 // # Types
 
+import { Id } from './core';
+
 export const kind = Symbol('kind');
 export const defaultFn = Symbol('defaultFn');
 
@@ -51,6 +53,7 @@ export type Field = {
 // # Schema
 
 export type Schema = { [key: string]: Field | Schema };
+export type SchemaId = Id;
 
 export type SchemaType<T> = T extends typeof float64 | typeof number
   ? number
