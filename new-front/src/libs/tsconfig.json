@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es6",
+    "target": "ES2020",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "outDir": "tecs-tecs/build",
@@ -10,8 +10,8 @@
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
-    "module": "commonjs",
-    "moduleResolution": "node",
+    "module": "es2022",
+    "moduleResolution": "Bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "downlevelIteration": true

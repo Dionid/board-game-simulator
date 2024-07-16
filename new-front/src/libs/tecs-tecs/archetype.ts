@@ -1,6 +1,6 @@
 import { Entity } from './core';
 import { SparseSet } from './sparse-set';
-import { Schema, SchemaType, SchemaId } from './schema';
+import { Schema, SchemaType, SchemaId, kind, tagK } from './schema';
 import { Internals } from './internals';
 import { ArrayContains } from './ts-types';
 
@@ -42,6 +42,12 @@ export function addEntity<CL extends Schema[]>(arch: Archetype<CL>, entity: Enti
 
   for (let i = 0; i < arch.type.length; i++) {
     const schema = arch.type[i];
+
+    // # Skip tag components
+    if (schema[kind] === tagK) {
+      continue;
+    }
+
     const schemaId = Internals.getSchemaId(schema);
 
     const componentTable = arch.table[schemaId];
@@ -62,15 +68,24 @@ export function removeEntity<CL extends Schema[]>(arch: Archetype<CL>, entity: E
   const sSet = arch.entitiesSS;
 
   const denseInd = sSet.sparse[entity];
+
   if (sSet.dense[denseInd] === entity && sSet.dense.length > 0) {
     const swapEntity = sSet.dense.pop()!;
 
-    for (let i = 0; i < arch.table.length; i++) {
-      const componentId = i;
+    for (let i = 0; i < arch.type.length; i++) {
+      const schema = arch.type[i];
+
+      if (schema[kind] === tagK) {
+        continue;
+      }
+
+      const componentId = Internals.getSchemaId(schema);
+
       const componentTable = arch.table[componentId];
       if (!componentTable) {
         continue;
       }
+
       const component = componentTable.pop()!;
       if (swapEntity !== entity) {
         componentTable[denseInd] = component;
@@ -96,11 +111,10 @@ export function moveEntity<CL extends Schema[]>(from: Archetype<CL>, to: Archety
   }
 
   // # Add to new archetype
-  const fromDenseEntityInd = from.entitiesSS.sparse[entity]!;
-
   SparseSet.add(to.entitiesSS, entity);
 
   // # Move all Components to new Archetype Table
+  const fromDenseEntityInd = from.entitiesSS.sparse[entity]!;
   for (let i = 0; i < to.table.length; i++) {
     const componentId = i;
 
@@ -114,6 +128,15 @@ export function moveEntity<CL extends Schema[]>(from: Archetype<CL>, to: Archety
       continue;
     }
 
+    const schema = Internals.getSchemaById(componentId);
+    if (!schema) {
+      throw new Error(`Can't find schema ${componentId}`);
+    }
+
+    if (schema[kind] === tagK) {
+      continue;
+    }
+
     setArchetypeComponent(to, entity, componentId, fromComponentTable[fromDenseEntityInd]);
   }
 
@@ -122,13 +145,18 @@ export function moveEntity<CL extends Schema[]>(from: Archetype<CL>, to: Archety
 }
 
 // OK
-export function setArchetypeComponent<C extends Schema>(
+export function setArchetypeComponent<S extends Schema>(
   arch: Archetype<any>,
   entity: Entity,
-  schema: SchemaId | Schema,
-  component: SchemaType<C>
+  schemaOrId: SchemaId | Schema,
+  component?: SchemaType<S>
 ) {
-  const schemaId = typeof schema === 'number' ? schema : Internals.getSchemaId(schema);
+  const schemaId = typeof schemaOrId === 'number' ? schemaOrId : Internals.getSchemaId(schemaOrId);
+  const schema = (typeof schemaOrId === 'number' ? Internals.getSchemaById(schemaOrId) : schemaOrId) as S | undefined;
+
+  if (!schema) {
+    throw new Error(`Can't find schema ${schemaId}`);
+  }
 
   // # Add component to archetype
   const componentTable = arch.table[schemaId];
@@ -148,18 +176,22 @@ export function setArchetypeComponent<C extends Schema>(
   ) {
     sSet.sparse[entity] = sSet.dense.length;
     sSet.dense.push(entity);
-    componentTable.push(component);
+    if (schema[kind] !== tagK) {
+      componentTable.push(component || Schema.default(schema));
+    }
     return true;
   }
 
-  if (
-    entity < sSet.sparse.length &&
-    denseInd !== undefined &&
-    denseInd < sSet.dense.length &&
-    sSet.dense[denseInd] === entity
-  ) {
-    componentTable[denseInd] = component;
-    return true;
+  if (schema[kind] !== tagK) {
+    if (
+      entity < sSet.sparse.length &&
+      denseInd !== undefined &&
+      denseInd < sSet.dense.length &&
+      sSet.dense[denseInd] === entity
+    ) {
+      componentTable[denseInd] = component || Schema.default(schema);
+      return true;
+    }
   }
 
   return false;

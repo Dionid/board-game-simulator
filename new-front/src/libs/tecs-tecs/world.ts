@@ -16,13 +16,13 @@ export type World = {
   entityGraveyard: number[];
 
   // # Archetypes
-  archetypesIdByArchetype: WeakMap<Archetype<any>, number>;
+  // archetypesIdByArchetype: WeakMap<Archetype<any>, number>;
   archetypesById: Map<number, Archetype<any>>;
   archetypesByComponentsType: Map<string, Archetype<any>>;
   nextArchetypeId: number;
 
   // Entity Archetype
-  archetypeByEntity: Map<Entity, Archetype<any> | undefined>;
+  archetypeByEntity: Array<Archetype<any> | undefined>;
 
   // Queries
   queries: Query<any>[];
@@ -39,7 +39,7 @@ export const spawnEntity = <SL extends Schema[]>(world: World, arch?: Archetype<
   }
   if (arch) {
     Archetype.addEntity(arch, entity);
-    world.archetypeByEntity.set(entity, arch);
+    world.archetypeByEntity[entity] = arch;
   }
   return entity;
 };
@@ -47,11 +47,11 @@ export const spawnEntity = <SL extends Schema[]>(world: World, arch?: Archetype<
 export const killEntity = (world: World, entity: number) => {
   world.entityGraveyard.push(entity);
 
-  const archetype = world.archetypeByEntity.get(entity);
+  const archetype = world.archetypeByEntity[entity];
   if (archetype) {
     Archetype.removeEntity(archetype, entity);
   }
-  world.archetypeByEntity.set(entity, undefined);
+  world.archetypeByEntity[entity] = undefined;
 };
 
 // # Schema
@@ -143,22 +143,17 @@ export const setComponent = <S extends Schema>(
   entity: Entity,
   schema: S,
   component?: SchemaType<S>
-): [Archetype<[S]>, SchemaType<S>] => {
-  // # Fill props with default
-  if (component === undefined) {
-    component = Schema.default(schema);
-  }
-
+): [Archetype<[S]>, SchemaType<S> | undefined] => {
   const schemaId = World.getSchemaId(schema);
 
   // # Get current archetype
-  let archetype = world.archetypeByEntity.get(entity) as Archetype<[S]> | undefined;
+  let archetype = world.archetypeByEntity[entity] as Archetype<[S]> | undefined;
   if (archetype === undefined) {
     // # If there were no archetype, create new one
     const newArchetype = World.registerArchetype(world, schema);
 
     // # Index archetype by entity
-    world.archetypeByEntity.set(entity, newArchetype);
+    world.archetypeByEntity[entity] = newArchetype;
 
     // # Add entity to archetype
     Archetype.setComponent(newArchetype, entity, schemaId, component);
@@ -177,7 +172,7 @@ export const setComponent = <S extends Schema>(
   const newArchetype = World.registerArchetype(world, schema, ...archetype.type) as unknown as Archetype<[S]>;
 
   // # Index archetype by entity
-  world.archetypeByEntity.set(entity, newArchetype);
+  world.archetypeByEntity[entity] = newArchetype;
 
   // # Move Entity to new Archetype
   Archetype.moveEntity(archetype, newArchetype, entity);
@@ -206,7 +201,7 @@ export const removeComponent = <S extends Schema>(world: World, entity: Entity, 
   const schemaId = World.getSchemaId(schema);
 
   // # Get current archetype
-  let archetype = world.archetypeByEntity.get(entity) as Archetype<[S]> | undefined;
+  let archetype = world.archetypeByEntity[entity] as Archetype<[S]> | undefined;
   if (archetype === undefined) {
     throw new Error(`Can't find archetype for entity ${entity}`);
   }
@@ -256,11 +251,11 @@ export const World = {
     nextEntityId: 1,
     entityGraveyard: [],
 
-    archetypesIdByArchetype: new WeakMap(),
+    // archetypesIdByArchetype: new WeakMap(),
     archetypesByComponentsType: new Map(),
     archetypesById: new Map(),
     nextArchetypeId: 0,
-    archetypeByEntity: new Map(),
+    archetypeByEntity: [],
 
     queries: [],
   }),

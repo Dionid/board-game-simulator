@@ -41,4 +41,7 @@ export const Internals = {
     }
     return type;
   },
+  getSchemaById: (schemaId: SchemaId) => {
+    return UNSAFE_internals.schemaById.get(schemaId);
+  },
 };
