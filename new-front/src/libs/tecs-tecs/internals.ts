@@ -1,4 +1,4 @@
-import { Schema, SchemaId } from './schema.js';
+import { Schema, SchemaId } from './schema';
 
 export type Internals = {
   // # Components

@@ -1,11 +1,11 @@
-import { Entity } from './core.js';
-import { SparseSet } from './sparse-set.js';
-import { Archetype, ArchetypeTable, ArchetypeTableRow } from './archetype.js';
-import { Internals } from './internals.js';
-import { Schema, SchemaType } from './schema.js';
-import { ArrayContains } from './ts-types.js';
-import { Query } from './query.js';
-import { Handler } from './handler.js';
+import { Entity } from './core';
+import { SparseSet } from './sparse-set';
+import { Archetype, ArchetypeTable, ArchetypeTableRow } from './archetype';
+import { Internals } from './internals';
+import { Schema, SchemaType } from './schema';
+import { ArrayContains } from './ts-types';
+import { Query } from './query';
+import { Handler } from './handler';
 
 /**
  * World is a container for Entities, Components and Archetypes.

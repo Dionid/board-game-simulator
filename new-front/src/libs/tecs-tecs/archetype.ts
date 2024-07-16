@@ -1,8 +1,8 @@
-import { Entity } from './core.js';
-import { SparseSet } from './sparse-set.js';
-import { Schema, SchemaType, SchemaId } from './schema.js';
-import { Internals } from './internals.js';
-import { ArrayContains } from './ts-types.js';
+import { Entity } from './core';
+import { SparseSet } from './sparse-set';
+import { Schema, SchemaType, SchemaId } from './schema';
+import { Internals } from './internals';
+import { ArrayContains } from './ts-types';
 
 export type ArchetypeTableRow<S extends Schema> = SchemaType<S>[];
 

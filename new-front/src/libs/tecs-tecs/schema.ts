@@ -1,7 +1,5 @@
 // # Types
-
-import { component } from './archetype.js';
-import { Id } from './core.js';
+import { Id } from './core';
 
 export const kind = Symbol('kind');
 export const defaultFn = Symbol('defaultFn');
@@ -53,7 +51,16 @@ export type Field = {
 
 // # Schema
 
-export type Schema = { [key: string]: Field | Schema };
+export const aosK = Symbol('aos');
+export const soaK = Symbol('soa');
+export const tagK = Symbol('tag');
+
+export type SchemaKind = typeof tagK | typeof aosK | typeof soaK;
+
+export type Schema = {
+  [key: string]: Field | Schema;
+  [kind]?: SchemaKind;
+};
 export type SchemaId = Id;
 
 export type SchemaType<T> = T extends typeof float64 | typeof number
@@ -64,15 +71,29 @@ export type SchemaType<T> = T extends typeof float64 | typeof number
   ? { [K in keyof T]: SchemaType<T[K]> }
   : never;
 
+export const Tag = {
+  new: (): Schema => {
+    return {
+      [kind]: tagK,
+    };
+  },
+};
+
 export const Schema = {
   default: <S extends Schema>(schema: S): SchemaType<S> => {
+    const schemaKind = schema[kind];
+
+    if (schemaKind === tagK) {
+      return {} as SchemaType<S>;
+    }
+
     const component = {} as SchemaType<S>;
     // TODO: How to add tags
     // TODO: Add recursive default props
     for (const key in schema) {
-      const sss = schema[key];
-      if (defaultFn in sss) {
-        component[key] = sss[defaultFn]() as any;
+      const field = schema[key];
+      if (defaultFn in field) {
+        component[key] = field[defaultFn]() as any;
       }
     }
     return component;

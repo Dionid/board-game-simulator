@@ -1,5 +1,5 @@
-import { Archetype, isSchemaInArchetype } from './archetype.js';
-import { Schema } from './schema.js';
+import { Archetype, isSchemaInArchetype } from './archetype';
+import { Schema } from './schema';
 
 export type Query<SL extends ReadonlyArray<Schema>> = {
   archetypes: Archetype<SL>[];

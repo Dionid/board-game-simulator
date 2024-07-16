@@ -1,4 +1,4 @@
-import { number } from './schema';
+import { number, Tag } from './schema';
 import { World } from './index';
 
 const Position = {
@@ -15,6 +15,8 @@ const Velocity = {
 const Speed = {
   value: number,
 };
+
+const Player = Tag.new();
 
 const world = World.new();
 
@@ -97,21 +99,59 @@ describe('aws', () => {
     const world = World.new();
 
     const PositionArchetype = World.registerArchetype(world, Position);
+
+    expect(PositionArchetype.type.length).toEqual(1);
+
     const SpeedArchetype = World.registerArchetype(world, Speed);
+
+    expect(SpeedArchetype.type.length).toEqual(1);
+
     const MovementArchetype = World.registerArchetype(world, Position, Speed);
 
-    console.log('MovementArchetype', MovementArchetype);
+    expect(MovementArchetype.type.length).toEqual(2);
 
     const entity = World.spawnEntity(world);
 
     World.setComponent(world, entity, Position, { x: 10, y: 20 });
 
-    console.log('PositionArchetype', PositionArchetype.entities, PositionArchetype.table);
+    // console.log('PositionArchetype', PositionArchetype.entities, PositionArchetype.table);
+
+    expect(PositionArchetype.entities.length).toEqual(1);
+    expect(PositionArchetype.table[0].length).toEqual(1);
 
     World.setComponent(world, entity, Speed, { value: 5 });
 
-    console.log('PositionArchetype', PositionArchetype.entities, PositionArchetype.table);
-    console.log('SpeedArchetype', SpeedArchetype.entities, SpeedArchetype.table);
-    console.log('MovementArchetype', MovementArchetype.entities, MovementArchetype.table);
+    expect(PositionArchetype.entities.length).toEqual(0);
+    expect(PositionArchetype.table[0].length).toEqual(0);
+
+    expect(SpeedArchetype.entities.length).toEqual(0);
+    // @ts-expect-error: can't find other way
+    expect(SpeedArchetype.table[1].length).toEqual(0);
+
+    expect(MovementArchetype.entities.length).toEqual(1);
+    expect(MovementArchetype.table[0].length).toEqual(1);
+    expect(MovementArchetype.table[1].length).toEqual(1);
+  });
+
+  it('should be true', () => {
+    expect(true).toBe(true);
+
+    const world = World.new();
+
+    const PositionArchetype = World.registerArchetype(world, Position);
+    const PlayerPositionArchetype = World.registerArchetype(world, Position, Player);
+
+    expect(PositionArchetype.type.length).toEqual(1);
+
+    const entity = World.spawnEntity(world);
+
+    World.setComponent(world, entity, Position, { x: 10, y: 20 });
+
+    expect(PositionArchetype.entities.length).toEqual(1);
+    expect(PositionArchetype.table[0].length).toEqual(1);
+
+    World.setComponent(world, entity, Player);
+
+    console.log('PlayerPositionArchetype', PlayerPositionArchetype);
   });
 });
