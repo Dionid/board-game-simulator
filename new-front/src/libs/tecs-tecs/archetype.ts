@@ -1,6 +1,6 @@
 import { Entity, $kind } from './core';
 import { SparseSet } from './sparse-set';
-import { Schema, SchemaType, SchemaId, tagK, aosK, soaK } from './schema';
+import { Schema, SchemaType, SchemaId, $tag, $aos, $soa } from './schema';
 import { Internals } from './internals';
 import { ArrayContains } from './ts-types';
 import { safeGuard } from './switch';
@@ -56,9 +56,9 @@ export function addEntity<CL extends Schema[]>(arch: Archetype<CL>, entity: Enti
     const schema = arch.type[i];
 
     switch (schema[$kind]) {
-      case tagK:
+      case $tag:
         continue;
-      case aosK:
+      case $aos:
         const schemaId = Internals.getSchemaId(schema);
 
         const componentTable = arch.table[schemaId];
@@ -71,7 +71,7 @@ export function addEntity<CL extends Schema[]>(arch: Archetype<CL>, entity: Enti
 
         componentTable.push(component);
         break;
-      case soaK:
+      case $soa:
         throw new Error('Not implemented');
       default:
         safeGuard(schema[$kind]);
@@ -93,9 +93,9 @@ export function removeEntity<CL extends Schema[]>(arch: Archetype<CL>, entity: E
       const schema = arch.type[i];
 
       switch (schema[$kind]) {
-        case tagK:
+        case $tag:
           continue;
-        case aosK:
+        case $aos:
           const componentId = Internals.getSchemaId(schema);
 
           const componentTable = arch.table[componentId];
@@ -108,7 +108,7 @@ export function removeEntity<CL extends Schema[]>(arch: Archetype<CL>, entity: E
             componentTable[denseInd] = component;
           }
           break;
-        case soaK:
+        case $soa:
           throw new Error('Not implemented');
         default:
           safeGuard(schema[$kind]);
@@ -157,11 +157,11 @@ export function moveEntity<CL extends Schema[]>(from: Archetype<CL>, to: Archety
     }
 
     switch (schema[$kind]) {
-      case tagK:
+      case $tag:
         continue;
-      case soaK:
+      case $soa:
         throw new Error('Not implemented');
-      case aosK:
+      case $aos:
         setArchetypeComponent(to, entity, componentId, fromComponentTable[fromDenseEntityInd]);
         break;
       default:
@@ -206,12 +206,12 @@ export function setArchetypeComponent<S extends Schema>(
     sSet.sparse[entity] = sSet.dense.length;
     sSet.dense.push(entity);
     switch (schema[$kind]) {
-      case tagK:
+      case $tag:
         return true;
-      case aosK:
+      case $aos:
         componentTable.push(component || Schema.default(schema));
         return true;
-      case soaK:
+      case $soa:
         throw new Error('Not implemented');
       default:
         safeGuard(schema[$kind]);
@@ -220,9 +220,9 @@ export function setArchetypeComponent<S extends Schema>(
   }
 
   switch (schema[$kind]) {
-    case tagK:
+    case $tag:
       return true;
-    case aosK:
+    case $aos:
       if (
         entity < sSet.sparse.length &&
         denseInd !== undefined &&
@@ -233,7 +233,7 @@ export function setArchetypeComponent<S extends Schema>(
         return true;
       }
       return false;
-    case soaK:
+    case $soa:
       throw new Error('Not implemented');
     default:
       return safeGuard(schema[$kind]);
