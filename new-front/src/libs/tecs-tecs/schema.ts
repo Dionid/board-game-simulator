@@ -23,6 +23,8 @@ export const $boolean = Symbol('boolean');
 export const $number = $float64;
 export const $string = $string16;
 
+export const $array = Symbol('array');
+
 export const uint8 = {
   [$kind]: $uint8,
   byteLength: 1,
@@ -92,6 +94,14 @@ export const boolean = {
 export const number = float64;
 export const string = string16;
 
+export function arrayOf<F extends PrimitiveField>(field: F) {
+  return {
+    field,
+    [$kind]: $array,
+    [$defaultFn]: () => [],
+  };
+}
+
 // # Field
 
 export type FieldKind =
@@ -105,7 +115,8 @@ export type FieldKind =
   | typeof $float64
   | typeof $string8
   | typeof $string16
-  | typeof $boolean;
+  | typeof $boolean
+  | ReturnType<typeof arrayOf>;
 
 export const FieldKind = {
   uint8: $uint8,
@@ -121,7 +132,7 @@ export const FieldKind = {
   boolean: $boolean,
 } as const;
 
-export type Field =
+export type PrimitiveField =
   | typeof uint8
   | typeof uint16
   | typeof uint32
@@ -135,6 +146,10 @@ export type Field =
   | typeof boolean
   | typeof number
   | typeof string;
+
+export type ComplexField = ReturnType<typeof arrayOf>;
+
+export type Field = PrimitiveField | ComplexField;
 
 export const Field = {
   uint8,
@@ -154,20 +169,45 @@ export const Field = {
 
 export function isField(value: unknown): value is Field {
   return (
-    value === uint8 ||
-    value === uint16 ||
-    value === uint32 ||
-    value === int8 ||
-    value === int16 ||
-    value === int32 ||
-    value === float32 ||
-    value === float64 ||
-    value === string8 ||
-    value === string16 ||
-    value === boolean ||
-    value === number ||
-    value === string
+    value !== null &&
+    typeof value === 'object' &&
+    $kind in value &&
+    (value[$kind] === $uint8 ||
+      value[$kind] === $uint16 ||
+      value[$kind] === $uint32 ||
+      value[$kind] === $int8 ||
+      value[$kind] === $int16 ||
+      value[$kind] === $int32 ||
+      value[$kind] === $float32 ||
+      value[$kind] === $float64 ||
+      value[$kind] === $string8 ||
+      value[$kind] === $string16 ||
+      value[$kind] === $boolean ||
+      value[$kind] === $number ||
+      value[$kind] === $string ||
+      value[$kind] === $array)
   );
+}
+
+export function isPrimitiveField(value: unknown): value is PrimitiveField {
+  return (
+    isField(value) &&
+    (value[$kind] === $uint8 ||
+      value[$kind] === $uint16 ||
+      value[$kind] === $uint32 ||
+      value[$kind] === $int8 ||
+      value[$kind] === $int16 ||
+      value[$kind] === $int32 ||
+      value[$kind] === $float32 ||
+      value[$kind] === $float64 ||
+      value[$kind] === $string8 ||
+      value[$kind] === $string16 ||
+      value[$kind] === $boolean)
+  );
+}
+
+export function isComplexField(value: unknown): value is ComplexField {
+  return isField(value) && value[$kind] === $array;
 }
 
 // # Schema
@@ -190,6 +230,8 @@ export type SchemaType<T> = T extends typeof float64 | typeof number
   ? string
   : T extends Schema
   ? { [K in keyof T as K extends symbol ? never : K]: SchemaType<T[K]> }
+  : T extends ComplexField
+  ? SchemaType<T['field']>[]
   : never;
 
 export function isSchema(value: unknown): value is Schema {
@@ -217,8 +259,7 @@ export const Schema = {
           const field = schema[key];
 
           if (isField(field)) {
-            const v = field[$defaultFn]();
-            component[key] = v as any;
+            component[key] = field[$defaultFn]() as any;
             continue;
           } else if (isSchema(field)) {
             component[key] = Schema.default(field) as any;
