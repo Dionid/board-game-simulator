@@ -460,6 +460,28 @@ export const hasComponent = <S extends Schema>(world: World, entity: Entity, sch
   return Archetype.hasSchema(archetype, schema);
 };
 
+// OK
+export const componentByEntity = <S extends Schema>(
+  world: World,
+  entity: Entity,
+  schema: S
+): SchemaType<S> | undefined => {
+  const archetype = world.archetypeByEntity[entity];
+  if (!archetype) {
+    return;
+  }
+
+  if (!Archetype.hasSchema(archetype, schema)) {
+    return;
+  }
+
+  if (!Archetype.hasEntity(archetype, entity)) {
+    return;
+  }
+
+  return Archetype.component(archetype, entity, schema);
+};
+
 export const World = {
   new: newWorld,
   archetypeByEntity,
@@ -468,6 +490,7 @@ export const World = {
   spawnEntity,
   killEntity,
   hasComponent,
+  componentByEntity,
 
   // # Components
   registerSchema,

@@ -4,19 +4,19 @@ import { Application } from 'pixi.js';
 import { initWorld } from './core';
 import { step } from '../../libs/tecs';
 
-const app = new Application();
-await app.init({ resizeTo: window, backgroundColor: 'white', autoStart: false })
-
 function App() {
   useEffect(() => {
     const canvas = document.getElementById('canvas') as HTMLCanvasElement;
-    canvas.appendChild(app.canvas);
-    const world = initWorld(app)
-    const animation = () => {
-      step(world)
-      requestAnimationFrame(animation);
-    }
-    animation()
+    const app = new Application();
+    app.init({ resizeTo: window, backgroundColor: 'white', autoStart: false }).then(() => {
+      canvas.appendChild(app.canvas);
+      const world = initWorld(app)
+      const animation = () => {
+        step(world)
+        requestAnimationFrame(animation);
+      }
+      animation()
+    })
   }, [])
 
   return (

@@ -39,7 +39,7 @@ export function hasSchema(arch: Archetype<any>, schema: Schema): boolean {
 // OK
 export function hasEntity(arch: Archetype<any>, entity: Entity) {
   const denseInd = arch.entitiesSS.sparse[entity];
-  if (!denseInd) {
+  if (denseInd === undefined) {
     return false;
   }
   return arch.entitiesSS.dense[denseInd] === entity;
@@ -267,7 +267,7 @@ export function component<S extends Schema, A extends Archetype<ReadonlyArray<Sc
 ): SchemaType<S> {
   const componentId = Internals.getSchemaId(schema);
   const componentIndex = archetype.entitiesSS.sparse[entity];
-  const componentTable = archetype.table[componentId][componentIndex];
+  const componentTable = archetype.table[componentId];
   if (!componentTable) {
     throw new Error(`Can't find component ${componentId} on this archetype ${archetype.id}`);
   }

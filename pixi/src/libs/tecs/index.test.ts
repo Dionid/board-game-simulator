@@ -1,3 +1,4 @@
+import { hasSchema } from './archetype';
 import { World, Schema, number, Tag, arrayOf, string, Context } from './index';
 import { Query } from './query';
 
@@ -353,14 +354,20 @@ describe('aws', () => {
       const entity = World.spawnEntity(world);
       World.setComponent(world, entity, Position, { x: 10, y: 20 });
 
-      const arch = World.archetypeByEntity(world, entity);
-      if (!arch) {
-        throw new Error('archetype not found');
+      const position = World.componentByEntity(world, entity, Position);
+      if (!position) {
+        throw new Error('Position is not found');
       }
 
-      // if (hasSchema(arch, Position)) {
-      //   const position = World.component(arch, entity, Position);
-      // }
+      expect(position).toEqual({ x: 10, y: 20 });
+
+      World.setComponent(world, entity, Position, { x: 3, y: 5 });
+
+      const position2 = World.componentByEntity(world, entity, Position);
+      if (!position2) {
+        throw new Error('Position is not found');
+      }
+      expect(position2).toEqual({ x: 3, y: 5 });
     });
     it('should chang 1e', () => {
       const world = World.new();
