@@ -153,7 +153,7 @@ export type SchemaKind = typeof tagK | typeof aosK | typeof soaK;
 
 export type Schema = {
   [key: string]: Field | Schema;
-  [$kind]?: SchemaKind;
+  [$kind]: SchemaKind;
 };
 export type SchemaId = Id;
 
@@ -165,15 +165,13 @@ export type SchemaType<T> = T extends typeof float64 | typeof number
   ? { [K in keyof T as K extends symbol ? never : K]: SchemaType<T[K]> }
   : never;
 
-export const Tag = {
-  new: (): Schema => {
+export const Schema = {
+  new: <S extends Omit<Schema, typeof $kind>>(schema: S, kind?: SchemaKind): S & { [$kind]: SchemaKind } => {
     return {
-      [$kind]: tagK,
+      ...schema,
+      [$kind]: kind ?? aosK,
     };
   },
-};
-
-export const Schema = {
   default: <S extends Schema>(schema: S): SchemaType<S> => {
     const schemaKind = schema[$kind];
 
@@ -191,5 +189,11 @@ export const Schema = {
     }
 
     return component;
+  },
+};
+
+export const Tag = {
+  new: (): Schema => {
+    return Schema.new({}, tagK);
   },
 };

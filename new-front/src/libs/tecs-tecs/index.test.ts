@@ -1,18 +1,18 @@
-import { World, number, Tag } from './index';
+import { World, Schema, number, Tag } from './index';
 
-const Position = {
+const Position = Schema.new({
   x: number,
   y: number,
-};
+});
 
-const Velocity = {
+const Velocity = Schema.new({
   x: number,
   y: number,
-};
+});
 
-const Speed = {
+const Speed = Schema.new({
   value: number,
-};
+});
 
 const Player = Tag.new();
 

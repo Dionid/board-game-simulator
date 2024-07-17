@@ -1,8 +1,9 @@
-import { Entity } from './core';
+import { Entity, $kind } from './core';
 import { SparseSet } from './sparse-set';
-import { Schema, SchemaType, SchemaId, kind, tagK } from './schema';
+import { Schema, SchemaType, SchemaId, tagK, aosK, soaK } from './schema';
 import { Internals } from './internals';
 import { ArrayContains } from './ts-types';
+import { safeGuard } from './switch';
 
 export type ArchetypeTableRow<S extends Schema> = SchemaType<S>[];
 
@@ -54,22 +55,27 @@ export function addEntity<CL extends Schema[]>(arch: Archetype<CL>, entity: Enti
   for (let i = 0; i < arch.type.length; i++) {
     const schema = arch.type[i];
 
-    // # Skip tag components
-    if (schema[kind] === tagK) {
-      continue;
+    switch (schema[$kind]) {
+      case tagK:
+        continue;
+      case aosK:
+        const schemaId = Internals.getSchemaId(schema);
+
+        const componentTable = arch.table[schemaId];
+
+        if (!componentTable) {
+          throw new Error(`Can't find component ${schemaId} on this archetype ${arch.id}`);
+        }
+
+        const component = Schema.default(schema);
+
+        componentTable.push(component);
+        break;
+      case soaK:
+        throw new Error('Not implemented');
+      default:
+        safeGuard(schema[$kind]);
     }
-
-    const schemaId = Internals.getSchemaId(schema);
-
-    const componentTable = arch.table[schemaId];
-
-    if (!componentTable) {
-      throw new Error(`Can't find component ${schemaId} on this archetype ${arch.id}`);
-    }
-
-    const component = Schema.default(schema);
-
-    componentTable.push(component);
   }
 }
 
@@ -86,20 +92,26 @@ export function removeEntity<CL extends Schema[]>(arch: Archetype<CL>, entity: E
     for (let i = 0; i < arch.type.length; i++) {
       const schema = arch.type[i];
 
-      if (schema[kind] === tagK) {
-        continue;
-      }
+      switch (schema[$kind]) {
+        case tagK:
+          continue;
+        case aosK:
+          const componentId = Internals.getSchemaId(schema);
 
-      const componentId = Internals.getSchemaId(schema);
+          const componentTable = arch.table[componentId];
+          if (!componentTable) {
+            continue;
+          }
 
-      const componentTable = arch.table[componentId];
-      if (!componentTable) {
-        continue;
-      }
-
-      const component = componentTable.pop()!;
-      if (swapEntity !== entity) {
-        componentTable[denseInd] = component;
+          const component = componentTable.pop()!;
+          if (swapEntity !== entity) {
+            componentTable[denseInd] = component;
+          }
+          break;
+        case soaK:
+          throw new Error('Not implemented');
+        default:
+          safeGuard(schema[$kind]);
       }
     }
     if (swapEntity !== entity) {
@@ -144,11 +156,17 @@ export function moveEntity<CL extends Schema[]>(from: Archetype<CL>, to: Archety
       throw new Error(`Can't find schema ${componentId}`);
     }
 
-    if (schema[kind] === tagK) {
-      continue;
+    switch (schema[$kind]) {
+      case tagK:
+        continue;
+      case soaK:
+        throw new Error('Not implemented');
+      case aosK:
+        setArchetypeComponent(to, entity, componentId, fromComponentTable[fromDenseEntityInd]);
+        break;
+      default:
+        safeGuard(schema[$kind]);
     }
-
-    setArchetypeComponent(to, entity, componentId, fromComponentTable[fromDenseEntityInd]);
   }
 
   // # Remove it from `from` entities (sSet dense) and components
@@ -161,7 +179,7 @@ export function setArchetypeComponent<S extends Schema>(
   entity: Entity,
   schemaOrId: SchemaId | Schema,
   component?: SchemaType<S>
-) {
+): boolean {
   const schemaId = typeof schemaOrId === 'number' ? schemaOrId : Internals.getSchemaId(schemaOrId);
   const schema = (typeof schemaOrId === 'number' ? Internals.getSchemaById(schemaOrId) : schemaOrId) as S | undefined;
 
@@ -187,26 +205,39 @@ export function setArchetypeComponent<S extends Schema>(
   ) {
     sSet.sparse[entity] = sSet.dense.length;
     sSet.dense.push(entity);
-    if (schema[kind] !== tagK) {
-      // @ts-ignore
-      componentTable.push(component || Schema.default(schema));
+    switch (schema[$kind]) {
+      case tagK:
+        return true;
+      case aosK:
+        componentTable.push(component || Schema.default(schema));
+        return true;
+      case soaK:
+        throw new Error('Not implemented');
+      default:
+        safeGuard(schema[$kind]);
     }
     return true;
   }
 
-  if (schema[kind] !== tagK) {
-    if (
-      entity < sSet.sparse.length &&
-      denseInd !== undefined &&
-      denseInd < sSet.dense.length &&
-      sSet.dense[denseInd] === entity
-    ) {
-      componentTable[denseInd] = component || Schema.default(schema);
+  switch (schema[$kind]) {
+    case tagK:
       return true;
-    }
+    case aosK:
+      if (
+        entity < sSet.sparse.length &&
+        denseInd !== undefined &&
+        denseInd < sSet.dense.length &&
+        sSet.dense[denseInd] === entity
+      ) {
+        componentTable[denseInd] = component || Schema.default(schema);
+        return true;
+      }
+      return false;
+    case soaK:
+      throw new Error('Not implemented');
+    default:
+      return safeGuard(schema[$kind]);
   }
-
-  return false;
 }
 
 // OK
