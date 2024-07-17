@@ -1,15 +1,9 @@
 import { World } from './world';
 
-export type EngineEventType = 'preUpdate' | 'update' | 'postUpdate';
-
-export type EventType = EngineEventType | string;
-
-export type Event = {
-  type: EventType;
-};
+export type Stage = 'onFirstStep' | 'preUpdate' | 'update' | 'postUpdate';
 
 export type Context = {
-  event: Event;
+  stage: Stage;
   deltaTime: number;
   world: World;
 };

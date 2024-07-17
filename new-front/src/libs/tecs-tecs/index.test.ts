@@ -522,7 +522,13 @@ describe('aws', () => {
       World.step(world);
 
       expect(world.deferredOperations.deferred).toBe(false);
-      expect(world.deferredOperations.operations.length).toBe(0);
+      expect(world.deferredOperations.operations.length).toBe(300);
+      expect(world.deferredOperations.killed.size).toBe(0);
+
+      World.step(world);
+
+      expect(world.deferredOperations.deferred).toBe(false);
+      expect(world.deferredOperations.operations.length).toBe(300);
       expect(world.deferredOperations.killed.size).toBe(0);
     });
   });

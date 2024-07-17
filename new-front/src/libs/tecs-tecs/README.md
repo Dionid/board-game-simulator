@@ -32,6 +32,7 @@
 1. Singleton Component
 1. Change detection
 1. ...
+1. Register System before / after other System
 1. SoA components
 1. World size
 1. BitMask

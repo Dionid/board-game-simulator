@@ -8,12 +8,14 @@ import { Query } from './query';
 import { System } from './system';
 import { Operation } from './operations';
 import { safeGuard } from './switch';
+import { Topic } from './topic';
 
 /**
  * World is a container for Entities, Components and Archetypes.
  */
 export type World = {
   // # State
+  isFirstStep: boolean;
   state: 'running' | 'idle';
 
   // # Time
@@ -31,16 +33,17 @@ export type World = {
 
   // # Systems
   systems: {
+    onFirstStep: System[];
     preUpdate: System[];
     update: System[];
     postUpdate: System[];
-    custom: {
-      [key: string]: System[];
-    };
   };
 
   // # Queries
   queries: Query<any>[];
+
+  // # Topics
+  topics: Topic<unknown>[];
 
   // # Deferred Operations
   deferredOperations: {
@@ -67,6 +70,10 @@ export const spawnEntity = <SL extends Schema[]>(world: World, arch?: Archetype<
 };
 
 export const killEntity = (world: World, entity: number): void => {
+  if (world.deferredOperations.killed.has(entity)) {
+    return;
+  }
+
   if (world.deferredOperations.deferred) {
     world.deferredOperations.operations.push({
       type: 'killEntity',
@@ -311,28 +318,63 @@ export function applyDeferredOp(world: World, operation: Operation): void {
   }
 }
 
-export function registerSystem(world: World, system: System, type?: 'preUpdate' | 'update' | 'postUpdate') {
+export function registerSystem(
+  world: World,
+  system: System,
+  type?: 'onFirstStep' | 'preUpdate' | 'update' | 'postUpdate'
+) {
   world.systems[type || 'update'].push(system);
 }
 
+export function registerTopic(world: World, topic: Topic<unknown>) {
+  world.topics.push(topic);
+}
+
 export function step(world: World): void {
+  // # Set state
   world.state = 'running';
+
+  // # Set delta
   let deltaTime = world.lastStepTime - Date.now();
 
   if (deltaTime < 0) {
     deltaTime = 0;
   }
 
+  // # Execute deferred operations
+  const operations = world.deferredOperations.operations;
+
+  for (let i = 0; i < operations.length; i++) {
+    applyDeferredOp(world, operations[i]);
+  }
+
+  world.deferredOperations.operations = [];
+
+  // # Flush topics
+  for (let i = 0; i < world.topics.length; i++) {
+    Topic.flush(world.topics[i]);
+  }
+
+  // # Execute systems
   world.deferredOperations.deferred = true;
+
+  if (world.isFirstStep) {
+    for (let i = 0, l = world.systems.onFirstStep.length; i < l; i++) {
+      const system = world.systems.onFirstStep[i];
+      system({
+        stage: 'onFirstStep',
+        world,
+        deltaTime: deltaTime,
+      });
+    }
+  }
 
   for (let i = 0, l = world.systems.preUpdate.length; i < l; i++) {
     const system = world.systems.preUpdate[i];
     system({
       world,
       deltaTime: deltaTime,
-      event: {
-        type: 'preUpdate',
-      },
+      stage: 'preUpdate',
     });
   }
 
@@ -341,9 +383,7 @@ export function step(world: World): void {
     system({
       world,
       deltaTime: deltaTime,
-      event: {
-        type: 'update',
-      },
+      stage: 'update',
     });
   }
 
@@ -352,29 +392,24 @@ export function step(world: World): void {
     system({
       world,
       deltaTime: deltaTime,
-      event: {
-        type: 'postUpdate',
-      },
+      stage: 'postUpdate',
     });
   }
 
   world.deferredOperations.deferred = false;
 
-  const operations = world.deferredOperations.operations;
-
-  for (let i = 0; i < operations.length; i++) {
-    applyDeferredOp(world, operations[i]);
-  }
-
-  world.deferredOperations.operations = [];
+  // # Reset killed
   world.deferredOperations.killed.clear();
 
+  // # Set state
   world.lastStepTime = deltaTime;
   world.state = 'idle';
+  world.isFirstStep = false;
 }
 
 export function newWorld(): World {
   return {
+    isFirstStep: true,
     state: 'idle',
     lastStepTime: 0,
     nextEntityId: 1,
@@ -382,12 +417,13 @@ export function newWorld(): World {
     archetypesById: new Map(),
     archetypeByEntity: [],
     systems: {
+      onFirstStep: [],
       preUpdate: [],
       update: [],
       postUpdate: [],
-      custom: {},
     },
     queries: [],
+    topics: [],
     deferredOperations: {
       deferred: false,
       operations: [],
@@ -432,6 +468,9 @@ export const World = {
 
   // # Query
   registerQuery,
+
+  // # Topics
+  registerTopic,
 
   // # Step
   step,
