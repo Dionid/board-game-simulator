@@ -18,14 +18,14 @@
     "@types/react": "^17.0.43",
     "@types/react-dom": "^17.0.14",
     "@types/uuid": "^8.3.4",
+    "caniuse-lite": "^1.0.30001642",
     "clsx": "^1.1.1",
-    "jest": "^27.5.1",
     "konva": "^8.3.5",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-konva": "^17.0.2-6",
     "react-konva-utils": "^0.2.0",
-    "react-scripts": "5.0.0",
+    "react-scripts": "^5.0.1",
     "uuid": "^8.3.2",
     "web-vitals": "^2.1.4",
     "y-webrtc": "^10.2.5",
@@ -35,8 +35,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "test:unit": "jest"
+    "eject": "react-scripts eject"
   },
   "eslintConfig": {
     "extends": [
@@ -60,6 +59,7 @@
     "node": "16.x"
   },
   "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "ts-jest": "^29.2.2",
     "typescript": "^5.0.4"
   }
