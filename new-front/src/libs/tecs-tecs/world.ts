@@ -5,7 +5,7 @@ import { Internals } from './internals';
 import { Schema, SchemaType } from './schema';
 import { ArrayContains } from './ts-types';
 import { Query } from './query';
-import { Handler } from './handler';
+import { System } from './system';
 import { Operation } from './operations';
 import { safeGuard } from './switch';
 
@@ -13,16 +13,31 @@ import { safeGuard } from './switch';
  * World is a container for Entities, Components and Archetypes.
  */
 export type World = {
+  // # State
+  state: 'running' | 'idle';
+
+  // # Time
+  lastStepTime: number;
+
   // # Entity
   nextEntityId: number;
   entityGraveyard: number[];
 
   // # Archetypes
-  // archetypesIdByArchetype: WeakMap<Archetype<any>, number>;
   archetypesById: Map<string, Archetype<any>>;
 
   // # Entity Archetype
   archetypeByEntity: Array<Archetype<any> | undefined>;
+
+  // # Systems
+  systems: {
+    preUpdate: System[];
+    update: System[];
+    postUpdate: System[];
+    custom: {
+      [key: string]: System[];
+    };
+  };
 
   // # Queries
   queries: Query<any>[];
@@ -296,15 +311,49 @@ export function applyDeferredOp(world: World, operation: Operation): void {
   }
 }
 
-export function step(world: World, systems: Handler[]) {
+export function registerSystem(world: World, system: System, type?: 'preUpdate' | 'update' | 'postUpdate') {
+  world.systems[type || 'update'].push(system);
+}
+
+export function step(world: World): void {
+  world.state = 'running';
+  let deltaTime = world.lastStepTime - Date.now();
+
+  if (deltaTime < 0) {
+    deltaTime = 0;
+  }
+
   world.deferredOperations.deferred = true;
 
-  for (let i = 0; i < systems.length; i++) {
-    const system = systems[i];
+  for (let i = 0, l = world.systems.preUpdate.length; i < l; i++) {
+    const system = world.systems.preUpdate[i];
     system({
       world,
+      deltaTime: deltaTime,
+      event: {
+        type: 'preUpdate',
+      },
+    });
+  }
+
+  for (let i = 0, l = world.systems.update.length; i < l; i++) {
+    const system = world.systems.update[i];
+    system({
+      world,
+      deltaTime: deltaTime,
       event: {
         type: 'update',
+      },
+    });
+  }
+
+  for (let i = 0, l = world.systems.postUpdate.length; i < l; i++) {
+    const system = world.systems.postUpdate[i];
+    system({
+      world,
+      deltaTime: deltaTime,
+      event: {
+        type: 'postUpdate',
       },
     });
   }
@@ -319,14 +368,25 @@ export function step(world: World, systems: Handler[]) {
 
   world.deferredOperations.operations = [];
   world.deferredOperations.killed.clear();
+
+  world.lastStepTime = deltaTime;
+  world.state = 'idle';
 }
 
 export function newWorld(): World {
   return {
+    state: 'idle',
+    lastStepTime: 0,
     nextEntityId: 1,
     entityGraveyard: [],
     archetypesById: new Map(),
     archetypeByEntity: [],
+    systems: {
+      preUpdate: [],
+      update: [],
+      postUpdate: [],
+      custom: {},
+    },
     queries: [],
     deferredOperations: {
       deferred: false,
@@ -366,6 +426,9 @@ export const World = {
   // ## Set
   setComponent,
   removeComponent,
+
+  // # System
+  registerSystem,
 
   // # Query
   registerQuery,

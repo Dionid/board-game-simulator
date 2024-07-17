@@ -1,4 +1,4 @@
-import { World, Schema, number, Tag, arrayOf, string, Context } from './index';
+import { World, Schema, number, Tag, arrayOf, string, Context, registerSystem } from './index';
 
 const Position = Schema.new({
   x: number,
@@ -516,9 +516,10 @@ describe('aws', () => {
         };
       };
 
-      const systems = [UpdateHandler(world), CheckUpdateHandler(world)];
+      registerSystem(world, UpdateHandler(world), 'update');
+      registerSystem(world, CheckUpdateHandler(world), 'postUpdate');
 
-      World.step(world, systems);
+      World.step(world);
 
       expect(world.deferredOperations.deferred).toBe(false);
       expect(world.deferredOperations.operations.length).toBe(0);

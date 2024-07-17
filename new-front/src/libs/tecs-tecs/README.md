@@ -26,16 +26,16 @@
 1. ~~Tags~~
 1. ~~Types: Boolean, Array ~~
 1. ~~Defer add and remove entities and components on the same World.step or deferred~~
-1. ...
 1. Events
 1. ...
-1. BitMask
+1. Complex queries
 1. Singleton Component
-1. Component pools
-1. Custom Errors
+1. Change detection
 1. ...
 1. SoA components
 1. World size
+1. BitMask
+1. Custom Errors
 1. ...
 
 # Goals
