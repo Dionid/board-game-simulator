@@ -1,4 +1,4 @@
-import { System } from '../../../../ecs/system';
+import { System, SystemProps } from '../../../../ecs/system';
 import { Essence } from '../../../../ecs/essence';
 import { Pool } from '../../../../ecs/component';
 import { Size, Vector2 } from '../../../../math';
@@ -7,170 +7,129 @@ import {
   PositionComponent,
   SizeComponent,
   ScaleComponent,
-  PlayerComponent,
   FingerComponent,
   PanModeComponent,
 } from '../../components';
-import { UUID } from '../../../../branded-types';
+import { EntityId } from '../../../../ecs/entity';
+import { useIsInitial } from '../../../../ecs/hooks/use-init';
 
 export const CameraSystem = (): System<{
   boardSize: Size;
-  playerId: UUID;
+  cameraEntity: EntityId;
 }> => {
-  return {
-    init: ({ essence, ctx }) => {
-      const playerEntities = Essence.getEntitiesByComponents(essence, [PlayerComponent]);
+  const init = ({ essence, ctx }: SystemProps<{ cameraEntity: EntityId; boardSize: Size }>) => {
+    const { cameraEntity, boardSize } = ctx();
 
-      const playerEntity = playerEntities.find((playerEntityId) => {
-        const playerPool = Essence.getOrAddPool(essence, PlayerComponent);
+    const cameraP = Essence.getOrAddPool(essence, CameraComponent);
+    const positionP = Essence.getOrAddPool(essence, PositionComponent);
+    const sizeP = Essence.getOrAddPool(essence, SizeComponent);
+    const scaleP = Essence.getOrAddPool(essence, ScaleComponent);
 
-        const playerComp = Pool.get(playerPool, playerEntityId);
+    Pool.add(cameraP, cameraEntity, CameraComponent.new(true));
 
-        return playerComp.props.id === ctx.playerId;
-      });
+    const cameraSize = {
+      // TODO. move somewhere (as deps or ctx)
+      width: window.innerWidth,
+      height: window.innerHeight,
+    };
 
-      if (!playerEntity) {
-        throw new Error('No player entity');
-      }
+    // # POSITION
+    Pool.add(
+      positionP,
+      cameraEntity,
+      PositionComponent.new({
+        x: boardSize.width / 2 - cameraSize.width / 2,
+        y: boardSize.height / 2 - cameraSize.height / 2,
+        z: 0,
+      })
+    );
 
-      const cameraP = Essence.getOrAddPool(essence, CameraComponent);
-      const positionP = Essence.getOrAddPool(essence, PositionComponent);
-      const sizeP = Essence.getOrAddPool(essence, SizeComponent);
-      const scaleP = Essence.getOrAddPool(essence, ScaleComponent);
+    // # SIZE
+    const sizeComponent = Pool.add(
+      sizeP,
+      cameraEntity,
+      SizeComponent.new({
+        width: cameraSize.width,
+        height: cameraSize.height,
+      })
+    );
 
-      Pool.add(cameraP, playerEntity, CameraComponent.new(undefined));
+    // TODO. Move somewhere (as deps or ctx)
+    window.addEventListener('resize', () => {
+      sizeComponent.width = window.innerWidth;
+      sizeComponent.height = window.innerHeight;
+    });
 
-      const cameraSize = {
-        // TODO. move somewhere (as deps or ctx)
-        width: window.innerWidth,
-        height: window.innerHeight,
+    // # SCALE
+    Pool.add(
+      scaleP,
+      cameraEntity,
+      ScaleComponent.new({
+        x: 1,
+        y: 1,
+      })
+    );
+
+    // # PAN MODE
+    Pool.add(
+      Essence.getOrAddPool(essence, PanModeComponent),
+      cameraEntity,
+      PanModeComponent.new({
+        activated: false,
+      })
+    );
+  };
+
+  return (world) => {
+    const { essence, ctx } = world;
+    const { cameraEntity, boardSize } = ctx();
+    const initial = useIsInitial();
+
+    if (initial) {
+      console.log('INITIAL CAMERA');
+      init(world);
+      return;
+    }
+
+    // const panModeEntities = Essence.getEntitiesByComponents(essence, [PanModeComponent]);
+    const positionCP = Essence.getOrAddPool(essence, PositionComponent);
+    const sizeCP = Essence.getOrAddPool(essence, SizeComponent);
+    const panModeP = Essence.getOrAddPool(essence, PanModeComponent);
+
+    const cameraPositionC = Pool.get(positionCP, cameraEntity);
+    const cameraSizeC = Pool.get(sizeCP, cameraEntity);
+    const cameraPanModeC = Pool.get(panModeP, cameraEntity);
+
+    if (cameraPanModeC.activated) {
+      const newCameraPosition: Vector2 = {
+        ...cameraPositionC,
       };
 
-      // # POSITION
-      Pool.add(
-        positionP,
-        playerEntity,
-        PositionComponent.new({
-          x: ctx.boardSize.width / 2 - cameraSize.width / 2,
-          y: ctx.boardSize.height / 2 - cameraSize.height / 2,
-        })
-      );
+      const handPool = Essence.getOrAddPool(essence, FingerComponent);
+      const fingerC = Pool.get(handPool, cameraEntity);
 
-      // # SIZE
-      const sizeComponent = SizeComponent.new(cameraSize);
-      Pool.add(sizeP, playerEntity, sizeComponent);
-
-      // TODO. Move somewhere (as deps or ctx)
-      window.addEventListener('resize', () => {
-        sizeComponent.props.width = window.innerWidth;
-        sizeComponent.props.height = window.innerHeight;
-      });
-
-      // # SCALE
-      Pool.add(
-        scaleP,
-        playerEntity,
-        ScaleComponent.new({
-          x: 1,
-          y: 1,
-        })
-      );
-
-      // # PAN MODE
-      Pool.add(
-        Essence.getOrAddPool(essence, PanModeComponent),
-        playerEntity,
-        PanModeComponent.new({
-          activated: true,
-        })
-      );
-    },
-    run: ({ essence, ctx }) => {
-      const playerEntities = Essence.getEntitiesByComponents(essence, [
-        PlayerComponent,
-        FingerComponent,
-        CameraComponent,
-        PanModeComponent,
-      ]);
-
-      const playerEntity = playerEntities.find((playerEntityId) => {
-        const playerPool = Essence.getOrAddPool(essence, PlayerComponent);
-
-        const playerComp = Pool.get(playerPool, playerEntityId);
-
-        return playerComp.props.id === ctx.playerId;
-      });
-
-      if (!playerEntity) {
-        throw new Error('Somehow no player entity');
+      if (fingerC.click.current.down) {
+        const delta = Vector2.compareAndChange(fingerC.onCameraPosition.previous, fingerC.onCameraPosition.current);
+        newCameraPosition.x -= delta.x;
+        newCameraPosition.y -= delta.y;
       }
 
-      // const panModeEntities = Essence.getEntitiesByComponents(essence, [PanModeComponent]);
-      const positionCP = Essence.getOrAddPool(essence, PositionComponent);
-      const sizeCP = Essence.getOrAddPool(essence, SizeComponent);
-      const panModeP = Essence.getOrAddPool(essence, PanModeComponent);
-
-      const cameraPositionC = Pool.get(positionCP, playerEntity);
-      const sizeC = Pool.get(sizeCP, playerEntity);
-      const panModeC = Pool.get(panModeP, playerEntity);
-
-      if (panModeC.props.activated) {
-        const newCameraPosition: Vector2 = {
-          ...cameraPositionC.props,
-        };
-
-        const handPool = Essence.getOrAddPool(essence, FingerComponent);
-        const fingerC = Pool.get(handPool, playerEntity);
-
-        if (fingerC.props.click.current.down) {
-          const delta = Vector2.compareAndChange(
-            fingerC.props.onCameraPosition.previous,
-            fingerC.props.onCameraPosition.current
-          );
-          newCameraPosition.x -= delta.x;
-          newCameraPosition.y -= delta.y;
-        }
-
-        // . Restrict
-        if (
-          newCameraPosition.x > 0 &&
-          newCameraPosition.x + sizeC.props.width < ctx.boardSize.width &&
-          cameraPositionC.props.x !== newCameraPosition.x
-        ) {
-          cameraPositionC.props.x = newCameraPosition.x;
-        }
-
-        if (
-          newCameraPosition.y > 0 &&
-          newCameraPosition.y + sizeC.props.height < ctx.boardSize.height &&
-          cameraPositionC.props.y !== newCameraPosition.y
-        ) {
-          cameraPositionC.props.y = newCameraPosition.y;
-        }
+      // . Restrict
+      if (
+        newCameraPosition.x > 0 &&
+        newCameraPosition.x + cameraSizeC.width < boardSize.width &&
+        cameraPositionC.x !== newCameraPosition.x
+      ) {
+        cameraPositionC.x = newCameraPosition.x;
       }
 
-      // // . Pan mode
-      // if (panModeEntities.length > 0) {
-
-      // } else {
-      //   // // . Hand near border feature
-      //   // const margin = 20;
-      //   // const velocity = timeDelta * 0.5;
-      //   // // . Check that camera position is more than 0 and less than board size
-      //   // if (handC.props.onCameraPosition.current.x > sizeC.props.width - margin) {
-      //   //   // console.log('RIGHT');
-      //   //   newPosition.x += velocity;
-      //   // } else if (handC.props.onCameraPosition.current.x < margin) {
-      //   //   // console.log('LEFT');
-      //   //   newPosition.x -= velocity;
-      //   // } else if (handC.props.onCameraPosition.current.y < margin) {
-      //   //   // console.log('TOP');
-      //   //   newPosition.y -= velocity;
-      //   // } else if (handC.props.onCameraPosition.current.y > sizeC.props.height - margin) {
-      //   //   // console.log('DOWN');
-      //   //   newPosition.y += velocity;
-      //   // }
-      // }
-    },
+      if (
+        newCameraPosition.y > 0 &&
+        newCameraPosition.y + cameraSizeC.height < boardSize.height &&
+        cameraPositionC.y !== newCameraPosition.y
+      ) {
+        cameraPositionC.y = newCameraPosition.y;
+      }
+    }
   };
 };

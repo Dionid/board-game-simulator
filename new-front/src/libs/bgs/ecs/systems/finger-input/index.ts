@@ -1,168 +1,167 @@
-import { System } from '../../../../ecs/system';
+import { System, SystemProps } from '../../../../ecs/system';
 import { Essence } from '../../../../ecs/essence';
 import { Pool } from '../../../../ecs/component';
-import { CameraComponent, FingerComponent, PlayerComponent, PositionComponent, ScaleComponent } from '../../components';
+import { FingerComponent, PositionComponent, ScaleComponent } from '../../components';
+import { EntityId } from '../../../../ecs/entity';
+import { useIsInitial } from '../../../../ecs/hooks/use-init';
+import { useRef } from '../../../../ecs/hooks/use-ref';
 
-export const FingerInputSystem = (): System => {
-  const lastMouseData = {
-    x: 0,
-    y: 0,
-    down: false,
+export const FingerInputSystem = (): System<{
+  playerEntity: EntityId;
+  cameraEntity: EntityId;
+}> => {
+  // const lastMouseData = {
+  //   x: 0,
+  //   y: 0,
+  //   down: false,
+  // };
+
+  const init = (
+    {
+      essence,
+      ctx,
+    }: SystemProps<{
+      playerEntity: EntityId;
+      cameraEntity: EntityId;
+    }>,
+    lastMouseData: { x: number; y: number; down: boolean }
+  ) => {
+    const { playerEntity } = ctx();
+    const mousePool = Essence.getOrAddPool(essence, FingerComponent);
+
+    Pool.add(
+      mousePool,
+      playerEntity,
+      FingerComponent.new({
+        onBoardPosition: {
+          current: {
+            x: window.innerWidth / 2,
+            y: window.innerHeight / 2,
+          },
+          previous: {
+            x: window.innerWidth / 2,
+            y: window.innerHeight / 2,
+          },
+        },
+        onCameraPosition: {
+          current: {
+            x: window.innerWidth / 2,
+            y: window.innerHeight / 2,
+          },
+          previous: {
+            x: window.innerWidth / 2,
+            y: window.innerHeight / 2,
+          },
+        },
+        click: {
+          previous: {
+            down: false,
+          },
+          current: {
+            down: false,
+          },
+        },
+      })
+    );
+
+    document.body.onmousedown = () => {
+      lastMouseData.down = true;
+    };
+    document.body.onmouseup = () => {
+      lastMouseData.down = false;
+    };
+    document.onmousemove = (event) => {
+      lastMouseData.x = event.pageX;
+      lastMouseData.y = event.pageY;
+    };
   };
 
-  return {
-    init: async ({ essence, ctx }) => {
-      const playerEntities = Essence.getEntitiesByComponents(essence, [PlayerComponent]);
+  return (world) => {
+    const lastMouseData = useRef({
+      x: 0,
+      y: 0,
+      down: false,
+    });
 
-      const playerEntity = playerEntities.find((playerEntityId) => {
-        const playerPool = Essence.getOrAddPool(essence, PlayerComponent);
+    const { essence, ctx } = world;
+    const { playerEntity, cameraEntity } = ctx();
 
-        const playerComp = Pool.get(playerPool, playerEntityId);
+    const initial = useIsInitial();
 
-        return playerComp.props.id === ctx.playerId;
-      });
+    if (initial) {
+      console.log('INITIAL FINGER');
+      init(world, lastMouseData.current);
+      return;
+    }
 
-      if (!playerEntity) {
-        throw new Error('No player entity');
-      }
+    const fingerCP = Essence.getOrAddPool(essence, FingerComponent);
+    const positionCP = Essence.getOrAddPool(essence, PositionComponent);
+    const scaleCP = Essence.getOrAddPool(essence, ScaleComponent);
 
-      const mousePool = Essence.getOrAddPool(essence, FingerComponent);
+    const cameraScaleC = Pool.get(scaleCP, cameraEntity);
+    const cameraPositionC = Pool.get(positionCP, cameraEntity);
+    const fingerC = Pool.get(fingerCP, playerEntity);
 
-      Pool.add(
-        mousePool,
-        playerEntity,
-        FingerComponent.new({
-          onBoardPosition: {
-            current: {
-              x: window.innerWidth / 2,
-              y: window.innerHeight / 2,
-            },
-            previous: {
-              x: window.innerWidth / 2,
-              y: window.innerHeight / 2,
-            },
-          },
-          onCameraPosition: {
-            current: {
-              x: window.innerWidth / 2,
-              y: window.innerHeight / 2,
-            },
-            previous: {
-              x: window.innerWidth / 2,
-              y: window.innerHeight / 2,
-            },
-          },
-          click: {
-            previous: {
-              down: false,
-            },
-            current: {
-              down: false,
-            },
-          },
-        })
-      );
+    // # Update
+    // if (fingerC.onCameraPosition.previous.x !== fingerC.onCameraPosition.current.x) {
+    //   fingerC.onCameraPosition.previous.x = fingerC.onCameraPosition.current.x;
+    // }
+    // if (fingerC.onCameraPosition.previous.y !== fingerC.onCameraPosition.current.y) {
+    //   fingerC.onCameraPosition.previous.y = fingerC.onCameraPosition.current.y;
+    // }
+    fingerC.onCameraPosition.previous = {
+      ...fingerC.onCameraPosition.current,
+    };
 
-      document.body.onmousedown = () => {
-        lastMouseData.down = true;
-      };
-      document.body.onmouseup = () => {
-        lastMouseData.down = false;
-      };
-      document.onmousemove = (event) => {
-        lastMouseData.x = event.pageX;
-        lastMouseData.y = event.pageY;
-      };
-    },
-    run: async ({ essence, ctx }) => {
-      const playerEntities = Essence.getEntitiesByComponents(essence, [
-        FingerComponent,
-        PlayerComponent,
-        CameraComponent,
-        ScaleComponent,
-      ]);
+    // if (fingerC.onBoardPosition.previous.x !== fingerC.onBoardPosition.current.x) {
+    //   fingerC.onBoardPosition.previous.x = fingerC.onBoardPosition.current.x;
+    // }
+    // if (fingerC.onBoardPosition.previous.y !== fingerC.onBoardPosition.current.y) {
+    //   fingerC.onBoardPosition.previous.y = fingerC.onBoardPosition.current.y;
+    // }
+    fingerC.onBoardPosition.previous = {
+      ...fingerC.onBoardPosition.current,
+    };
 
-      const playerEntity = playerEntities.find((playerEntityId) => {
-        const playerPool = Essence.getOrAddPool(essence, PlayerComponent);
+    // if (fingerC.click.previous.down !== fingerC.click.current.down) {
+    //   fingerC.click.previous.down = fingerC.click.current.down;
+    // }
+    fingerC.click.previous = {
+      ...fingerC.click.current,
+    };
 
-        const playerComp = Pool.get(playerPool, playerEntityId);
+    // if (fingerC.onCameraPosition.current.x !== lastMouseData.x) {
+    //   fingerC.onCameraPosition.current.x = lastMouseData.x;
+    // }
+    // if (fingerC.onCameraPosition.current.y !== lastMouseData.y) {
+    //   fingerC.onCameraPosition.current.y = lastMouseData.y;
+    // }
+    fingerC.onCameraPosition.current = {
+      ...lastMouseData.current,
+    };
 
-        return playerComp.props.id === ctx.playerId;
-      });
+    // if (
+    //   fingerC.onBoardPosition.current.x !==
+    //   lastMouseData.x / cameraScaleC.x + cameraPositionC.x
+    // ) {
+    //   fingerC.onBoardPosition.current.x = lastMouseData.x / cameraScaleC.x + cameraPositionC.x;
+    // }
+    // if (
+    //   fingerC.onBoardPosition.current.y !==
+    //   lastMouseData.y / cameraScaleC.y + cameraPositionC.y
+    // ) {
+    //   fingerC.onBoardPosition.current.y = lastMouseData.y / cameraScaleC.y + cameraPositionC.y;
+    // }
+    fingerC.onBoardPosition.current = {
+      x: lastMouseData.current.x / cameraScaleC.x + cameraPositionC.x,
+      y: lastMouseData.current.y / cameraScaleC.y + cameraPositionC.y,
+    };
 
-      if (!playerEntity) {
-        throw new Error('Somehow no player entity');
-      }
-
-      const fingerCP = Essence.getOrAddPool(essence, FingerComponent);
-      const positionCP = Essence.getOrAddPool(essence, PositionComponent);
-      const scaleCP = Essence.getOrAddPool(essence, ScaleComponent);
-
-      const cameraScaleC = Pool.get(scaleCP, playerEntity);
-      const cameraPositionC = Pool.get(positionCP, playerEntity);
-      const fingerC = Pool.get(fingerCP, playerEntity);
-
-      // # Update
-      // if (fingerC.props.onCameraPosition.previous.x !== fingerC.props.onCameraPosition.current.x) {
-      //   fingerC.props.onCameraPosition.previous.x = fingerC.props.onCameraPosition.current.x;
-      // }
-      // if (fingerC.props.onCameraPosition.previous.y !== fingerC.props.onCameraPosition.current.y) {
-      //   fingerC.props.onCameraPosition.previous.y = fingerC.props.onCameraPosition.current.y;
-      // }
-      fingerC.props.onCameraPosition.previous = {
-        ...fingerC.props.onCameraPosition.current,
-      };
-
-      // if (fingerC.props.onBoardPosition.previous.x !== fingerC.props.onBoardPosition.current.x) {
-      //   fingerC.props.onBoardPosition.previous.x = fingerC.props.onBoardPosition.current.x;
-      // }
-      // if (fingerC.props.onBoardPosition.previous.y !== fingerC.props.onBoardPosition.current.y) {
-      //   fingerC.props.onBoardPosition.previous.y = fingerC.props.onBoardPosition.current.y;
-      // }
-      fingerC.props.onBoardPosition.previous = {
-        ...fingerC.props.onBoardPosition.current,
-      };
-
-      // if (fingerC.props.click.previous.down !== fingerC.props.click.current.down) {
-      //   fingerC.props.click.previous.down = fingerC.props.click.current.down;
-      // }
-      fingerC.props.click.previous = {
-        ...fingerC.props.click.current,
-      };
-
-      // if (fingerC.props.onCameraPosition.current.x !== lastMouseData.x) {
-      //   fingerC.props.onCameraPosition.current.x = lastMouseData.x;
-      // }
-      // if (fingerC.props.onCameraPosition.current.y !== lastMouseData.y) {
-      //   fingerC.props.onCameraPosition.current.y = lastMouseData.y;
-      // }
-      fingerC.props.onCameraPosition.current = {
-        ...lastMouseData,
-      };
-
-      // if (
-      //   fingerC.props.onBoardPosition.current.x !==
-      //   lastMouseData.x / cameraScaleC.props.x + cameraPositionC.props.x
-      // ) {
-      //   fingerC.props.onBoardPosition.current.x = lastMouseData.x / cameraScaleC.props.x + cameraPositionC.props.x;
-      // }
-      // if (
-      //   fingerC.props.onBoardPosition.current.y !==
-      //   lastMouseData.y / cameraScaleC.props.y + cameraPositionC.props.y
-      // ) {
-      //   fingerC.props.onBoardPosition.current.y = lastMouseData.y / cameraScaleC.props.y + cameraPositionC.props.y;
-      // }
-      fingerC.props.onBoardPosition.current = {
-        x: lastMouseData.x / cameraScaleC.props.x + cameraPositionC.props.x,
-        y: lastMouseData.y / cameraScaleC.props.y + cameraPositionC.props.y,
-      };
-
-      // if (fingerC.props.click.current.down !== lastMouseData.down) {
-      //   fingerC.props.click.current.down = lastMouseData.down;
-      // }
-      fingerC.props.click.current = {
-        down: lastMouseData.down,
-      };
-    },
+    // if (fingerC.click.current.down !== lastMouseData.down) {
+    //   fingerC.click.current.down = lastMouseData.down;
+    // }
+    fingerC.click.current = {
+      down: lastMouseData.current.down,
+    };
   };
 };

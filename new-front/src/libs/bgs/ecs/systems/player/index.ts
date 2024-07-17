@@ -3,32 +3,38 @@ import { OwnerComponent, PlayerComponent } from '../../components';
 import { Essence } from '../../../../ecs/essence';
 import { Pool } from '../../../../ecs/component';
 import { EntityId } from '../../../../ecs/entity';
-import { UUID } from '../../../../branded-types';
+import { useIsInitial } from '../../../../ecs/hooks/use-init';
 
 export const PlayerSystem = (): System<{
-  playerId: UUID;
+  playerEntity: EntityId;
 }> => {
-  return {
-    init: async ({ essence, ctx }) => {
-      // const playerEntity = EntityId.new();
+  return ({ essence, ctx }) => {
+    const isInitial = useIsInitial();
 
-      const playerPool = Essence.getOrAddPool(essence, PlayerComponent);
-      Pool.add(
-        playerPool,
-        EntityId.ofString(ctx.playerId),
-        PlayerComponent.new({
-          id: ctx.playerId,
-        })
-      );
+    if (!isInitial) {
+      return;
+    }
 
-      const ownerPool = Essence.getOrAddPool(essence, OwnerComponent);
-      Pool.add(
-        ownerPool,
-        EntityId.ofString(ctx.playerId),
-        OwnerComponent.new({
-          playerId: ctx.playerId,
-        })
-      );
-    },
+    const { playerEntity } = ctx();
+
+    console.log('PlayerSystem', playerEntity);
+
+    const playerCP = Essence.getOrAddPool(essence, PlayerComponent);
+    Pool.add(
+      playerCP,
+      playerEntity,
+      PlayerComponent.new({
+        id: playerEntity,
+      })
+    );
+
+    const ownerPool = Essence.getOrAddPool(essence, OwnerComponent);
+    Pool.add(
+      ownerPool,
+      EntityId.ofString(playerEntity),
+      OwnerComponent.new({
+        playerId: playerEntity,
+      })
+    );
   };
 };

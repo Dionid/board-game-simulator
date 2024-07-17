@@ -14,6 +14,7 @@ export type Event<Name extends string, Payload extends Record<any, any> | boolea
   name: Name;
   id: EventId;
   payload: Payload;
+  liveFor?: number;
 };
 
 export type EventFactory<
@@ -21,7 +22,7 @@ export type EventFactory<
   Payload extends Record<any, any> | boolean | string | number | undefined
 > = {
   name: Name;
-  new: (d: Payload) => Event<Name, Payload>;
+  new: (d: Payload, liveFor?: number) => Event<Name, Payload>;
 };
 
 export const EventFactory = <
@@ -32,12 +33,19 @@ export const EventFactory = <
 ) => {
   return {
     name,
-    new: (payload: Payload) => {
+    new: (payload: Payload, liveFor?: number) => {
       return {
         name,
         id: EventId.new(),
         payload,
+        liveFor,
       };
     },
   };
+};
+
+export type EventFromFactory<CF extends EventFactory<any, any>> = ReturnType<CF['new']>;
+
+export type EventsRecord<EL extends Event<any, any>[]> = {
+  [K in EL[number]['name']]?: Array<EL[number]>;
 };

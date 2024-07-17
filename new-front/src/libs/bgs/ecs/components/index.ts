@@ -1,13 +1,13 @@
 import { ComponentFactory } from '../../../ecs/component';
 import { UUID } from '../../../branded-types';
-import { Size, Vector2 } from '../../../math';
+import { Size, Vector2, Vector3 } from '../../../math';
 
 // # PLAYERS
 
 export const PlayerComponent = ComponentFactory<
   'PlayerComponent',
   {
-    id: UUID;
+    id: string;
   }
 >('PlayerComponent');
 
@@ -17,7 +17,7 @@ export const PlayerComponent = ComponentFactory<
 export const OwnerComponent = ComponentFactory<
   'OwnerComponent',
   {
-    playerId: UUID;
+    playerId: string;
   }
 >('OwnerComponent');
 
@@ -47,7 +47,7 @@ export const FingerComponent = ComponentFactory<
 
 // # CAMERA
 
-export const CameraComponent = ComponentFactory<'CameraComponent', undefined>('CameraComponent');
+export const CameraComponent = ComponentFactory<'CameraComponent', boolean>('CameraComponent');
 
 export const PanModeComponent = ComponentFactory<
   'PanModeComponent',
@@ -58,13 +58,20 @@ export const PanModeComponent = ComponentFactory<
 
 // # GEOMETRY
 
-export const PositionComponent = ComponentFactory<'PositionComponent', Vector2>('PositionComponent');
+export const PositionComponent = ComponentFactory<'PositionComponent', Vector3>('PositionComponent');
 export const SizeComponent = ComponentFactory<'SizeComponent', Size>('SizeComponent');
 export const ScaleComponent = ComponentFactory<'ScaleComponent', Vector2>('ScaleComponent');
 
 // . GAME OBJECT
 
-// export type GameObjectComponent = Component<typeof GameObjectComponentName, {}>;
+export const GameObjectComponent = ComponentFactory<'GameObject', boolean>('GameObject');
+
+export const DepthComponent = ComponentFactory<
+  'DepthComponent',
+  {
+    highest: number;
+  }
+>('DepthComponent');
 
 export const ImageComponent = ComponentFactory<
   'ImageComponent',
@@ -101,13 +108,13 @@ export const GroupComponent = ComponentFactory<
 
 // # ACTIONS ON GO
 
-export const SelectableComponent = ComponentFactory<'SelectableComponent', undefined>('SelectableComponent');
-export const IsSelectedComponent = ComponentFactory<'IsSelectedComponent', undefined>('IsSelectedComponent');
-export const LockableComponent = ComponentFactory<'LockableComponent', undefined>('LockableComponent');
-export const IsLockedComponent = ComponentFactory<'IsLockedComponent', undefined>('IsLockedComponent');
-export const DraggableComponent = ComponentFactory<'DraggableComponent', undefined>('DraggableComponent');
-export const IsDraggingComponent = ComponentFactory<'IsDraggingComponent', undefined>('IsDraggingComponent');
-export const DeletableComponent = ComponentFactory<'DeletableComponent', undefined>('DeletableComponent');
+export const SelectableComponent = ComponentFactory<'SelectableComponent', boolean>('SelectableComponent');
+export const IsSelectedComponent = ComponentFactory<'IsSelectedComponent', boolean>('IsSelectedComponent');
+export const LockableComponent = ComponentFactory<'LockableComponent', boolean>('LockableComponent');
+export const IsLockedComponent = ComponentFactory<'IsLockedComponent', boolean>('IsLockedComponent');
+export const DraggableComponent = ComponentFactory<'DraggableComponent', boolean>('DraggableComponent');
+export const IsDraggingComponent = ComponentFactory<'IsDraggingComponent', boolean>('IsDraggingComponent');
+export const DeletableComponent = ComponentFactory<'DeletableComponent', boolean>('DeletableComponent');
 
 // # BOARD GAME SPECIFICS
 

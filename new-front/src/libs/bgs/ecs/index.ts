@@ -1,12 +1,12 @@
-import { UUID } from '../../branded-types';
+import { EntityId } from '../../ecs/entity';
 import { World } from '../../ecs/world';
 import { Size } from '../../math';
 import { HeroSets } from '../games/unmatched';
 
 export type BgsWorldCtx = {
   heroSets: typeof HeroSets;
-  // forceUpdate: () => void;
-  playerId: UUID;
+  playerEntity: EntityId;
+  cameraEntity: EntityId;
   boardSize: Size;
 };
 

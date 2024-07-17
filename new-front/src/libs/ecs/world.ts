@@ -1,42 +1,68 @@
-import { System } from './system';
+import { $systemId, System } from './system';
 import { Essence } from './essence';
+import { UNSAFE_internals } from './internals';
 
-export type World<Ctx extends Record<any, any> = Record<any, any>> = {
+// # Code
+
+export type World<Ctx extends Record<any, any> | unknown> = {
+  id: number;
+  step: number;
+  systemIds: number;
+  latestSystemId: number;
+  ctx: () => Ctx;
   essence: Essence<any, any>;
-  systems: System<Ctx>[];
-  ctx: Ctx;
+  systems: Array<System<Ctx>>;
 };
 
 export const World = {
-  init: <Ctx extends Record<any, any> = Record<any, any>>(world: World<Ctx>): void => {
-    for (let i = 0; i < world.systems.length; i++) {
-      const system = world.systems[i];
-      if (system.init) {
-        system.init({
-          essence: world.essence,
-          ctx: world.ctx,
-          timeDelta: 0,
-        });
-      }
+  new: <Ctx extends Record<any, any>>(world: {
+    essence: Essence<any, any>;
+    ctx: () => Ctx;
+    systems?: Array<System<Ctx>>;
+    systemIds?: number;
+    step?: number;
+  }): World<Ctx> => {
+    const systems = world.systems || [];
+    let systemIds = world.systemIds || 0;
+
+    for (let i = 0; i < systems.length; i++) {
+      const system = systems[i];
+      system[$systemId] = systemIds++;
     }
+
+    const newWorld = {
+      id: UNSAFE_internals.worlds.length,
+      systemIds,
+      step: world.step || 0,
+      latestSystemId: -1,
+      ctx: world.ctx,
+      essence: world.essence,
+      systems,
+    };
+
+    UNSAFE_internals.worlds.push(newWorld);
+
+    return newWorld;
   },
-  run: <Ctx extends Record<any, any> = Record<any, any>>(world: World<Ctx>, timeDelta: number): void => {
-    for (let i = 0; i < world.systems.length; i++) {
-      const system = world.systems[i];
-      if (system.run) {
-        system.run({
-          essence: world.essence,
-          ctx: world.ctx,
-          timeDelta,
-        });
-      }
+  run: <Ctx extends Record<any, any> = Record<any, any>>(world: World<Ctx>): void => {
+    // # Store previous world
+    let prevWorld = UNSAFE_internals.currentWorldId;
+    // # Assign current one
+    UNSAFE_internals.currentWorldId = world.id;
+    // # Activate pending events
+    Essence.flushEvents(world.essence);
+    // # Run systems
+    for (const system of world.systems) {
+      // # Assign current system
+      world.latestSystemId = system[$systemId]!;
+      // # Run system
+      system(world);
     }
-  },
-  addToCtx: <K extends keyof Ctx, Ctx extends Record<K, any> = Record<K, any>>(
-    world: World<Ctx>,
-    ctxName: K,
-    dep: Ctx[K]
-  ): void => {
-    world.ctx[ctxName] = dep;
+    // # Remove done events
+    Essence.clearEvents(world.essence);
+    // # Increment step
+    world.step++;
+    // # Restore previous world
+    UNSAFE_internals.currentWorldId = prevWorld;
   },
 };
