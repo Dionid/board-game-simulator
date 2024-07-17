@@ -25,6 +25,11 @@ export const $string = $string16;
 
 export const $array = Symbol('array');
 
+export type Kind = {
+  [$kind]: symbol;
+  [$defaultFn]: () => unknown;
+};
+
 export const uint8 = {
   [$kind]: $uint8,
   byteLength: 1,
@@ -94,15 +99,13 @@ export const boolean = {
 export const number = float64;
 export const string = string16;
 
-export function arrayOf<F extends PrimitiveField>(field: F) {
+export function arrayOf<K extends Kind>(field: K) {
   return {
     field,
     [$kind]: $array,
     [$defaultFn]: () => [],
   };
 }
-
-// # Field
 
 export type FieldKind =
   | typeof $uint8

@@ -20,6 +20,10 @@ const Comments = Schema.new({
   value: arrayOf(string),
 });
 
+const NamedTags = Schema.new({
+  value: arrayOf(arrayOf(string)),
+});
+
 export const withoutQuery = () => {
   const world = World.new();
 
@@ -386,6 +390,58 @@ describe('aws', () => {
           expect(speed[i].value).toBe(6);
 
           expect(comments[i].value).toEqual(['hello', 'world']);
+        }
+      }
+    });
+    it('should change', () => {
+      const world = World.new();
+
+      World.registerArchetype(world, Position);
+      World.registerArchetype(world, Speed);
+      World.registerArchetype(world, NamedTags);
+
+      const query = World.registerQuery(world, Position, Speed, NamedTags);
+
+      const num = 100;
+
+      for (let i = 0; i < num; i++) {
+        const entity = World.spawnEntity(world);
+        World.setComponent(world, entity, Position, { x: 10, y: 20 });
+        World.setComponent(world, entity, Speed, { value: 5 });
+        World.setComponent(world, entity, NamedTags, { value: [['hello']] });
+      }
+
+      expect(query.archetypes.length).toBe(1);
+
+      for (const archetype of query.archetypes) {
+        const position = World.archetypeTable(world, archetype, Position);
+        const speed = World.archetypeTable(world, archetype, Speed);
+        const comments = World.archetypeTable(world, archetype, NamedTags);
+
+        expect(archetype.entities.length).toBe(num);
+
+        for (let i = 0; i < archetype.entities.length; i++) {
+          position[i].x += 1;
+          position[i].y += 1;
+
+          speed[i].value += 1;
+
+          comments[i].value.push(['world']);
+        }
+      }
+
+      for (const archetype of query.archetypes) {
+        const position = World.archetypeTable(world, archetype, Position);
+        const speed = World.archetypeTable(world, archetype, Speed);
+        const comments = World.archetypeTable(world, archetype, NamedTags);
+
+        for (let i = 0; i < archetype.entities.length; i++) {
+          expect(position[i].x).toBe(11);
+          expect(position[i].y).toBe(21);
+
+          expect(speed[i].value).toBe(6);
+
+          expect(comments[i].value).toEqual([['hello'], ['world']]);
         }
       }
     });
