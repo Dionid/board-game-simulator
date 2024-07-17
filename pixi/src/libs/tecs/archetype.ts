@@ -13,6 +13,7 @@ export type ArchetypeTable<SL extends ReadonlyArray<Schema>> = {
 
 export type ArchetypeId = string;
 
+// eslint-disable-next-line @typescript-eslint/no-redeclare
 export const ArchetypeId = {
   create: (schemas: Schema[]) => {
     return schemas
@@ -31,9 +32,21 @@ export type Archetype<SL extends ReadonlyArray<Schema> = ReadonlyArray<Schema>> 
 };
 
 // OK, BUT can be changed to bitmask
-export function hasSchema(arch: Archetype<any>, schema: Schema): boolean {
+// export function hasSchema<S extends Schema>(arch: Archetype<any>, schema: S): boolean {
+//   const schemaId = Internals.getSchemaId(schema);
+//   return arch.table[schemaId] !== undefined;
+// }
+
+export function hasSchema<SL extends ReadonlyArray<Schema>, S extends Schema>(
+  arch: Archetype<SL>,
+  schema: S
+): Archetype<[S, ...SL]> | undefined {
   const schemaId = Internals.getSchemaId(schema);
-  return arch.table[schemaId] !== undefined;
+  if (arch.table[schemaId] !== undefined) {
+    return arch as unknown as Archetype<[S, ...SL]>;
+  }
+
+  return;
 }
 
 // OK
@@ -324,6 +337,7 @@ export function newArchetype<SL extends Schema[]>(...schemas: SL) {
 //   return isSchemaInArchetype(archetype, schema);
 // }
 
+// eslint-disable-next-line @typescript-eslint/no-redeclare
 export const Archetype = {
   new: newArchetype,
   hasSchema,

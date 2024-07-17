@@ -7,7 +7,6 @@ import {
   string,
   System,
   table,
-  registerSchema,
   registerSystem,
   spawnEntity,
   setComponent,
@@ -19,8 +18,9 @@ import {
   newTag,
   Entity,
 } from '../../../libs/tecs';
+import { hasSchema } from '../../../libs/tecs/archetype';
 import { Query } from '../../../libs/tecs/query';
-import { Application, Graphics, Sprite } from 'pixi.js';
+import { Application, Graphics } from 'pixi.js';
 
 // # Schemas
 
@@ -63,7 +63,7 @@ const viewEvents = newTopic<{ type: 'pointerOver'; entity: Entity }>();
 
 // # Queries
 
-const drawQuery = Query.new(View, pGraphics, Position, Color);
+const drawQuery = Query.new(View, Position);
 
 // # Systems
 
@@ -100,8 +100,6 @@ export const SetPosition = (world: World): System => {
 export const ViewEvents = (app: Application): System => {
   return ({ world, deltaFrameTime }) => {
     for (const event of viewEvents) {
-      console.log('event', event);
-
       setComponent(world, event.entity, Color, { value: 'blue' });
     }
   };
@@ -117,7 +115,7 @@ export const Clicked = (app: Application): System => {
       setComponent(world, entity, pGraphics, { value: circle });
       setComponent(world, entity, Position, { x: event.position.x, y: event.position.y });
       setComponent(world, entity, Color, { value: 'red' });
-      // setComponent(world, entity, Velocity, { x: 0, y: 0 });
+      setComponent(world, entity, Velocity, { x: 0, y: 0 });
 
       circle.eventMode = 'static';
       circle.on('pointerover', () => {
@@ -132,19 +130,27 @@ export const Draw = (world: World, app: Application): System => {
 
   return ({ world, deltaFrameTime }) => {
     for (const archetype of query.archetypes) {
-      const graphicsT = table(archetype, pGraphics);
       const positionT = table(archetype, Position);
-      const colorT = table(archetype, Color);
+      const withPGraphics = hasSchema(archetype, pGraphics);
+      const withColor = hasSchema(archetype, Color);
 
       for (let i = 0, l = archetype.entities.length; i < l; i++) {
-        const graphics = graphicsT[i].value;
+        if (withPGraphics) {
+          const graphicsT = table(withPGraphics, pGraphics);
 
-        graphics.x = positionT[i].x;
-        graphics.y = positionT[i].y;
-        graphics.fill(colorT[i].value);
+          const graphics = graphicsT[i].value;
 
-        if (graphics.parent === null) {
-          app.stage.addChild(graphics);
+          graphics.clear();
+          graphics.circle(positionT[i].x, positionT[i].y, 50);
+
+          if (withColor) {
+            const colorT = table(withColor, Color);
+            graphics.fill(colorT[i].value);
+          }
+
+          if (graphics.parent === null) {
+            app.stage.addChild(graphics);
+          }
         }
       }
     }
@@ -157,12 +163,7 @@ export const Draw = (world: World, app: Application): System => {
 export const initWorld = (app: Application) => {
   const world = newWorld();
 
-  // # (optional) Schemas
-  registerSchema(pGraphics);
-  registerSchema(Position);
-  registerSchema(Size);
-  registerSchema(Color);
-
+  // # Topics
   registerTopic(world, clicked);
   registerTopic(world, viewEvents);
 

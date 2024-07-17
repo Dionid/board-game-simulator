@@ -180,7 +180,7 @@ export const setComponent = <S extends Schema>(
   const schemaId = Internals.getSchemaId(schema);
 
   // # Get current archetype
-  let archetype = world.archetypeByEntity[entity] as Archetype<[S]> | undefined;
+  let archetype = world.archetypeByEntity[entity] as Archetype<any> | undefined;
   if (archetype === undefined) {
     // # If there were no archetype, create new one
     const newArchetype = World.createArchetype(world, schema);
@@ -243,7 +243,7 @@ export const removeComponent = <S extends Schema>(world: World, entity: Entity, 
   const schemaId = Internals.getSchemaId(schema);
 
   // # Get current archetype
-  let archetype = world.archetypeByEntity[entity] as Archetype<[S]> | undefined;
+  let archetype = world.archetypeByEntity[entity] as Archetype<Schema[]> | undefined;
   if (archetype === undefined) {
     throw new Error(`Can't find archetype for entity ${entity}`);
   }
@@ -457,7 +457,7 @@ export const hasComponent = <S extends Schema>(world: World, entity: Entity, sch
     return false;
   }
 
-  return Archetype.hasSchema(archetype, schema);
+  return !!Archetype.hasSchema(archetype, schema);
 };
 
 // OK
@@ -482,6 +482,7 @@ export const componentByEntity = <S extends Schema>(
   return Archetype.component(archetype, entity, schema);
 };
 
+// eslint-disable-next-line @typescript-eslint/no-redeclare
 export const World = {
   new: newWorld,
   archetypeByEntity,
