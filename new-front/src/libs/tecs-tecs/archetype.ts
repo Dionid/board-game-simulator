@@ -188,6 +188,7 @@ export function setArchetypeComponent<S extends Schema>(
     sSet.sparse[entity] = sSet.dense.length;
     sSet.dense.push(entity);
     if (schema[kind] !== tagK) {
+      // @ts-ignore
       componentTable.push(component || Schema.default(schema));
     }
     return true;
@@ -214,8 +215,8 @@ export function componentsList<SL extends ReadonlyArray<Schema>, A extends Arche
   entity: Entity,
   ...schemas: A extends Archetype<infer iCL> ? (ArrayContains<iCL, SL> extends true ? SL : never) : never
 ) {
-  return schemas.map((component) => {
-    const schemaId = Internals.getSchemaId(component);
+  return schemas.map((schema) => {
+    const schemaId = Internals.getSchemaId(schema);
     const componentIndex = archetype.entitiesSS.sparse[entity];
     return archetype.table[schemaId][componentIndex];
   }) as {

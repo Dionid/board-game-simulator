@@ -80,8 +80,8 @@ export const registerArchetype = <SL extends Schema[]>(world: World, ...schemas:
     type: schemas,
     entitiesSS: ss,
     entities: ss.dense,
-    table: schemas.reduce((acc, component) => {
-      acc[getSchemaId(component)] = [];
+    table: schemas.reduce((acc, schema) => {
+      acc[getSchemaId(schema)] = [];
       return acc;
     }, [] as ArchetypeTable<SL>),
   };

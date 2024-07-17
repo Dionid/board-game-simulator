@@ -68,7 +68,7 @@ export type SchemaType<T> = T extends typeof float64 | typeof number
   : T extends typeof string
   ? string
   : T extends Schema
-  ? { [K in keyof T]: SchemaType<T[K]> }
+  ? { [K in keyof T as K extends symbol ? never : K]: SchemaType<T[K]> }
   : never;
 
 export const Tag = {

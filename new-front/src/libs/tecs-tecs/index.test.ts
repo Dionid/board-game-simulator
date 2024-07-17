@@ -1,5 +1,4 @@
-import { number, Tag } from './schema';
-import { World } from './index';
+import { World, number, Tag } from './index';
 
 const Position = {
   x: number,
@@ -9,7 +8,6 @@ const Position = {
 const Velocity = {
   x: number,
   y: number,
-  z: number,
 };
 
 const Speed = {
@@ -18,25 +16,12 @@ const Speed = {
 
 const Player = Tag.new();
 
-const world = World.new();
-
 export const withoutQuery = () => {
+  const world = World.new();
+
   const archetype1 = World.registerArchetype(world, Position, Speed);
 
-  const byGetComponentTable = () => {
-    const position = World.archetypeTable(world, archetype1, Position);
-    const speed = World.archetypeTable(world, archetype1, Speed);
-    // @ts-expect-error: Velocity is not in the archetype
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const velocity = World.archetypeTable(world, archetype1, Velocity);
-
-    for (let i = 0; i < archetype1.entities.length; i++) {
-      position[i].x += 1;
-      position[i].y += 1;
-
-      speed[i].value += 1;
-    }
-  };
+  const byGetComponentTable = () => {};
 
   byGetComponentTable();
 
@@ -44,7 +29,7 @@ export const withoutQuery = () => {
     const [position] = World.archetypeTablesList(world, archetype1, Position);
     const [speed] = World.archetypeTablesList(world, archetype1, Speed, Position);
 
-    // @ts-expect-error: Velocity is not in the archetype
+    // TODO: MUST BE ERROR
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [velocity] = World.archetypeTablesList(world, archetype1, Velocity);
 
@@ -93,9 +78,7 @@ export const withoutQuery = () => {
 };
 
 describe('aws', () => {
-  it('should be true', () => {
-    expect(true).toBe(true);
-
+  it('should move entity', () => {
     const world = World.new();
 
     const PositionArchetype = World.registerArchetype(world, Position);
@@ -133,25 +116,222 @@ describe('aws', () => {
     expect(MovementArchetype.table[1].length).toEqual(1);
   });
 
-  it('should be true', () => {
-    expect(true).toBe(true);
+  describe('tag', () => {
+    it('should be added', () => {
+      const world = World.new();
 
-    const world = World.new();
+      const PositionArchetype = World.registerArchetype(world, Position);
+      const PlayerPositionArchetype = World.registerArchetype(world, Position, Player);
 
-    const PositionArchetype = World.registerArchetype(world, Position);
-    const PlayerPositionArchetype = World.registerArchetype(world, Position, Player);
+      expect(PositionArchetype.type.length).toEqual(1);
 
-    expect(PositionArchetype.type.length).toEqual(1);
+      const entity = World.spawnEntity(world);
 
-    const entity = World.spawnEntity(world);
+      World.setComponent(world, entity, Position, { x: 10, y: 20 });
 
-    World.setComponent(world, entity, Position, { x: 10, y: 20 });
+      expect(PositionArchetype.entities.length).toEqual(1);
+      expect(PositionArchetype.table[0].length).toEqual(1);
 
-    expect(PositionArchetype.entities.length).toEqual(1);
-    expect(PositionArchetype.table[0].length).toEqual(1);
+      World.setComponent(world, entity, Player);
 
-    World.setComponent(world, entity, Player);
+      expect(PlayerPositionArchetype.entities.length).toEqual(1);
+      expect(PlayerPositionArchetype.table[World.getSchemaId(Position)].length).toEqual(1);
+      expect(PlayerPositionArchetype.table[World.getSchemaId(Player)].length).toEqual(0);
+    });
+  });
 
-    console.log('PlayerPositionArchetype', PlayerPositionArchetype);
+  describe('spawn and kill entity', () => {
+    it('should be 0 in the end', () => {
+      const world = World.new();
+      expect(world.entityGraveyard.length).toEqual(0);
+
+      const PositionArchetype = World.registerArchetype(world, Position);
+
+      expect(PositionArchetype.entities.length).toEqual(0);
+
+      const entity = World.spawnEntity(world, PositionArchetype);
+
+      expect(PositionArchetype.entities.length).toEqual(1);
+
+      World.killEntity(world, entity);
+
+      expect(PositionArchetype.entities.length).toEqual(0);
+      expect(world.entityGraveyard.length).toEqual(1);
+    });
+    it('should be 0 in the end', () => {
+      const world = World.new();
+      expect(world.entityGraveyard.length).toEqual(0);
+
+      const PositionArchetype = World.registerArchetype(world, Position);
+
+      expect(PositionArchetype.entities.length).toEqual(0);
+
+      const entity = World.spawnEntity(world);
+
+      World.setComponent(world, entity, Position, { x: 10, y: 20 });
+
+      expect(PositionArchetype.entities.length).toEqual(1);
+
+      World.killEntity(world, entity);
+
+      expect(world.entityGraveyard.length).toEqual(1);
+      expect(PositionArchetype.entities.length).toEqual(0);
+    });
+    it('should be 0 in the end', () => {
+      const world = World.new();
+      expect(world.entityGraveyard.length).toEqual(0);
+
+      const PositionArchetype = World.registerArchetype(world, Position);
+
+      expect(PositionArchetype.entities.length).toEqual(0);
+
+      const num = 100;
+
+      const entities = [];
+
+      for (let i = 0; i < num; i++) {
+        const entity = World.spawnEntity(world);
+        World.setComponent(world, entity, Position, { x: 10, y: 20 });
+        entities.push(entity);
+      }
+
+      expect(PositionArchetype.entities.length).toEqual(num);
+
+      for (const entity of entities) {
+        World.killEntity(world, entity);
+      }
+
+      expect(world.entityGraveyard.length).toEqual(num);
+      expect(PositionArchetype.entities.length).toEqual(0);
+    });
+  });
+
+  describe('query', () => {
+    it('should get entities', () => {
+      const world = World.new();
+
+      World.registerArchetype(world, Position);
+      World.registerArchetype(world, Position, Player);
+
+      const num = 100;
+
+      for (let i = 0; i < num; i++) {
+        const entity = World.spawnEntity(world);
+        World.setComponent(world, entity, Position, { x: 10, y: 20 });
+      }
+
+      const query = World.registerQuery(world, Position);
+
+      expect(query.archetypes.length).toBe(2);
+      expect(query.archetypes.some((arch) => arch.entities.length === num)).toBe(true);
+    });
+    it('should get entities', () => {
+      const world = World.new();
+      const query = World.registerQuery(world, Position);
+      expect(query.archetypes.length).toBe(0);
+
+      World.registerArchetype(world, Position);
+      World.registerArchetype(world, Position, Player);
+
+      const num = 100;
+
+      for (let i = 0; i < num; i++) {
+        const entity = World.spawnEntity(world);
+        World.setComponent(world, entity, Position, { x: 10, y: 20 });
+      }
+
+      expect(query.archetypes.length).toBe(2);
+      expect(query.archetypes.some((arch) => arch.entities.length === num)).toBe(true);
+    });
+    it('should get entities', () => {
+      const world = World.new();
+
+      World.registerArchetype(world, Position);
+      World.registerArchetype(world, Position, Player);
+
+      const query = World.registerQuery(world, Position);
+      expect(query.archetypes.length).toBe(2);
+
+      World.registerArchetype(world, Position, Speed);
+
+      expect(query.archetypes.length).toBe(3);
+
+      const num = 100;
+
+      for (let i = 0; i < num; i++) {
+        const entity = World.spawnEntity(world);
+        World.setComponent(world, entity, Position, { x: 10, y: 20 });
+      }
+
+      expect(query.archetypes.length).toBe(3);
+      expect(query.archetypes.some((arch) => arch.entities.length === num)).toBe(true);
+    });
+  });
+  describe('component', () => {
+    it('should change', () => {
+      const world = World.new();
+
+      World.registerArchetype(world, Position);
+      World.registerArchetype(world, Speed);
+
+      const query = World.registerQuery(world, Position, Speed);
+
+      for (const archetype of query.archetypes) {
+        const position = World.archetypeTable(world, archetype, Position);
+        const speed = World.archetypeTable(world, archetype, Speed);
+
+        expect(archetype.entities.length).toBe(0);
+
+        for (let i = 0; i < archetype.entities.length; i++) {
+          position[i].x += 1;
+          position[i].y += 1;
+
+          speed[i].value += 1;
+        }
+      }
+
+      const num = 100;
+
+      for (let i = 0; i < num; i++) {
+        const entity = World.spawnEntity(world);
+        World.setComponent(world, entity, Position, { x: 10, y: 20 });
+      }
+
+      expect(query.archetypes.length).toBe(0);
+
+      for (let i = 0; i < num; i++) {
+        const entity = World.spawnEntity(world);
+        World.setComponent(world, entity, Position, { x: 10, y: 20 });
+        World.setComponent(world, entity, Speed, { value: 5 });
+      }
+
+      expect(query.archetypes.length).toBe(1);
+
+      for (const archetype of query.archetypes) {
+        const position = World.archetypeTable(world, archetype, Position);
+        const speed = World.archetypeTable(world, archetype, Speed);
+
+        expect(archetype.entities.length).toBe(num);
+
+        for (let i = 0; i < archetype.entities.length; i++) {
+          position[i].x += 1;
+          position[i].y += 1;
+
+          speed[i].value += 1;
+        }
+      }
+
+      for (const archetype of query.archetypes) {
+        const position = World.archetypeTable(world, archetype, Position);
+        const speed = World.archetypeTable(world, archetype, Speed);
+
+        for (let i = 0; i < archetype.entities.length; i++) {
+          expect(position[i].x).toBe(11);
+          expect(position[i].y).toBe(21);
+
+          expect(speed[i].value).toBe(6);
+        }
+      }
+    });
   });
 });
