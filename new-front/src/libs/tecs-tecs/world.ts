@@ -336,6 +336,12 @@ export function newWorld(): World {
   };
 }
 
+export const immediately = (world: World, fn: () => void) => {
+  world.deferredOperations.deferred = false;
+  fn();
+  world.deferredOperations.deferred = true;
+};
+
 export const World = {
   new: newWorld,
 
@@ -366,4 +372,5 @@ export const World = {
 
   // # Step
   step,
+  immediately,
 };
