@@ -266,11 +266,53 @@ export function component<S extends Schema, A extends Archetype<any>>(
   return archetype.table[componentId][componentIndex] as SchemaType<S>;
 }
 
+// OK
+export const table = <S extends Schema, A extends Archetype<any>>(
+  archetype: A,
+  schema: A extends Archetype<infer iCL> ? (ArrayContains<iCL, [S]> extends true ? S : never) : never
+) => {
+  const componentId = Internals.getSchemaId(schema);
+  return archetype.table[componentId] as ArchetypeTableRow<S>;
+};
+
+// OK
+export const tablesList = <SL extends ReadonlyArray<Schema>, A extends Archetype<any>>(
+  archetype: A,
+  ...components: A extends Archetype<infer iCL> ? (ArrayContains<iCL, SL> extends true ? SL : never) : never
+) => {
+  return components.map((component) => {
+    const componentId = Internals.getSchemaId(component);
+    return archetype.table[componentId];
+  }) as {
+    [K in keyof SL]: SchemaType<SL[K]>[];
+  };
+};
+
+export function newArchetype<SL extends Schema[]>(...schemas: SL) {
+  const ss = SparseSet.new();
+  const archId = ArchetypeId.create(schemas);
+  const archetype: Archetype<SL> = {
+    id: archId,
+    type: schemas,
+    entitiesSS: ss,
+    entities: ss.dense,
+    table: schemas.reduce((acc, schema) => {
+      acc[Internals.getSchemaId(schema)] = [];
+      return acc;
+    }, [] as ArchetypeTable<SL>),
+  };
+
+  return archetype;
+}
+
 export const Archetype = {
+  new: newArchetype,
   isSchemaInArchetype,
   isEntityInArchetype,
   componentsList,
   component,
+  table,
+  tablesList,
   setComponent: setArchetypeComponent,
   addEntity: addArchetypeEntity,
   removeEntity,

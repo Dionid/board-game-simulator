@@ -1,24 +1,29 @@
-import React from 'react';
-import logo from './logo.svg';
+import { useEffect } from 'react';
 import './App.css';
+import { Application } from 'pixi.js';
+import { initWorld } from './core';
+import { step } from '../../libs/tecs';
+
+const app = new Application();
+await app.init({ resizeTo: window, backgroundColor: 'white' })
 
 function App() {
+  useEffect(() => {
+    const canvas = document.getElementById('canvas') as HTMLCanvasElement;
+    canvas.appendChild(app.canvas);
+    const world = initWorld(app)
+    const animation = () => {
+      step(world)
+      requestAnimationFrame(animation);
+    }
+    animation()
+
+    // step(world)
+  }, [])
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <div id="canvas"></div>
     </div>
   );
 }

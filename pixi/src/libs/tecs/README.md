@@ -26,7 +26,7 @@
 1. ~~Tags~~
 1. ~~Types: Boolean, Array ~~
 1. ~~Defer add and remove entities and components on the same World.step or deferred~~
-1. Events
+1. ~~Topics~~
 1. ...
 1. Complex queries
 1. Singleton Component

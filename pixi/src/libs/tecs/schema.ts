@@ -222,7 +222,7 @@ export const $tag = Symbol('tag');
 export type SchemaKind = typeof $tag | typeof $aos | typeof $soa;
 
 export type Schema = {
-  [key: string]: Field | Schema;
+  [key: string]: Kind | Schema;
   [$kind]: SchemaKind;
 };
 export type SchemaId = Id;
@@ -235,6 +235,8 @@ export type SchemaType<T> = T extends typeof float64 | typeof number
   ? { [K in keyof T as K extends symbol ? never : K]: SchemaType<T[K]> }
   : T extends ComplexField
   ? SchemaType<T['field']>[]
+  : T extends Kind
+  ? ReturnType<T[typeof $defaultFn]>
   : never;
 
 export function isSchema(value: unknown): value is Schema {

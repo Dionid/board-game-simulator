@@ -1,9 +1,7 @@
 import { Entity } from './core';
-import { SparseSet } from './sparse-set';
-import { Archetype, ArchetypeId, ArchetypeTable, ArchetypeTableRow } from './archetype';
+import { Archetype, ArchetypeId } from './archetype';
 import { Internals } from './internals';
 import { Schema, SchemaType } from './schema';
-import { ArrayContains } from './ts-types';
 import { Query } from './query';
 import { System } from './system';
 import { Operation } from './operations';
@@ -19,6 +17,7 @@ export type World = {
   state: 'running' | 'idle';
 
   // # Time
+  currentStepTime: number;
   lastStepTime: number;
 
   // # Entity
@@ -91,19 +90,9 @@ export const killEntity = (world: World, entity: number): void => {
   world.archetypeByEntity[entity] = undefined;
 };
 
-// # Schema
-
-export const registerSchema = (schema: Schema, schemaId?: number) => {
-  return Internals.registerSchema(schema, schemaId);
-};
-
-export const getSchemaId = (schema: Schema) => {
-  return Internals.getSchemaId(schema);
-};
-
 // # Archetype
 
-export const registerArchetype = <SL extends Schema[]>(world: World, ...schemas: SL): Archetype<SL> => {
+export const createArchetype = <SL extends Schema[]>(world: World, ...schemas: SL): Archetype<SL> => {
   const archId = ArchetypeId.create(schemas);
 
   let archetype = world.archetypesById.get(archId) as Archetype<SL> | undefined;
@@ -113,49 +102,37 @@ export const registerArchetype = <SL extends Schema[]>(world: World, ...schemas:
   }
 
   // # Create new Archetype
-  const ss = SparseSet.new();
-  const newArchetype: Archetype<SL> = {
-    id: archId,
-    type: schemas,
-    entitiesSS: ss,
-    entities: ss.dense,
-    table: schemas.reduce((acc, schema) => {
-      acc[getSchemaId(schema)] = [];
-      return acc;
-    }, [] as ArchetypeTable<SL>),
-  };
+  const newArchetype = Archetype.new(...schemas);
 
   // # Index new Archetype
   world.archetypesById.set(newArchetype.id, newArchetype);
 
   // # Add to queries
   world.queries.forEach((query) => {
-    query.tryAdd(newArchetype);
+    Query.tryAddArchetype(query, newArchetype);
   });
 
   return newArchetype;
 };
 
-export const archetypeTable = <S extends Schema, A extends Archetype<any>>(
-  world: World,
-  archetype: A,
-  schema: A extends Archetype<infer iCL> ? (ArrayContains<iCL, [S]> extends true ? S : never) : never
-) => {
-  const componentId = World.getSchemaId(schema);
-  return archetype.table[componentId] as ArchetypeTableRow<S>;
-};
+export const registerArchetype = <SL extends Schema[]>(world: World, newArchetype: Archetype<SL>): Archetype<SL> => {
+  const archId = ArchetypeId.create(newArchetype.type);
 
-export const archetypeTablesList = <SL extends ReadonlyArray<Schema>, A extends Archetype<any>>(
-  world: World,
-  archetype: A,
-  ...components: A extends Archetype<infer iCL> ? (ArrayContains<iCL, SL> extends true ? SL : never) : never
-) => {
-  return components.map((component) => {
-    const componentId = World.getSchemaId(component);
-    return archetype.table[componentId];
-  }) as {
-    [K in keyof SL]: SchemaType<SL[K]>[];
-  };
+  let existingArchetype = world.archetypesById.get(archId) as Archetype<SL> | undefined;
+
+  if (existingArchetype !== undefined) {
+    return existingArchetype;
+  }
+
+  // # Index new Archetype
+  world.archetypesById.set(newArchetype.id, newArchetype);
+
+  // # Add to queries
+  world.queries.forEach((query) => {
+    Query.tryAddArchetype(query, newArchetype);
+  });
+
+  return newArchetype;
 };
 
 export function addEntity<CL extends Schema[]>(world: World, arch: Archetype<CL>, entity: Entity): void {
@@ -200,13 +177,13 @@ export const setComponent = <S extends Schema>(
     return;
   }
 
-  const schemaId = World.getSchemaId(schema);
+  const schemaId = Internals.getSchemaId(schema);
 
   // # Get current archetype
   let archetype = world.archetypeByEntity[entity] as Archetype<[S]> | undefined;
   if (archetype === undefined) {
     // # If there were no archetype, create new one
-    const newArchetype = World.registerArchetype(world, schema);
+    const newArchetype = World.createArchetype(world, schema);
 
     // # Index archetype by entity
     world.archetypeByEntity[entity] = newArchetype;
@@ -225,7 +202,7 @@ export const setComponent = <S extends Schema>(
   }
 
   // # If not, create new Archetype
-  const newArchetype = World.registerArchetype(world, schema, ...archetype.type) as unknown as Archetype<[S]>;
+  const newArchetype = World.createArchetype(world, schema, ...archetype.type) as unknown as Archetype<[S]>;
 
   // # Index archetype by entity
   world.archetypeByEntity[entity] = newArchetype;
@@ -263,7 +240,7 @@ export const removeComponent = <S extends Schema>(world: World, entity: Entity, 
     return;
   }
 
-  const schemaId = World.getSchemaId(schema);
+  const schemaId = Internals.getSchemaId(schema);
 
   // # Get current archetype
   let archetype = world.archetypeByEntity[entity] as Archetype<[S]> | undefined;
@@ -277,7 +254,7 @@ export const removeComponent = <S extends Schema>(world: World, entity: Entity, 
   }
 
   // # Find or create new archetype
-  const newArchetype = World.registerArchetype(world, ...archetype.type.filter((c) => c !== schema));
+  const newArchetype = World.createArchetype(world, ...archetype.type.filter((c) => c !== schema));
 
   // # Move entity to new archetype
   Archetype.moveEntity(archetype, newArchetype, entity);
@@ -287,13 +264,16 @@ export const removeComponent = <S extends Schema>(world: World, entity: Entity, 
 
 // # Queries
 
-export function registerQuery<SL extends ReadonlyArray<Schema>>(world: World, ...schemas: SL) {
-  const query = Query.new(...schemas);
+// TODO: add query index by id to check for similar filters
+export function registerQuery<Q extends Query<Schema[]>>(world: World, query: Q): Q {
+  if (world.queries.includes(query)) {
+    return query;
+  }
 
   world.queries.push(query);
 
   world.archetypesById.forEach((archetype) => {
-    query.tryAdd(archetype);
+    Query.tryAddArchetype(query, archetype);
   });
 
   return query;
@@ -333,13 +313,15 @@ export function registerTopic(world: World, topic: Topic<unknown>) {
 export function step(world: World): void {
   // # Set state
   world.state = 'running';
+  const now = Date.now();
+  world.currentStepTime = now;
+  if (world.lastStepTime === 0) {
+    world.lastStepTime = now;
+  }
 
   // # Set delta
-  let deltaTime = world.lastStepTime - Date.now();
-
-  if (deltaTime < 0) {
-    deltaTime = 0;
-  }
+  let deltaTime = Math.max(0, now - world.lastStepTime);
+  let deltaFrameTime = deltaTime / 16.668;
 
   // # Execute deferred operations
   const operations = world.deferredOperations.operations;
@@ -364,7 +346,8 @@ export function step(world: World): void {
       system({
         stage: 'onFirstStep',
         world,
-        deltaTime: deltaTime,
+        deltaTime,
+        deltaFrameTime,
       });
     }
   }
@@ -373,7 +356,8 @@ export function step(world: World): void {
     const system = world.systems.preUpdate[i];
     system({
       world,
-      deltaTime: deltaTime,
+      deltaTime,
+      deltaFrameTime,
       stage: 'preUpdate',
     });
   }
@@ -382,7 +366,8 @@ export function step(world: World): void {
     const system = world.systems.update[i];
     system({
       world,
-      deltaTime: deltaTime,
+      deltaTime,
+      deltaFrameTime,
       stage: 'update',
     });
   }
@@ -391,7 +376,8 @@ export function step(world: World): void {
     const system = world.systems.postUpdate[i];
     system({
       world,
-      deltaTime: deltaTime,
+      deltaTime,
+      deltaFrameTime,
       stage: 'postUpdate',
     });
   }
@@ -402,28 +388,40 @@ export function step(world: World): void {
   world.deferredOperations.killed.clear();
 
   // # Set state
-  world.lastStepTime = deltaTime;
+  world.lastStepTime = now;
   world.state = 'idle';
   world.isFirstStep = false;
 }
 
-export function newWorld(): World {
+export function newWorld(
+  props: {
+    queries?: Query<any>[];
+    topics?: Topic<unknown>[];
+    systems?: {
+      onFirstStep?: System[];
+      preUpdate?: System[];
+      update?: System[];
+      postUpdate?: System[];
+    };
+  } = {}
+): World {
   return {
     isFirstStep: true,
     state: 'idle',
+    currentStepTime: 0,
     lastStepTime: 0,
     nextEntityId: 1,
     entityGraveyard: [],
     archetypesById: new Map(),
     archetypeByEntity: [],
     systems: {
-      onFirstStep: [],
-      preUpdate: [],
-      update: [],
-      postUpdate: [],
+      onFirstStep: props.systems ? props.systems.onFirstStep ?? [] : [],
+      preUpdate: props.systems ? props.systems.preUpdate ?? [] : [],
+      update: props.systems ? props.systems.update ?? [] : [],
+      postUpdate: props.systems ? props.systems.postUpdate ?? [] : [],
     },
-    queries: [],
-    topics: [],
+    queries: props.queries ?? [],
+    topics: props.topics ?? [],
     deferredOperations: {
       deferred: false,
       operations: [],
@@ -438,6 +436,9 @@ export const immediately = (world: World, fn: () => void) => {
   world.deferredOperations.deferred = true;
 };
 
+export const registerSchema = Internals.registerSchema;
+export const getSchemaId = Internals.getSchemaId;
+
 export const World = {
   new: newWorld,
 
@@ -450,12 +451,13 @@ export const World = {
   getSchemaId,
 
   // # Archetypes
+  createArchetype,
   registerArchetype,
 
   // # Archetypes Entities & Components
   // ## Get
-  archetypeTable,
-  archetypeTablesList,
+  table: Archetype.table,
+  tablesList: Archetype.tablesList,
   component: Archetype.component,
   componentsList: Archetype.componentsList,
 
