@@ -48,7 +48,7 @@ export function isEntityInArchetype(arch: Archetype<any>, entity: Entity) {
 }
 
 // OK
-export function addEntity<CL extends Schema[]>(arch: Archetype<CL>, entity: Entity) {
+export function addArchetypeEntity<CL extends Schema[]>(arch: Archetype<CL>, entity: Entity) {
   // # Add entity to archetype
   SparseSet.add(arch.entitiesSS, entity);
 
@@ -272,7 +272,7 @@ export const Archetype = {
   componentsList,
   component,
   setComponent: setArchetypeComponent,
-  addEntity,
+  addEntity: addArchetypeEntity,
   removeEntity,
   moveEntity,
 };

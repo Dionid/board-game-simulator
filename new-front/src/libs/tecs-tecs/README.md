@@ -1,5 +1,3 @@
-
-
 # Design
 
 1. Id – number id
@@ -26,9 +24,8 @@
 1. ~~Prefabricate Archetype~~
 1. ~~Query~~
 1. ~~Tags~~
-1. Types: Boolean, Array, Object, Set, Map [link](https://github.com/3mcd/javelin/blob/2b64cfa78e016675e698da8299c36b9d4f431e27/packages/pack/src/views.ts)
-    1. Make them branded
-1. ? Add and remove on the same World.step or deferred
+1. ~~Types: Boolean, Array ~~
+1. ~~Defer add and remove entities and components on the same World.step or deferred~~
 1. ...
 1. Events
 1. ...
@@ -44,17 +41,17 @@
 # Goals
 
 1. ~~Try to separate storage and ECS engine, to use ECS engine just as index~~.
-    Better to make so that person doesn't need to know about storage.
+   Better to make so that person doesn't need to know about storage.
 1. ...
 
 # Ideas
 
 1. I can create Archetype Type, just by concating sorted component ids
 1. ??? Global SparseSet with components
-2. ...
+1. ...
 
 # Thoughts
 
 1. Вспомнил почему плохая идея использовать 1 большой ComponentTable:
-    проблема в том, что итерация по нему не получится последовательной, так как
-    мы будем брать только часть компонентов. Поэтому лучше хранить компоненты в Archetype
+   проблема в том, что итерация по нему не получится последовательной, так как
+   мы будем брать только часть компонентов. Поэтому лучше хранить компоненты в Archetype

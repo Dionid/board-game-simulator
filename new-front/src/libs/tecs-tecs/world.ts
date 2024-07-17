@@ -6,6 +6,8 @@ import { Schema, SchemaType } from './schema';
 import { ArrayContains } from './ts-types';
 import { Query } from './query';
 import { Handler } from './handler';
+import { Operation } from './operations';
+import { safeGuard } from './switch';
 
 /**
  * World is a container for Entities, Components and Archetypes.
@@ -19,11 +21,18 @@ export type World = {
   // archetypesIdByArchetype: WeakMap<Archetype<any>, number>;
   archetypesById: Map<string, Archetype<any>>;
 
-  // Entity Archetype
+  // # Entity Archetype
   archetypeByEntity: Array<Archetype<any> | undefined>;
 
-  // Queries
+  // # Queries
   queries: Query<any>[];
+
+  // # Deferred Operations
+  deferredOperations: {
+    deferred: boolean;
+    operations: Operation[];
+    killed: Set<Entity>;
+  };
 };
 
 // # Entity
@@ -42,7 +51,15 @@ export const spawnEntity = <SL extends Schema[]>(world: World, arch?: Archetype<
   return entity;
 };
 
-export const killEntity = (world: World, entity: number) => {
+export const killEntity = (world: World, entity: number): void => {
+  if (world.deferredOperations.deferred) {
+    world.deferredOperations.operations.push({
+      type: 'killEntity',
+      entityId: entity,
+    });
+    return;
+  }
+
   world.entityGraveyard.push(entity);
 
   const archetype = world.archetypeByEntity[entity];
@@ -119,6 +136,19 @@ export const archetypeTablesList = <SL extends ReadonlyArray<Schema>, A extends 
   };
 };
 
+export function addEntity<CL extends Schema[]>(world: World, arch: Archetype<CL>, entity: Entity): void {
+  if (world.deferredOperations.deferred) {
+    world.deferredOperations.operations.push({
+      type: 'addEntity',
+      entityId: entity,
+      archetype: arch,
+    });
+    return;
+  }
+
+  Archetype.addEntity(arch, entity);
+}
+
 // OK
 /**
  *
@@ -137,7 +167,17 @@ export const setComponent = <S extends Schema>(
   entity: Entity,
   schema: S,
   component?: SchemaType<S>
-): [Archetype<[S]>, SchemaType<S> | undefined] => {
+): void => {
+  if (world.deferredOperations.deferred) {
+    world.deferredOperations.operations.push({
+      type: 'setComponent',
+      entityId: entity,
+      schema,
+      component,
+    });
+    return;
+  }
+
   const schemaId = World.getSchemaId(schema);
 
   // # Get current archetype
@@ -152,14 +192,14 @@ export const setComponent = <S extends Schema>(
     // # Add entity to archetype
     Archetype.setComponent(newArchetype, entity, schemaId, component);
 
-    return [newArchetype, component];
+    return;
   }
 
   // # If Schema is already in archetype, than just set Component
   if (Archetype.isSchemaInArchetype(archetype, schemaId)) {
     Archetype.setComponent(archetype, entity, schemaId, component);
 
-    return [archetype, component];
+    return;
   }
 
   // # If not, create new Archetype
@@ -174,7 +214,7 @@ export const setComponent = <S extends Schema>(
   // # Add new data
   Archetype.setComponent(newArchetype, entity, schemaId, component);
 
-  return [newArchetype, component];
+  return;
 };
 
 // OK
@@ -191,7 +231,16 @@ export const setComponent = <S extends Schema>(
  *
  * @example
  */
-export const removeComponent = <S extends Schema>(world: World, entity: Entity, schema: S) => {
+export const removeComponent = <S extends Schema>(world: World, entity: Entity, schema: S): void => {
+  if (world.deferredOperations.deferred) {
+    world.deferredOperations.operations.push({
+      type: 'removeComponent',
+      entityId: entity,
+      schema,
+    });
+    return;
+  }
+
   const schemaId = World.getSchemaId(schema);
 
   // # Get current archetype
@@ -211,7 +260,7 @@ export const removeComponent = <S extends Schema>(world: World, entity: Entity, 
   // # Move entity to new archetype
   Archetype.moveEntity(archetype, newArchetype, entity);
 
-  return newArchetype;
+  return;
 };
 
 // # Queries
@@ -228,7 +277,28 @@ export function registerQuery<SL extends ReadonlyArray<Schema>>(world: World, ..
   return query;
 }
 
+export function applyDeferredOp(world: World, operation: Operation): void {
+  switch (operation.type) {
+    case 'addEntity':
+      addEntity(world, operation.archetype, operation.entityId);
+      break;
+    case 'killEntity':
+      killEntity(world, operation.entityId);
+      break;
+    case 'setComponent':
+      setComponent(world, operation.entityId, operation.schema, operation.component);
+      break;
+    case 'removeComponent':
+      removeComponent(world, operation.entityId, operation.schema);
+      break;
+    default:
+      return safeGuard(operation);
+  }
+}
+
 export function step(world: World, systems: Handler[]) {
+  world.deferredOperations.deferred = true;
+
   for (let i = 0; i < systems.length; i++) {
     const system = systems[i];
     system({
@@ -238,16 +308,36 @@ export function step(world: World, systems: Handler[]) {
       },
     });
   }
+
+  world.deferredOperations.deferred = false;
+
+  const operations = world.deferredOperations.operations;
+
+  for (let i = 0; i < operations.length; i++) {
+    applyDeferredOp(world, operations[i]);
+  }
+
+  world.deferredOperations.operations = [];
+  world.deferredOperations.killed.clear();
 }
 
-export const World = {
-  new: (): World => ({
+export function newWorld(): World {
+  return {
     nextEntityId: 1,
     entityGraveyard: [],
     archetypesById: new Map(),
     archetypeByEntity: [],
     queries: [],
-  }),
+    deferredOperations: {
+      deferred: false,
+      operations: [],
+      killed: new Set(),
+    },
+  };
+}
+
+export const World = {
+  new: newWorld,
 
   // # Entity
   spawnEntity,
