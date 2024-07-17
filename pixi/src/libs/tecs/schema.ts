@@ -289,8 +289,8 @@ export const Schema = {
   },
 };
 
+export const newTag = (): Schema => Schema.new({}, $tag);
+
 export const Tag = {
-  new: (): Schema => {
-    return Schema.new({}, $tag);
-  },
+  new: newTag,
 };

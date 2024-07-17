@@ -195,7 +195,7 @@ export const setComponent = <S extends Schema>(
   }
 
   // # If Schema is already in archetype, than just set Component
-  if (Archetype.isSchemaInArchetype(archetype, schemaId)) {
+  if (Archetype.hasSchema(archetype, schema)) {
     Archetype.setComponent(archetype, entity, schemaId, component);
 
     return;
@@ -249,7 +249,7 @@ export const removeComponent = <S extends Schema>(world: World, entity: Entity, 
   }
 
   // # Check if component in archetype
-  if (!Archetype.isSchemaInArchetype(archetype, schemaId)) {
+  if (!Archetype.hasSchema(archetype, schema)) {
     throw new Error(`Can't find component ${schemaId} on this archetype ${archetype.id}`);
   }
 
@@ -307,6 +307,10 @@ export function registerSystem(
 }
 
 export function registerTopic(world: World, topic: Topic<unknown>) {
+  if (world.topics.includes(topic)) {
+    return;
+  }
+
   world.topics.push(topic);
 }
 
@@ -430,21 +434,40 @@ export function newWorld(
   };
 }
 
+// OK
 export const immediately = (world: World, fn: () => void) => {
   world.deferredOperations.deferred = false;
   fn();
   world.deferredOperations.deferred = true;
 };
 
+// OK
 export const registerSchema = Internals.registerSchema;
+
+// OK
 export const getSchemaId = Internals.getSchemaId;
+
+// OK
+export const archetypeByEntity = (world: World, entity: Entity) => world.archetypeByEntity[entity];
+
+// OK
+export const hasComponent = <S extends Schema>(world: World, entity: Entity, schema: S): boolean => {
+  const archetype = world.archetypeByEntity[entity];
+  if (!archetype) {
+    return false;
+  }
+
+  return Archetype.hasSchema(archetype, schema);
+};
 
 export const World = {
   new: newWorld,
+  archetypeByEntity,
 
   // # Entity
   spawnEntity,
   killEntity,
+  hasComponent,
 
   // # Components
   registerSchema,

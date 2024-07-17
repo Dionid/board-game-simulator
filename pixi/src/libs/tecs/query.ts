@@ -1,4 +1,4 @@
-import { Archetype, isSchemaInArchetype } from './archetype';
+import { Archetype, hasSchema } from './archetype';
 import { Schema } from './schema';
 
 export type Query<SL extends ReadonlyArray<Schema>> = {
@@ -9,7 +9,7 @@ export type Query<SL extends ReadonlyArray<Schema>> = {
 export function tryAddArchetype<SL extends ReadonlyArray<Schema>>(query: Query<SL>, archetype: Archetype): boolean {
   if (
     !query.schemas.every((schema) => {
-      return isSchemaInArchetype(archetype, schema);
+      return hasSchema(archetype, schema);
     })
   ) {
     return false;

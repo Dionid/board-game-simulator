@@ -167,7 +167,7 @@ describe('aws', () => {
       expect(PositionArchetype.entities.length).toEqual(0);
       expect(world.entityGraveyard.length).toEqual(1);
     });
-    it('should be 0 in the end', () => {
+    it('should be 0 in the end 1', () => {
       const world = World.new();
       expect(world.entityGraveyard.length).toEqual(0);
 
@@ -186,7 +186,7 @@ describe('aws', () => {
       expect(world.entityGraveyard.length).toEqual(1);
       expect(PositionArchetype.entities.length).toEqual(0);
     });
-    it('should be 0 in the end', () => {
+    it('should be 0 in the end 2', () => {
       const world = World.new();
       expect(world.entityGraveyard.length).toEqual(0);
 
@@ -235,7 +235,7 @@ describe('aws', () => {
       expect(query.archetypes.length).toBe(2);
       expect(query.archetypes.some((arch) => arch.entities.length === num)).toBe(true);
     });
-    it('should get entities', () => {
+    it('should get entities 1', () => {
       const world = World.new();
 
       const query = Query.new(Position);
@@ -255,7 +255,7 @@ describe('aws', () => {
       expect(query.archetypes.length).toBe(2);
       expect(query.archetypes.some((arch) => arch.entities.length === num)).toBe(true);
     });
-    it('should get entities', () => {
+    it('should get entities 2', () => {
       const world = World.new();
 
       World.createArchetype(world, Position);
@@ -347,7 +347,22 @@ describe('aws', () => {
         }
       }
     });
-    it('should change', () => {
+    it('should change by setComponent', () => {
+      const world = World.new();
+
+      const entity = World.spawnEntity(world);
+      World.setComponent(world, entity, Position, { x: 10, y: 20 });
+
+      const arch = World.archetypeByEntity(world, entity);
+      if (!arch) {
+        throw new Error('archetype not found');
+      }
+
+      // if (hasSchema(arch, Position)) {
+      //   const position = World.component(arch, entity, Position);
+      // }
+    });
+    it('should chang 1e', () => {
       const world = World.new();
 
       World.createArchetype(world, Position);
@@ -400,7 +415,7 @@ describe('aws', () => {
         }
       }
     });
-    it('should change', () => {
+    it('should change 2', () => {
       const world = World.new();
 
       World.createArchetype(world, Position);

@@ -6,7 +6,7 @@ export type Topic<E> = {
   ready: E[];
 };
 
-export function push<T extends Topic<unknown>>(
+export function emit<T extends Topic<unknown>>(
   topic: T,
   event: T extends Topic<infer E> ? E : never,
   immediate = false
@@ -50,7 +50,7 @@ export const newTopic = <$Event = unknown>(): Topic<$Event> => {
 
 export const Topic = {
   new: newTopic,
-  push,
+  emit,
   flush,
   clear,
 };

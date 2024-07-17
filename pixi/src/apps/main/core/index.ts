@@ -13,21 +13,28 @@ import {
   setComponent,
   World,
   registerQuery,
+  Topic,
+  newTopic,
+  registerTopic,
+  newTag,
+  Entity,
 } from '../../../libs/tecs';
 import { Query } from '../../../libs/tecs/query';
-import { Application, Graphics as pGraphics } from 'pixi.js';
+import { Application, Graphics, Sprite } from 'pixi.js';
 
 // # Schemas
+
+export const View = newTag();
 
 export const $graphics = Symbol('graphics');
 
 export const graphics = {
   [$kind]: $graphics,
   byteLength: 8,
-  [$defaultFn]: () => new pGraphics(),
+  [$defaultFn]: () => new Graphics(),
 } as const;
 
-export const Graphics = newSchema({
+export const pGraphics = newSchema({
   value: graphics,
 });
 
@@ -50,9 +57,13 @@ export const Color = newSchema({
   value: string,
 });
 
+// # Topics
+const clicked = newTopic<{ type: 'clicked'; position: { x: number; y: number } }>();
+const viewEvents = newTopic<{ type: 'pointerOver'; entity: Entity }>();
+
 // # Queries
 
-const drawQuery = Query.new(Graphics, Position, Color);
+const drawQuery = Query.new(View, pGraphics, Position, Color);
 
 // # Systems
 
@@ -86,23 +97,60 @@ export const SetPosition = (world: World): System => {
   };
 };
 
+export const ViewEvents = (app: Application): System => {
+  return ({ world, deltaFrameTime }) => {
+    for (const event of viewEvents) {
+      console.log('event', event);
+
+      setComponent(world, event.entity, Color, { value: 'blue' });
+    }
+  };
+};
+
+export const Clicked = (app: Application): System => {
+  return ({ world, deltaFrameTime }) => {
+    for (const event of clicked) {
+      const entity = spawnEntity(world);
+
+      const circle = new Graphics().circle(0, 0, 50).fill('red');
+      setComponent(world, entity, View);
+      setComponent(world, entity, pGraphics, { value: circle });
+      setComponent(world, entity, Position, { x: event.position.x, y: event.position.y });
+      setComponent(world, entity, Color, { value: 'red' });
+      // setComponent(world, entity, Velocity, { x: 0, y: 0 });
+
+      circle.eventMode = 'static';
+      circle.on('pointerover', () => {
+        Topic.emit(viewEvents, { type: 'pointerOver', entity });
+      });
+    }
+  };
+};
+
 export const Draw = (world: World, app: Application): System => {
   const query = registerQuery(world, drawQuery);
 
   return ({ world, deltaFrameTime }) => {
     for (const archetype of query.archetypes) {
-      const graphics = table(archetype, Graphics);
-      const position = table(archetype, Position);
-      const color = table(archetype, Color);
+      const graphicsT = table(archetype, pGraphics);
+      const positionT = table(archetype, Position);
+      const colorT = table(archetype, Color);
 
       for (let i = 0, l = archetype.entities.length; i < l; i++) {
-        graphics[i].value.x = position[i].x;
-        graphics[i].value.y = position[i].y;
-        graphics[i].value.fill(color[i].value);
+        const graphics = graphicsT[i].value;
+
+        graphics.x = positionT[i].x;
+        graphics.y = positionT[i].y;
+        graphics.fill(colorT[i].value);
+
+        if (graphics.parent === null) {
+          app.stage.addChild(graphics);
+        }
       }
     }
 
-    app.ticker.update();
+    app.render();
+    // app.ticker.update(world.currentStepTime);
   };
 };
 
@@ -110,25 +158,33 @@ export const initWorld = (app: Application) => {
   const world = newWorld();
 
   // # (optional) Schemas
-  registerSchema(Graphics);
+  registerSchema(pGraphics);
   registerSchema(Position);
   registerSchema(Size);
   registerSchema(Color);
 
+  registerTopic(world, clicked);
+  registerTopic(world, viewEvents);
+
+  window.addEventListener('click', (e) => {
+    Topic.emit(clicked, { type: 'clicked', position: { x: e.clientX, y: e.clientY } });
+  });
+
   // # Systems
-  registerSystem(world, Gravity(world));
-  registerSystem(world, SetPosition(world));
+  // registerSystem(world, Gravity(world));
+  // registerSystem(world, SetPosition(world));
   registerSystem(world, Draw(world, app));
+  registerSystem(world, Clicked(app));
+  registerSystem(world, ViewEvents(app));
 
   const entity = spawnEntity(world);
-  const circle = new pGraphics().circle(0, 0, 50);
-  setComponent(world, entity, Graphics, { value: circle });
+  const circle = new Graphics().circle(0, 0, 50);
+  setComponent(world, entity, View);
+  setComponent(world, entity, pGraphics, { value: circle });
   setComponent(world, entity, Position, { x: 100, y: 100 });
   setComponent(world, entity, Velocity, { x: 0, y: 0 });
   setComponent(world, entity, Size, { width: 100, height: 100 });
   setComponent(world, entity, Color, { value: 'red' });
-
-  app.stage.addChild(circle);
 
   return world;
 };

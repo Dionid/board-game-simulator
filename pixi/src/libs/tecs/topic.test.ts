@@ -19,7 +19,7 @@ describe('topic', () => {
 
     const topic = Topic.new<CustomEvent>();
 
-    Topic.push(topic, { type: 'added', id: 1 });
+    Topic.emit(topic, { type: 'added', id: 1 });
 
     expect([...topic]).toEqual([]);
 
@@ -35,8 +35,8 @@ describe('topic', () => {
     let seq = 0;
 
     const SpawnEventSystem = () => {
-      Topic.push(topic, { type: 'added', id: seq });
-      Topic.push(topic, { type: 'removed', id: seq }, true);
+      Topic.emit(topic, { type: 'added', id: seq });
+      Topic.emit(topic, { type: 'removed', id: seq }, true);
     };
 
     const TopicSystem = () => {

@@ -5,7 +5,7 @@ import { initWorld } from './core';
 import { step } from '../../libs/tecs';
 
 const app = new Application();
-await app.init({ resizeTo: window, backgroundColor: 'white' })
+await app.init({ resizeTo: window, backgroundColor: 'white', autoStart: false })
 
 function App() {
   useEffect(() => {
@@ -17,8 +17,6 @@ function App() {
       requestAnimationFrame(animation);
     }
     animation()
-
-    // step(world)
   }, [])
 
   return (

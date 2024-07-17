@@ -31,15 +31,13 @@ export type Archetype<SL extends ReadonlyArray<Schema> = ReadonlyArray<Schema>> 
 };
 
 // OK, BUT can be changed to bitmask
-export function isSchemaInArchetype(arch: Archetype<any>, schema: Schema): boolean;
-export function isSchemaInArchetype(arch: Archetype<any>, schemaId: SchemaId): boolean;
-export function isSchemaInArchetype(arch: Archetype<any>, schema: SchemaId | Schema): boolean {
-  const schemaId = typeof schema === 'number' ? schema : Internals.getSchemaId(schema);
+export function hasSchema(arch: Archetype<any>, schema: Schema): boolean {
+  const schemaId = Internals.getSchemaId(schema);
   return arch.table[schemaId] !== undefined;
 }
 
 // OK
-export function isEntityInArchetype(arch: Archetype<any>, entity: Entity) {
+export function hasEntity(arch: Archetype<any>, entity: Entity) {
   const denseInd = arch.entitiesSS.sparse[entity];
   if (!denseInd) {
     return false;
@@ -256,14 +254,31 @@ export function componentsList<SL extends ReadonlyArray<Schema>, A extends Arche
 }
 
 // OK
-export function component<S extends Schema, A extends Archetype<any>>(
+export function component<S extends Schema, A extends Archetype<ReadonlyArray<Schema>>>(
   archetype: A,
   entity: Entity,
-  component: A extends Archetype<infer iCL> ? (ArrayContains<iCL, [S]> extends true ? S : never) : never
-) {
-  const componentId = Internals.getSchemaId(component);
+  schema: A extends Archetype<infer iCL>
+    ? iCL extends any
+      ? S
+      : ArrayContains<iCL, [S]> extends true
+      ? S
+      : never
+    : never
+): SchemaType<S> {
+  const componentId = Internals.getSchemaId(schema);
   const componentIndex = archetype.entitiesSS.sparse[entity];
-  return archetype.table[componentId][componentIndex] as SchemaType<S>;
+  const componentTable = archetype.table[componentId][componentIndex];
+  if (!componentTable) {
+    throw new Error(`Can't find component ${componentId} on this archetype ${archetype.id}`);
+  }
+  if (schema[$kind] === $tag) {
+    return {} as SchemaType<S>;
+  }
+  const component = componentTable[componentIndex];
+  if (!component) {
+    throw new Error(`Can't find component ${componentId} on this archetype ${archetype.id}`);
+  }
+  return component as SchemaType<S>;
 }
 
 // OK
@@ -305,10 +320,14 @@ export function newArchetype<SL extends Schema[]>(...schemas: SL) {
   return archetype;
 }
 
+// export function hasSchema<S extends Schema>(archetype: Archetype<any>, schema: S): archetype is Archetype<[S]> {
+//   return isSchemaInArchetype(archetype, schema);
+// }
+
 export const Archetype = {
   new: newArchetype,
-  isSchemaInArchetype,
-  isEntityInArchetype,
+  hasSchema,
+  hasEntity,
   componentsList,
   component,
   table,
