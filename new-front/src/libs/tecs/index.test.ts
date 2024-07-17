@@ -1,4 +1,5 @@
-import { World, Schema, number, Tag, arrayOf, string, Context, registerSystem } from './index';
+import { World, Schema, number, Tag, arrayOf, string, Context } from './index';
+import { Query } from './query';
 
 const Position = Schema.new({
   x: number,
@@ -27,19 +28,19 @@ const NamedTags = Schema.new({
 export const withoutQuery = () => {
   const world = World.new();
 
-  const archetype1 = World.registerArchetype(world, Position, Speed);
+  const archetype1 = World.createArchetype(world, Position, Speed);
 
   const byGetComponentTable = () => {};
 
   byGetComponentTable();
 
   const byGetComponentTablesList = () => {
-    const [position] = World.archetypeTablesList(world, archetype1, Position);
-    const [speed] = World.archetypeTablesList(world, archetype1, Speed, Position);
+    const [position] = World.tablesList(archetype1, Position);
+    const [speed] = World.tablesList(archetype1, Speed, Position);
 
     // TODO: MUST BE ERROR
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [velocity] = World.archetypeTablesList(world, archetype1, Velocity);
+    const [velocity] = World.tablesList(archetype1, Velocity);
 
     for (let i = 0; i < archetype1.entities.length; i++) {
       position[i].x += 1;
@@ -89,15 +90,15 @@ describe('aws', () => {
   it('should move entity', () => {
     const world = World.new();
 
-    const PositionArchetype = World.registerArchetype(world, Position);
+    const PositionArchetype = World.createArchetype(world, Position);
 
     expect(PositionArchetype.type.length).toEqual(1);
 
-    const SpeedArchetype = World.registerArchetype(world, Speed);
+    const SpeedArchetype = World.createArchetype(world, Speed);
 
     expect(SpeedArchetype.type.length).toEqual(1);
 
-    const MovementArchetype = World.registerArchetype(world, Position, Speed);
+    const MovementArchetype = World.createArchetype(world, Position, Speed);
 
     expect(MovementArchetype.type.length).toEqual(2);
 
@@ -128,8 +129,8 @@ describe('aws', () => {
     it('should be added', () => {
       const world = World.new();
 
-      const PositionArchetype = World.registerArchetype(world, Position);
-      const PlayerPositionArchetype = World.registerArchetype(world, Position, Player);
+      const PositionArchetype = World.createArchetype(world, Position);
+      const PlayerPositionArchetype = World.createArchetype(world, Position, Player);
 
       expect(PositionArchetype.type.length).toEqual(1);
 
@@ -153,7 +154,7 @@ describe('aws', () => {
       const world = World.new();
       expect(world.entityGraveyard.length).toEqual(0);
 
-      const PositionArchetype = World.registerArchetype(world, Position);
+      const PositionArchetype = World.createArchetype(world, Position);
 
       expect(PositionArchetype.entities.length).toEqual(0);
 
@@ -170,7 +171,7 @@ describe('aws', () => {
       const world = World.new();
       expect(world.entityGraveyard.length).toEqual(0);
 
-      const PositionArchetype = World.registerArchetype(world, Position);
+      const PositionArchetype = World.createArchetype(world, Position);
 
       expect(PositionArchetype.entities.length).toEqual(0);
 
@@ -189,7 +190,7 @@ describe('aws', () => {
       const world = World.new();
       expect(world.entityGraveyard.length).toEqual(0);
 
-      const PositionArchetype = World.registerArchetype(world, Position);
+      const PositionArchetype = World.createArchetype(world, Position);
 
       expect(PositionArchetype.entities.length).toEqual(0);
 
@@ -218,8 +219,8 @@ describe('aws', () => {
     it('should get entities', () => {
       const world = World.new();
 
-      World.registerArchetype(world, Position);
-      World.registerArchetype(world, Position, Player);
+      World.createArchetype(world, Position);
+      World.createArchetype(world, Position, Player);
 
       const num = 100;
 
@@ -228,18 +229,21 @@ describe('aws', () => {
         World.setComponent(world, entity, Position, { x: 10, y: 20 });
       }
 
-      const query = World.registerQuery(world, Position);
+      const query = Query.new(Position);
+      World.registerQuery(world, query);
 
       expect(query.archetypes.length).toBe(2);
       expect(query.archetypes.some((arch) => arch.entities.length === num)).toBe(true);
     });
     it('should get entities', () => {
       const world = World.new();
-      const query = World.registerQuery(world, Position);
+
+      const query = Query.new(Position);
+      World.registerQuery(world, query);
       expect(query.archetypes.length).toBe(0);
 
-      World.registerArchetype(world, Position);
-      World.registerArchetype(world, Position, Player);
+      World.createArchetype(world, Position);
+      World.createArchetype(world, Position, Player);
 
       const num = 100;
 
@@ -254,13 +258,14 @@ describe('aws', () => {
     it('should get entities', () => {
       const world = World.new();
 
-      World.registerArchetype(world, Position);
-      World.registerArchetype(world, Position, Player);
+      World.createArchetype(world, Position);
+      World.createArchetype(world, Position, Player);
 
-      const query = World.registerQuery(world, Position);
+      const query = Query.new(Position);
+      World.registerQuery(world, query);
       expect(query.archetypes.length).toBe(2);
 
-      World.registerArchetype(world, Position, Speed);
+      World.createArchetype(world, Position, Speed);
 
       expect(query.archetypes.length).toBe(3);
 
@@ -279,14 +284,15 @@ describe('aws', () => {
     it('should change', () => {
       const world = World.new();
 
-      World.registerArchetype(world, Position);
-      World.registerArchetype(world, Speed);
+      World.createArchetype(world, Position);
+      World.createArchetype(world, Speed);
 
-      const query = World.registerQuery(world, Position, Speed);
+      const query = Query.new(Position, Speed);
+      World.registerQuery(world, query);
 
       for (const archetype of query.archetypes) {
-        const position = World.archetypeTable(world, archetype, Position);
-        const speed = World.archetypeTable(world, archetype, Speed);
+        const position = World.table(archetype, Position);
+        const speed = World.table(archetype, Speed);
 
         expect(archetype.entities.length).toBe(0);
 
@@ -316,8 +322,8 @@ describe('aws', () => {
       expect(query.archetypes.length).toBe(1);
 
       for (const archetype of query.archetypes) {
-        const position = World.archetypeTable(world, archetype, Position);
-        const speed = World.archetypeTable(world, archetype, Speed);
+        const position = World.table(archetype, Position);
+        const speed = World.table(archetype, Speed);
 
         expect(archetype.entities.length).toBe(num);
 
@@ -330,8 +336,8 @@ describe('aws', () => {
       }
 
       for (const archetype of query.archetypes) {
-        const position = World.archetypeTable(world, archetype, Position);
-        const speed = World.archetypeTable(world, archetype, Speed);
+        const position = World.table(archetype, Position);
+        const speed = World.table(archetype, Speed);
 
         for (let i = 0; i < archetype.entities.length; i++) {
           expect(position[i].x).toBe(11);
@@ -344,11 +350,12 @@ describe('aws', () => {
     it('should change', () => {
       const world = World.new();
 
-      World.registerArchetype(world, Position);
-      World.registerArchetype(world, Speed);
-      World.registerArchetype(world, Comments);
+      World.createArchetype(world, Position);
+      World.createArchetype(world, Speed);
+      World.createArchetype(world, Comments);
 
-      const query = World.registerQuery(world, Position, Speed, Comments);
+      const query = Query.new(Position, Speed, Comments);
+      World.registerQuery(world, query);
 
       const num = 100;
 
@@ -362,9 +369,9 @@ describe('aws', () => {
       expect(query.archetypes.length).toBe(1);
 
       for (const archetype of query.archetypes) {
-        const position = World.archetypeTable(world, archetype, Position);
-        const speed = World.archetypeTable(world, archetype, Speed);
-        const comments = World.archetypeTable(world, archetype, Comments);
+        const position = World.table(archetype, Position);
+        const speed = World.table(archetype, Speed);
+        const comments = World.table(archetype, Comments);
 
         expect(archetype.entities.length).toBe(num);
 
@@ -379,9 +386,9 @@ describe('aws', () => {
       }
 
       for (const archetype of query.archetypes) {
-        const position = World.archetypeTable(world, archetype, Position);
-        const speed = World.archetypeTable(world, archetype, Speed);
-        const comments = World.archetypeTable(world, archetype, Comments);
+        const position = World.table(archetype, Position);
+        const speed = World.table(archetype, Speed);
+        const comments = World.table(archetype, Comments);
 
         for (let i = 0; i < archetype.entities.length; i++) {
           expect(position[i].x).toBe(11);
@@ -396,11 +403,12 @@ describe('aws', () => {
     it('should change', () => {
       const world = World.new();
 
-      World.registerArchetype(world, Position);
-      World.registerArchetype(world, Speed);
-      World.registerArchetype(world, NamedTags);
+      World.createArchetype(world, Position);
+      World.createArchetype(world, Speed);
+      World.createArchetype(world, NamedTags);
 
-      const query = World.registerQuery(world, Position, Speed, NamedTags);
+      const query = Query.new(Position, Speed, NamedTags);
+      World.registerQuery(world, query);
 
       const num = 100;
 
@@ -414,9 +422,9 @@ describe('aws', () => {
       expect(query.archetypes.length).toBe(1);
 
       for (const archetype of query.archetypes) {
-        const position = World.archetypeTable(world, archetype, Position);
-        const speed = World.archetypeTable(world, archetype, Speed);
-        const comments = World.archetypeTable(world, archetype, NamedTags);
+        const position = World.table(archetype, Position);
+        const speed = World.table(archetype, Speed);
+        const comments = World.table(archetype, NamedTags);
 
         expect(archetype.entities.length).toBe(num);
 
@@ -431,9 +439,9 @@ describe('aws', () => {
       }
 
       for (const archetype of query.archetypes) {
-        const position = World.archetypeTable(world, archetype, Position);
-        const speed = World.archetypeTable(world, archetype, Speed);
-        const comments = World.archetypeTable(world, archetype, NamedTags);
+        const position = World.table(archetype, Position);
+        const speed = World.table(archetype, Speed);
+        const comments = World.table(archetype, NamedTags);
 
         for (let i = 0; i < archetype.entities.length; i++) {
           expect(position[i].x).toBe(11);
@@ -450,12 +458,13 @@ describe('aws', () => {
     it('should iterate', () => {
       const world = World.new();
 
-      World.registerArchetype(world, Position);
-      World.registerArchetype(world, Speed);
-      World.registerArchetype(world, NamedTags);
+      World.createArchetype(world, Position);
+      World.createArchetype(world, Speed);
+      World.createArchetype(world, NamedTags);
 
       const UpdateHandler = (world: World) => {
-        const query = World.registerQuery(world, Position, Speed, NamedTags);
+        const query = Query.new(Position, Speed, NamedTags);
+        World.registerQuery(world, query);
         const num = 100;
         let firstCall = true;
 
@@ -470,9 +479,9 @@ describe('aws', () => {
           expect(query.archetypes.length).toBe(firstCall ? 0 : 1);
 
           for (const archetype of query.archetypes) {
-            const position = World.archetypeTable(world, archetype, Position);
-            const speed = World.archetypeTable(world, archetype, Speed);
-            const comments = World.archetypeTable(world, archetype, NamedTags);
+            const position = World.table(archetype, Position);
+            const speed = World.table(archetype, Speed);
+            const comments = World.table(archetype, NamedTags);
 
             expect(archetype.entities.length).toBe(num);
 
@@ -491,16 +500,17 @@ describe('aws', () => {
       };
 
       const CheckUpdateHandler = (world: World) => {
-        const query = World.registerQuery(world, Position, Speed, NamedTags);
+        const query = Query.new(Position, Speed, NamedTags);
+        World.registerQuery(world, query);
         let firstCall = true;
 
         return ({ world }: Context) => {
           expect(query.archetypes.length).toBe(firstCall ? 0 : 1);
 
           for (const archetype of query.archetypes) {
-            const position = World.archetypeTable(world, archetype, Position);
-            const speed = World.archetypeTable(world, archetype, Speed);
-            const comments = World.archetypeTable(world, archetype, NamedTags);
+            const position = World.table(archetype, Position);
+            const speed = World.table(archetype, Speed);
+            const comments = World.table(archetype, NamedTags);
 
             for (let i = 0; i < archetype.entities.length; i++) {
               expect(position[i].x).toBe(11);
@@ -516,8 +526,8 @@ describe('aws', () => {
         };
       };
 
-      registerSystem(world, UpdateHandler(world), 'update');
-      registerSystem(world, CheckUpdateHandler(world), 'postUpdate');
+      World.registerSystem(world, UpdateHandler(world), 'update');
+      World.registerSystem(world, CheckUpdateHandler(world), 'postUpdate');
 
       World.step(world);
 
