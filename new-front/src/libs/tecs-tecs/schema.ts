@@ -1,8 +1,5 @@
 // # Types
-import { Id } from './core';
-
-export const kind = Symbol('kind');
-export const defaultFn = Symbol('defaultFn');
+import { $defaultFn, Id, $kind } from './core';
 
 // # Kinds
 
@@ -26,63 +23,69 @@ export const numberK = float64K;
 export const stringK = string16K;
 
 export const uint8 = {
-  [kind]: uint8K,
+  [$kind]: uint8K,
   byteLength: 1,
-  [defaultFn]: () => 0,
+  [$defaultFn]: () => 0,
 } as const;
 
 export const uint16 = {
-  [kind]: uint16K,
+  [$kind]: uint16K,
   byteLength: 2,
-  [defaultFn]: () => 0,
+  [$defaultFn]: () => 0,
 } as const;
 
 export const uint32 = {
-  [kind]: uint32K,
+  [$kind]: uint32K,
   byteLength: 4,
-  [defaultFn]: () => 0,
+  [$defaultFn]: () => 0,
 } as const;
 
 export const int8 = {
-  [kind]: int8K,
+  [$kind]: int8K,
   byteLength: 1,
-  [defaultFn]: () => 0,
+  [$defaultFn]: () => 0,
 } as const;
 
 export const int16 = {
-  [kind]: int16K,
+  [$kind]: int16K,
   byteLength: 2,
-  [defaultFn]: () => 0,
+  [$defaultFn]: () => 0,
 } as const;
 
 export const int32 = {
-  [kind]: int32K,
+  [$kind]: int32K,
   byteLength: 4,
-  [defaultFn]: () => 0,
+  [$defaultFn]: () => 0,
 } as const;
 
 export const float32 = {
-  [kind]: float32K,
+  [$kind]: float32K,
   byteLength: 4,
-  [defaultFn]: () => 0,
+  [$defaultFn]: () => 0,
 } as const;
 
 export const float64 = {
-  [kind]: float64K,
+  [$kind]: float64K,
   byteLength: 8,
-  [defaultFn]: () => 0,
+  [$defaultFn]: () => 0,
 } as const;
 
 export const string8 = {
-  [kind]: string8K,
+  [$kind]: string8K,
   byteLength: 1,
-  [defaultFn]: () => '',
+  [$defaultFn]: () => '',
 };
 
 export const string16 = {
-  [kind]: string16K,
+  [$kind]: string16K,
   byteLength: 2,
-  [defaultFn]: () => '',
+  [$defaultFn]: () => '',
+};
+
+export const boolean = {
+  [$kind]: booleanK,
+  byteLength: 1,
+  [$defaultFn]: () => false,
 };
 
 export const number = float64;
@@ -91,24 +94,53 @@ export const string = string16;
 export type Types = typeof number | typeof float64 | typeof string;
 
 export const Types = {
-  number,
+  uint8,
+  uint16,
+  uint32,
+  int8,
+  int16,
+  int32,
+  float32,
   float64,
+  string8,
+  string16,
+  boolean,
+  number,
   string,
 } as const;
 
 // # Field
 
-export type FieldKind = typeof numberK | typeof float64K | typeof stringK;
+export type FieldKind =
+  | typeof uint8K
+  | typeof uint16K
+  | typeof uint32K
+  | typeof int8K
+  | typeof int16K
+  | typeof int32K
+  | typeof float32K
+  | typeof float64K
+  | typeof string8K
+  | typeof string16K
+  | typeof booleanK;
 
 export const FieldKind = {
-  number: numberK,
+  uint8: uint8K,
+  uint16: uint16K,
+  uint32: uint32K,
+  int8: int8K,
+  int16: int16K,
+  int32: int32K,
+  float32: float32K,
   float64: float64K,
-  string: stringK,
+  string8: string8K,
+  string16: string16K,
+  boolean: booleanK,
 } as const;
 
 export type Field = {
-  [kind]: FieldKind;
-  [defaultFn]: () => SchemaType<Types>;
+  [$kind]: FieldKind;
+  [$defaultFn]: () => SchemaType<Types>;
 };
 
 // # Schema
@@ -121,7 +153,7 @@ export type SchemaKind = typeof tagK | typeof aosK | typeof soaK;
 
 export type Schema = {
   [key: string]: Field | Schema;
-  [kind]?: SchemaKind;
+  [$kind]?: SchemaKind;
 };
 export type SchemaId = Id;
 
@@ -136,28 +168,28 @@ export type SchemaType<T> = T extends typeof float64 | typeof number
 export const Tag = {
   new: (): Schema => {
     return {
-      [kind]: tagK,
+      [$kind]: tagK,
     };
   },
 };
 
 export const Schema = {
   default: <S extends Schema>(schema: S): SchemaType<S> => {
-    const schemaKind = schema[kind];
+    const schemaKind = schema[$kind];
 
     if (schemaKind === tagK) {
       return {} as SchemaType<S>;
     }
 
     const component = {} as SchemaType<S>;
-    // TODO: How to add tags
-    // TODO: Add recursive default props
+
     for (const key in schema) {
       const field = schema[key];
-      if (defaultFn in field) {
-        component[key] = field[defaultFn]() as any;
+      if ($defaultFn in field) {
+        component[key] = field[$defaultFn]() as any;
       }
     }
+
     return component;
   },
 };

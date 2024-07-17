@@ -27,6 +27,7 @@
 1. ~~Query~~
 1. ~~Tags~~
 1. Types: Boolean, Array, Object, Set, Map [link](https://github.com/3mcd/javelin/blob/2b64cfa78e016675e698da8299c36b9d4f431e27/packages/pack/src/views.ts)
+    1. Make them branded
 1. ? Add and remove on the same World.step or deferred
 1. ...
 1. Events
