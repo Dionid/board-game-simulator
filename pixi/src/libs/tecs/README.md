@@ -31,6 +31,8 @@
 1. Complex queries
 1. Singleton Component
 1. Change detection
+1. Union type Field
+1. State Machine
 1. ...
 1. Register System before / after other System
 1. SoA components
