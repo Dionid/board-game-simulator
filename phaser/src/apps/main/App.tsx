@@ -20,6 +20,10 @@ function App() {
           default: 'matter',
           matter: {
               debug: true,
+              gravity: {
+                x: 0,
+                y: 0,
+              },
           }
       },
       scale: {
