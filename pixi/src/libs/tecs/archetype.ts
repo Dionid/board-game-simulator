@@ -300,7 +300,17 @@ export const table = <S extends Schema, A extends Archetype<any>>(
   schema: A extends Archetype<infer iCL> ? (ArrayContains<iCL, [S]> extends true ? S : never) : never
 ) => {
   const componentId = Internals.getSchemaId(schema);
-  return archetype.table[componentId] as ArchetypeTableRow<S>;
+  const table = archetype.table[componentId];
+  if (!table) {
+    throw new Error(`Can't find component ${componentId} on this archetype ${archetype.id}`);
+  }
+  return table as ArchetypeTableRow<S>;
+};
+
+// OK
+export const tryTable = <S extends Schema>(archetype: Archetype<any>, schema: S): ArchetypeTableRow<S> | undefined => {
+  const componentId = Internals.getSchemaId(schema);
+  return archetype.table[componentId] as ArchetypeTableRow<S> | undefined;
 };
 
 // OK
@@ -313,6 +323,16 @@ export const tablesList = <SL extends ReadonlyArray<Schema>, A extends Archetype
     return archetype.table[componentId];
   }) as {
     [K in keyof SL]: SchemaType<SL[K]>[];
+  };
+};
+
+// OK
+export const tryTablesList = <SL extends ReadonlyArray<Schema>>(archetype: Archetype<any>, ...components: SL) => {
+  return components.map((component) => {
+    const componentId = Internals.getSchemaId(component);
+    return archetype.table[componentId];
+  }) as {
+    [K in keyof SL]: SchemaType<SL[K]>[] | undefined;
   };
 };
 
