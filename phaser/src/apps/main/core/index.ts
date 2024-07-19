@@ -22,7 +22,7 @@ import { hasSchema, tryTable } from '../../../libs/tecs/archetype';
 import { Query } from '../../../libs/tecs/query';
 import Phaser from 'phaser';
 import { generateMultipleFramesAnimation, generateOneFrameAnimation } from './animation';
-import { Pair } from 'matter';
+import { BodyType, Pair } from 'matter';
 
 // # Schemas
 
@@ -155,13 +155,20 @@ export class MainScene extends Phaser.Scene {
   targetX: number;
   targetY: number;
   playerSpeed: number;
-  movementTrajectory!: Phaser.GameObjects.Graphics;
+  movementTrajectoryGr!: Phaser.GameObjects.Graphics;
+  movementTrajectoryL!: Phaser.GameObjects.Line;
+  cameraMovementDirection: { x: number; y: number };
+  cameraMoveThreshold: number;
+  cameraMovementSpeed: number;
 
   constructor() {
     super('MainScene');
     this.targetX = 0;
     this.targetY = 0;
     this.playerSpeed = 10;
+    this.cameraMovementDirection = { x: 0, y: 0 };
+    this.cameraMoveThreshold = 200;
+    this.cameraMovementSpeed = 30;
   }
 
   preload() {
@@ -191,18 +198,21 @@ export class MainScene extends Phaser.Scene {
     map.createLayer('Floor', tileset, halfWidth, 0);
     const innerWalls = map.createLayer('Inner Walls', tileset, halfWidth, 0);
     const outerWalls = map.createLayer('Outer Walls', tileset, halfWidth, 0);
+    const obstacles = map.createLayer('Obstacles', tileset, halfWidth, 0);
 
-    if (!innerWalls || !outerWalls) {
+    if (!innerWalls || !outerWalls || !obstacles) {
       throw new Error('Layer not found');
     }
 
     innerWalls.setCollisionByProperty({ collides: true });
     outerWalls.setCollisionByProperty({ collides: true });
+    obstacles.setCollisionByProperty({ collides: true });
 
     outerWalls.setVisible(false);
 
     this.matter.world.convertTilemapLayer(innerWalls);
     this.matter.world.convertTilemapLayer(outerWalls);
+    this.matter.world.convertTilemapLayer(obstacles);
 
     this.player = this.matter.add.sprite(halfWidth, halfHeight, 'human', 'Human_0_Idle0.png', {
       shape: {
@@ -218,8 +228,6 @@ export class MainScene extends Phaser.Scene {
     generateOneFrameAnimation(this, 'human-idle', 'Idle');
     generateMultipleFramesAnimation(this, 'human-run', 'Run', 9);
     this.player.anims.play('human-idle-b');
-
-    this.cameras.main.startFollow(this.player, true);
 
     // # Reset target on collision with walls
     this.matter.world.on('collisionstart', (event: Phaser.Physics.Matter.Events.CollisionStartEvent) => {
@@ -243,30 +251,55 @@ export class MainScene extends Phaser.Scene {
       this
     );
 
-    this.movementTrajectory = this.add.graphics();
-    this.movementTrajectory.lineStyle(2, 0xff0000, 1);
+    this.cameras.main.centerOn(this.player.x, this.player.y);
 
-    this.targetGraphics = this.add.circle(this.targetX, this.targetY, 10, 0xff0000, 0.5);
+    // 1 = 1 - (100 - 95) / 100
+
+    this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
+      const { x, y } = pointer;
+
+      if (x > this.scale.width - this.cameraMoveThreshold) {
+        this.cameraMovementDirection.x = 1 - (this.scale.width - x) / this.cameraMoveThreshold;
+      } else if (x < this.cameraMoveThreshold) {
+        this.cameraMovementDirection.x = -1 + x / this.cameraMoveThreshold;
+      } else {
+        this.cameraMovementDirection.x = 0;
+      }
+
+      if (y > this.scale.height - this.cameraMoveThreshold) {
+        this.cameraMovementDirection.y = 1 - (this.scale.height - y) / this.cameraMoveThreshold;
+      } else if (y < this.cameraMoveThreshold) {
+        this.cameraMovementDirection.y = -1 + y / this.cameraMoveThreshold;
+      } else {
+        this.cameraMovementDirection.y = 0;
+      }
+    });
+
+    // # Move trajectory
+    this.movementTrajectoryL = this.add.line(0, 0, 0, 0, 0, 0, 0xff0000, 1);
+    this.targetGraphics = this.add.circle(this.targetX, this.targetY, 10, 0xff0000, 0);
   }
 
   targetGraphics!: Phaser.GameObjects.Arc;
 
   update(t: number, dt: number) {
-    if (!this.cursors || !this.player || !this.movementTrajectory) {
+    if (!this.cursors || !this.player) {
       return;
     }
 
-    this.movementTrajectory.clear();
+    // # Camera movement
+    const cam = this.cameras.main;
 
-    const pointer = this.input.mousePointer;
+    cam.scrollX += this.cameraMovementDirection.x * this.cameraMovementSpeed;
+    cam.scrollY += this.cameraMovementDirection.y * this.cameraMovementSpeed;
 
+    // # Movement
     if (this.targetX && this.targetY) {
       this.targetGraphics.x = this.targetX;
       this.targetGraphics.y = this.targetY;
 
-      this.movementTrajectory.lineStyle(2, 0xff0000, 1);
-      this.movementTrajectory.lineBetween(this.player.x, this.player.y, this.targetX, this.targetY);
-      // this.movementTrajectory.fillStyle(0xff0000, 1);
+      this.movementTrajectoryL.setTo(this.player.x, this.player.y, this.targetX, this.targetY);
+      this.movementTrajectoryL.setFillStyle(0xff0000, 1);
 
       // this.graphics.lineBetween(this.player.x, this.player.y, this.targetX, this.targetY);
       // Check if the player is close to the target position
@@ -311,9 +344,12 @@ export class MainScene extends Phaser.Scene {
         this.player.setVelocityY((dy / distance) * this.playerSpeed);
       }
     } else {
-      this.movementTrajectory.lineStyle(2, 0xff0000, 1);
-      this.movementTrajectory.lineBetween(this.player.x, this.player.y, pointer.worldX, pointer.worldY);
-      // this.movementTrajectory.fillStyle(0xff0000, 1);
+      const pointer = this.input.mousePointer;
+      this.movementTrajectoryL.setTo(this.player.x, this.player.y, pointer.worldX, pointer.worldY);
+      this.movementTrajectoryL.setFillStyle(0xff0000, 1);
+
+      // this.movementTrajectoryGr.lineStyle(2, 0xff0000, 1);
+      // this.movementTrajectoryGr.lineBetween(this.player.x, this.player.y, pointer.worldX, pointer.worldY);
     }
   }
 }
