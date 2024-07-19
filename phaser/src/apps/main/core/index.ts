@@ -22,7 +22,8 @@ import { hasSchema, tryTable } from '../../../libs/tecs/archetype';
 import { Query } from '../../../libs/tecs/query';
 import Phaser from 'phaser';
 import { generateMultipleFramesAnimation, generateOneFrameAnimation } from './animation';
-import PhaserNavMeshPlugin from '../../../libs/phaser-navmesh';
+import PhaserNavMeshPlugin, { PhaserNavMesh } from '../../../libs/phaser-navmesh';
+import EasyStar from 'easystarjs';
 
 // # Schemas
 
@@ -57,10 +58,6 @@ export const Color = newSchema({
 // # Topics
 const clicked = newTopic<{ type: 'clicked'; position: { x: number; y: number } }>();
 const viewEvents = newTopic<{ type: 'pointerOver'; entity: Entity }>();
-
-// # Queries
-
-const drawQuery = Query.new(View, Position);
 
 // # Systems
 
@@ -99,18 +96,30 @@ export const initWorld = () => {
   return world;
 };
 
+function twoDToIso(x: number, y: number) {
+  const twoDX = x - y;
+  const twoDY = (x + y) / 2;
+  return { x: twoDX, y: twoDY };
+}
+
+function isoToTwoD(x: number, y: number) {
+  const isoX = (2 * y + x) / 2;
+  const isoY = (2 * y - x) / 2;
+  return { x: isoX, y: isoY };
+}
+
 export class MainScene extends Phaser.Scene {
   cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   player!: Phaser.Physics.Matter.Sprite;
   targetX: number;
   targetY: number;
   playerSpeed: number;
-  movementTrajectoryGr!: Phaser.GameObjects.Graphics;
   movementTrajectoryL!: Phaser.GameObjects.Line;
   cameraMovementDirection: { x: number; y: number };
   cameraMoveThreshold: number;
   cameraMovementSpeed: number;
-  navMeshPlugin!: PhaserNavMeshPlugin;
+  tileWidth: number;
+  tileHeight: number;
 
   constructor() {
     super('MainScene');
@@ -120,13 +129,12 @@ export class MainScene extends Phaser.Scene {
     this.cameraMovementDirection = { x: 0, y: 0 };
     this.cameraMoveThreshold = 200;
     this.cameraMovementSpeed = 30;
+    this.tileWidth = 256;
+    this.tileHeight = 512;
   }
 
   preload() {
-    // load the PNG file
     this.load.image('base_tiles', 'assets/kennytilesheet.png');
-
-    // load the JSON file
     this.load.tilemapTiledJSON('tilemap', 'assets/FirstMap.json');
 
     this.load.atlas('human', 'assets/human_atlas.png', 'assets/human_atlas.json');
@@ -134,22 +142,21 @@ export class MainScene extends Phaser.Scene {
     this.cursors = this.input.keyboard!.createCursorKeys();
   }
 
+  pathfinder!: EasyStar.js;
+  floorLayer!: Phaser.Tilemaps.TilemapLayer;
+
   create() {
     const map = this.make.tilemap({ key: 'tilemap' });
-
     const tileset = map.addTilesetImage('kennytilesheet', 'base_tiles');
 
     if (!tileset) {
       throw new Error('Tileset not found');
     }
 
-    const halfWidth = map.widthInPixels / 2;
-    const halfHeight = map.heightInPixels / 2;
-
-    map.createLayer('Floor', tileset, halfWidth, 0);
-    const innerWalls = map.createLayer('Inner Walls', tileset, halfWidth, 0);
-    const outerWalls = map.createLayer('Outer Walls', tileset, halfWidth, 0);
-    const obstacles = map.createLayer('Obstacles', tileset, halfWidth, 0);
+    this.floorLayer = map.createLayer('Floor', tileset, 0, 0)!;
+    const innerWalls = map.createLayer('Inner Walls', tileset, 0, 0);
+    const outerWalls = map.createLayer('Outer Walls', tileset, 0, 0);
+    const obstacles = map.createLayer('Obstacles', tileset, 0, 0);
 
     if (!innerWalls || !outerWalls || !obstacles) {
       throw new Error('Layer not found');
@@ -165,17 +172,11 @@ export class MainScene extends Phaser.Scene {
     this.matter.world.convertTilemapLayer(outerWalls);
     this.matter.world.convertTilemapLayer(obstacles);
 
-    // # Pathfinding
-    const navMesh = this.navMeshPlugin.buildMeshFromTilemap('mesh', map, [innerWalls, outerWalls, obstacles]);
-    const path = navMesh.findPath({ x: 0, y: 0 }, { x: 300, y: 400 });
-    if (path) {
-      navMesh.debugDrawPath(path, 0xffd900);
-    }
-
-    console.log(path);
+    const startingTile = this.floorLayer.getTileAt(0, 0);
+    console.log('startingTile.width', startingTile.x, startingTile.y);
 
     // # Player
-    this.player = this.matter.add.sprite(halfWidth, halfHeight, 'human', 'Human_0_Idle0.png', {
+    this.player = this.matter.add.sprite(startingTile.x, startingTile.y, 'human', 'Human_0_Idle0.png', {
       shape: {
         type: 'circle',
         radius: 30,
@@ -184,11 +185,69 @@ export class MainScene extends Phaser.Scene {
 
     this.player.setOrigin(0.5, 0.88);
     this.player.setFixedRotation();
-    this.player.setPosition(halfWidth, halfHeight);
+    this.player.setPosition(startingTile.x, startingTile.y);
 
     generateOneFrameAnimation(this, 'human-idle', 'Idle');
     generateMultipleFramesAnimation(this, 'human-run', 'Run', 9);
     this.player.anims.play('human-idle-b');
+
+    this.cameras.main.centerOn(this.player.x, this.player.y);
+
+    this.pathfinder = new EasyStar.js();
+
+    const grid = [];
+
+    for (let y = 0; y < map.height; y++) {
+      const col = [];
+      for (let x = 0; x < map.width; x++) {
+        const innerWallsTile = innerWalls.getTileAt(x, y);
+
+        // # If inner wall exists and is bigger than 0
+        if (innerWallsTile) {
+          col.push(1);
+          continue;
+        }
+
+        const outerWallsTile = outerWalls.getTileAt(x, y);
+
+        if (outerWallsTile) {
+          col.push(1);
+          continue;
+        }
+
+        const obstaclesTile = obstacles.getTileAt(x, y);
+
+        if (obstaclesTile) {
+          col.push(1);
+          continue;
+        }
+
+        col.push(0);
+      }
+      grid.push(col);
+    }
+
+    console.log('grid', grid);
+    this.pathfinder.setGrid(grid);
+    this.pathfinder.setAcceptableTiles([0]);
+    this.pathfinder.enableDiagonals();
+
+    try {
+      const tile = this.floorLayer.getIsoTileAtWorldXY(this.player.x, this.player.y);
+
+      // console.log('fromX', fromX, 'fromY', fromY);
+      // this.pathfinder.findPath(fromX, fromY, fromX + 2, fromY + 2, (path) => {
+      //   if (path) {
+      //     console.log('Path found', path);
+      //   } else {
+      //     console.log('Path not found');
+      //   }
+      // });
+    } catch (e) {
+      console.error(e);
+    }
+
+    this.pathfinder.calculate();
 
     // # Collision
     // # Reset target on collision with walls
@@ -207,11 +266,17 @@ export class MainScene extends Phaser.Scene {
       (pointer: any) => {
         this.targetX = pointer.worldX;
         this.targetY = pointer.worldY;
+
+        console.log('pointer', pointer.worldX, pointer.worldY);
+
+        const tile = this.floorLayer.getIsoTileAtWorldXY(pointer.worldX, pointer.worldY);
+        console.log('mtile', tile);
+
+        // const startingTile = this.floorLayer.getTileAt(0, 0);
+        // console.log('startingTile.width', startingTile.x, startingTile.y);
       },
       this
     );
-
-    this.cameras.main.centerOn(this.player.x, this.player.y);
 
     this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
       const { x, y } = pointer;
@@ -234,8 +299,8 @@ export class MainScene extends Phaser.Scene {
     });
 
     // # Move trajectory
-    this.movementTrajectoryL = this.add.line(0, 0, 0, 0, 0, 0, 0xff0000, 1);
-    this.targetGraphics = this.add.circle(this.targetX, this.targetY, 10, 0xff0000, 0);
+    this.movementTrajectoryL = this.add.line(0, 0, 0, 0, 0, 0, 0xff0fff, 1);
+    this.targetGraphics = this.add.circle(this.targetX, this.targetY, 10, 0xff0fff, 0);
   }
 
   targetGraphics!: Phaser.GameObjects.Arc;
@@ -261,13 +326,20 @@ export class MainScene extends Phaser.Scene {
       cam.scrollY += this.cameraMovementDirection.y * this.cameraMovementSpeed;
     }
 
+    // this.navMesh.debugDrawClear();
+
     // # Movement
     if (this.targetX && this.targetY) {
       this.targetGraphics.x = this.targetX;
       this.targetGraphics.y = this.targetY;
 
+      // const path = this.navMesh.findPath({ x: this.player.x, y: this.player.y }, { x: this.targetX, y: this.targetY });
+      // if (path) {
+      //   this.navMesh.debugDrawPath(path, 0xff0fff);
+      // }
+
       this.movementTrajectoryL.setTo(this.player.x, this.player.y, this.targetX, this.targetY);
-      this.movementTrajectoryL.setFillStyle(0xff0000, 1);
+      this.movementTrajectoryL.setFillStyle(0xff0fff, 1);
 
       // this.graphics.lineBetween(this.player.x, this.player.y, this.targetX, this.targetY);
       // Check if the player is close to the target position
@@ -314,9 +386,9 @@ export class MainScene extends Phaser.Scene {
     } else {
       const pointer = this.input.mousePointer;
       this.movementTrajectoryL.setTo(this.player.x, this.player.y, pointer.worldX, pointer.worldY);
-      this.movementTrajectoryL.setFillStyle(0xff0000, 1);
+      this.movementTrajectoryL.setFillStyle(0xff0fff, 1);
 
-      // this.movementTrajectoryGr.lineStyle(2, 0xff0000, 1);
+      // this.movementTrajectoryGr.lineStyle(2, 0xff0fff, 1);
       // this.movementTrajectoryGr.lineBetween(this.player.x, this.player.y, pointer.worldX, pointer.worldY);
     }
   }
