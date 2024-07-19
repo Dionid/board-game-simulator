@@ -3,7 +3,7 @@ import './App.css';
 import { initWorld, MainScene } from './core';
 import { step } from '../../libs/tecs';
 import Phaser from 'phaser';
-import { PhaserNavMeshPlugin } from "phaser-navmesh/src";
+import PhaserNavMeshPlugin from '../../libs/phaser-navmesh';
 
 function App() {
   useEffect(() => {

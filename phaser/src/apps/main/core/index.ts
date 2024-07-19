@@ -22,7 +22,7 @@ import { hasSchema, tryTable } from '../../../libs/tecs/archetype';
 import { Query } from '../../../libs/tecs/query';
 import Phaser from 'phaser';
 import { generateMultipleFramesAnimation, generateOneFrameAnimation } from './animation';
-import { PhaserNavMeshPlugin } from 'phaser-navmesh/src';
+import PhaserNavMeshPlugin from '../../../libs/phaser-navmesh';
 
 // # Schemas
 
@@ -71,56 +71,6 @@ export const ViewEvents = (): System => {
     }
   };
 };
-
-// export const Clicked = (): System => {
-//   return ({ world, deltaFrameTime }) => {
-//     for (const event of clicked) {
-//       const entity = spawnEntity(world);
-
-//       const circle = new Graphics().circle(0, 0, 50).fill('red');
-//       setComponent(world, entity, View);
-//       setComponent(world, entity, pGraphics, { value: circle });
-//       setComponent(world, entity, Position, { x: event.position.x, y: event.position.y });
-//       setComponent(world, entity, Color, { value: 'red' });
-
-//       circle.eventMode = 'static';
-//       circle.on('pointerover', () => {
-//         Topic.emit(viewEvents, { type: 'pointerOver', entity });
-//       });
-//     }
-//   };
-// };
-
-// export const Draw = (world: World, ): System => {
-//   const query = registerQuery(world, drawQuery);
-
-//   return ({ world, deltaFrameTime }) => {
-//     for (const archetype of query.archetypes) {
-//       const positionT = table(archetype, Position);
-//       const graphicsT = tryTable(archetype, pGraphics);
-//       const colorT = tryTable(archetype, Color);
-
-//       for (let i = 0, l = archetype.entities.length; i < l; i++) {
-//         if (graphicsT) {
-//           const graphics = graphicsT[i].value;
-
-//           graphics.clear();
-//           graphics.circle(positionT[i].x, positionT[i].y, 50);
-
-//           if (colorT) {
-//             graphics.fill(colorT[i].value);
-//           }
-
-//           if (graphics.parent === null) {
-//             app.stage.addChild(graphics);
-//           }
-//         }
-//       }
-//     }
-
-//     app.render();
-//   };
-// };
 
 export const initWorld = () => {
   const world = newWorld();
@@ -263,8 +213,6 @@ export class MainScene extends Phaser.Scene {
 
     this.cameras.main.centerOn(this.player.x, this.player.y);
 
-    // 1 = 1 - (100 - 95) / 100
-
     this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
       const { x, y } = pointer;
 
@@ -300,8 +248,18 @@ export class MainScene extends Phaser.Scene {
     // # Camera movement
     const cam = this.cameras.main;
 
-    cam.scrollX += this.cameraMovementDirection.x * this.cameraMovementSpeed;
-    cam.scrollY += this.cameraMovementDirection.y * this.cameraMovementSpeed;
+    if (this.cursors.left.isDown) {
+      cam.scrollX -= this.cameraMovementSpeed / 2;
+    } else if (this.cursors.right.isDown) {
+      cam.scrollX += this.cameraMovementSpeed / 2;
+    } else if (this.cursors.up.isDown) {
+      cam.scrollY -= this.cameraMovementSpeed / 2;
+    } else if (this.cursors.down.isDown) {
+      cam.scrollY += this.cameraMovementSpeed / 2;
+    } else {
+      cam.scrollX += this.cameraMovementDirection.x * this.cameraMovementSpeed;
+      cam.scrollY += this.cameraMovementDirection.y * this.cameraMovementSpeed;
+    }
 
     // # Movement
     if (this.targetX && this.targetY) {
