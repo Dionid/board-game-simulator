@@ -3,6 +3,7 @@ import './App.css';
 import { initWorld, MainScene } from './core';
 import { step } from '../../libs/tecs';
 import Phaser from 'phaser';
+import { PhaserNavMeshPlugin } from "phaser-navmesh/src";
 
 function App() {
   useEffect(() => {
@@ -16,6 +17,16 @@ function App() {
       // height: window.innerHeight,
       parent: canvas,
       scene: MainScene,
+      plugins: {
+        scene: [
+          {
+            key: "PhaserNavMeshPlugin", // Key to store the plugin class under in cache
+            plugin: PhaserNavMeshPlugin, // Class that constructs plugins
+            mapping: "navMeshPlugin", // Property mapping to use for the scene, e.g. this.navMeshPlugin
+            start: true
+          }
+        ]
+      },
       physics: {
           default: 'matter',
           matter: {

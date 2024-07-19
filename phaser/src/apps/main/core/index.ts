@@ -22,7 +22,7 @@ import { hasSchema, tryTable } from '../../../libs/tecs/archetype';
 import { Query } from '../../../libs/tecs/query';
 import Phaser from 'phaser';
 import { generateMultipleFramesAnimation, generateOneFrameAnimation } from './animation';
-import { BodyType, Pair } from 'matter';
+import { PhaserNavMeshPlugin } from 'phaser-navmesh/src';
 
 // # Schemas
 
@@ -160,6 +160,7 @@ export class MainScene extends Phaser.Scene {
   cameraMovementDirection: { x: number; y: number };
   cameraMoveThreshold: number;
   cameraMovementSpeed: number;
+  navMeshPlugin!: PhaserNavMeshPlugin;
 
   constructor() {
     super('MainScene');
@@ -214,6 +215,16 @@ export class MainScene extends Phaser.Scene {
     this.matter.world.convertTilemapLayer(outerWalls);
     this.matter.world.convertTilemapLayer(obstacles);
 
+    // # Pathfinding
+    const navMesh = this.navMeshPlugin.buildMeshFromTilemap('mesh', map, [innerWalls, outerWalls, obstacles]);
+    const path = navMesh.findPath({ x: 0, y: 0 }, { x: 300, y: 400 });
+    if (path) {
+      navMesh.debugDrawPath(path, 0xffd900);
+    }
+
+    console.log(path);
+
+    // # Player
     this.player = this.matter.add.sprite(halfWidth, halfHeight, 'human', 'Human_0_Idle0.png', {
       shape: {
         type: 'circle',
@@ -229,6 +240,7 @@ export class MainScene extends Phaser.Scene {
     generateMultipleFramesAnimation(this, 'human-run', 'Run', 9);
     this.player.anims.play('human-idle-b');
 
+    // # Collision
     // # Reset target on collision with walls
     this.matter.world.on('collisionstart', (event: Phaser.Physics.Matter.Events.CollisionStartEvent) => {
       if (event.pairs.length > 0) {
@@ -238,8 +250,6 @@ export class MainScene extends Phaser.Scene {
           this.targetY = this.player.y;
         }
       }
-
-      console.log('collision', event);
     });
 
     this.input.on(
