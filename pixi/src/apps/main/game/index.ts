@@ -1,7 +1,7 @@
 import { newWorld, registerSystem, Topic, registerTopic } from '../../../libs/tecs';
 import { Application, Assets, Sprite, Texture } from 'pixi.js';
 import { createWorldScene, WorldScene } from './engine';
-import { ApplyCameraToScene, Clicked, clicked, Draw, ViewEvents, viewEvents } from './ecs';
+import { ApplyCameraToScene, clicked, Draw, viewEvents } from './ecs';
 
 const fillSceneContainer = async (worldScene: WorldScene) => {
   const texture = (await Assets.load('assets/star.png')) as Texture;
@@ -141,8 +141,6 @@ export const initWorld = async (app: Application) => {
   // # Systems
   registerSystem(world, ApplyCameraToScene(worldScene));
   registerSystem(world, Draw(world, app), 'postUpdate');
-  registerSystem(world, Clicked(app), 'postUpdate');
-  registerSystem(world, ViewEvents(app), 'postUpdate');
 
   // const entity = spawnEntity(world);
   // const circle = new Graphics().circle(0, 0, 50);

@@ -57,21 +57,6 @@ export const drawQuery = Query.new(View, Position);
 
 // # Systems
 
-export const ViewEvents = (app: Application): System => {
-  return ({ world, deltaFrameTime }) => {
-    for (const event of viewEvents) {
-      setComponent(world, event.entity, Color, { value: 'blue' });
-    }
-  };
-};
-
-export const Clicked = (app: Application): System => {
-  return ({ world, deltaFrameTime }) => {
-    for (const event of clicked) {
-    }
-  };
-};
-
 export const ApplyCameraToScene = (worldScene: WorldScene): System => {
   const camera = worldScene.cameras.main;
 
