@@ -124,35 +124,6 @@ export function applyWorldBoundariesToCamera(worldScene: WorldScene): System {
   };
 }
 
-// export function applyWorldBoundariesToCamera(worldScene: WorldScene): System {
-//   const camera = worldScene.cameras.main;
-
-//   return () => {
-//     // # Calculate new camera
-//     let newCameraX = camera.target.position.x;
-//     let newCameraY = camera.target.position.y;
-
-//     if (newCameraX === camera.position.x && newCameraY === camera.position.y) {
-//       return;
-//     }
-
-//     if (newCameraX < 0) {
-//       newCameraX = 0;
-//     } else if (newCameraX > worldScene.size.width - camera.size.width) {
-//       newCameraX = worldScene.size.width - camera.size.width;
-//     }
-
-//     if (newCameraY < 0) {
-//       newCameraY = 0;
-//     } else if (newCameraY > worldScene.size.height - camera.size.height) {
-//       newCameraY = worldScene.size.height - camera.size.height;
-//     }
-
-//     camera.target.position.x = newCameraX;
-//     camera.target.position.y = newCameraY;
-//   };
-// }
-
 export function moveCameraByDragging(worldScene: WorldScene): System {
   const camera = worldScene.cameras.main;
   const mouse = worldScene.input.mouse;
