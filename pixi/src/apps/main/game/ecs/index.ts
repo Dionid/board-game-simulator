@@ -86,22 +86,10 @@ export function moveCameraByDragging(worldScene: WorldScene): System {
   };
 }
 
-export const applyCameraToContainer = (worldScene: WorldScene): System => {
-  const camera = worldScene.cameras.main;
-  const container = worldScene.container;
-
-  return () => {
-    // # Position
-    container.x = -camera.position.x;
-    container.y = -camera.position.y;
-    // # Scale
-    container.scale.x = camera.scale;
-    container.scale.y = camera.scale;
-  };
-};
-
 export const zoom = (worldScene: WorldScene): System => {
   const camera = worldScene.cameras.main;
+
+  let scaleEvent: KeyboardEvent | null = null;
 
   window.addEventListener('keydown', (e) => {
     // if arrow up
@@ -109,28 +97,34 @@ export const zoom = (worldScene: WorldScene): System => {
       return;
     }
 
-    const delta = e.key === 'ArrowUp' ? 0.1 : -0.1;
+    scaleEvent = e;
+  });
+
+  const calculateScale = (scaleEvent: KeyboardEvent) => {
+    const delta = scaleEvent.key === 'ArrowUp' ? 0.1 : -0.1;
 
     let newScale = parseFloat((camera.scale + delta).toFixed(1));
 
     if (newScale < 0.5) {
-      return;
+      return camera.scale;
     } else if (newScale > 2) {
-      return;
+      return camera.scale;
     } else if (camera.width / newScale > worldScene.size.width) {
-      newScale = camera.width / worldScene.size.width;
+      return camera.width / worldScene.size.width;
     } else if (camera.height / newScale > worldScene.size.height) {
-      newScale = camera.height / worldScene.size.height;
+      return camera.height / worldScene.size.height;
     }
 
-    camera.target.scale = newScale;
-  });
-
-  if (typeof worldScene.container.scale === 'number') {
-    throw new Error('Container scale is a number');
-  }
+    return newScale;
+  };
 
   return ({ world, deltaFrameTime }) => {
+    if (scaleEvent !== null) {
+      const newScale = calculateScale(scaleEvent);
+      camera.target.scale = newScale;
+      scaleEvent = null;
+    }
+
     const newScale = camera.target.scale;
 
     if (camera.scale === newScale) {
@@ -138,7 +132,7 @@ export const zoom = (worldScene: WorldScene): System => {
     }
 
     // # Calculate step
-    let step = (newScale - camera.scale) * 0.1;
+    let step = (newScale - camera.scale) * 0.3;
 
     // # Apply step threshold
     if (Math.abs(step) < 0.0001) {
@@ -146,6 +140,21 @@ export const zoom = (worldScene: WorldScene): System => {
     }
 
     camera.scale += step;
+  };
+};
+
+export const applyCameraToContainer = (worldScene: WorldScene): System => {
+  const camera = worldScene.cameras.main;
+  const container = worldScene.container;
+
+  return () => {
+    // # Position
+    // # NEED TO BE UNSCALED
+    container.x = -camera.position.x;
+    container.y = -camera.position.y;
+    // # Scale
+    container.scale.x = camera.scale;
+    container.scale.y = camera.scale;
   };
 };
 

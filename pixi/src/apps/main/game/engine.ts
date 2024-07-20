@@ -125,8 +125,6 @@ export const createWorldScene = (
   app.canvas.addEventListener('resize', () => {
     camera.width = app.renderer.width;
     camera.height = app.renderer.width;
-    // camera.boundRX = worldScene.size.width - camera.width;
-    // camera.boundRY = worldScene.size.height - camera.height;
 
     // TODO: Maybe move
     if (camera.position.x > worldScene.size.width - camera.width) {
