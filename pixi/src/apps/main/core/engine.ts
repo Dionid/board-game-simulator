@@ -6,8 +6,7 @@ export type Vector2 = {
 };
 
 export type Camera = {
-  x: number;
-  y: number;
+  position: Vector2;
   width: number;
   height: number;
   boundLX: number;
