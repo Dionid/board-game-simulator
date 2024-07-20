@@ -40,7 +40,6 @@ export const zoom = (worldScene: WorldScene): System => {
   let scaleEvent: KeyboardEvent | null = null;
 
   window.addEventListener('keydown', (e) => {
-    // if arrow up
     if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') {
       return;
     }
@@ -59,9 +58,9 @@ export const zoom = (worldScene: WorldScene): System => {
     } else if (newScale > 2) {
       return currentScale;
     } else if (camera.size.width / newScale > worldScene.size.width) {
-      return camera.size.width / worldScene.size.width;
+      return currentScale;
     } else if (camera.size.height / newScale > worldScene.size.height) {
-      return camera.size.height / worldScene.size.height;
+      return currentScale;
     }
 
     return newScale;
@@ -96,6 +95,64 @@ export const zoom = (worldScene: WorldScene): System => {
   };
 };
 
+export function applyWorldBoundariesToCamera(worldScene: WorldScene): System {
+  const camera = worldScene.cameras.main;
+
+  return () => {
+    // # Calculate new camera
+    let newCameraX = camera.target.position.x;
+    let newCameraY = camera.target.position.y;
+
+    if (newCameraX === camera.scaled.position.x && newCameraY === camera.scaled.position.y) {
+      return;
+    }
+
+    if (newCameraX < 0) {
+      newCameraX = 0;
+    } else if (newCameraX / camera.scale > worldScene.size.width - camera.scaled.size.width) {
+      newCameraX = (worldScene.size.width - camera.scaled.size.width) * camera.scale;
+    }
+
+    if (newCameraY < 0) {
+      newCameraY = 0;
+    } else if (newCameraY / camera.scale > worldScene.size.height - camera.scaled.size.height) {
+      newCameraY = (worldScene.size.height - camera.scaled.size.height) * camera.scale;
+    }
+
+    camera.target.position.x = newCameraX;
+    camera.target.position.y = newCameraY;
+  };
+}
+
+// export function applyWorldBoundariesToCamera(worldScene: WorldScene): System {
+//   const camera = worldScene.cameras.main;
+
+//   return () => {
+//     // # Calculate new camera
+//     let newCameraX = camera.target.position.x;
+//     let newCameraY = camera.target.position.y;
+
+//     if (newCameraX === camera.position.x && newCameraY === camera.position.y) {
+//       return;
+//     }
+
+//     if (newCameraX < 0) {
+//       newCameraX = 0;
+//     } else if (newCameraX > worldScene.size.width - camera.size.width) {
+//       newCameraX = worldScene.size.width - camera.size.width;
+//     }
+
+//     if (newCameraY < 0) {
+//       newCameraY = 0;
+//     } else if (newCameraY > worldScene.size.height - camera.size.height) {
+//       newCameraY = worldScene.size.height - camera.size.height;
+//     }
+
+//     camera.target.position.x = newCameraX;
+//     camera.target.position.y = newCameraY;
+//   };
+// }
+
 export function moveCameraByDragging(worldScene: WorldScene): System {
   const camera = worldScene.cameras.main;
   const mouse = worldScene.input.mouse;
@@ -111,34 +168,5 @@ export function moveCameraByDragging(worldScene: WorldScene): System {
       camera.target.position.x = newCameraX;
       camera.target.position.y = newCameraY;
     }
-  };
-}
-
-export function applyWorldBoundariesToCamera(worldScene: WorldScene): System {
-  const camera = worldScene.cameras.main;
-
-  return () => {
-    // # Calculate new camera
-    let newCameraX = camera.target.position.x;
-    let newCameraY = camera.target.position.y;
-
-    if (newCameraX === camera.position.x && newCameraY === camera.position.y) {
-      return;
-    }
-
-    if (newCameraX < 0) {
-      newCameraX = 0;
-    } else if (newCameraX > worldScene.size.width - camera.size.width) {
-      newCameraX = worldScene.size.width - camera.size.width;
-    }
-
-    if (newCameraY < 0) {
-      newCameraY = 0;
-    } else if (newCameraY > worldScene.size.height - camera.size.height) {
-      newCameraY = worldScene.size.height - camera.size.height;
-    }
-
-    camera.target.position.x = newCameraX;
-    camera.target.position.y = newCameraY;
   };
 }
