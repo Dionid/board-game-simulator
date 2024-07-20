@@ -77,10 +77,8 @@ export const initWorld = async (app: Application) => {
   // ## Initial props
   const sceneSizeX = 2000;
   const sceneSizeY = 1000;
-  const sceneBoundLX = 0;
-  const sceneBoundTY = 0;
 
-  const worldScene = createWorldScene({
+  const worldScene = createWorldScene(app, {
     camera: {
       position: {
         x: 0,
@@ -95,11 +93,11 @@ export const initWorld = async (app: Application) => {
     },
     worldScene: {
       size: {
-        x: sceneSizeX,
-        y: sceneSizeY,
+        x: 2000,
+        y: 1000,
       },
-      boundLX: sceneBoundLX,
-      boundTY: sceneBoundTY,
+      boundLX: 0,
+      boundTY: 0,
     },
   });
 
@@ -131,39 +129,6 @@ export const initWorld = async (app: Application) => {
   camera.position.y = worldScene.size.y / 2 - camera.height / 2;
 
   // # Move by mouse
-  let mouseDown = false;
-
-  app.canvas.addEventListener('mousedown', (e) => {
-    mouseDown = true;
-  });
-
-  app.canvas.addEventListener('mouseup', (e) => {
-    mouseDown = false;
-  });
-
-  app.canvas.addEventListener('mousemove', (e) => {
-    // # Calculate new camera
-    if (mouseDown) {
-      const newCameraX = camera.position.x - e.movementX;
-      const newCameraY = camera.position.y - e.movementY;
-
-      if (camera.position.x < camera.boundLX) {
-        camera.position.x = camera.boundLX;
-      } else if (camera.position.x > camera.boundRX) {
-        camera.position.x = camera.boundRX;
-      } else {
-        camera.position.x = newCameraX;
-      }
-
-      if (camera.position.y < camera.boundLY) {
-        camera.position.y = camera.boundLY;
-      } else if (camera.position.y > camera.boundRY) {
-        camera.position.y = camera.boundRY;
-      } else {
-        camera.position.y = newCameraY;
-      }
-    }
-  });
 
   // # Topics
   registerTopic(world, clicked);

@@ -17,7 +17,7 @@ import {
   tryTable,
 } from '../../../../libs/tecs';
 import { Query } from '../../../../libs/tecs/query';
-import { Camera, WorldScene } from '../engine';
+import { WorldScene } from '../engine';
 
 export const View = newTag();
 

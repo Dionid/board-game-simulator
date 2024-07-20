@@ -1,4 +1,4 @@
-import { Container } from 'pixi.js';
+import { Application, Container } from 'pixi.js';
 
 export type Vector2 = {
   x: number;
@@ -16,6 +16,7 @@ export type Camera = {
 };
 
 export type WorldScene = {
+  app: Application;
   container: Container;
   size: Vector2;
   cameras: {
@@ -25,22 +26,25 @@ export type WorldScene = {
   boundTY: number;
 };
 
-export const createWorldScene = (config?: {
-  camera?: {
-    position?: Vector2;
-    width?: number;
-    height?: number;
-    boundLX?: number;
-    boundLY?: number;
-    boundRX?: number;
-    boundRY?: number;
-  };
-  worldScene?: {
-    size?: Vector2;
-    boundLX?: number;
-    boundTY?: number;
-  };
-}): WorldScene => {
+export const createWorldScene = (
+  app: Application,
+  config?: {
+    camera?: {
+      position?: Vector2;
+      width?: number;
+      height?: number;
+      boundLX?: number;
+      boundLY?: number;
+      boundRX?: number;
+      boundRY?: number;
+    };
+    worldScene?: {
+      size?: Vector2;
+      boundLX?: number;
+      boundTY?: number;
+    };
+  }
+): WorldScene => {
   const sceneSizeX = config?.worldScene?.size?.x ?? 2000;
   const sceneSizeY = config?.worldScene?.size?.y ?? 1000;
   const sceneBoundLX = config?.worldScene?.boundLX ?? 0;
@@ -66,6 +70,7 @@ export const createWorldScene = (config?: {
   };
 
   const worldScene: WorldScene = {
+    app,
     container: sceneContainer,
     size: {
       x: sceneSizeX,
@@ -79,4 +84,42 @@ export const createWorldScene = (config?: {
   };
 
   return worldScene;
+};
+
+export const moveCameraByDragging = (worldScene: WorldScene) => {
+  const camera = worldScene.cameras.main;
+
+  let mouseDown = false;
+
+  worldScene.app.canvas.addEventListener('mousedown', (e) => {
+    mouseDown = true;
+  });
+
+  worldScene.app.canvas.addEventListener('mouseup', (e) => {
+    mouseDown = false;
+  });
+
+  worldScene.app.canvas.addEventListener('mousemove', (e) => {
+    // # Calculate new camera
+    if (mouseDown) {
+      const newCameraX = camera.position.x - e.movementX;
+      const newCameraY = camera.position.y - e.movementY;
+
+      if (camera.position.x < camera.boundLX) {
+        camera.position.x = camera.boundLX;
+      } else if (camera.position.x > camera.boundRX) {
+        camera.position.x = camera.boundRX;
+      } else {
+        camera.position.x = newCameraX;
+      }
+
+      if (camera.position.y < camera.boundLY) {
+        camera.position.y = camera.boundLY;
+      } else if (camera.position.y > camera.boundRY) {
+        camera.position.y = camera.boundRY;
+      } else {
+        camera.position.y = newCameraY;
+      }
+    }
+  });
 };
