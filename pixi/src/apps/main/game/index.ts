@@ -99,23 +99,17 @@ export const initWorld = async (app: Application) => {
   const world = newWorld();
 
   // # Main Scene Container
-  // ## Initial props
-  const sceneSizeX = 2000;
-  const sceneSizeY = 1000;
-
   const worldScene = createWorldScene(app, {
     camera: {
       position: {
         x: 0,
-        y: 0.5,
+        y: 0,
       },
       scale: 1,
-      width: app.renderer.width,
-      height: app.renderer.height,
-      boundLX: 0,
-      boundLY: 0.5,
-      boundRX: sceneSizeX - app.renderer.width,
-      boundRY: sceneSizeY - app.renderer.height,
+      size: {
+        width: app.renderer.width,
+        height: app.renderer.height,
+      },
     },
     worldScene: {
       size: {

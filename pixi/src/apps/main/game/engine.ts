@@ -66,12 +66,7 @@ export const createWorldScene = (
   config?: {
     camera?: {
       position?: Vector2;
-      width?: number;
-      height?: number;
-      boundLX?: number;
-      boundLY?: number;
-      boundRX?: number;
-      boundRY?: number;
+      size?: Size;
       scale?: number;
     };
     worldScene?: {
@@ -94,8 +89,8 @@ export const createWorldScene = (
     y: config?.camera?.position?.y ?? 0,
   };
   const size = {
-    width: config?.camera?.width ?? 0,
-    height: config?.camera?.height ?? 0,
+    width: config?.camera?.size?.width ?? 0,
+    height: config?.camera?.size?.height ?? 0,
   };
 
   const camera: Camera = {
