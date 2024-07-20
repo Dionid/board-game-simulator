@@ -69,6 +69,21 @@ export const createWorldScene = (
     boundRY: config?.camera?.boundRY ?? 0,
   };
 
+  // ## On resize change camera last coordinates
+  app.canvas.addEventListener('resize', () => {
+    camera.width = app.renderer.width;
+    camera.height = app.renderer.width;
+    camera.boundRX = worldScene.size.x - camera.width;
+    camera.boundRY = worldScene.size.y - camera.height;
+
+    if (camera.position.x > camera.boundRX) {
+      camera.position.x = camera.boundRX;
+    }
+    if (camera.position.y > camera.boundRY) {
+      camera.position.y = camera.boundRY;
+    }
+  });
+
   const worldScene: WorldScene = {
     app,
     container: sceneContainer,

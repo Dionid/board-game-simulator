@@ -1,7 +1,7 @@
-import { newWorld, registerSystem, Topic, registerTopic } from '../../../libs/tecs';
+import { newWorld, registerSystem } from '../../../libs/tecs';
 import { Application, Assets, Sprite, Texture } from 'pixi.js';
-import { createWorldScene, WorldScene } from './engine';
-import { ApplyCameraToScene, clicked, Draw, viewEvents } from './ecs';
+import { createWorldScene, moveCameraByDragging, WorldScene } from './engine';
+import { ApplyCameraToScene, Draw } from './ecs';
 
 const fillSceneContainer = async (worldScene: WorldScene) => {
   const texture = (await Assets.load('assets/star.png')) as Texture;
@@ -106,37 +106,15 @@ export const initWorld = async (app: Application) => {
   // # Add to stage
   app.stage.addChild(worldScene.container);
 
-  // ## Fill with some data
-  fillSceneContainer(worldScene);
-
-  // ## On resize change camera last coordinates
-  app.canvas.addEventListener('resize', () => {
-    camera.width = app.renderer.width;
-    camera.height = app.renderer.width;
-    camera.boundRX = worldScene.size.x - camera.width;
-    camera.boundRY = worldScene.size.y - camera.height;
-
-    if (camera.position.x > camera.boundRX) {
-      camera.position.x = camera.boundRX;
-    }
-    if (camera.position.y > camera.boundRY) {
-      camera.position.y = camera.boundRY;
-    }
-  });
-
   // ## Set camera to center
   camera.position.x = worldScene.size.x / 2 - camera.width / 2;
   camera.position.y = worldScene.size.y / 2 - camera.height / 2;
 
-  // # Move by mouse
+  // # Camera movement
+  moveCameraByDragging(worldScene);
 
-  // # Topics
-  registerTopic(world, clicked);
-  registerTopic(world, viewEvents);
-
-  window.addEventListener('click', (e) => {
-    Topic.emit(clicked, { type: 'clicked', position: { x: e.clientX, y: e.clientY } });
-  });
+  // ## Fill with some data
+  fillSceneContainer(worldScene);
 
   // # Systems
   registerSystem(world, ApplyCameraToScene(worldScene));

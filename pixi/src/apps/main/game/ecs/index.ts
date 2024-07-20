@@ -47,10 +47,6 @@ export const Color = newSchema({
   value: string,
 });
 
-// # Topics
-export const clicked = newTopic<{ type: 'clicked'; position: { x: number; y: number } }>();
-export const viewEvents = newTopic<{ type: 'pointerOver'; entity: Entity }>();
-
 // # Queries
 
 export const drawQuery = Query.new(View, Position);
