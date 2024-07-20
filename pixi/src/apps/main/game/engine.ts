@@ -30,6 +30,9 @@ export function setCameraPosition(camera: Camera, x: number, y: number) {
   camera.position.x = x;
   camera.position.y = y;
 
+  camera.target.position.x = x;
+  camera.target.position.y = y;
+
   camera.scaled.position.x = x / camera.scale;
   camera.scaled.position.y = y / camera.scale;
 }
