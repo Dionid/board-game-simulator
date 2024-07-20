@@ -1,7 +1,7 @@
 import { newWorld, registerSystem } from '../../../libs/tecs';
 import { Application, Assets, Sprite, Texture } from 'pixi.js';
-import { createWorldScene, moveCameraByDragging, WorldScene } from './engine';
-import { ApplyCameraToScene, Draw } from './ecs';
+import { createWorldScene, moveCameraByDragging, setCameraPosition, WorldScene } from './engine';
+import { ApplyCameraToContainer, Draw, MoveCameraByDragging, Zoom } from './ecs';
 
 const fillSceneContainer = async (worldScene: WorldScene) => {
   const texture = (await Assets.load('assets/star.png')) as Texture;
@@ -12,9 +12,11 @@ const fillSceneContainer = async (worldScene: WorldScene) => {
   //   const element = new Sprite({
   //     texture: texture,
   //     x: Math.random() * sceneSizeX + (texture.width / 2) * scale,
-  //     y: Math.random() * sceneSizeY + (texture.height / 2) * scale,
+  //     y: Math.random() * sceneSizeY + (texture.height * 0.3) * scale,
   //     scale: scale,
-  //     anchor: 0.5,
+  //     anchor: {
+  //   x: 0.5,
+  // y: 0.5,},
   //   });
 
   //   sceneContainer.addChild(element);
@@ -24,45 +26,60 @@ const fillSceneContainer = async (worldScene: WorldScene) => {
   const ltElement = new Sprite({
     texture: texture,
     x: 0 + (texture.width / 2) * scale,
-    y: 0 + (texture.height / 2) * scale,
+    y: 0 + texture.height * 0.7 * scale,
     scale: scale,
-    anchor: 0.5,
+    anchor: {
+      x: 0.5,
+      y: 0.5,
+    },
   });
   worldScene.container.addChild(ltElement);
 
   const rtElement = new Sprite({
     texture: texture,
-    x: worldScene.size.x - (texture.width / 2) * scale,
-    y: 0 + (texture.height / 2) * scale,
+    x: worldScene.size.width - (texture.width / 2) * scale,
+    y: 0 + texture.height * 0.7 * scale,
     scale: scale,
-    anchor: 0.5,
+    anchor: {
+      x: 0.5,
+      y: 0.5,
+    },
   });
   worldScene.container.addChild(rtElement);
 
   const lbElement = new Sprite({
     texture: texture,
     x: 0 + (texture.width / 2) * scale,
-    y: worldScene.size.y - (texture.height / 2) * scale,
+    y: worldScene.size.height - texture.height * 0.7 * scale,
     scale: scale,
-    anchor: 0.5,
+    anchor: {
+      x: 0.5,
+      y: 0.5,
+    },
   });
   worldScene.container.addChild(lbElement);
 
   const rbElement = new Sprite({
     texture: texture,
-    x: worldScene.size.x - (texture.width / 2) * scale,
-    y: worldScene.size.y - (texture.height / 2) * scale,
+    x: worldScene.size.width - (texture.width / 2) * scale,
+    y: worldScene.size.height - texture.height * 0.7 * scale,
     scale: scale,
-    anchor: 0.5,
+    anchor: {
+      x: 0.5,
+      y: 0.5,
+    },
   });
   worldScene.container.addChild(rbElement);
 
   const centerElement = new Sprite({
     texture: texture,
-    x: worldScene.size.x / 2 - texture.width / 2 + (texture.width / 2) * scale,
-    y: worldScene.size.y / 2 - texture.height / 2 + (texture.height / 2) * scale,
+    x: worldScene.size.width / 2 - texture.width / 2 + (texture.width / 2) * scale,
+    y: worldScene.size.height / 2 - texture.height * 0.3 + texture.height * 0.7 * scale,
     scale: scale,
-    anchor: 0.5,
+    anchor: {
+      x: 0.5,
+      y: 0.5,
+    },
   });
   worldScene.container.addChild(centerElement);
 
@@ -82,12 +99,13 @@ export const initWorld = async (app: Application) => {
     camera: {
       position: {
         x: 0,
-        y: 0,
+        y: 0.5,
       },
+      scale: 1,
       width: app.renderer.width,
       height: app.renderer.height,
       boundLX: 0,
-      boundLY: 0,
+      boundLY: 0.5,
       boundRX: sceneSizeX - app.renderer.width,
       boundRY: sceneSizeY - app.renderer.height,
     },
@@ -97,18 +115,22 @@ export const initWorld = async (app: Application) => {
         y: 1000,
       },
       boundLX: 0,
-      boundTY: 0,
+      boundTY: 0.5,
     },
   });
+
+  (globalThis as any).__TECS_WORLD_SCENE__ = worldScene;
 
   const camera = worldScene.cameras.main;
 
   // # Add to stage
   app.stage.addChild(worldScene.container);
 
-  // ## Set camera to center
-  camera.position.x = worldScene.size.x / 2 - camera.width / 2;
-  camera.position.y = worldScene.size.y / 2 - camera.height / 2;
+  setCameraPosition(
+    camera,
+    worldScene.size.width / 2 - camera.width / 2,
+    worldScene.size.height / 2 - camera.height / 2
+  );
 
   // # Camera movement
   moveCameraByDragging(worldScene);
@@ -116,8 +138,28 @@ export const initWorld = async (app: Application) => {
   // ## Fill with some data
   fillSceneContainer(worldScene);
 
+  // # Mouse move
+  app.canvas.addEventListener('mousemove', (e) => {
+    worldScene.input.mouse.previous.clientPosition.x = worldScene.input.mouse.clientPosition.x;
+    worldScene.input.mouse.previous.clientPosition.y = worldScene.input.mouse.clientPosition.y;
+    worldScene.input.mouse.previous.scenePosition.x = worldScene.input.mouse.scenePosition.x;
+    worldScene.input.mouse.previous.scenePosition.y = worldScene.input.mouse.scenePosition.y;
+
+    worldScene.input.mouse.clientPosition.x = e.x;
+    worldScene.input.mouse.clientPosition.y = e.y;
+
+    worldScene.input.mouse.scenePosition.x = Math.floor(
+      e.x / worldScene.cameras.main.scale + worldScene.cameras.main.scaledPosition.x
+    );
+    worldScene.input.mouse.scenePosition.y = Math.floor(
+      e.y / worldScene.cameras.main.scale + worldScene.cameras.main.scaledPosition.y
+    );
+  });
+
   // # Systems
-  registerSystem(world, ApplyCameraToScene(worldScene));
+  registerSystem(world, MoveCameraByDragging(worldScene));
+  registerSystem(world, ApplyCameraToContainer(worldScene));
+  registerSystem(world, Zoom(worldScene), 'postUpdate');
   registerSystem(world, Draw(world, app), 'postUpdate');
 
   // const entity = spawnEntity(world);

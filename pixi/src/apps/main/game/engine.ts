@@ -7,18 +7,42 @@ export type Vector2 = {
 
 export type Camera = {
   position: Vector2;
+  scaledPosition: Vector2;
   width: number;
   height: number;
+  scale: number;
   boundLX: number;
   boundLY: number;
   boundRX: number;
   boundRY: number;
 };
 
+export function setCameraPosition(camera: Camera, x: number, y: number) {
+  camera.position.x = x;
+  camera.position.y = y;
+
+  camera.scaledPosition.x = camera.position.x / camera.scale;
+  camera.scaledPosition.y = camera.position.y / camera.scale;
+}
+
+export type MouseInput = {
+  clientPosition: Vector2;
+  scenePosition: Vector2;
+  up: boolean;
+  down: boolean;
+  previous: Omit<MouseInput, 'previous'>;
+};
+
 export type WorldScene = {
   app: Application;
   container: Container;
-  size: Vector2;
+  input: {
+    mouse: MouseInput;
+  };
+  size: {
+    width: number;
+    height: number;
+  };
   cameras: {
     main: Camera;
   };
@@ -37,6 +61,7 @@ export const createWorldScene = (
       boundLY?: number;
       boundRX?: number;
       boundRY?: number;
+      scale?: number;
     };
     worldScene?: {
       size?: Vector2;
@@ -61,6 +86,11 @@ export const createWorldScene = (
       x: config?.camera?.position?.x ?? 0,
       y: config?.camera?.position?.y ?? 0,
     },
+    scaledPosition: {
+      x: 0,
+      y: 0,
+    },
+    scale: config?.camera?.scale ?? 1,
     width: config?.camera?.width ?? 0,
     height: config?.camera?.height ?? 0,
     boundLX: config?.camera?.boundLX ?? 0,
@@ -69,12 +99,15 @@ export const createWorldScene = (
     boundRY: config?.camera?.boundRY ?? 0,
   };
 
+  camera.scaledPosition.x = camera.position.x / camera.scale;
+  camera.scaledPosition.y = camera.position.y / camera.scale;
+
   // ## On resize change camera last coordinates
   app.canvas.addEventListener('resize', () => {
     camera.width = app.renderer.width;
     camera.height = app.renderer.width;
-    camera.boundRX = worldScene.size.x - camera.width;
-    camera.boundRY = worldScene.size.y - camera.height;
+    camera.boundRX = worldScene.size.width - camera.width;
+    camera.boundRY = worldScene.size.height - camera.height;
 
     if (camera.position.x > camera.boundRX) {
       camera.position.x = camera.boundRX;
@@ -87,9 +120,35 @@ export const createWorldScene = (
   const worldScene: WorldScene = {
     app,
     container: sceneContainer,
+    input: {
+      mouse: {
+        clientPosition: {
+          x: 0,
+          y: 0,
+        },
+        scenePosition: {
+          x: 0,
+          y: 0,
+        },
+        up: false,
+        down: false,
+        previous: {
+          clientPosition: {
+            x: 0,
+            y: 0,
+          },
+          scenePosition: {
+            x: 0,
+            y: 0,
+          },
+          up: false,
+          down: false,
+        },
+      },
+    },
     size: {
-      x: sceneSizeX,
-      y: sceneSizeY,
+      width: sceneSizeX,
+      height: sceneSizeY,
     },
     cameras: {
       main: camera,
@@ -102,39 +161,48 @@ export const createWorldScene = (
 };
 
 export const moveCameraByDragging = (worldScene: WorldScene) => {
-  const camera = worldScene.cameras.main;
-
-  let mouseDown = false;
-
   worldScene.app.canvas.addEventListener('mousedown', (e) => {
-    mouseDown = true;
+    worldScene.input.mouse.previous.down = worldScene.input.mouse.down;
+    worldScene.input.mouse.previous.up = worldScene.input.mouse.up;
+
+    worldScene.input.mouse.down = true;
+    worldScene.input.mouse.up = false;
   });
 
   worldScene.app.canvas.addEventListener('mouseup', (e) => {
-    mouseDown = false;
+    worldScene.input.mouse.previous.down = worldScene.input.mouse.down;
+    worldScene.input.mouse.previous.up = worldScene.input.mouse.up;
+
+    worldScene.input.mouse.down = false;
+    worldScene.input.mouse.up = true;
   });
 
-  worldScene.app.canvas.addEventListener('mousemove', (e) => {
-    // # Calculate new camera
-    if (mouseDown) {
-      const newCameraX = camera.position.x - e.movementX;
-      const newCameraY = camera.position.y - e.movementY;
+  // const camera = worldScene.cameras.main;
+  //
+  // worldScene.app.canvas.addEventListener('mousemove', (e) => {
+  //   // # Calculate new camera
+  //   if (worldScene.input.mouse.down) {
+  //     const newCameraX = camera.position.x - e.movementX;
+  //     const newCameraY = camera.position.y - e.movementY;
 
-      if (camera.position.x < camera.boundLX) {
-        camera.position.x = camera.boundLX;
-      } else if (camera.position.x > camera.boundRX) {
-        camera.position.x = camera.boundRX;
-      } else {
-        camera.position.x = newCameraX;
-      }
+  //     if (camera.position.x < camera.boundLX) {
+  //       camera.position.x = camera.boundLX;
+  //     } else if (camera.position.x > camera.boundRX) {
+  //       camera.position.x = camera.boundRX;
+  //     } else {
+  //       camera.position.x = newCameraX;
+  //     }
 
-      if (camera.position.y < camera.boundLY) {
-        camera.position.y = camera.boundLY;
-      } else if (camera.position.y > camera.boundRY) {
-        camera.position.y = camera.boundRY;
-      } else {
-        camera.position.y = newCameraY;
-      }
-    }
-  });
+  //     if (camera.position.y < camera.boundLY) {
+  //       camera.position.y = camera.boundLY;
+  //     } else if (camera.position.y > camera.boundRY) {
+  //       camera.position.y = camera.boundRY;
+  //     } else {
+  //       camera.position.y = newCameraY;
+  //     }
+
+  //     camera.scaledPosition.x = camera.position.x / camera.scale;
+  //     camera.scaledPosition.y = camera.position.y / camera.scale;
+  //   }
+  // });
 };
