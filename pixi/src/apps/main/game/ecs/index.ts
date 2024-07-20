@@ -15,6 +15,7 @@ import {
 } from '../../../../libs/tecs';
 import { Query } from '../../../../libs/tecs/query';
 import { WorldScene } from '../engine';
+export * from './input-mapping';
 
 export const View = newTag();
 
@@ -50,77 +51,18 @@ const drawQuery = Query.new(View, Position);
 
 // # Systems
 
-export function mapMouseInput(worldScene: WorldScene): System {
-  const input = worldScene.input;
-  const mouse = input.mouse;
-  const canvas = worldScene.app.canvas;
-
-  let mouseUp = false;
-  let mouseDown = false;
-  let mouseMoveEvent: MouseEvent | null = null;
-
-  canvas.addEventListener('mousedown', (e) => {
-    mouseDown = true;
-  });
-
-  canvas.addEventListener('mouseup', (e) => {
-    mouseUp = true;
-  });
-
-  // # Mouse move
-  canvas.addEventListener('mousemove', (e) => {
-    mouseMoveEvent = e;
-  });
-
-  return () => {
-    if (mouseDown) {
-      mouse.previous.down = mouse.down;
-      mouse.previous.up = mouse.up;
-
-      mouse.down = true;
-      mouse.up = false;
-
-      mouseDown = false;
-    }
-
-    if (mouseUp) {
-      mouse.previous.down = mouse.down;
-      mouse.previous.up = mouse.up;
-
-      mouse.down = false;
-      mouse.up = true;
-
-      mouseUp = false;
-    }
-
-    if (mouseMoveEvent) {
-      mouse.previous.clientPosition.x = mouse.clientPosition.x;
-      mouse.previous.clientPosition.y = mouse.clientPosition.y;
-      mouse.previous.scenePosition.x = mouse.scenePosition.x;
-      mouse.previous.scenePosition.y = mouse.scenePosition.y;
-
-      mouse.clientPosition.x = mouseMoveEvent.x;
-      mouse.clientPosition.y = mouseMoveEvent.y;
-
-      mouse.scenePosition.x = Math.floor(
-        mouseMoveEvent.x / worldScene.cameras.main.scale + worldScene.cameras.main.scaledPosition.x
-      );
-      mouse.scenePosition.y = Math.floor(
-        mouseMoveEvent.y / worldScene.cameras.main.scale + worldScene.cameras.main.scaledPosition.y
-      );
-      mouseMoveEvent = null;
-    }
-  };
-}
-
 export function moveCameraByDragging(worldScene: WorldScene): System {
   const camera = worldScene.cameras.main;
+  const mouse = worldScene.input.mouse;
 
   return () => {
     // # Calculate new camera
-    if (worldScene.input.mouse.down) {
-      const deltaX = worldScene.input.mouse.clientPosition.x - worldScene.input.mouse.previous.clientPosition.x;
-      const deltaY = worldScene.input.mouse.clientPosition.y - worldScene.input.mouse.previous.clientPosition.y;
+    if (mouse.down) {
+      // const deltaX = mouse.clientPosition.x - mouse.previous.clientPosition.x;
+      // const deltaY = mouse.clientPosition.y - mouse.previous.clientPosition.y;
+
+      const deltaX = mouse.delta.clientPosition.x;
+      const deltaY = mouse.delta.clientPosition.y;
 
       const newCameraX = camera.position.x - deltaX;
       const newCameraY = camera.position.y - deltaY;
@@ -141,34 +83,35 @@ export function moveCameraByDragging(worldScene: WorldScene): System {
         camera.position.y = newCameraY;
       }
 
-      camera.scaledPosition.x = camera.position.x / camera.scale;
-      camera.scaledPosition.y = camera.position.y / camera.scale;
+      camera.scaled.position.x = camera.position.x / camera.scale;
+      camera.scaled.position.y = camera.position.y / camera.scale;
     }
   };
 }
 
 export const applyCameraToContainer = (worldScene: WorldScene): System => {
   const camera = worldScene.cameras.main;
+  const container = worldScene.container;
 
   return () => {
     // # Apply camera to scene
-    worldScene.container.x = -camera.position.x;
-    worldScene.container.y = -camera.position.y;
+    container.x = -camera.position.x;
+    container.y = -camera.position.y;
 
-    if (worldScene.container.x > worldScene.boundLX) {
-      worldScene.container.x = worldScene.boundLX;
-    } else if (worldScene.container.x < -camera.boundRX) {
-      worldScene.container.x = -camera.boundRX;
-    } else if (worldScene.container.y > worldScene.boundTY) {
-      worldScene.container.y = worldScene.boundTY;
+    if (container.x > worldScene.boundLX) {
+      container.x = worldScene.boundLX;
+    } else if (container.x < -camera.boundRX) {
+      container.x = -camera.boundRX;
+    } else if (container.y > worldScene.boundTY) {
+      container.y = worldScene.boundTY;
     }
 
-    if (worldScene.container.y < -camera.boundRY) {
-      worldScene.container.y = -camera.boundRY;
-    } else if (worldScene.container.y > worldScene.boundTY) {
-      worldScene.container.y = worldScene.boundTY;
-    } else if (worldScene.container.y < -camera.boundRY) {
-      worldScene.container.y = -camera.boundRY;
+    if (container.y < -camera.boundRY) {
+      container.y = -camera.boundRY;
+    } else if (container.y > worldScene.boundTY) {
+      container.y = worldScene.boundTY;
+    } else if (container.y < -camera.boundRY) {
+      container.y = -camera.boundRY;
     }
   };
 };

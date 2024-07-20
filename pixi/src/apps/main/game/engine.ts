@@ -5,9 +5,15 @@ export type Vector2 = {
   y: number;
 };
 
+export type Velocity = Vector2;
+
+export type Size = {
+  width: number;
+  height: number;
+};
+
 export type Camera = {
   position: Vector2;
-  scaledPosition: Vector2;
   width: number;
   height: number;
   scale: number;
@@ -18,14 +24,18 @@ export type Camera = {
   target: {
     scale: number;
   };
+  scaled: {
+    position: Vector2;
+    size: Size;
+  };
 };
 
 export function setCameraPosition(camera: Camera, x: number, y: number) {
   camera.position.x = x;
   camera.position.y = y;
 
-  camera.scaledPosition.x = camera.position.x / camera.scale;
-  camera.scaledPosition.y = camera.position.y / camera.scale;
+  camera.scaled.position.x = x / camera.scale;
+  camera.scaled.position.y = y / camera.scale;
 }
 
 export type MouseInput = {
@@ -34,6 +44,10 @@ export type MouseInput = {
   up: boolean;
   down: boolean;
   previous: Omit<MouseInput, 'previous'>;
+  delta: {
+    clientPosition: Vector2;
+    scenePosition: Vector2;
+  };
 };
 
 export type WorldScene = {
@@ -84,29 +98,42 @@ export const createWorldScene = (
   });
 
   // # Camera
-  const camera: Camera = {
-    position: {
-      x: config?.camera?.position?.x ?? 0,
-      y: config?.camera?.position?.y ?? 0,
-    },
-    scaledPosition: {
-      x: 0,
-      y: 0,
-    },
-    scale: config?.camera?.scale ?? 1,
+  const scale = config?.camera?.scale ?? 1;
+  const position = {
+    x: config?.camera?.position?.x ?? 0,
+    y: config?.camera?.position?.y ?? 0,
+  };
+  const size = {
     width: config?.camera?.width ?? 0,
     height: config?.camera?.height ?? 0,
+  };
+
+  const camera: Camera = {
+    position: {
+      x: position.x,
+      y: position.y,
+    },
+    scaled: {
+      position: {
+        x: position.x / scale,
+        y: position.y / scale,
+      },
+      size: {
+        width: size.width / scale,
+        height: size.height / scale,
+      },
+    },
+    scale,
+    width: size.width,
+    height: size.height,
     boundLX: config?.camera?.boundLX ?? 0,
     boundLY: config?.camera?.boundLY ?? 0,
     boundRX: config?.camera?.boundRX ?? 0,
     boundRY: config?.camera?.boundRY ?? 0,
     target: {
-      scale: 1,
+      scale,
     },
   };
-
-  camera.scaledPosition.x = camera.position.x / camera.scale;
-  camera.scaledPosition.y = camera.position.y / camera.scale;
 
   // ## On resize change camera last coordinates
   app.canvas.addEventListener('resize', () => {
@@ -138,6 +165,16 @@ export const createWorldScene = (
         },
         up: false,
         down: false,
+        delta: {
+          clientPosition: {
+            x: 0,
+            y: 0,
+          },
+          scenePosition: {
+            x: 0,
+            y: 0,
+          },
+        },
         previous: {
           clientPosition: {
             x: 0,
@@ -149,6 +186,16 @@ export const createWorldScene = (
           },
           up: false,
           down: false,
+          delta: {
+            clientPosition: {
+              x: 0,
+              y: 0,
+            },
+            scenePosition: {
+              x: 0,
+              y: 0,
+            },
+          },
         },
       },
     },

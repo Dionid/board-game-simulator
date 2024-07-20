@@ -1,8 +1,10 @@
 1. Camera
     1. ~~Camera movement~~
     1. ~~Scene boundaries~~
-    1. Camera zoom (~~scale~~, ~~position scale~~, ~~ease~~, move camera in case of zoom from center + boundaries)
+    1. Camera zoom (~~scale~~, ~~position scale~~, ~~ease~~, move camera by boundaries, zoom from center)
     1. Convert scale from float to int
+1. camera.scale to Vector2
+1. camera.size to Size
 1. Tilemap
     1. Draw map
     1. Make it isometric
@@ -14,3 +16,10 @@
 1. ...
 1. ? Does requestAnimationFrame correct way
 1. ...
+1. Tweens
+
+# Zoom
+
+1. camera.scenePosition calculates in mapMouseInput on mousemove event
+1. camera.position
+    1. 
