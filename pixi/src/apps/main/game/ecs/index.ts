@@ -50,6 +50,69 @@ const drawQuery = Query.new(View, Position);
 
 // # Systems
 
+export function mapMouseInput(worldScene: WorldScene): System {
+  const input = worldScene.input;
+  const mouse = input.mouse;
+  const canvas = worldScene.app.canvas;
+
+  let mouseUp = false;
+  let mouseDown = false;
+  let mouseMoveEvent: MouseEvent | null = null;
+
+  canvas.addEventListener('mousedown', (e) => {
+    mouseDown = true;
+  });
+
+  canvas.addEventListener('mouseup', (e) => {
+    mouseUp = true;
+  });
+
+  // # Mouse move
+  canvas.addEventListener('mousemove', (e) => {
+    mouseMoveEvent = e;
+  });
+
+  return () => {
+    if (mouseDown) {
+      mouse.previous.down = mouse.down;
+      mouse.previous.up = mouse.up;
+
+      mouse.down = true;
+      mouse.up = false;
+
+      mouseDown = false;
+    }
+
+    if (mouseUp) {
+      mouse.previous.down = mouse.down;
+      mouse.previous.up = mouse.up;
+
+      mouse.down = false;
+      mouse.up = true;
+
+      mouseUp = false;
+    }
+
+    if (mouseMoveEvent) {
+      mouse.previous.clientPosition.x = mouse.clientPosition.x;
+      mouse.previous.clientPosition.y = mouse.clientPosition.y;
+      mouse.previous.scenePosition.x = mouse.scenePosition.x;
+      mouse.previous.scenePosition.y = mouse.scenePosition.y;
+
+      mouse.clientPosition.x = mouseMoveEvent.x;
+      mouse.clientPosition.y = mouseMoveEvent.y;
+
+      mouse.scenePosition.x = Math.floor(
+        mouseMoveEvent.x / worldScene.cameras.main.scale + worldScene.cameras.main.scaledPosition.x
+      );
+      mouse.scenePosition.y = Math.floor(
+        mouseMoveEvent.y / worldScene.cameras.main.scale + worldScene.cameras.main.scaledPosition.y
+      );
+      mouseMoveEvent = null;
+    }
+  };
+}
+
 export function MoveCameraByDragging(worldScene: WorldScene): System {
   const camera = worldScene.cameras.main;
 

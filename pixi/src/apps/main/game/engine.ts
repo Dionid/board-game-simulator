@@ -157,52 +157,7 @@ export const createWorldScene = (
     boundTY: sceneBoundTY,
   };
 
+  (globalThis as any).__TECS_WORLD_SCENE__ = worldScene;
+
   return worldScene;
-};
-
-export const moveCameraByDragging = (worldScene: WorldScene) => {
-  worldScene.app.canvas.addEventListener('mousedown', (e) => {
-    worldScene.input.mouse.previous.down = worldScene.input.mouse.down;
-    worldScene.input.mouse.previous.up = worldScene.input.mouse.up;
-
-    worldScene.input.mouse.down = true;
-    worldScene.input.mouse.up = false;
-  });
-
-  worldScene.app.canvas.addEventListener('mouseup', (e) => {
-    worldScene.input.mouse.previous.down = worldScene.input.mouse.down;
-    worldScene.input.mouse.previous.up = worldScene.input.mouse.up;
-
-    worldScene.input.mouse.down = false;
-    worldScene.input.mouse.up = true;
-  });
-
-  // const camera = worldScene.cameras.main;
-  //
-  // worldScene.app.canvas.addEventListener('mousemove', (e) => {
-  //   // # Calculate new camera
-  //   if (worldScene.input.mouse.down) {
-  //     const newCameraX = camera.position.x - e.movementX;
-  //     const newCameraY = camera.position.y - e.movementY;
-
-  //     if (camera.position.x < camera.boundLX) {
-  //       camera.position.x = camera.boundLX;
-  //     } else if (camera.position.x > camera.boundRX) {
-  //       camera.position.x = camera.boundRX;
-  //     } else {
-  //       camera.position.x = newCameraX;
-  //     }
-
-  //     if (camera.position.y < camera.boundLY) {
-  //       camera.position.y = camera.boundLY;
-  //     } else if (camera.position.y > camera.boundRY) {
-  //       camera.position.y = camera.boundRY;
-  //     } else {
-  //       camera.position.y = newCameraY;
-  //     }
-
-  //     camera.scaledPosition.x = camera.position.x / camera.scale;
-  //     camera.scaledPosition.y = camera.position.y / camera.scale;
-  //   }
-  // });
 };

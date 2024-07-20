@@ -1,7 +1,7 @@
 import { newWorld, registerSystem } from '../../../libs/tecs';
 import { Application, Assets, Sprite, Texture } from 'pixi.js';
-import { createWorldScene, moveCameraByDragging, setCameraPosition, WorldScene } from './engine';
-import { ApplyCameraToContainer, Draw, MoveCameraByDragging, Zoom } from './ecs';
+import { createWorldScene, setCameraPosition, WorldScene } from './engine';
+import { ApplyCameraToContainer, Draw, mapMouseInput, MoveCameraByDragging, Zoom } from './ecs';
 
 const fillSceneContainer = async (worldScene: WorldScene) => {
   const texture = (await Assets.load('assets/star.png')) as Texture;
@@ -119,44 +119,25 @@ export const initWorld = async (app: Application) => {
     },
   });
 
-  (globalThis as any).__TECS_WORLD_SCENE__ = worldScene;
-
   const camera = worldScene.cameras.main;
 
   // # Add to stage
   app.stage.addChild(worldScene.container);
 
+  // # Center camera
   setCameraPosition(
     camera,
     worldScene.size.width / 2 - camera.width / 2,
     worldScene.size.height / 2 - camera.height / 2
   );
 
-  // # Camera movement
-  moveCameraByDragging(worldScene);
-
   // ## Fill with some data
   fillSceneContainer(worldScene);
 
-  // # Mouse move
-  app.canvas.addEventListener('mousemove', (e) => {
-    worldScene.input.mouse.previous.clientPosition.x = worldScene.input.mouse.clientPosition.x;
-    worldScene.input.mouse.previous.clientPosition.y = worldScene.input.mouse.clientPosition.y;
-    worldScene.input.mouse.previous.scenePosition.x = worldScene.input.mouse.scenePosition.x;
-    worldScene.input.mouse.previous.scenePosition.y = worldScene.input.mouse.scenePosition.y;
-
-    worldScene.input.mouse.clientPosition.x = e.x;
-    worldScene.input.mouse.clientPosition.y = e.y;
-
-    worldScene.input.mouse.scenePosition.x = Math.floor(
-      e.x / worldScene.cameras.main.scale + worldScene.cameras.main.scaledPosition.x
-    );
-    worldScene.input.mouse.scenePosition.y = Math.floor(
-      e.y / worldScene.cameras.main.scale + worldScene.cameras.main.scaledPosition.y
-    );
-  });
+  // # Camera movement
 
   // # Systems
+  registerSystem(world, mapMouseInput(worldScene), 'preUpdate');
   registerSystem(world, MoveCameraByDragging(worldScene));
   registerSystem(world, ApplyCameraToContainer(worldScene));
   registerSystem(world, Zoom(worldScene), 'postUpdate');
