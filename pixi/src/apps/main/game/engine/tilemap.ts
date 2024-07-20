@@ -128,56 +128,52 @@ export const initTileMap = async () => {
 
   const mapContainer = new Container();
 
-  const floorLayer = tileMap.layers['Floor'];
-
-  if (!floorLayer) {
-    throw new Error('Floor layer not found');
-  }
-
-  console.log(floorLayer.data);
-
   for (let r = 0; r < tileMap.rows; r++) {
     for (let c = 0; c < tileMap.columns; c++) {
-      const layerTileId = floorLayer.data[r * tileMap.columns + c];
+      for (const layerName in tileMap.layers) {
+        const layer = tileMap.layers[layerName];
 
-      if (layerTileId === 0) {
-        continue;
+        const layerTileId = layer.data[r * tileMap.columns + c];
+
+        if (layerTileId === 0) {
+          continue;
+        }
+
+        const tileId = layerTileId - 1;
+
+        const tileData = tileMap.tileSet[tileMap.activeTileSet].tile[tileId];
+
+        if (!tileData) {
+          throw new Error(`Tile with id ${tileId} not found`);
+        }
+
+        const positionX = (c * tileMap.tileSet[tileMap.activeTileSet].tileWidth) / 2;
+        const positionY = (r * tileMap.tileSet[tileMap.activeTileSet].tileHeight) / 4;
+
+        const isoPosition = cartisianToIso({ x: positionX, y: positionY });
+
+        const tile = new TilingSprite({
+          texture: tileMap.tileSet[tileMap.activeTileSet].texture,
+          width: tileMap.tileSet[tileMap.activeTileSet].tileWidth,
+          height: tileMap.tileSet[tileMap.activeTileSet].tileHeight,
+          tilePosition: {
+            x: -tileData.tileSetPosition.x,
+            y: -tileData.tileSetPosition.y,
+          },
+          x: isoPosition.x,
+          y: isoPosition.y,
+          pivot: {
+            x: 0,
+            y: 0,
+          },
+          anchor: {
+            x: 0.5,
+            y: 0,
+          },
+        });
+
+        mapContainer.addChild(tile);
       }
-
-      const tileId = layerTileId - 1;
-
-      const tileData = tileMap.tileSet[tileMap.activeTileSet].tile[tileId];
-
-      if (!tileData) {
-        throw new Error(`Tile with id ${tileId} not found`);
-      }
-
-      const positionX = (c * tileMap.tileSet[tileMap.activeTileSet].tileWidth) / 2;
-      const positionY = (r * tileMap.tileSet[tileMap.activeTileSet].tileHeight) / 4;
-
-      const isoPosition = cartisianToIso({ x: positionX, y: positionY });
-
-      const tile = new TilingSprite({
-        texture: tileMap.tileSet[tileMap.activeTileSet].texture,
-        width: tileMap.tileSet[tileMap.activeTileSet].tileWidth,
-        height: tileMap.tileSet[tileMap.activeTileSet].tileHeight,
-        tilePosition: {
-          x: -tileData.tileSetPosition.x,
-          y: -tileData.tileSetPosition.y,
-        },
-        x: isoPosition.x,
-        y: isoPosition.y,
-        pivot: {
-          x: 0,
-          y: 0,
-        },
-        anchor: {
-          x: 0.5,
-          y: 0,
-        },
-      });
-
-      mapContainer.addChild(tile);
     }
   }
 
