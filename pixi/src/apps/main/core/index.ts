@@ -109,19 +109,66 @@ export const Draw = (world: World, app: Application): System => {
 };
 
 const fillSceneContainer = async (sceneSizeX: number, sceneSizeY: number, sceneContainer: Container) => {
-  const arrowTexture = await Assets.load('assets/arrow_E.png');
+  const texture = (await Assets.load('assets/star.png')) as Texture;
 
-  for (let i = 0; i < 1000; i++) {
-    const tree = new Sprite({
-      texture: arrowTexture,
-      x: Math.random() * sceneSizeX,
-      y: Math.random() * sceneSizeY,
-      scale: 0.25,
-      anchor: 0.5,
-    });
+  // for (let i = 0; i < 1000; i++) {
+  //   const scale = 1;
+  //   const element = new Sprite({
+  //     texture: texture,
+  //     x: Math.random() * sceneSizeX + (texture.width / 2) * scale,
+  //     y: Math.random() * sceneSizeY + (texture.height / 2) * scale,
+  //     scale: scale,
+  //     anchor: 0.5,
+  //   });
 
-    sceneContainer.addChild(tree);
-  }
+  //   sceneContainer.addChild(element);
+  // }
+
+  const scale = 1;
+  const ltElement = new Sprite({
+    texture: texture,
+    x: 0 + (texture.width / 2) * scale,
+    y: 0 + (texture.height / 2) * scale,
+    scale: scale,
+    anchor: 0.5,
+  });
+  sceneContainer.addChild(ltElement);
+
+  const rtElement = new Sprite({
+    texture: texture,
+    x: sceneSizeX - (texture.width / 2) * scale,
+    y: 0 + (texture.height / 2) * scale,
+    scale: scale,
+    anchor: 0.5,
+  });
+  sceneContainer.addChild(rtElement);
+
+  const lbElement = new Sprite({
+    texture: texture,
+    x: 0 + (texture.width / 2) * scale,
+    y: sceneSizeY - (texture.height / 2) * scale,
+    scale: scale,
+    anchor: 0.5,
+  });
+  sceneContainer.addChild(lbElement);
+
+  const rbElement = new Sprite({
+    texture: texture,
+    x: sceneSizeX - (texture.width / 2) * scale,
+    y: sceneSizeY - (texture.height / 2) * scale,
+    scale: scale,
+    anchor: 0.5,
+  });
+  sceneContainer.addChild(rbElement);
+
+  const centerElement = new Sprite({
+    texture: texture,
+    x: sceneSizeX / 2 - texture.width / 2 + (texture.width / 2) * scale,
+    y: sceneSizeY / 2 - texture.height / 2 + (texture.height / 2) * scale,
+    scale: scale,
+    anchor: 0.5,
+  });
+  sceneContainer.addChild(centerElement);
 
   // sort the trees by their y position
   sceneContainer.children.sort((a, b) => a.position.y - b.position.y);
@@ -131,39 +178,52 @@ export const initWorld = async (app: Application) => {
   const world = newWorld();
 
   // # Main Scene Container
+  // ## Data
+  const sceneSizeX = 2000;
+  const sceneSizeY = 1000;
+  const sceneBoundLX = 0;
+  const sceneBoundTY = 0;
+  // let sceneBoundRX = -sceneSizeX;
+  // let sceneBoundBY = -sceneSizeY;
+
+  // ## Container
   const sceneContainer = new Container({
     isRenderGroup: true,
   });
 
   app.stage.addChild(sceneContainer);
 
-  const sceneSizeX = 5000;
-  const sceneSizeY = 5000;
-  const sceneBoundLX = 0;
-  const sceneBoundTY = 0;
-  let sceneBoundRX = -sceneSizeX + app.renderer.width;
-  let sceneBoundRY = -sceneSizeY + app.renderer.height;
-
   // ## Fill with some data
   fillSceneContainer(sceneSizeX, sceneSizeY, sceneContainer);
 
   // # Camera
-  let cameraLX = 0;
-  let cameraLY = 0;
+  let cameraX = 0;
+  let cameraY = 0;
+  let cameraWidth = app.renderer.width;
+  let cameraHeight = app.renderer.height;
   let cameraBoundLX = 0;
   let cameraBoundLY = 0;
-  let cameraBoundRX = -sceneBoundRX;
-  let cameraBoundRY = -sceneBoundRY;
-  // let cameraRX = app.renderer.width;
-  // let cameraRY = app.renderer.height;
+  let cameraBoundRX = sceneSizeX - cameraWidth;
+  let cameraBoundRY = sceneSizeY - cameraHeight;
 
+  // ## On resize change camera last coordinates
   app.canvas.addEventListener('resize', () => {
-    sceneBoundRX = -sceneSizeX + app.renderer.width;
-    sceneBoundRY = -sceneSizeY + app.renderer.height;
+    cameraWidth = app.renderer.width;
+    cameraHeight = app.renderer.width;
+    cameraBoundRX = sceneSizeX - cameraWidth;
+    cameraBoundRY = sceneSizeY - cameraHeight;
 
-    // cameraRX = app.renderer.width;
-    // cameraRY = app.renderer.height;
+    if (cameraX > cameraBoundRX) {
+      cameraX = cameraBoundRX;
+    }
+    if (cameraY > cameraBoundRY) {
+      cameraY = cameraBoundRY;
+    }
   });
+
+  // ## Set camera to center
+  cameraX = sceneSizeX / 2 - cameraWidth / 2;
+  cameraY = sceneSizeY / 2 - cameraHeight / 2;
 
   // # Move by mouse
   let mouseDown = false;
@@ -179,44 +239,44 @@ export const initWorld = async (app: Application) => {
   app.canvas.addEventListener('mousemove', (e) => {
     // # Calculate new camera
     if (mouseDown) {
-      const newCameraX = cameraLX - e.movementX;
-      const newCameraY = cameraLY - e.movementY;
+      const newCameraX = cameraX - e.movementX;
+      const newCameraY = cameraY - e.movementY;
 
-      if (cameraLX < cameraBoundLX) {
-        cameraLX = cameraBoundLX;
-      } else if (cameraLX > cameraBoundRX) {
-        cameraLX = cameraBoundRX;
+      if (cameraX < cameraBoundLX) {
+        cameraX = cameraBoundLX;
+      } else if (cameraX > cameraBoundRX) {
+        cameraX = cameraBoundRX;
       } else {
-        cameraLX = newCameraX;
+        cameraX = newCameraX;
       }
 
-      if (cameraLY < cameraBoundLY) {
-        cameraLY = cameraBoundLY;
-      } else if (cameraLY > cameraBoundRY) {
-        cameraLY = cameraBoundRY;
+      if (cameraY < cameraBoundLY) {
+        cameraY = cameraBoundLY;
+      } else if (cameraY > cameraBoundRY) {
+        cameraY = cameraBoundRY;
       } else {
-        cameraLY = newCameraY;
+        cameraY = newCameraY;
       }
     }
 
     // # Apply camera to scene
-    sceneContainer.x = -cameraLX;
-    sceneContainer.y = -cameraLY;
+    sceneContainer.x = -cameraX;
+    sceneContainer.y = -cameraY;
 
     if (sceneContainer.x > sceneBoundLX) {
       sceneContainer.x = sceneBoundLX;
-    } else if (sceneContainer.x < sceneBoundRX) {
-      sceneContainer.x = sceneBoundRX;
+    } else if (sceneContainer.x < -cameraBoundRX) {
+      sceneContainer.x = -cameraBoundRX;
     } else if (sceneContainer.y > sceneBoundTY) {
       sceneContainer.y = sceneBoundTY;
     }
 
-    if (sceneContainer.y < sceneBoundRY) {
-      sceneContainer.y = sceneBoundRY;
+    if (sceneContainer.y < -cameraBoundRY) {
+      sceneContainer.y = -cameraBoundRY;
     } else if (sceneContainer.y > sceneBoundTY) {
       sceneContainer.y = sceneBoundTY;
-    } else if (sceneContainer.y < sceneBoundRY) {
-      sceneContainer.y = sceneBoundRY;
+    } else if (sceneContainer.y < -cameraBoundRY) {
+      sceneContainer.y = -cameraBoundRY;
     }
   });
 
