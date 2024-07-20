@@ -21,6 +21,7 @@ import {
 import { hasSchema, tryTable } from '../../../libs/tecs/archetype';
 import { Query } from '../../../libs/tecs/query';
 import { Application, Assets, Container, Graphics, Sprite, Texture } from 'pixi.js';
+import { Camera, WorldScene } from './engine';
 
 // # Schemas
 
@@ -77,6 +78,30 @@ export const Clicked = (app: Application): System => {
   };
 };
 
+export const ApplyCameraToScene = (camera: Camera, worldScene: WorldScene): System => {
+  return () => {
+    // # Apply camera to scene
+    worldScene.container.x = -camera.x;
+    worldScene.container.y = -camera.y;
+
+    if (worldScene.container.x > worldScene.boundLX) {
+      worldScene.container.x = worldScene.boundLX;
+    } else if (worldScene.container.x < -camera.boundRX) {
+      worldScene.container.x = -camera.boundRX;
+    } else if (worldScene.container.y > worldScene.boundTY) {
+      worldScene.container.y = worldScene.boundTY;
+    }
+
+    if (worldScene.container.y < -camera.boundRY) {
+      worldScene.container.y = -camera.boundRY;
+    } else if (worldScene.container.y > worldScene.boundTY) {
+      worldScene.container.y = worldScene.boundTY;
+    } else if (worldScene.container.y < -camera.boundRY) {
+      worldScene.container.y = -camera.boundRY;
+    }
+  };
+};
+
 export const Draw = (world: World, app: Application): System => {
   const query = registerQuery(world, drawQuery);
 
@@ -108,9 +133,10 @@ export const Draw = (world: World, app: Application): System => {
   };
 };
 
-const fillSceneContainer = async (sceneSizeX: number, sceneSizeY: number, sceneContainer: Container) => {
+const fillSceneContainer = async (worldScene: WorldScene) => {
   const texture = (await Assets.load('assets/star.png')) as Texture;
 
+  // # Multiple elements
   // for (let i = 0; i < 1000; i++) {
   //   const scale = 1;
   //   const element = new Sprite({
@@ -132,98 +158,114 @@ const fillSceneContainer = async (sceneSizeX: number, sceneSizeY: number, sceneC
     scale: scale,
     anchor: 0.5,
   });
-  sceneContainer.addChild(ltElement);
+  worldScene.container.addChild(ltElement);
 
   const rtElement = new Sprite({
     texture: texture,
-    x: sceneSizeX - (texture.width / 2) * scale,
+    x: worldScene.size.x - (texture.width / 2) * scale,
     y: 0 + (texture.height / 2) * scale,
     scale: scale,
     anchor: 0.5,
   });
-  sceneContainer.addChild(rtElement);
+  worldScene.container.addChild(rtElement);
 
   const lbElement = new Sprite({
     texture: texture,
     x: 0 + (texture.width / 2) * scale,
-    y: sceneSizeY - (texture.height / 2) * scale,
+    y: worldScene.size.y - (texture.height / 2) * scale,
     scale: scale,
     anchor: 0.5,
   });
-  sceneContainer.addChild(lbElement);
+  worldScene.container.addChild(lbElement);
 
   const rbElement = new Sprite({
     texture: texture,
-    x: sceneSizeX - (texture.width / 2) * scale,
-    y: sceneSizeY - (texture.height / 2) * scale,
+    x: worldScene.size.x - (texture.width / 2) * scale,
+    y: worldScene.size.y - (texture.height / 2) * scale,
     scale: scale,
     anchor: 0.5,
   });
-  sceneContainer.addChild(rbElement);
+  worldScene.container.addChild(rbElement);
 
   const centerElement = new Sprite({
     texture: texture,
-    x: sceneSizeX / 2 - texture.width / 2 + (texture.width / 2) * scale,
-    y: sceneSizeY / 2 - texture.height / 2 + (texture.height / 2) * scale,
+    x: worldScene.size.x / 2 - texture.width / 2 + (texture.width / 2) * scale,
+    y: worldScene.size.y / 2 - texture.height / 2 + (texture.height / 2) * scale,
     scale: scale,
     anchor: 0.5,
   });
-  sceneContainer.addChild(centerElement);
+  worldScene.container.addChild(centerElement);
 
   // sort the trees by their y position
-  sceneContainer.children.sort((a, b) => a.position.y - b.position.y);
+  worldScene.container.children.sort((a, b) => a.position.y - b.position.y);
 };
 
 export const initWorld = async (app: Application) => {
   const world = newWorld();
 
   // # Main Scene Container
-  // ## Data
+  // ## Initial props
   const sceneSizeX = 2000;
   const sceneSizeY = 1000;
   const sceneBoundLX = 0;
   const sceneBoundTY = 0;
-  // let sceneBoundRX = -sceneSizeX;
-  // let sceneBoundBY = -sceneSizeY;
+  // const sceneBoundRX = -sceneSizeX;
+  // const sceneBoundBY = -sceneSizeY;
 
   // ## Container
   const sceneContainer = new Container({
     isRenderGroup: true,
   });
 
+  // # Camera
+  const camera = {
+    x: 0,
+    y: 0,
+    width: app.renderer.width,
+    height: app.renderer.height,
+    boundLX: 0,
+    boundLY: 0,
+    boundRX: sceneSizeX - app.renderer.width,
+    boundRY: sceneSizeY - app.renderer.height,
+  };
+
+  const worldScene: WorldScene = {
+    container: sceneContainer,
+    size: {
+      x: sceneSizeX,
+      y: sceneSizeY,
+    },
+    cameras: {
+      main: camera,
+    },
+    boundLX: sceneBoundLX,
+    boundTY: sceneBoundTY,
+  };
+
+  // # Add to stage
   app.stage.addChild(sceneContainer);
 
   // ## Fill with some data
-  fillSceneContainer(sceneSizeX, sceneSizeY, sceneContainer);
-
-  // # Camera
-  let cameraX = 0;
-  let cameraY = 0;
-  let cameraWidth = app.renderer.width;
-  let cameraHeight = app.renderer.height;
-  let cameraBoundLX = 0;
-  let cameraBoundLY = 0;
-  let cameraBoundRX = sceneSizeX - cameraWidth;
-  let cameraBoundRY = sceneSizeY - cameraHeight;
+  fillSceneContainer(worldScene);
 
   // ## On resize change camera last coordinates
   app.canvas.addEventListener('resize', () => {
-    cameraWidth = app.renderer.width;
-    cameraHeight = app.renderer.width;
-    cameraBoundRX = sceneSizeX - cameraWidth;
-    cameraBoundRY = sceneSizeY - cameraHeight;
+    camera.width = app.renderer.width;
+    camera.height = app.renderer.width;
+    camera.boundRX = worldScene.size.x - camera.width;
+    camera.boundRY = worldScene.size.y - camera.height;
 
-    if (cameraX > cameraBoundRX) {
-      cameraX = cameraBoundRX;
+    if (camera.x > camera.boundRX) {
+      camera.x = camera.boundRX;
     }
-    if (cameraY > cameraBoundRY) {
-      cameraY = cameraBoundRY;
+    if (camera.y > camera.boundRY) {
+      camera.y = camera.boundRY;
     }
   });
 
   // ## Set camera to center
-  cameraX = sceneSizeX / 2 - cameraWidth / 2;
-  cameraY = sceneSizeY / 2 - cameraHeight / 2;
+  camera.x = worldScene.size.x / 2 - camera.width / 2;
+  camera.y = worldScene.size.y / 2 - camera.height / 2;
 
   // # Move by mouse
   let mouseDown = false;
@@ -239,44 +281,24 @@ export const initWorld = async (app: Application) => {
   app.canvas.addEventListener('mousemove', (e) => {
     // # Calculate new camera
     if (mouseDown) {
-      const newCameraX = cameraX - e.movementX;
-      const newCameraY = cameraY - e.movementY;
+      const newCameraX = camera.x - e.movementX;
+      const newCameraY = camera.y - e.movementY;
 
-      if (cameraX < cameraBoundLX) {
-        cameraX = cameraBoundLX;
-      } else if (cameraX > cameraBoundRX) {
-        cameraX = cameraBoundRX;
+      if (camera.x < camera.boundLX) {
+        camera.x = camera.boundLX;
+      } else if (camera.x > camera.boundRX) {
+        camera.x = camera.boundRX;
       } else {
-        cameraX = newCameraX;
+        camera.x = newCameraX;
       }
 
-      if (cameraY < cameraBoundLY) {
-        cameraY = cameraBoundLY;
-      } else if (cameraY > cameraBoundRY) {
-        cameraY = cameraBoundRY;
+      if (camera.y < camera.boundLY) {
+        camera.y = camera.boundLY;
+      } else if (camera.y > camera.boundRY) {
+        camera.y = camera.boundRY;
       } else {
-        cameraY = newCameraY;
+        camera.y = newCameraY;
       }
-    }
-
-    // # Apply camera to scene
-    sceneContainer.x = -cameraX;
-    sceneContainer.y = -cameraY;
-
-    if (sceneContainer.x > sceneBoundLX) {
-      sceneContainer.x = sceneBoundLX;
-    } else if (sceneContainer.x < -cameraBoundRX) {
-      sceneContainer.x = -cameraBoundRX;
-    } else if (sceneContainer.y > sceneBoundTY) {
-      sceneContainer.y = sceneBoundTY;
-    }
-
-    if (sceneContainer.y < -cameraBoundRY) {
-      sceneContainer.y = -cameraBoundRY;
-    } else if (sceneContainer.y > sceneBoundTY) {
-      sceneContainer.y = sceneBoundTY;
-    } else if (sceneContainer.y < -cameraBoundRY) {
-      sceneContainer.y = -cameraBoundRY;
     }
   });
 
@@ -294,6 +316,7 @@ export const initWorld = async (app: Application) => {
   registerSystem(world, Draw(world, app));
   registerSystem(world, Clicked(app));
   registerSystem(world, ViewEvents(app));
+  registerSystem(world, ApplyCameraToScene(camera, worldScene));
 
   // const entity = spawnEntity(world);
   // const circle = new Graphics().circle(0, 0, 50);
