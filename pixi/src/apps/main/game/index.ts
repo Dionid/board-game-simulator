@@ -1,7 +1,15 @@
 import { newWorld, registerSystem } from '../../../libs/tecs';
 import { Application, Assets, Sprite, Texture } from 'pixi.js';
 import { createWorldScene, setCameraPosition, WorldScene } from './engine';
-import { applyCameraToContainer, render, mapMouseInput, moveCameraByDragging, zoom, moveCamera } from './ecs';
+import {
+  applyCameraToContainer,
+  render,
+  mapMouseInput,
+  moveCameraByDragging,
+  zoom,
+  moveCamera,
+  applyWorldBoundariesToCamera,
+} from './ecs';
 
 const fillSceneContainer = async (worldScene: WorldScene) => {
   const texture = (await Assets.load('assets/star.png')) as Texture;
@@ -117,14 +125,31 @@ export const initWorld = async (app: Application) => {
     },
   });
 
+  const camera = worldScene.cameras.main;
+
+  // ## On resize change camera last coordinates
+  app.canvas.addEventListener('resize', () => {
+    camera.size.width = app.renderer.width;
+    camera.size.height = app.renderer.width;
+
+    // TODO: Maybe move
+    // if (camera.position.x > worldScene.size.width - camera.width) {
+    //   camera.position.x = worldScene.size.width - camera.width;
+    // }
+
+    // if (camera.position.y > worldScene.size.height - camera.height) {
+    //   camera.position.y = worldScene.size.height - camera.height;
+    // }
+  });
+
   // # Add to stage
   app.stage.addChild(worldScene.container);
 
   // # Center camera
   setCameraPosition(
-    worldScene.cameras.main,
-    worldScene.size.width / 2 - worldScene.cameras.main.width / 2,
-    worldScene.size.height / 2 - worldScene.cameras.main.height / 2
+    camera,
+    worldScene.size.width / 2 - camera.size.width / 2,
+    worldScene.size.height / 2 - camera.size.height / 2
   );
 
   // ## Fill with some data
@@ -136,6 +161,7 @@ export const initWorld = async (app: Application) => {
   // # Camera
   registerSystem(world, moveCameraByDragging(worldScene));
   registerSystem(world, zoom(worldScene));
+  registerSystem(world, applyWorldBoundariesToCamera(worldScene));
   registerSystem(world, moveCamera(worldScene));
   // # Apply camera
   registerSystem(world, applyCameraToContainer(worldScene));

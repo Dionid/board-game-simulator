@@ -14,16 +14,15 @@ export type Size = {
 
 export type Camera = {
   position: Vector2;
-  width: number;
-  height: number;
+  size: Size;
   scale: number;
-  target: {
-    position: Vector2;
-    scale: number;
-  };
   scaled: {
     position: Vector2;
     size: Size;
+  };
+  target: {
+    position: Vector2;
+    scale: number;
   };
 };
 
@@ -115,8 +114,10 @@ export const createWorldScene = (
       },
     },
     scale,
-    width: size.width,
-    height: size.height,
+    size: {
+      width: size.width,
+      height: size.height,
+    },
     target: {
       position: {
         x: position.x,
@@ -125,21 +126,6 @@ export const createWorldScene = (
       scale,
     },
   };
-
-  // ## On resize change camera last coordinates
-  app.canvas.addEventListener('resize', () => {
-    camera.width = app.renderer.width;
-    camera.height = app.renderer.width;
-
-    // TODO: Maybe move
-    if (camera.position.x > worldScene.size.width - camera.width) {
-      camera.position.x = worldScene.size.width - camera.width;
-    }
-
-    if (camera.position.y > worldScene.size.height - camera.height) {
-      camera.position.y = worldScene.size.height - camera.height;
-    }
-  });
 
   const worldScene: WorldScene = {
     app,
