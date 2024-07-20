@@ -20,7 +20,7 @@ import {
 } from '../../../libs/tecs';
 import { hasSchema, tryTable } from '../../../libs/tecs/archetype';
 import { Query } from '../../../libs/tecs/query';
-import { Application, Graphics } from 'pixi.js';
+import { Application, Assets, Container, Graphics, Sprite, Texture } from 'pixi.js';
 
 // # Schemas
 
@@ -73,18 +73,6 @@ export const ViewEvents = (app: Application): System => {
 export const Clicked = (app: Application): System => {
   return ({ world, deltaFrameTime }) => {
     for (const event of clicked) {
-      const entity = spawnEntity(world);
-
-      const circle = new Graphics().circle(0, 0, 50).fill('red');
-      setComponent(world, entity, View);
-      setComponent(world, entity, pGraphics, { value: circle });
-      setComponent(world, entity, Position, { x: event.position.x, y: event.position.y });
-      setComponent(world, entity, Color, { value: 'red' });
-
-      circle.eventMode = 'static';
-      circle.on('pointerover', () => {
-        Topic.emit(viewEvents, { type: 'pointerOver', entity });
-      });
     }
   };
 };
@@ -120,8 +108,76 @@ export const Draw = (world: World, app: Application): System => {
   };
 };
 
-export const initWorld = (app: Application) => {
+export const initWorld = async (app: Application) => {
   const world = newWorld();
+
+  // # Main Scene
+  const worldContainer = new Container({
+    isRenderGroup: true,
+  });
+
+  const worldSizeX = 5000;
+  const worldSizeY = 5000;
+  const worldBoundLX = 0;
+  const worldBoundRX = -worldSizeX + app.renderer.width;
+  const worldBoundLY = 0;
+  const worldBoundRY = -worldSizeY + app.renderer.height;
+
+  app.stage.addChild(worldContainer);
+
+  // # Move by mouse
+  let mouseDown = false;
+
+  app.canvas.addEventListener('mousedown', (e) => {
+    mouseDown = true;
+  });
+
+  app.canvas.addEventListener('mouseup', (e) => {
+    mouseDown = false;
+  });
+
+  const arrowTexture = await Assets.load('assets/arrow_E.png');
+
+  for (let i = 0; i < 1000; i++) {
+    const tree = new Sprite({
+      texture: arrowTexture,
+      x: Math.random() * worldSizeX,
+      y: Math.random() * worldSizeY,
+      scale: 0.25,
+      anchor: 0.5,
+    });
+
+    worldContainer.addChild(tree);
+  }
+
+  // sort the trees by their y position
+  worldContainer.children.sort((a, b) => a.position.y - b.position.y);
+
+  app.canvas.addEventListener('mousemove', (e) => {
+    if (mouseDown) {
+      const newX = worldContainer.x + e.movementX;
+      const newY = worldContainer.y + e.movementY;
+
+      if (newX > worldBoundLX) {
+        worldContainer.x = worldBoundLX;
+      } else if (newX < worldBoundRX) {
+        worldContainer.x = worldBoundRX;
+      } else if (newX < worldBoundLX && newX > worldBoundRX) {
+        worldContainer.x = newX;
+      }
+
+      if (newY > worldBoundLY) {
+        worldContainer.y = worldBoundLY;
+      } else if (newY < worldBoundRY) {
+        worldContainer.y = worldBoundRY;
+      } else if (newY < worldBoundLY && newY > worldBoundRY) {
+        worldContainer.y = newY;
+      }
+
+      // worldContainer.x -= e.movementX;
+      // worldContainer.y -= e.movementY;
+    }
+  });
 
   // # Topics
   registerTopic(world, clicked);
@@ -138,13 +194,13 @@ export const initWorld = (app: Application) => {
   registerSystem(world, Clicked(app));
   registerSystem(world, ViewEvents(app));
 
-  const entity = spawnEntity(world);
-  const circle = new Graphics().circle(0, 0, 50);
-  setComponent(world, entity, View);
-  setComponent(world, entity, pGraphics, { value: circle });
-  setComponent(world, entity, Position, { x: 100, y: 100 });
-  setComponent(world, entity, Size, { width: 100, height: 100 });
-  setComponent(world, entity, Color, { value: 'red' });
+  // const entity = spawnEntity(world);
+  // const circle = new Graphics().circle(0, 0, 50);
+  // setComponent(world, entity, View);
+  // setComponent(world, entity, pGraphics, { value: circle });
+  // setComponent(world, entity, Position, { x: 100, y: 100 });
+  // setComponent(world, entity, Size, { width: 100, height: 100 });
+  // setComponent(world, entity, Color, { value: 'red' });
 
   return world;
 };
