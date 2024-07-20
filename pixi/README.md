@@ -22,4 +22,6 @@
 
 1. camera.scenePosition calculates in mapMouseInput on mousemove event
 1. camera.position
-    1. 
+
+1. 
+

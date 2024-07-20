@@ -55,34 +55,57 @@ export function moveCameraByDragging(worldScene: WorldScene): System {
   const camera = worldScene.cameras.main;
   const mouse = worldScene.input.mouse;
 
+  const cameraSpeed = 1.2;
+
   return () => {
     // # Calculate new camera
     if (mouse.down) {
-      const deltaX = mouse.delta.clientPosition.x;
-      const deltaY = mouse.delta.clientPosition.y;
-
-      const newCameraX = camera.position.x - deltaX;
-      const newCameraY = camera.position.y - deltaY;
+      let newCameraX = camera.position.x - mouse.delta.clientPosition.x * cameraSpeed;
+      let newCameraY = camera.position.y - mouse.delta.clientPosition.y * cameraSpeed;
 
       if (newCameraX < 0) {
-        camera.position.x = 0;
+        newCameraX = 0;
       } else if (newCameraX > worldScene.size.width - camera.width) {
-        camera.position.x = worldScene.size.width - camera.width;
-      } else {
-        camera.position.x = newCameraX;
+        newCameraX = worldScene.size.width - camera.width;
       }
 
       if (newCameraY < 0) {
-        camera.position.y = 0;
+        newCameraY = 0;
       } else if (newCameraY > worldScene.size.height - camera.height) {
-        camera.position.y = worldScene.size.height - camera.height;
-      } else {
-        camera.position.y = newCameraY;
+        newCameraY = worldScene.size.height - camera.height;
       }
 
-      camera.scaled.position.x = camera.position.x / camera.scale;
-      camera.scaled.position.y = camera.position.y / camera.scale;
+      camera.target.position.x = newCameraX;
+      camera.target.position.y = newCameraY;
     }
+  };
+}
+
+export function moveCamera(worldScene: WorldScene): System {
+  const camera = worldScene.cameras.main;
+
+  return () => {
+    const newCameraX = camera.target.position.x;
+    const newCameraY = camera.target.position.y;
+
+    // # Calculate steps
+    let stepX = (newCameraX - camera.position.x) * 1;
+    let stepY = (newCameraY - camera.position.y) * 1;
+
+    // # Apply step threshold
+    if (Math.abs(stepX) < 0.0001) {
+      stepX = newCameraX - camera.position.x;
+    }
+
+    if (Math.abs(stepY) < 0.0001) {
+      stepY = newCameraY - camera.position.y;
+    }
+
+    camera.position.x += stepX;
+    camera.position.y += stepY;
+
+    camera.scaled.position.x = camera.position.x / camera.scale;
+    camera.scaled.position.y = camera.position.y / camera.scale;
   };
 }
 

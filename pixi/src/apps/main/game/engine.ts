@@ -18,6 +18,7 @@ export type Camera = {
   height: number;
   scale: number;
   target: {
+    position: Vector2;
     scale: number;
   };
   scaled: {
@@ -117,6 +118,10 @@ export const createWorldScene = (
     width: size.width,
     height: size.height,
     target: {
+      position: {
+        x: position.x,
+        y: position.y,
+      },
       scale,
     },
   };
