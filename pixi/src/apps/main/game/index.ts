@@ -1,7 +1,7 @@
 import { newWorld, registerSystem } from '../../../libs/tecs';
 import { Application, Assets, Sprite, Texture } from 'pixi.js';
 import { createWorldScene, setCameraPosition, WorldScene } from './engine';
-import { ApplyCameraToContainer, Draw, mapMouseInput, MoveCameraByDragging, Zoom } from './ecs';
+import { applyCameraToContainer, draw, mapMouseInput, moveCameraByDragging, zoom } from './ecs';
 
 const fillSceneContainer = async (worldScene: WorldScene) => {
   const texture = (await Assets.load('assets/star.png')) as Texture;
@@ -123,23 +123,21 @@ export const initWorld = async (app: Application) => {
   app.stage.addChild(worldScene.container);
 
   // # Center camera
-  // setCameraPosition(
-  //   worldScene.cameras.main,
-  //   worldScene.size.width / 2 - camera.width / 2,
-  //   worldScene.size.height / 2 - camera.height / 2
-  // );
+  setCameraPosition(
+    worldScene.cameras.main,
+    worldScene.size.width / 2 - worldScene.cameras.main.width / 2,
+    worldScene.size.height / 2 - worldScene.cameras.main.height / 2
+  );
 
   // ## Fill with some data
   fillSceneContainer(worldScene);
 
-  // # Camera movement
-
   // # Systems
   registerSystem(world, mapMouseInput(worldScene), 'preUpdate');
-  registerSystem(world, MoveCameraByDragging(worldScene));
-  registerSystem(world, ApplyCameraToContainer(worldScene));
-  registerSystem(world, Zoom(worldScene), 'postUpdate');
-  registerSystem(world, Draw(world, app), 'postUpdate');
+  registerSystem(world, moveCameraByDragging(worldScene));
+  registerSystem(world, zoom(worldScene), 'postUpdate');
+  registerSystem(world, applyCameraToContainer(worldScene));
+  registerSystem(world, draw(world, app), 'postUpdate');
 
   // const entity = spawnEntity(world);
   // const circle = new Graphics().circle(0, 0, 50);

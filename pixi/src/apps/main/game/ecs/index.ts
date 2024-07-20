@@ -113,7 +113,7 @@ export function mapMouseInput(worldScene: WorldScene): System {
   };
 }
 
-export function MoveCameraByDragging(worldScene: WorldScene): System {
+export function moveCameraByDragging(worldScene: WorldScene): System {
   const camera = worldScene.cameras.main;
 
   return () => {
@@ -147,7 +147,7 @@ export function MoveCameraByDragging(worldScene: WorldScene): System {
   };
 }
 
-export const ApplyCameraToContainer = (worldScene: WorldScene): System => {
+export const applyCameraToContainer = (worldScene: WorldScene): System => {
   const camera = worldScene.cameras.main;
 
   return () => {
@@ -173,8 +173,11 @@ export const ApplyCameraToContainer = (worldScene: WorldScene): System => {
   };
 };
 
-export const Zoom = (worldScene: WorldScene): System => {
+export const zoom = (worldScene: WorldScene): System => {
   const camera = worldScene.cameras.main;
+  const container = worldScene.container;
+
+  // let newScale = camera.scale;
 
   window.addEventListener('keydown', (e) => {
     // if arrow up
@@ -196,44 +199,34 @@ export const Zoom = (worldScene: WorldScene): System => {
       newScale = camera.height / worldScene.size.height;
     }
 
-    camera.scale = newScale;
+    camera.target.scale = newScale;
   });
 
+  if (typeof worldScene.container.scale === 'number') {
+    throw new Error('Container scale is a number');
+  }
+
   return ({ world, deltaFrameTime }) => {
-    if (typeof worldScene.container.scale === 'number') {
-      if (worldScene.cameras.main.scale === worldScene.container.scale) {
-        return;
-      }
-      worldScene.container.scale += (worldScene.cameras.main.scale - worldScene.container.scale) * 0.1;
-    } else {
-      if (
-        worldScene.cameras.main.scale === worldScene.container.scale.x &&
-        worldScene.cameras.main.scale === worldScene.container.scale.y
-      ) {
-        return;
-      }
+    const newScale = camera.target.scale;
 
-      let stepX = (worldScene.cameras.main.scale - worldScene.container.scale.x) * 0.1;
-      let stepY = (worldScene.cameras.main.scale - worldScene.container.scale.x) * 0.1;
-
-      if (Math.abs(stepX) < 0.0001) {
-        stepX = worldScene.cameras.main.scale - worldScene.container.scale.x;
-      }
-
-      if (Math.abs(stepY) < 0.0001) {
-        stepY = worldScene.cameras.main.scale - worldScene.container.scale.x;
-      }
-
-      const newScaleX = worldScene.container.scale.x + stepX;
-      const newScaleY = worldScene.container.scale.y + stepY;
-
-      worldScene.container.scale.x = newScaleX;
-      worldScene.container.scale.y = newScaleY;
+    if (camera.scale === newScale) {
+      return;
     }
+
+    let step = (newScale - camera.scale) * 0.1;
+
+    if (Math.abs(step) < 0.0001) {
+      step = newScale - camera.scale;
+    }
+
+    camera.scale += step;
+
+    container.scale.x = camera.scale;
+    container.scale.y = camera.scale;
   };
 };
 
-export const Draw = (world: World, app: Application): System => {
+export const draw = (world: World, app: Application): System => {
   const query = registerQuery(world, drawQuery);
 
   return ({ world, deltaFrameTime }) => {

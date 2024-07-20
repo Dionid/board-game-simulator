@@ -15,6 +15,9 @@ export type Camera = {
   boundLY: number;
   boundRX: number;
   boundRY: number;
+  target: {
+    scale: number;
+  };
 };
 
 export function setCameraPosition(camera: Camera, x: number, y: number) {
@@ -97,6 +100,9 @@ export const createWorldScene = (
     boundLY: config?.camera?.boundLY ?? 0,
     boundRX: config?.camera?.boundRX ?? 0,
     boundRY: config?.camera?.boundRY ?? 0,
+    target: {
+      scale: 1,
+    },
   };
 
   camera.scaledPosition.x = camera.position.x / camera.scale;
