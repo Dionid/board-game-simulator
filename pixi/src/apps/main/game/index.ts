@@ -1,6 +1,6 @@
 import { newWorld, registerSystem, Topic, registerTopic } from '../../../libs/tecs';
-import { Application, Assets, Container, Sprite, Texture } from 'pixi.js';
-import { Camera, WorldScene } from './engine';
+import { Application, Assets, Sprite, Texture } from 'pixi.js';
+import { createWorldScene, WorldScene } from './engine';
 import { ApplyCameraToScene, Clicked, clicked, Draw, ViewEvents, viewEvents } from './ecs';
 
 const fillSceneContainer = async (worldScene: WorldScene) => {
@@ -79,43 +79,34 @@ export const initWorld = async (app: Application) => {
   const sceneSizeY = 1000;
   const sceneBoundLX = 0;
   const sceneBoundTY = 0;
-  // const sceneBoundRX = -sceneSizeX;
-  // const sceneBoundBY = -sceneSizeY;
 
-  // ## Container
-  const sceneContainer = new Container({
-    isRenderGroup: true,
+  const worldScene = createWorldScene({
+    camera: {
+      position: {
+        x: 0,
+        y: 0,
+      },
+      width: app.renderer.width,
+      height: app.renderer.height,
+      boundLX: 0,
+      boundLY: 0,
+      boundRX: sceneSizeX - app.renderer.width,
+      boundRY: sceneSizeY - app.renderer.height,
+    },
+    worldScene: {
+      size: {
+        x: sceneSizeX,
+        y: sceneSizeY,
+      },
+      boundLX: sceneBoundLX,
+      boundTY: sceneBoundTY,
+    },
   });
 
-  // # Camera
-  const camera: Camera = {
-    position: {
-      x: 0,
-      y: 0,
-    },
-    width: app.renderer.width,
-    height: app.renderer.height,
-    boundLX: 0,
-    boundLY: 0,
-    boundRX: sceneSizeX - app.renderer.width,
-    boundRY: sceneSizeY - app.renderer.height,
-  };
-
-  const worldScene: WorldScene = {
-    container: sceneContainer,
-    size: {
-      x: sceneSizeX,
-      y: sceneSizeY,
-    },
-    cameras: {
-      main: camera,
-    },
-    boundLX: sceneBoundLX,
-    boundTY: sceneBoundTY,
-  };
+  const camera = worldScene.cameras.main;
 
   // # Add to stage
-  app.stage.addChild(sceneContainer);
+  app.stage.addChild(worldScene.container);
 
   // ## Fill with some data
   fillSceneContainer(worldScene);
@@ -183,7 +174,7 @@ export const initWorld = async (app: Application) => {
   });
 
   // # Systems
-  registerSystem(world, ApplyCameraToScene(camera, worldScene));
+  registerSystem(world, ApplyCameraToScene(worldScene));
   registerSystem(world, Draw(world, app), 'postUpdate');
   registerSystem(world, Clicked(app), 'postUpdate');
   registerSystem(world, ViewEvents(app), 'postUpdate');

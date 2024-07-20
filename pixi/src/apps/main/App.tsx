@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import './App.css';
 import { Application, Assets, Container, Sprite, Texture } from 'pixi.js';
-import { initWorld } from './core';
+import { initWorld } from './game';
 import { step } from '../../libs/tecs';
 
 function App() {

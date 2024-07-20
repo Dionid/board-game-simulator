@@ -72,7 +72,9 @@ export const Clicked = (app: Application): System => {
   };
 };
 
-export const ApplyCameraToScene = (camera: Camera, worldScene: WorldScene): System => {
+export const ApplyCameraToScene = (worldScene: WorldScene): System => {
+  const camera = worldScene.cameras.main;
+
   return () => {
     // # Apply camera to scene
     worldScene.container.x = -camera.position.x;
