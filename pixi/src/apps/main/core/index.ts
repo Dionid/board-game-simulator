@@ -108,22 +108,62 @@ export const Draw = (world: World, app: Application): System => {
   };
 };
 
+const fillSceneContainer = async (sceneSizeX: number, sceneSizeY: number, sceneContainer: Container) => {
+  const arrowTexture = await Assets.load('assets/arrow_E.png');
+
+  for (let i = 0; i < 1000; i++) {
+    const tree = new Sprite({
+      texture: arrowTexture,
+      x: Math.random() * sceneSizeX,
+      y: Math.random() * sceneSizeY,
+      scale: 0.25,
+      anchor: 0.5,
+    });
+
+    sceneContainer.addChild(tree);
+  }
+
+  // sort the trees by their y position
+  sceneContainer.children.sort((a, b) => a.position.y - b.position.y);
+};
+
 export const initWorld = async (app: Application) => {
   const world = newWorld();
 
-  // # Main Scene
-  const worldContainer = new Container({
+  // # Main Scene Container
+  const sceneContainer = new Container({
     isRenderGroup: true,
   });
 
-  const worldSizeX = 5000;
-  const worldSizeY = 5000;
-  const worldBoundLX = 0;
-  const worldBoundRX = -worldSizeX + app.renderer.width;
-  const worldBoundLY = 0;
-  const worldBoundRY = -worldSizeY + app.renderer.height;
+  app.stage.addChild(sceneContainer);
 
-  app.stage.addChild(worldContainer);
+  const sceneSizeX = 5000;
+  const sceneSizeY = 5000;
+  const sceneBoundLX = 0;
+  const sceneBoundTY = 0;
+  let sceneBoundRX = -sceneSizeX + app.renderer.width;
+  let sceneBoundRY = -sceneSizeY + app.renderer.height;
+
+  // ## Fill with some data
+  fillSceneContainer(sceneSizeX, sceneSizeY, sceneContainer);
+
+  // # Camera
+  let cameraLX = 0;
+  let cameraLY = 0;
+  let cameraBoundLX = 0;
+  let cameraBoundLY = 0;
+  let cameraBoundRX = -sceneBoundRX;
+  let cameraBoundRY = -sceneBoundRY;
+  // let cameraRX = app.renderer.width;
+  // let cameraRY = app.renderer.height;
+
+  app.canvas.addEventListener('resize', () => {
+    sceneBoundRX = -sceneSizeX + app.renderer.width;
+    sceneBoundRY = -sceneSizeY + app.renderer.height;
+
+    // cameraRX = app.renderer.width;
+    // cameraRY = app.renderer.height;
+  });
 
   // # Move by mouse
   let mouseDown = false;
@@ -136,46 +176,47 @@ export const initWorld = async (app: Application) => {
     mouseDown = false;
   });
 
-  const arrowTexture = await Assets.load('assets/arrow_E.png');
-
-  for (let i = 0; i < 1000; i++) {
-    const tree = new Sprite({
-      texture: arrowTexture,
-      x: Math.random() * worldSizeX,
-      y: Math.random() * worldSizeY,
-      scale: 0.25,
-      anchor: 0.5,
-    });
-
-    worldContainer.addChild(tree);
-  }
-
-  // sort the trees by their y position
-  worldContainer.children.sort((a, b) => a.position.y - b.position.y);
-
   app.canvas.addEventListener('mousemove', (e) => {
+    // # Calculate new camera
     if (mouseDown) {
-      const newX = worldContainer.x + e.movementX;
-      const newY = worldContainer.y + e.movementY;
+      const newCameraX = cameraLX - e.movementX;
+      const newCameraY = cameraLY - e.movementY;
 
-      if (newX > worldBoundLX) {
-        worldContainer.x = worldBoundLX;
-      } else if (newX < worldBoundRX) {
-        worldContainer.x = worldBoundRX;
-      } else if (newX < worldBoundLX && newX > worldBoundRX) {
-        worldContainer.x = newX;
+      if (cameraLX < cameraBoundLX) {
+        cameraLX = cameraBoundLX;
+      } else if (cameraLX > cameraBoundRX) {
+        cameraLX = cameraBoundRX;
+      } else {
+        cameraLX = newCameraX;
       }
 
-      if (newY > worldBoundLY) {
-        worldContainer.y = worldBoundLY;
-      } else if (newY < worldBoundRY) {
-        worldContainer.y = worldBoundRY;
-      } else if (newY < worldBoundLY && newY > worldBoundRY) {
-        worldContainer.y = newY;
+      if (cameraLY < cameraBoundLY) {
+        cameraLY = cameraBoundLY;
+      } else if (cameraLY > cameraBoundRY) {
+        cameraLY = cameraBoundRY;
+      } else {
+        cameraLY = newCameraY;
       }
+    }
 
-      // worldContainer.x -= e.movementX;
-      // worldContainer.y -= e.movementY;
+    // # Apply camera to scene
+    sceneContainer.x = -cameraLX;
+    sceneContainer.y = -cameraLY;
+
+    if (sceneContainer.x > sceneBoundLX) {
+      sceneContainer.x = sceneBoundLX;
+    } else if (sceneContainer.x < sceneBoundRX) {
+      sceneContainer.x = sceneBoundRX;
+    } else if (sceneContainer.y > sceneBoundTY) {
+      sceneContainer.y = sceneBoundTY;
+    }
+
+    if (sceneContainer.y < sceneBoundRY) {
+      sceneContainer.y = sceneBoundRY;
+    } else if (sceneContainer.y > sceneBoundTY) {
+      sceneContainer.y = sceneBoundTY;
+    } else if (sceneContainer.y < sceneBoundRY) {
+      sceneContainer.y = sceneBoundRY;
     }
   });
 
