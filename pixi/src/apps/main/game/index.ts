@@ -1,5 +1,5 @@
 import { newWorld, registerSystem } from '../../../libs/tecs';
-import { Application, Assets, Sprite, Texture } from 'pixi.js';
+import { Application, Assets, Container, Graphics, Sprite, Spritesheet, Texture, TilingSprite } from 'pixi.js';
 import { createWorldScene, setCameraPosition, WorldScene } from './engine';
 import {
   applyCameraToContainer,
@@ -10,6 +10,7 @@ import {
   moveCamera,
   applyWorldBoundariesToCamera,
 } from './ecs';
+import { initTileMap } from './engine/tilemap';
 
 const fillSceneContainer = async (worldScene: WorldScene) => {
   const texture = (await Assets.load('assets/star.png')) as Texture;
@@ -30,6 +31,8 @@ const fillSceneContainer = async (worldScene: WorldScene) => {
   //   sceneContainer.addChild(element);
   // }
 
+  const starsContrainer = new Container();
+
   const scale = 1;
   const ltElement = new Sprite({
     texture: texture,
@@ -41,7 +44,7 @@ const fillSceneContainer = async (worldScene: WorldScene) => {
       y: 0.5,
     },
   });
-  worldScene.container.addChild(ltElement);
+  starsContrainer.addChild(ltElement);
 
   const rtElement = new Sprite({
     texture: texture,
@@ -53,7 +56,7 @@ const fillSceneContainer = async (worldScene: WorldScene) => {
       y: 0.5,
     },
   });
-  worldScene.container.addChild(rtElement);
+  starsContrainer.addChild(rtElement);
 
   const lbElement = new Sprite({
     texture: texture,
@@ -65,7 +68,7 @@ const fillSceneContainer = async (worldScene: WorldScene) => {
       y: 0.5,
     },
   });
-  worldScene.container.addChild(lbElement);
+  starsContrainer.addChild(lbElement);
 
   const rbElement = new Sprite({
     texture: texture,
@@ -77,7 +80,7 @@ const fillSceneContainer = async (worldScene: WorldScene) => {
       y: 0.5,
     },
   });
-  worldScene.container.addChild(rbElement);
+  starsContrainer.addChild(rbElement);
 
   const centerElement = new Sprite({
     texture: texture,
@@ -89,10 +92,12 @@ const fillSceneContainer = async (worldScene: WorldScene) => {
       y: 0.5,
     },
   });
-  worldScene.container.addChild(centerElement);
+  starsContrainer.addChild(centerElement);
 
   // sort the trees by their y position
-  worldScene.container.children.sort((a, b) => a.position.y - b.position.y);
+  starsContrainer.children.sort((a, b) => a.position.y - b.position.y);
+
+  worldScene.container.addChild(starsContrainer);
 };
 
 export const initWorld = async (app: Application) => {
@@ -113,7 +118,7 @@ export const initWorld = async (app: Application) => {
     },
     worldScene: {
       size: {
-        x: 2000,
+        x: 1760,
         y: 1000,
       },
     },
@@ -148,6 +153,11 @@ export const initWorld = async (app: Application) => {
 
   // ## Fill with some data
   fillSceneContainer(worldScene);
+
+  const mapContainer = await initTileMap();
+
+  mapContainer.x = mapContainer.width / 2 + mapContainer.width / 6;
+  worldScene.container.addChild(mapContainer);
 
   // # Systems
   // ## Inputs
