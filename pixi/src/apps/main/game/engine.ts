@@ -17,10 +17,6 @@ export type Camera = {
   width: number;
   height: number;
   scale: number;
-  boundLX: number;
-  boundLY: number;
-  boundRX: number;
-  boundRY: number;
   target: {
     scale: number;
   };
@@ -63,8 +59,6 @@ export type WorldScene = {
   cameras: {
     main: Camera;
   };
-  boundLX: number;
-  boundTY: number;
 };
 
 export const createWorldScene = (
@@ -82,15 +76,11 @@ export const createWorldScene = (
     };
     worldScene?: {
       size?: Vector2;
-      boundLX?: number;
-      boundTY?: number;
     };
   }
 ): WorldScene => {
   const sceneSizeX = config?.worldScene?.size?.x ?? 2000;
   const sceneSizeY = config?.worldScene?.size?.y ?? 1000;
-  const sceneBoundLX = config?.worldScene?.boundLX ?? 0;
-  const sceneBoundTY = config?.worldScene?.boundLX ?? 0;
 
   // ## Container
   const sceneContainer = new Container({
@@ -126,10 +116,6 @@ export const createWorldScene = (
     scale,
     width: size.width,
     height: size.height,
-    boundLX: config?.camera?.boundLX ?? 0,
-    boundLY: config?.camera?.boundLY ?? 0,
-    boundRX: config?.camera?.boundRX ?? 0,
-    boundRY: config?.camera?.boundRY ?? 0,
     target: {
       scale,
     },
@@ -139,14 +125,16 @@ export const createWorldScene = (
   app.canvas.addEventListener('resize', () => {
     camera.width = app.renderer.width;
     camera.height = app.renderer.width;
-    camera.boundRX = worldScene.size.width - camera.width;
-    camera.boundRY = worldScene.size.height - camera.height;
+    // camera.boundRX = worldScene.size.width - camera.width;
+    // camera.boundRY = worldScene.size.height - camera.height;
 
-    if (camera.position.x > camera.boundRX) {
-      camera.position.x = camera.boundRX;
+    // TODO: Maybe move
+    if (camera.position.x > worldScene.size.width - camera.width) {
+      camera.position.x = worldScene.size.width - camera.width;
     }
-    if (camera.position.y > camera.boundRY) {
-      camera.position.y = camera.boundRY;
+
+    if (camera.position.y > worldScene.size.height - camera.height) {
+      camera.position.y = worldScene.size.height - camera.height;
     }
   });
 
@@ -206,8 +194,6 @@ export const createWorldScene = (
     cameras: {
       main: camera,
     },
-    boundLX: sceneBoundLX,
-    boundTY: sceneBoundTY,
   };
 
   (globalThis as any).__TECS_WORLD_SCENE__ = worldScene;

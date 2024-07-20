@@ -1,7 +1,7 @@
 import { newWorld, registerSystem } from '../../../libs/tecs';
 import { Application, Assets, Sprite, Texture } from 'pixi.js';
 import { createWorldScene, setCameraPosition, WorldScene } from './engine';
-import { applyCameraToContainer, draw, mapMouseInput, moveCameraByDragging, zoom } from './ecs';
+import { applyCameraToContainer, render, mapMouseInput, moveCameraByDragging, zoom } from './ecs';
 
 const fillSceneContainer = async (worldScene: WorldScene) => {
   const texture = (await Assets.load('assets/star.png')) as Texture;
@@ -114,8 +114,6 @@ export const initWorld = async (app: Application) => {
         x: 2000,
         y: 1000,
       },
-      boundLX: 0,
-      boundTY: 0.5,
     },
   });
 
@@ -133,11 +131,15 @@ export const initWorld = async (app: Application) => {
   fillSceneContainer(worldScene);
 
   // # Systems
-  registerSystem(world, mapMouseInput(worldScene), 'preUpdate');
+  // ## Inputs
+  registerSystem(world, mapMouseInput(worldScene));
+  // # Camera
   registerSystem(world, moveCameraByDragging(worldScene));
-  registerSystem(world, zoom(worldScene), 'postUpdate');
+  registerSystem(world, zoom(worldScene));
+  // # Apply camera
   registerSystem(world, applyCameraToContainer(worldScene));
-  registerSystem(world, draw(world, app), 'postUpdate');
+  // # Render
+  registerSystem(world, render(world, app), 'postUpdate');
 
   // const entity = spawnEntity(world);
   // const circle = new Graphics().circle(0, 0, 50);

@@ -58,27 +58,24 @@ export function moveCameraByDragging(worldScene: WorldScene): System {
   return () => {
     // # Calculate new camera
     if (mouse.down) {
-      // const deltaX = mouse.clientPosition.x - mouse.previous.clientPosition.x;
-      // const deltaY = mouse.clientPosition.y - mouse.previous.clientPosition.y;
-
       const deltaX = mouse.delta.clientPosition.x;
       const deltaY = mouse.delta.clientPosition.y;
 
       const newCameraX = camera.position.x - deltaX;
       const newCameraY = camera.position.y - deltaY;
 
-      if (camera.position.x < camera.boundLX) {
-        camera.position.x = camera.boundLX;
-      } else if (camera.position.x > camera.boundRX) {
-        camera.position.x = camera.boundRX;
+      if (newCameraX < 0) {
+        camera.position.x = 0;
+      } else if (newCameraX > worldScene.size.width - camera.width) {
+        camera.position.x = worldScene.size.width - camera.width;
       } else {
         camera.position.x = newCameraX;
       }
 
-      if (camera.position.y < camera.boundLY) {
-        camera.position.y = camera.boundLY;
-      } else if (camera.position.y > camera.boundRY) {
-        camera.position.y = camera.boundRY;
+      if (newCameraY < 0) {
+        camera.position.y = 0;
+      } else if (newCameraY > worldScene.size.height - camera.height) {
+        camera.position.y = worldScene.size.height - camera.height;
       } else {
         camera.position.y = newCameraY;
       }
@@ -94,33 +91,17 @@ export const applyCameraToContainer = (worldScene: WorldScene): System => {
   const container = worldScene.container;
 
   return () => {
-    // # Apply camera to scene
+    // # Position
     container.x = -camera.position.x;
     container.y = -camera.position.y;
-
-    if (container.x > worldScene.boundLX) {
-      container.x = worldScene.boundLX;
-    } else if (container.x < -camera.boundRX) {
-      container.x = -camera.boundRX;
-    } else if (container.y > worldScene.boundTY) {
-      container.y = worldScene.boundTY;
-    }
-
-    if (container.y < -camera.boundRY) {
-      container.y = -camera.boundRY;
-    } else if (container.y > worldScene.boundTY) {
-      container.y = worldScene.boundTY;
-    } else if (container.y < -camera.boundRY) {
-      container.y = -camera.boundRY;
-    }
+    // # Scale
+    container.scale.x = camera.scale;
+    container.scale.y = camera.scale;
   };
 };
 
 export const zoom = (worldScene: WorldScene): System => {
   const camera = worldScene.cameras.main;
-  const container = worldScene.container;
-
-  // let newScale = camera.scale;
 
   window.addEventListener('keydown', (e) => {
     // if arrow up
@@ -156,20 +137,19 @@ export const zoom = (worldScene: WorldScene): System => {
       return;
     }
 
+    // # Calculate step
     let step = (newScale - camera.scale) * 0.1;
 
+    // # Apply step threshold
     if (Math.abs(step) < 0.0001) {
       step = newScale - camera.scale;
     }
 
     camera.scale += step;
-
-    container.scale.x = camera.scale;
-    container.scale.y = camera.scale;
   };
 };
 
-export const draw = (world: World, app: Application): System => {
+export const render = (world: World, app: Application): System => {
   const query = registerQuery(world, drawQuery);
 
   return ({ world, deltaFrameTime }) => {
