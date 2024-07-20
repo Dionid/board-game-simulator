@@ -119,17 +119,15 @@ export const initWorld = async (app: Application) => {
     },
   });
 
-  const camera = worldScene.cameras.main;
-
   // # Add to stage
   app.stage.addChild(worldScene.container);
 
   // # Center camera
-  setCameraPosition(
-    camera,
-    worldScene.size.width / 2 - camera.width / 2,
-    worldScene.size.height / 2 - camera.height / 2
-  );
+  // setCameraPosition(
+  //   worldScene.cameras.main,
+  //   worldScene.size.width / 2 - camera.width / 2,
+  //   worldScene.size.height / 2 - camera.height / 2
+  // );
 
   // ## Fill with some data
   fillSceneContainer(worldScene);

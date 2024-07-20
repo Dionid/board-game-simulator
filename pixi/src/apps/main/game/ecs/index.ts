@@ -184,52 +184,52 @@ export const Zoom = (worldScene: WorldScene): System => {
 
     const delta = e.key === 'ArrowUp' ? 0.1 : -0.1;
 
-    camera.scale += delta;
+    let newScale = parseFloat((camera.scale + delta).toFixed(1));
 
-    // let newCameraWidth = camera.width;
-    // let newCameraHeight = camera.height;
+    if (newScale < 0.5) {
+      return;
+    } else if (newScale > 2) {
+      return;
+    } else if (camera.width / newScale > worldScene.size.width) {
+      newScale = camera.width / worldScene.size.width;
+    } else if (camera.height / newScale > worldScene.size.height) {
+      newScale = camera.height / worldScene.size.height;
+    }
 
-    // if (delta > 0) {
-    //   newCameraWidth = camera.width + camera.width * scale;
-    //   newCameraHeight = camera.height + camera.height * scale;
-    // } else {
-    //   newCameraWidth = camera.width - camera.width * scale;
-    //   newCameraHeight = camera.height - camera.height * scale;
-    // }
-
-    // if (newCameraWidth < worldScene.size.width) {
-    //   camera.width = newCameraWidth;
-    // }
-
-    // if (newCameraHeight < worldScene.size.height) {
-    //   camera.height = newCameraHeight;
-    // }
-
-    // console.log('camera', camera);
-
-    // ---
-
-    // if (delta > 0) {
-    //   camera.width += camera.width * scale;
-    //   camera.height += camera.height * scale;
-    // } else {
-    //   camera.width -= camera.width * scale;
-    //   camera.height -= camera.height * scale;
-    // }
-
-    // camera.boundRX = worldScene.size.x - camera.width;
-    // camera.boundRY = worldScene.size.y - camera.height;
-
-    // if (camera.position.x > camera.boundRX) {
-    //   camera.position.x = camera.boundRX;
-    // }
-    // if (camera.position.y > camera.boundRY) {
-    //   camera.position.y = camera.boundRY;
-    // }
+    camera.scale = newScale;
   });
 
   return ({ world, deltaFrameTime }) => {
-    worldScene.container.scale = worldScene.cameras.main.scale;
+    if (typeof worldScene.container.scale === 'number') {
+      if (worldScene.cameras.main.scale === worldScene.container.scale) {
+        return;
+      }
+      worldScene.container.scale += (worldScene.cameras.main.scale - worldScene.container.scale) * 0.1;
+    } else {
+      if (
+        worldScene.cameras.main.scale === worldScene.container.scale.x &&
+        worldScene.cameras.main.scale === worldScene.container.scale.y
+      ) {
+        return;
+      }
+
+      let stepX = (worldScene.cameras.main.scale - worldScene.container.scale.x) * 0.1;
+      let stepY = (worldScene.cameras.main.scale - worldScene.container.scale.x) * 0.1;
+
+      if (Math.abs(stepX) < 0.0001) {
+        stepX = worldScene.cameras.main.scale - worldScene.container.scale.x;
+      }
+
+      if (Math.abs(stepY) < 0.0001) {
+        stepY = worldScene.cameras.main.scale - worldScene.container.scale.x;
+      }
+
+      const newScaleX = worldScene.container.scale.x + stepX;
+      const newScaleY = worldScene.container.scale.y + stepY;
+
+      worldScene.container.scale.x = newScaleX;
+      worldScene.container.scale.y = newScaleY;
+    }
   };
 };
 
