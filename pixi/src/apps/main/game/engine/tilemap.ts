@@ -37,6 +37,7 @@ export type TileLayer = {
   x: number;
   y: number;
   opacity: number;
+  container: Container;
 };
 
 export type TileMap<D> = {
@@ -53,6 +54,8 @@ export type TileMap<D> = {
 };
 
 export const initTileMap = async () => {
+  const mapContainer = new Container();
+
   const kennyTileSet = (await Assets.load('assets/kennytilesheet.png')) as Texture;
   const tileMap: TileMap<typeof mapData> = {
     data: mapData,
@@ -106,18 +109,13 @@ export const initTileMap = async () => {
       x: layerData.x,
       y: layerData.y,
       opacity: layerData.opacity,
+      container: new Container(),
     };
+
+    mapContainer.addChild(tileLayer.container);
 
     tileMap.layers[layerData.name] = tileLayer;
   }
-
-  console.log(tileMap);
-
-  const mapContainer = new Container();
-
-  const mapTilesContainer = new Container();
-
-  mapContainer.addChild(mapTilesContainer);
 
   for (let r = 0; r < tileMap.rows; r++) {
     for (let c = 0; c < tileMap.columns; c++) {
@@ -163,7 +161,7 @@ export const initTileMap = async () => {
           },
         });
 
-        mapTilesContainer.addChild(tile);
+        layer.container.addChild(tile);
       }
     }
   }
