@@ -22,7 +22,7 @@ import {
 } from './ecs';
 import { initTileMap } from './engine/tilemap';
 import humanAtlasData from './assets/human_atlas.json';
-import { newDirectionalAnimationFrames } from './engine/animation';
+import { newAnimatedSprites, newDirectionalAnimationFrames } from './engine/animation';
 
 const fillSceneContainer = async (worldScene: WorldScene) => {
   const texture = (await Assets.load('assets/star.png')) as Texture;
@@ -136,16 +136,14 @@ export const initWorld = async (app: Application) => {
     },
   });
 
-  const camera = worldScene.cameras.main;
-
   // # Add to stage
   app.stage.addChild(worldScene.container);
 
   // # Center camera
   setCameraPosition(
-    camera,
-    worldScene.size.width / 2 - camera.size.width / 2,
-    worldScene.size.height / 2 - camera.size.height / 2
+    worldScene.cameras.main,
+    worldScene.size.width / 2 - worldScene.cameras.main.size.width / 2,
+    worldScene.size.height / 2 - worldScene.cameras.main.size.height / 2
   );
 
   // ## Fill with some data
@@ -157,11 +155,13 @@ export const initWorld = async (app: Application) => {
   worldScene.container.addChild(mapContainer);
 
   // # Init player
+  const playerContainer = new Container();
+
   const playerTexture = (await Assets.load(`assets/${humanAtlasData.meta.image}`)) as Texture;
 
   const directions = ['TR', 'R', 'BR', 'B', 'BL', 'L', 'TL', 'T'] as const;
 
-  const player = new Spritesheet(playerTexture, {
+  const playerSpritesheet = new Spritesheet(playerTexture, {
     ...humanAtlasData,
     animations: {
       ...newDirectionalAnimationFrames(directions, 'run', 'Human_', {
@@ -186,26 +186,17 @@ export const initWorld = async (app: Application) => {
   });
 
   // Generate all the Textures asynchronously
-  await player.parse();
+  await playerSpritesheet.parse();
 
-  console.log(player.animations);
+  const playerAnimationSprites = newAnimatedSprites(playerSpritesheet, { x: 0.5, y: 1 });
 
-  // spritesheet is ready to use!
-  const animatedPlayerSprite = new AnimatedSprite(player.animations.idleB);
-  // set the animation speed
-  animatedPlayerSprite.animationSpeed = 0.1666;
-  // play the animation on a loop
-  animatedPlayerSprite.play();
-  // set anchor
-  animatedPlayerSprite.anchor.set(0.5, 1);
+  playerAnimationSprites.runB.animationSpeed = 0.1666;
+  playerAnimationSprites.runB.play();
+  playerAnimationSprites.runB.position.set(0, mapContainer.height / 2 / mapContainer.scale.y);
 
-  // mapContainer.height = 500;
+  playerContainer.addChild(playerAnimationSprites.runB);
 
-  console.log('mapContainer.height', mapContainer.height);
-  animatedPlayerSprite.position.set(0, mapContainer.height / 2 / mapContainer.scale.y);
-
-  // add it to the stage to render
-  mapContainer.addChild(animatedPlayerSprite);
+  mapContainer.addChild(playerContainer);
 
   // # Systems
   // ## Inputs
@@ -215,7 +206,6 @@ export const initWorld = async (app: Application) => {
   registerSystem(world, zoom(worldScene));
   registerSystem(world, applyWorldBoundariesToCamera(worldScene));
   registerSystem(world, moveCamera(worldScene));
-  // # Apply camera
   registerSystem(world, applyCameraToContainer(worldScene));
   // # Render
   registerSystem(world, render(world, app), 'postUpdate');
