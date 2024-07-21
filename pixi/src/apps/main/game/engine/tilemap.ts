@@ -1,5 +1,5 @@
 import { Texture, Assets, Container, TilingSprite } from 'pixi.js';
-import mapData from '../assets/FirstMap.json';
+import firstMapData from '../assets/FirstMap.json';
 import { Vector2 } from '.';
 import { cartisianToIso } from './isometric';
 
@@ -53,23 +53,36 @@ export type TileMap<D> = {
   activeTileSet: string;
 };
 
-export const initTileMap = async () => {
+export const initTileMap = async <MD extends typeof firstMapData>(props: {
+  assetName: string;
+  texture: Texture | string;
+  mapData: MD;
+}) => {
   const mapContainer = new Container();
 
-  const kennyTileSet = (await Assets.load('assets/kennytilesheet.png')) as Texture;
+  let tileSetTexture: Texture;
+
+  if (typeof props.texture === 'string') {
+    tileSetTexture = (await Assets.load(props.texture)) as Texture;
+  } else {
+    tileSetTexture = props.texture;
+  }
+
+  const mapData = props.mapData;
+
   const tileMap: TileMap<typeof mapData> = {
     data: mapData,
     columns: mapData.width,
     rows: mapData.height,
     tileSet: {},
     layers: {},
-    activeTileSet: 'kennytilesheet',
+    activeTileSet: props.assetName,
   };
 
   for (const tileSetData of tileMap.data.tilesets) {
     const tileSet: TileSet = {
       name: tileSetData.name,
-      texture: kennyTileSet,
+      texture: tileSetTexture,
       imageHeight: tileSetData.imageheight,
       imageWidth: tileSetData.imagewidth,
       tileWidth: tileSetData.tilewidth,
@@ -112,7 +125,7 @@ export const initTileMap = async () => {
       container: new Container(),
     };
 
-    mapContainer.addChild(tileLayer.container);
+    // mapContainer.addChild(tileLayer.container);
 
     tileMap.layers[layerData.name] = tileLayer;
   }
@@ -142,6 +155,7 @@ export const initTileMap = async () => {
         const isoPosition = cartisianToIso({ x: positionX, y: positionY });
 
         const tile = new TilingSprite({
+          label: `${layerName.toLocaleLowerCase().replaceAll(' ', '_')}-tile-${r}-${c}`,
           texture: tileMap.tileSet[tileMap.activeTileSet].texture,
           width: tileMap.tileSet[tileMap.activeTileSet].tileWidth,
           height: tileMap.tileSet[tileMap.activeTileSet].tileHeight,
@@ -151,22 +165,22 @@ export const initTileMap = async () => {
           },
           x: isoPosition.x,
           y: isoPosition.y,
-          pivot: {
-            x: 0,
-            y: 0,
-          },
           anchor: {
             x: 0.5,
             y: 0,
           },
         });
 
-        layer.container.addChild(tile);
+        tile.cullable = true;
+        tile.zIndex = layerName === 'Floor' ? isoPosition.y + 410 : isoPosition.y + 460;
+
+        // layer.container.addChild(tile);
+        mapContainer.addChild(tile);
       }
     }
   }
 
-  mapContainer.scale.set(0.5);
+  // mapContainer.scale.set(0.5);
   mapContainer.position.set(0, 0);
   mapContainer.pivot.set(0, 0);
 

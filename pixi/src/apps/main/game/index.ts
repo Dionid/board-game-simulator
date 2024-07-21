@@ -10,6 +10,7 @@ import {
   Texture,
   TilingSprite,
 } from 'pixi.js';
+import firstMapData from './assets/FirstMap.json';
 import { createWorldScene, setCameraPosition, WorldScene } from './engine';
 import {
   applyCameraToContainer,
@@ -123,7 +124,7 @@ export const initWorld = async (app: Application) => {
         x: 0,
         y: 0,
       },
-      scale: 1,
+      scale: 0.5,
       size: {
         width: app.renderer.width,
         height: app.renderer.height,
@@ -131,8 +132,8 @@ export const initWorld = async (app: Application) => {
     },
     worldScene: {
       size: {
-        x: 1760,
-        y: 1000,
+        x: 5000,
+        y: 3000,
       },
     },
   });
@@ -141,31 +142,48 @@ export const initWorld = async (app: Application) => {
   app.stage.addChild(worldScene.container);
 
   // # Center camera
-  setCameraPosition(
-    worldScene.cameras.main,
-    worldScene.size.width / 2 - worldScene.cameras.main.size.width / 2,
-    worldScene.size.height / 2 - worldScene.cameras.main.size.height / 2
-  );
+  // setCameraPosition(
+  //   worldScene.cameras.main,
+  //   worldScene.size.width / 2 - worldScene.cameras.main.size.width / 2,
+  //   worldScene.size.height / 2 - worldScene.cameras.main.size.height / 2
+  // );
 
   // ## Fill with some data
   fillSceneContainer(worldScene);
 
   // # Init map
-  const mapContainer = await initTileMap();
-  mapContainer.x = mapContainer.width / 2 + mapContainer.width / 6;
+  const mapContainer = await initTileMap({
+    assetName: 'kennytilesheet',
+    texture: 'assets/kennytilesheet.png',
+    mapData: firstMapData,
+  });
+  // mapContainer.culled = true;
+  // mapContainer.cullableChildren = true;
+  console.log('mapContainer.width', mapContainer.width);
+  mapContainer.label = 'map';
+  // # Move pivot to top left corner
+  mapContainer.pivot.x = -mapContainer.width / 2;
+  mapContainer.pivot.y = 0;
+  // mapContainer.y = 100;
+  // mapContainer.x = mapContainer.width / 2 + mapContainer.width / 6;
   worldScene.container.addChild(mapContainer);
 
   // # Init player
   const playerContainer = new Container();
-  worldScene.container.addChild(playerContainer);
-
-  const playerPositionCenter = {
-    x: mapContainer.x,
-    y: mapContainer.height / 2,
+  playerContainer.label = 'player';
+  playerContainer.pivot = {
+    x: 0,
+    y: 0,
   };
 
-  playerContainer.position.set(playerPositionCenter.x, playerPositionCenter.y);
-  playerContainer.scale.set(0.5);
+  mapContainer.addChild(playerContainer);
+
+  playerContainer.position.set(100, 100);
+  // const playerPositionCenter = {
+  //   x: mapContainer.x,
+  //   y: mapContainer.height / 2,
+  // };
+  // playerContainer.position.set(playerPositionCenter.x, playerPositionCenter.y);
 
   // Also can change to just load (https://codesandbox.io/p/sandbox/charming-wilbur-gm7vgl?file=%2Fsrc%2Findex.js%3A15%2C24-15%2C74&utm_medium=sandpack)
   const playerTexture = (await Assets.load(`assets/${humanAtlasData.meta.image}`)) as Texture;
@@ -209,12 +227,23 @@ export const initWorld = async (app: Application) => {
 
   playerContainer.addChild(currentAnimation);
 
+  playerContainer.pivot = {
+    x: 0,
+    y: 0,
+  };
+
   app.canvas.addEventListener('click', (e) => {
     currentAnimation.gotoAndPlay(0);
 
-    const newPlayerPosition = worldScene.input.mouse.scenePosition;
+    const scenePosition = worldScene.input.mouse.scenePosition;
 
-    playerContainer.position.set(newPlayerPosition.x, newPlayerPosition.y);
+    // const isoPosition = cartisianToIso({
+    //   x: newPlayerPosition.x,
+    //   y: newPlayerPosition.y,
+    // });
+
+    playerContainer.position.set(scenePosition.x - mapContainer.width / 2, scenePosition.y);
+    playerContainer.zIndex = Math.floor(scenePosition.y);
   });
 
   // # Systems

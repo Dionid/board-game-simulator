@@ -281,25 +281,25 @@ export class MainScene extends Phaser.Scene {
       this
     );
 
-    this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
-      const { x, y } = pointer;
+    // this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
+    //   const { x, y } = pointer;
 
-      if (x > this.scale.width - this.cameraMoveThreshold) {
-        this.cameraMovementDirection.x = 1 - (this.scale.width - x) / this.cameraMoveThreshold;
-      } else if (x < this.cameraMoveThreshold) {
-        this.cameraMovementDirection.x = -1 + x / this.cameraMoveThreshold;
-      } else {
-        this.cameraMovementDirection.x = 0;
-      }
+    //   if (x > this.scale.width - this.cameraMoveThreshold) {
+    //     this.cameraMovementDirection.x = 1 - (this.scale.width - x) / this.cameraMoveThreshold;
+    //   } else if (x < this.cameraMoveThreshold) {
+    //     this.cameraMovementDirection.x = -1 + x / this.cameraMoveThreshold;
+    //   } else {
+    //     this.cameraMovementDirection.x = 0;
+    //   }
 
-      if (y > this.scale.height - this.cameraMoveThreshold) {
-        this.cameraMovementDirection.y = 1 - (this.scale.height - y) / this.cameraMoveThreshold;
-      } else if (y < this.cameraMoveThreshold) {
-        this.cameraMovementDirection.y = -1 + y / this.cameraMoveThreshold;
-      } else {
-        this.cameraMovementDirection.y = 0;
-      }
-    });
+    //   if (y > this.scale.height - this.cameraMoveThreshold) {
+    //     this.cameraMovementDirection.y = 1 - (this.scale.height - y) / this.cameraMoveThreshold;
+    //   } else if (y < this.cameraMoveThreshold) {
+    //     this.cameraMovementDirection.y = -1 + y / this.cameraMoveThreshold;
+    //   } else {
+    //     this.cameraMovementDirection.y = 0;
+    //   }
+    // });
 
     // # Move trajectory
     this.movementTrajectoryL = this.add.line(0, 0, 0, 0, 0, 0, 0xff0fff, 1);
