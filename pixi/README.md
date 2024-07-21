@@ -32,10 +32,6 @@
 1. ...
 1. ? Convert scale from float to int
 
-# Zoom
+# Useful links
 
-1. camera.scenePosition calculates in mapMouseInput on mousemove event
-1. camera.position
-
-1. 
-
+1. Rendering isometric map (https://melmouk.medium.com/algorithm-to-render-isometric-maps-3d86d1a49713)

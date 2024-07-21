@@ -133,12 +133,12 @@ export const initTileMap = async <MD extends typeof firstMapData>(props: {
     tileMap.layers[layerData.name] = tileLayer;
   }
 
-  for (let r = 0; r < tileMap.rows; r++) {
-    for (let c = 0; c < tileMap.columns; c++) {
+  for (let y = 0; y < tileMap.rows; y++) {
+    for (let x = 0; x < tileMap.columns; x++) {
       for (const layerName in tileMap.layers) {
         const layer = tileMap.layers[layerName];
 
-        const layerTileId = layer.data[r * tileMap.columns + c];
+        const layerTileId = layer.data[y * tileMap.columns + x];
 
         if (layerTileId === 0) {
           continue;
@@ -154,21 +154,14 @@ export const initTileMap = async <MD extends typeof firstMapData>(props: {
           throw new Error(`Tile with id ${tileId} not found`);
         }
 
-        // const positionX = (c * tileSet.tileWidth) / 2;
-        // const positionY = (r * tileSet.tileHeight) / 4;
-        // const isoPosition = cartisianToIso({ x: positionX, y: positionY });
-
         const tileWidth = tileMap.tileWidth; // 256
         const tileHeight = tileMap.tileHeight; // 128
         const spriteHeight = tileMap.spriteHeight; // 512
 
         console.log(tileWidth, tileHeight, spriteHeight);
 
-        const x = c;
-        const y = r;
-
         const tile = new TilingSprite({
-          label: `${layerName.toLocaleLowerCase().replaceAll(' ', '_')}-tile-${r}-${c}`,
+          label: `${layerName.toLocaleLowerCase().replaceAll(' ', '_')}-tile-${y}-${x}`,
           texture: tileSet.texture,
           width: tileSet.spriteWidth,
           height: tileSet.spriteHeight,
