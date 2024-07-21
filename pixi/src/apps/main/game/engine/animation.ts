@@ -34,21 +34,21 @@ export function newDirectionalAnimationFrames<Prefix extends string, D extends R
   return frames;
 }
 
-export function newAnimatedSprites<S extends Spritesheet>(
-  spritesheet: S,
+export function newAnimatedSprites<A extends Record<string | number, Texture[]>>(
+  animations: A,
   anchor: Vector2 = { x: 0, y: 0 }
 ): {
-  [K in keyof S['animations']]: AnimatedSprite;
+  [K in keyof A]: AnimatedSprite;
 } {
   const sprites = {} as {
-    [K in keyof S['animations']]: AnimatedSprite;
+    [K in keyof A]: AnimatedSprite;
   };
 
-  for (const [name, frames] of Object.entries(spritesheet.animations)) {
+  for (const [name, frames] of Object.entries(animations)) {
     const sprite = new AnimatedSprite(frames);
     sprite.anchor.set(anchor.x, anchor.y);
 
-    sprites[name as keyof S['animations']] = sprite;
+    sprites[name as keyof A] = sprite;
   }
 
   return sprites;

@@ -172,8 +172,11 @@ export class MainScene extends Phaser.Scene {
     this.matter.world.convertTilemapLayer(outerWalls);
     this.matter.world.convertTilemapLayer(obstacles);
 
-    const startingTile = this.floorLayer.getTileAt(0, 0);
-    console.log('startingTile.width', startingTile.x, startingTile.y);
+    const startingTile = {
+      x: this.floorLayer.x,
+      y: this.floorLayer.y + this.floorLayer.height / 2,
+    };
+    // console.log('startingTile.width', startingTile.x, startingTile.y);
 
     // # Player
     this.player = this.matter.add.sprite(startingTile.x, startingTile.y, 'human', 'Human_0_Idle0.png', {

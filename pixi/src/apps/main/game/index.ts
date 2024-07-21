@@ -23,6 +23,7 @@ import {
 import { initTileMap } from './engine/tilemap';
 import humanAtlasData from './assets/human_atlas.json';
 import { newAnimatedSprites, newDirectionalAnimationFrames } from './engine/animation';
+import { cartisianToIso } from './engine/isometric';
 
 const fillSceneContainer = async (worldScene: WorldScene) => {
   const texture = (await Assets.load('assets/star.png')) as Texture;
@@ -113,7 +114,7 @@ const fillSceneContainer = async (worldScene: WorldScene) => {
 };
 
 export const initWorld = async (app: Application) => {
-  const world = newWorld();
+  const essence = newWorld();
 
   // # Main Scene Container
   const worldScene = createWorldScene(app, {
@@ -156,7 +157,17 @@ export const initWorld = async (app: Application) => {
 
   // # Init player
   const playerContainer = new Container();
+  worldScene.container.addChild(playerContainer);
 
+  const playerPositionCenter = {
+    x: mapContainer.x,
+    y: mapContainer.height / 2,
+  };
+
+  playerContainer.position.set(playerPositionCenter.x, playerPositionCenter.y);
+  playerContainer.scale.set(0.5);
+
+  // Also can change to just load (https://codesandbox.io/p/sandbox/charming-wilbur-gm7vgl?file=%2Fsrc%2Findex.js%3A15%2C24-15%2C74&utm_medium=sandpack)
   const playerTexture = (await Assets.load(`assets/${humanAtlasData.meta.image}`)) as Texture;
 
   const directions = ['TR', 'R', 'BR', 'B', 'BL', 'L', 'TL', 'T'] as const;
@@ -188,27 +199,35 @@ export const initWorld = async (app: Application) => {
   // Generate all the Textures asynchronously
   await playerSpritesheet.parse();
 
-  const playerAnimationSprites = newAnimatedSprites(playerSpritesheet, { x: 0.5, y: 1 });
+  const playerAnimationSprites = newAnimatedSprites(playerSpritesheet.animations, { x: 0.5, y: 0.9 });
 
-  playerAnimationSprites.runB.animationSpeed = 0.1666;
-  playerAnimationSprites.runB.play();
-  playerAnimationSprites.runB.position.set(0, mapContainer.height / 2 / mapContainer.scale.y);
+  const currentAnimation = playerAnimationSprites.runB;
 
-  playerContainer.addChild(playerAnimationSprites.runB);
+  currentAnimation.position.set(0, 0);
+  currentAnimation.animationSpeed = 0.1666;
+  currentAnimation.play();
 
-  mapContainer.addChild(playerContainer);
+  playerContainer.addChild(currentAnimation);
+
+  app.canvas.addEventListener('click', (e) => {
+    currentAnimation.gotoAndPlay(0);
+
+    const newPlayerPosition = worldScene.input.mouse.scenePosition;
+
+    playerContainer.position.set(newPlayerPosition.x, newPlayerPosition.y);
+  });
 
   // # Systems
   // ## Inputs
-  registerSystem(world, mapMouseInput(worldScene));
+  registerSystem(essence, mapMouseInput(worldScene));
   // # Camera
-  registerSystem(world, moveCameraByDragging(worldScene));
-  registerSystem(world, zoom(worldScene));
-  registerSystem(world, applyWorldBoundariesToCamera(worldScene));
-  registerSystem(world, moveCamera(worldScene));
-  registerSystem(world, applyCameraToContainer(worldScene));
+  registerSystem(essence, moveCameraByDragging(worldScene));
+  registerSystem(essence, zoom(worldScene));
+  registerSystem(essence, applyWorldBoundariesToCamera(worldScene));
+  registerSystem(essence, moveCamera(worldScene));
+  registerSystem(essence, applyCameraToContainer(worldScene));
   // # Render
-  registerSystem(world, render(world, app), 'postUpdate');
+  registerSystem(essence, render(essence, app), 'postUpdate');
 
   // const entity = spawnEntity(world);
   // const circle = new Graphics().circle(0, 0, 50);
@@ -218,5 +237,5 @@ export const initWorld = async (app: Application) => {
   // setComponent(world, entity, Size, { width: 100, height: 100 });
   // setComponent(world, entity, Color, { value: 'red' });
 
-  return world;
+  return essence;
 };

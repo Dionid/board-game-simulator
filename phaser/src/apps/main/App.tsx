@@ -48,6 +48,8 @@ function App() {
     };  
   
     const game = new Phaser.Game(config);
+
+    (globalThis as any).__PHASER_GAME__ = game;
     // const app = new Application();
     // app.init({ resizeTo: window, backgroundColor: 'white', autoStart: false }).then(() => {
     //   canvas.appendChild(app.canvas);

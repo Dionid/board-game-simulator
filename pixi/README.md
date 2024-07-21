@@ -6,11 +6,15 @@
     1. ~~Draw map~~
     1. ~~Make it isometric~~
     1. ~~Separate to layers~~
-1. Add player
-1. Move player by clicking
-1. Player animation
+1. ~~Add player~~
+1. ~~Player animation~~
+1. ~~Move player by clicking~~
+1. ? Do we need to add player to map or world
+1. Depth sorting
+1. Move speed (Velocity) + correct animation
 1. Debug
 1. Add collider
+1. Preload assets
 1. ...
 1. ? Does requestAnimationFrame correct way
 1. ...

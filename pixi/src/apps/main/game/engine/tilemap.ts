@@ -1,6 +1,7 @@
 import { Texture, Assets, Container, TilingSprite } from 'pixi.js';
 import mapData from '../assets/FirstMap.json';
 import { Vector2 } from '.';
+import { cartisianToIso } from './isometric';
 
 export type Tile = {
   id: number;
@@ -50,20 +51,6 @@ export type TileMap<D> = {
   };
   activeTileSet: string;
 };
-
-export function cartisianToIso(vector: Vector2): Vector2 {
-  return {
-    x: vector.x - vector.y,
-    y: (vector.x + vector.y) / 2,
-  };
-}
-
-export function isoToCartisian(vector: Vector2): Vector2 {
-  return {
-    x: (2 * vector.y + vector.x) / 2,
-    y: (2 * vector.y - vector.x) / 2,
-  };
-}
 
 export const initTileMap = async () => {
   const kennyTileSet = (await Assets.load('assets/kennytilesheet.png')) as Texture;
