@@ -53,6 +53,11 @@ export type TileMap<D> = {
   activeTileSet: string;
 };
 
+export type Map<MD extends typeof firstMapData> = {
+  container: Container;
+  tileMap: TileMap<MD>;
+};
+
 export const initTileMap = async <MD extends typeof firstMapData>(props: {
   assetName: string;
   texture: Texture | string;
@@ -60,7 +65,7 @@ export const initTileMap = async <MD extends typeof firstMapData>(props: {
   layerTileDepthModifier: {
     [key in MD['layers'][number]['name']]: number;
   } & { default: number };
-}) => {
+}): Promise<Map<MD>> => {
   const mapContainer = new Container();
 
   let tileSetTexture: Texture;
@@ -203,7 +208,7 @@ export const initTileMap = async <MD extends typeof firstMapData>(props: {
   mapContainer.pivot.set(0, 0);
 
   return {
-    mapContainer,
+    container: mapContainer,
     tileMap,
   };
 };

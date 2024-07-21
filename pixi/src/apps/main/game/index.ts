@@ -24,26 +24,9 @@ import {
 import { initTileMap } from './engine/tilemap';
 import humanAtlasData from './assets/human_atlas.json';
 import { newAnimatedSprites, newDirectionalAnimationFrames } from './engine/animation';
-import { cartisianToIso } from './engine/isometric';
 
 const fillSceneContainer = async (worldScene: WorldScene) => {
   const texture = (await Assets.load('assets/star.png')) as Texture;
-
-  // # Multiple elements
-  // for (let i = 0; i < 1000; i++) {
-  //   const scale = 1;
-  //   const element = new Sprite({
-  //     texture: texture,
-  //     x: Math.random() * sceneSizeX + (texture.width / 2) * scale,
-  //     y: Math.random() * sceneSizeY + (texture.height * 0.3) * scale,
-  //     scale: scale,
-  //     anchor: {
-  //   x: 0.5,
-  // y: 0.5,},
-  //   });
-
-  //   sceneContainer.addChild(element);
-  // }
 
   const starsContrainer = new Container();
 
@@ -117,8 +100,32 @@ const fillSceneContainer = async (worldScene: WorldScene) => {
 export const initWorld = async (app: Application) => {
   const essence = newWorld();
 
+  // # Init map
+  const map = await initTileMap({
+    assetName: 'kennytilesheet',
+    texture: 'assets/kennytilesheet.png',
+    mapData: firstMapData,
+    layerTileDepthModifier: {
+      Floor: 410,
+      'Outer Walls': 400,
+      'Inner Walls': 400,
+      default: 460,
+    },
+  });
+
+  const { container: mapContainer, tileMap } = map;
+
+  mapContainer.label = 'map';
+
+  // # Move pivot to top left corner
+  mapContainer.pivot.x = -mapContainer.width / 2 + tileMap.tileWidth / 2;
+  mapContainer.pivot.y = -tileMap.spriteHeight + tileMap.tileHeight;
+  // # Move map littlebit
+  mapContainer.x = 100;
+  mapContainer.y = 100;
+
   // # Main Scene Container
-  const worldScene = createWorldScene(app, {
+  const worldScene = createWorldScene(app, map, {
     camera: {
       position: {
         x: 0,
@@ -150,30 +157,6 @@ export const initWorld = async (app: Application) => {
 
   // ## Fill with some data
   fillSceneContainer(worldScene);
-
-  // # Init map
-  const { mapContainer, tileMap } = await initTileMap({
-    assetName: 'kennytilesheet',
-    texture: 'assets/kennytilesheet.png',
-    mapData: firstMapData,
-    layerTileDepthModifier: {
-      Floor: 410,
-      'Outer Walls': 400,
-      'Inner Walls': 400,
-      default: 460,
-    },
-  });
-
-  mapContainer.label = 'map';
-
-  // # Move pivot to top left corner
-  mapContainer.pivot.x = -mapContainer.width / 2 + tileMap.tileWidth / 2;
-  mapContainer.pivot.y = -tileMap.spriteHeight + tileMap.tileHeight;
-  // # Move map littlebit
-  mapContainer.x = 100;
-  mapContainer.y = 100;
-
-  worldScene.container.addChild(mapContainer);
 
   // # Init player
   const playerContainer = new Container();

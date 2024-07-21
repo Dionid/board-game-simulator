@@ -1,4 +1,5 @@
 import { Application, Container } from 'pixi.js';
+import { Map } from './tilemap';
 
 export type Vector2 = {
   x: number;
@@ -52,6 +53,7 @@ export type MouseInput = {
 
 export type WorldScene = {
   app: Application;
+  map: Map<any>;
   container: Container;
   input: {
     mouse: MouseInput;
@@ -67,6 +69,7 @@ export type WorldScene = {
 
 export const createWorldScene = (
   app: Application,
+  map: Map<any>,
   config?: {
     camera?: {
       position?: Vector2;
@@ -82,9 +85,11 @@ export const createWorldScene = (
   const sceneSizeY = config?.worldScene?.size?.y ?? 1000;
 
   // ## Container
-  const sceneContainer = new Container({
+  const worldContainer = new Container({
     isRenderGroup: true,
   });
+
+  worldContainer.addChild(map.container);
 
   // # Camera
   const scale = config?.camera?.scale ?? 1;
@@ -128,7 +133,8 @@ export const createWorldScene = (
 
   const worldScene: WorldScene = {
     app,
-    container: sceneContainer,
+    map,
+    container: worldContainer,
     input: {
       mouse: {
         clientPosition: {
