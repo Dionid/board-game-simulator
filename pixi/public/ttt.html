@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <canvas id="isometric-canvas"></canvas>
+<div class="labels">
+	<div class="label" id="screenCoords" style="background: rgba(255, 230, 0, .3)"></div>
+	<div class="label" id="gridCoords" style="background: rgba(0, 230, 0, .3)"></div>
+</div>
+<style>
+    * {
+	box-sizing: border-box;
+}
+
+body {
+	margin: 0;
+	padding: 0;
+}
+
+canvas {
+	display: block;
+	width: 100vw;
+	height: 100vh;
+	background-color: #B4E1E9;
+}
+
+.labels {
+	position: absolute;
+	top: 0;
+	right: 0;
+}
+
+.label {
+	display: block;
+	font-family: 'Courier New';
+	background-color: #fff;
+	padding: 2px 5px;
+	text-align: right;
+	
+	&:empty {
+		padding: 0;
+	}
+}
+</style>
+<script>
+    class IsometricGrid {
+	constructor(canvas, options = {}) {
+    	this.canvas = canvas;
+		this.ctx = this.canvas.getContext('2d');
+		
+		this.startPosX = 0; // Used for rendering from the middle of the canvas
+		this.startPosY = 0; // Used for rendering from the middle of the canvas
+		this.mouse = {};
+
+		/* https://gist.github.com/jordwest/8a12196436ebcf8df98a2745251915b5 */
+		this.axis = {
+			x: {
+				x: 1,
+				y: 0.5
+			}, 
+			y: {
+				x: -1,
+				y: 0.5
+			}
+		};
+		
+		// Overwrite defaults
+		Object.assign(this, {
+			tileWidth: 100,
+			get tileHeight() {
+				return this.tileWidth * 0.5;
+			},
+			numCols: 9,
+			numRows: 9,
+			drawCoords: false,
+			drawCoordsLabels: false,
+			screenCoordsEl: document.querySelector('#screenCoords'),
+			gridCoordsEl: document.querySelector('#gridCoords'),
+			drawMarkedCenter: false,
+			drawOverlay: false,
+			highlightOnHover: false,
+        }, options);
+    }
+	
+	setup() {
+		this.canvas.width = Math.floor(document.body.clientWidth);
+		this.canvas.height = Math.floor(document.body.clientHeight);
+		this.update();
+	}
+	
+	update() {
+		this.renderGrid();
+		this.drawCoordsLabels && this.addCoordsLabelsListener();
+		this.drawMarkedCenter && this.renderCenter();
+		this.drawOverlay && this.renderOverlay();
+		this.highlightOnHover && this.addHighLightOnHoverListener();
+	}
+	
+	addCoordsLabelsListener() {
+		this.screenCoordsEl.innerText = `0, 0`;
+		this.gridCoordsEl.innerText = `0, 0`;
+		canvas.addEventListener('mousemove', evt => this.updateCoordsLabels(evt));
+	}
+	
+	addHighLightOnHoverListener(evt) {
+		if (!this.mousePosEventListener)
+			this.addMousePosEventListener(evt);
+
+		canvas.addEventListener('mousemove', evt => {
+			const { x, y } = this.screenToGridCoordinate(this.mouse);
+			const withinRange = x >= 0 
+				&& x < this.numCols
+				&& y >= 0 
+				&& y < this.numRows;
+			
+			if (withinRange) {
+				this.renderGrid();
+				this.renderTile(x, y, { 
+					fillColor: '#80A045',
+					textColor: '#ffffff'
+				});
+			}
+		});
+	}
+	
+	addMousePosEventListener(evt) {
+		if (this.mousePosEventListener)
+			return;
+		
+		this.mousePosEventListener = true;
+		canvas.addEventListener('mousemove', evt => {
+			const rect = this.canvas.getBoundingClientRect();
+
+			this.mouse.x = Math.floor(evt.clientX - rect.left);
+			this.mouse.y = Math.floor(evt.clientY - rect.top);
+		});
+	}
+	
+	gridToScreenCoordinate(tile) {
+		const w = this.tileWidth;
+		const h = this.tileHeight;
+		
+		// Render from the middle of the screen
+		const offset = {
+			x: this.canvas.width / 2,
+			y: (this.canvas.height / 2) - h * this.numCols / 2,
+		}
+
+		const screenCoordinates = {
+			x: (tile.x * this.axis.x.x * 0.5 * w) + (tile.y * this.axis.y.x * 0.5 * w) + offset.x,
+			y: (tile.x * this.axis.x.y * 1 * h) + (tile.y * this.axis.y.y * 1 * h) + offset.y,
+		};
+		
+		const vectors = {
+			top: {
+				x: screenCoordinates.x,
+				y: screenCoordinates.y,
+			},
+			right: {
+				x: screenCoordinates.x + w / 2,
+				y: screenCoordinates.y + h / 2,
+			},
+			bottom: {
+				x: screenCoordinates.x,
+				y: screenCoordinates.y + h,
+			},
+			left: {
+				x: screenCoordinates.x - w / 2,
+				y: screenCoordinates.y + h / 2,
+			}
+		};
+		
+		return {
+			...screenCoordinates,
+			vectors,
+		}
+	}
+	
+	screenToGridCoordinate(screen) {
+		const a = this.axis.x.x * 0.5 * this.tileWidth;
+		const b = this.axis.y.x * 0.5 * this.tileWidth;
+		const c = this.axis.x.y * 1 * this.tileHeight;
+		const d = this.axis.y.y * 1 * this.tileHeight;
+		const inv = this.invertMatrix(a, b, c, d);
+		
+		const offset = {
+			x: this.numCols / 2,
+			y: this.numRows / 2
+		};
+
+		console.log(
+			(screen.x - this.canvas.width / 2), // making so that x=0 will be in the middle of the canvas
+			(screen.y - this.canvas.height / 2), // making so that y=0 will be in the middle of the canvas
+			offset.x,
+			(screen.x - this.canvas.width / 2) * inv.a 
+			+ (screen.y - this.canvas.height / 2) * inv.b 
+			+ offset.x
+		)
+
+		return {
+			x: Math.floor(
+				(screen.x - this.canvas.width / 2) * inv.a 
+				+ (screen.y - this.canvas.height / 2) * inv.b 
+				+ offset.x
+			),
+			y: Math.floor(
+				(screen.x - this.canvas.width / 2) * inv.c 
+				+ (screen.y - this.canvas.height / 2) * inv.d 
+				+ offset.y
+			),
+		}
+	}
+	
+	invertMatrix(a, b, c, d) {
+		// Determinant 
+		const det = (1 / (a * d - b * c));
+
+		return {
+			a: det * d,
+			b: det * -b,
+			c: det * -c,
+			d: det * a,
+		}
+	}
+	
+	renderGrid() {
+		const { canvas, tileHeight, numCols, numRows } = this;
+		this.tilesRendered = 0;
+		this.startPosX = (canvas.width / 2); 
+		this.startPosY = (canvas.height / 2) - (tileHeight * numRows / 2);
+
+		for (let x = 0; x < numCols; x++) {
+			for (let y = 0; y < numRows; y++) {
+				this.renderTile(x, y);
+			}
+		}
+		
+		// console.log(
+		// 	'Done! Tiles rendered:', this.tilesRendered, 'of', numCols * numRows,
+		// 	'\nTiles outside of the canvas:', (numCols * numRows) - this.tilesRendered
+		// );
+	}
+	
+	renderTile(x, y, style = {}) {
+		const { ctx, tileWidth } = this;
+		const vectors = this.gridToScreenCoordinate({ x, y }).vectors;
+		const fillColor = style.fillColor || '#B3E061';
+		const strokeColor = style.strokeColor || '#80A045';
+		const textColor = style.textColor || '#80A045';
+		
+		// Draw tile
+		ctx.beginPath();
+		ctx.moveTo(vectors.top.x, vectors.top.y);
+		ctx.lineTo(vectors.right.x, vectors.right.y);
+		ctx.lineTo(vectors.bottom.x, vectors.bottom.y);
+		ctx.lineTo(vectors.left.x, vectors.left.y);
+		ctx.closePath();
+
+		// Add styling to tile
+		ctx.fillStyle = fillColor;
+		ctx.fill();
+		ctx.lineWidth = .15; // stroke width is 1px by default
+		ctx.strokeStyle = strokeColor;
+		ctx.stroke();
+
+		// Draw coords
+		if (this.drawCoords) {
+			const tileCoords = `[${x},${y}]`;
+			ctx.font = '12px Courier';
+			ctx.textAlign = 'center';
+			ctx.fillStyle = textColor;
+			ctx.fillText(tileCoords, (vectors.left.x + tileWidth / 2), (vectors.left.y + 3));
+		}
+		
+		// Log
+		this.tilesRendered++;
+	}
+	
+	renderCenter() {
+		const centerX = Math.floor(this.numCols / 2);
+		const centerY = Math.floor(this.numRows / 2);
+
+		this.renderTile(centerX, centerY, {
+			fillColor: 'red',
+			strokeColor: 'red',
+			textColor: 'white'
+		});
+	}
+	
+	renderOverlay() {
+		const { canvas, ctx, tileWidth, tileHeight } = this;
+		const lineWidth = 1;
+		const xStart = (canvas.width / 2) * -1;
+		const yStart = (canvas.height / 2) * -1;
+		
+		ctx.fillStyle = "rgba(0, 0, 0, .05)";
+
+		// Draw column lines, starting from the middle going out
+		for (let x = (canvas.width / 2); x <= canvas.width; x += tileWidth / 2) {
+			ctx.fillRect(x, 0, lineWidth, canvas.height);
+		}
+
+		for (let x = (canvas.width / 2); x >= 0; x -= tileWidth / 2) {
+			ctx.fillRect(x, 0, lineWidth, canvas.height);
+		}
+
+		// Draw row lines, starting from the middle going out
+		for (let y = (canvas.height / 2); y <= canvas.height; y += tileHeight / 2) {
+			ctx.fillRect(0, y, canvas.width, lineWidth);
+		}
+
+		for (let y = (canvas.height / 2); y >= 0; y -= tileHeight / 2) {
+			ctx.fillRect(0, y, canvas.width, lineWidth);
+		}
+
+		// Exact middle of the canvas
+		ctx.fillRect(canvas.width / 2, 0, 1, canvas.height);
+		ctx.fillRect(0, canvas.height / 2, canvas.width, 1);
+	}
+	
+	updateCoordsLabels(evt) {
+		if (!this.mousePosEventListener) {
+			this.addMousePosEventListener(evt);
+		}
+		
+		const grid = this.screenToGridCoordinate(this.mouse);
+
+		this.screenCoordsEl.innerText = `${this.mouse.x}, ${this.mouse.y}`;
+		this.gridCoordsEl.innerText = `${grid.x}, ${grid.y}`;
+	}
+}
+
+	const canvas = document.getElementById('isometric-canvas');
+	const isoGrid = new IsometricGrid(canvas, {
+		drawMarkedCenter: true,
+		drawCoords: true,
+		numCols: 10,
+		numRows: 10,
+		drawCoordsLabels: true,
+		highlightOnHover: true,
+	});
+
+	isoGrid.setup();
+
+	function redraw(){
+		isoGrid.setup();
+	}
+
+	let resizeTimeout;
+	window.onresize = function() {
+		clearTimeout(resizeTimeout);
+		resizeTimeout = setTimeout(redraw, 100);
+	};
+</script>
+</body>
+</html>

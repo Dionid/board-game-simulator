@@ -24,7 +24,7 @@ import {
 import { initTileMap } from './engine/tilemap';
 import humanAtlasData from './assets/human_atlas.json';
 import { newAnimatedSprites, newDirectionalAnimationFrames } from './engine/animation';
-import { cartesianToIso } from './engine/isometric';
+import { cartesianTileRowCol, tileCartesianPosition } from './engine/isometric';
 
 const fillSceneContainer = async (worldScene: WorldScene) => {
   const texture = (await Assets.load('assets/star.png')) as Texture;
@@ -122,8 +122,8 @@ export const initWorld = async (app: Application) => {
   mapContainer.pivot.x = -mapContainer.width / 2 + tileMap.tileWidth / 2;
   mapContainer.pivot.y = -tileMap.spriteHeight + tileMap.tileHeight;
   // # Move map littlebit
-  mapContainer.x = 100;
-  mapContainer.y = 100;
+  // mapContainer.x = 100;
+  // mapContainer.y = 100;
 
   // # Main Scene Container
   const worldScene = createWorldScene(app, map, {
@@ -132,7 +132,7 @@ export const initWorld = async (app: Application) => {
         x: 0,
         y: 0,
       },
-      scale: 1,
+      scale: 0.5,
       size: {
         width: app.renderer.width,
         height: app.renderer.height,
@@ -231,27 +231,9 @@ export const initWorld = async (app: Application) => {
     const { x, y } = playerContainer.position;
     const { tileWidth, tileHeight } = tileMap;
 
-    function tilePosition(row: number, col: number) {
-      return {
-        x: (row * tileWidth) / 2 - (col * tileWidth) / 2,
-        y: (row * tileHeight) / 2 + (col * tileHeight) / 2,
-      };
-    }
+    const rc = cartesianTileRowCol(playerContainer.position, { width: tileWidth, height: tileHeight });
 
-    function tileRowCol(x: number, y: number) {
-      return {
-        col: Math.floor(x / tileWidth + y / tileHeight - 0.5),
-        row: Math.floor(y / tileHeight - x / tileWidth + 0.5),
-      };
-    }
-
-    console.log(
-      {
-        x,
-        y,
-      },
-      tileRowCol(x, y)
-    );
+    console.log({ x, y }, rc, tileCartesianPosition(rc, { width: tileWidth, height: tileHeight }));
   });
 
   // # Systems
