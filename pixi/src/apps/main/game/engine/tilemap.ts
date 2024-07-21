@@ -128,6 +128,10 @@ export const initTileMap = async () => {
 
   const mapContainer = new Container();
 
+  const mapTilesContainer = new Container();
+
+  mapContainer.addChild(mapTilesContainer);
+
   for (let r = 0; r < tileMap.rows; r++) {
     for (let c = 0; c < tileMap.columns; c++) {
       for (const layerName in tileMap.layers) {
@@ -172,7 +176,7 @@ export const initTileMap = async () => {
           },
         });
 
-        mapContainer.addChild(tile);
+        mapTilesContainer.addChild(tile);
       }
     }
   }

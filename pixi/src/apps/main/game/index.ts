@@ -1,5 +1,15 @@
 import { newWorld, registerSystem } from '../../../libs/tecs';
-import { Application, Assets, Container, Graphics, Sprite, Spritesheet, Texture, TilingSprite } from 'pixi.js';
+import {
+  AnimatedSprite,
+  Application,
+  Assets,
+  Container,
+  Graphics,
+  Sprite,
+  Spritesheet,
+  Texture,
+  TilingSprite,
+} from 'pixi.js';
 import { createWorldScene, setCameraPosition, WorldScene } from './engine';
 import {
   applyCameraToContainer,
@@ -11,6 +21,8 @@ import {
   applyWorldBoundariesToCamera,
 } from './ecs';
 import { initTileMap } from './engine/tilemap';
+import humanAtlasData from './assets/human_atlas.json';
+import { newDirectionalAnimationFrames } from './engine/animation';
 
 const fillSceneContainer = async (worldScene: WorldScene) => {
   const texture = (await Assets.load('assets/star.png')) as Texture;
@@ -126,21 +138,6 @@ export const initWorld = async (app: Application) => {
 
   const camera = worldScene.cameras.main;
 
-  // ## On resize change camera last coordinates
-  app.canvas.addEventListener('resize', () => {
-    camera.size.width = app.renderer.width;
-    camera.size.height = app.renderer.width;
-
-    // TODO: Maybe move
-    // if (camera.position.x > worldScene.size.width - camera.width) {
-    //   camera.position.x = worldScene.size.width - camera.width;
-    // }
-
-    // if (camera.position.y > worldScene.size.height - camera.height) {
-    //   camera.position.y = worldScene.size.height - camera.height;
-    // }
-  });
-
   // # Add to stage
   app.stage.addChild(worldScene.container);
 
@@ -154,10 +151,61 @@ export const initWorld = async (app: Application) => {
   // ## Fill with some data
   fillSceneContainer(worldScene);
 
+  // # Init map
   const mapContainer = await initTileMap();
-
   mapContainer.x = mapContainer.width / 2 + mapContainer.width / 6;
   worldScene.container.addChild(mapContainer);
+
+  // # Init player
+  const playerTexture = (await Assets.load(`assets/${humanAtlasData.meta.image}`)) as Texture;
+
+  const directions = ['TR', 'R', 'BR', 'B', 'BL', 'L', 'TL', 'T'] as const;
+
+  const player = new Spritesheet(playerTexture, {
+    ...humanAtlasData,
+    animations: {
+      ...newDirectionalAnimationFrames(directions, 'run', 'Human_', {
+        start: 0,
+        end: 9,
+        prefix: '_Run',
+        postfix: '.png',
+      }),
+      ...newDirectionalAnimationFrames(directions, 'pickup', 'Human_', {
+        start: 0,
+        end: 9,
+        prefix: '_Pickup',
+        postfix: '.png',
+      }),
+      ...newDirectionalAnimationFrames(directions, 'idle', 'Human_', {
+        start: 0,
+        end: 0,
+        prefix: '_Idle',
+        postfix: '.png',
+      }),
+    },
+  });
+
+  // Generate all the Textures asynchronously
+  await player.parse();
+
+  console.log(player.animations);
+
+  // spritesheet is ready to use!
+  const animatedPlayerSprite = new AnimatedSprite(player.animations.idleB);
+  // set the animation speed
+  animatedPlayerSprite.animationSpeed = 0.1666;
+  // play the animation on a loop
+  animatedPlayerSprite.play();
+  // set anchor
+  animatedPlayerSprite.anchor.set(0.5, 1);
+
+  // mapContainer.height = 500;
+
+  console.log('mapContainer.height', mapContainer.height);
+  animatedPlayerSprite.position.set(0, mapContainer.height / 2 / mapContainer.scale.y);
+
+  // add it to the stage to render
+  mapContainer.addChild(animatedPlayerSprite);
 
   // # Systems
   // ## Inputs
