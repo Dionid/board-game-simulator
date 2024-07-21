@@ -40,6 +40,7 @@ export function setCameraPosition(camera: Camera, x: number, y: number) {
 export type MouseInput = {
   clientPosition: Vector2;
   scenePosition: Vector2;
+  mapPosition: Vector2;
   up: boolean;
   down: boolean;
   previous: Omit<MouseInput, 'previous'>;
@@ -138,6 +139,10 @@ export const createWorldScene = (
           x: 0,
           y: 0,
         },
+        mapPosition: {
+          x: 0,
+          y: 0,
+        },
         up: false,
         down: false,
         delta: {
@@ -156,6 +161,10 @@ export const createWorldScene = (
             y: 0,
           },
           scenePosition: {
+            x: 0,
+            y: 0,
+          },
+          mapPosition: {
             x: 0,
             y: 0,
           },

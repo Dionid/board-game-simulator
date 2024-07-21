@@ -158,8 +158,6 @@ export const initTileMap = async <MD extends typeof firstMapData>(props: {
         const tileHeight = tileMap.tileHeight; // 128
         const spriteHeight = tileMap.spriteHeight; // 512
 
-        console.log(tileWidth, tileHeight, spriteHeight);
-
         const tile = new TilingSprite({
           label: `${layerName.toLocaleLowerCase().replaceAll(' ', '_')}-tile-${y}-${x}`,
           texture: tileSet.texture,

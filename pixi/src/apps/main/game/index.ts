@@ -165,6 +165,7 @@ export const initWorld = async (app: Application) => {
   });
 
   mapContainer.label = 'map';
+
   // # Move pivot to top left corner
   mapContainer.pivot.x = -mapContainer.width / 2 + tileMap.tileWidth / 2;
   mapContainer.pivot.y = -tileMap.spriteHeight + tileMap.tileHeight;
@@ -241,20 +242,12 @@ export const initWorld = async (app: Application) => {
   app.canvas.addEventListener('click', (e) => {
     currentAnimation.gotoAndPlay(0);
 
-    const scenePosition = worldScene.input.mouse.scenePosition;
-
-    // const isoPosition = cartisianToIso({
-    //   x: newPlayerPosition.x,
-    //   y: newPlayerPosition.y,
-    // });
-
-    playerContainer.position.set(scenePosition.x - mapContainer.width / 2, scenePosition.y);
-    playerContainer.zIndex = Math.floor(scenePosition.y);
+    playerContainer.position.set(worldScene.input.mouse.mapPosition.x, worldScene.input.mouse.mapPosition.y);
   });
 
   // # Systems
   // ## Inputs
-  registerSystem(essence, mapMouseInput(worldScene));
+  registerSystem(essence, mapMouseInput(worldScene, mapContainer));
   // # Camera
   registerSystem(essence, moveCameraByDragging(worldScene));
   registerSystem(essence, zoom(worldScene));

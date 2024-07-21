@@ -1,7 +1,8 @@
+import { Container } from 'pixi.js';
 import { System } from '../../../../libs/tecs';
 import { WorldScene } from '../engine';
 
-export function mapMouseInput(worldScene: WorldScene): System {
+export function mapMouseInput(worldScene: WorldScene, mapContainer: Container): System {
   const input = worldScene.input;
   const mouse = input.mouse;
   const canvas = worldScene.app.canvas;
@@ -64,6 +65,9 @@ export function mapMouseInput(worldScene: WorldScene): System {
 
       mouse.delta.scenePosition.x = mouse.scenePosition.x - mouse.previous.scenePosition.x;
       mouse.delta.scenePosition.y = mouse.scenePosition.y - mouse.previous.scenePosition.y;
+
+      mouse.mapPosition.x = mouse.scenePosition.x - mapContainer.x + mapContainer.pivot.x;
+      mouse.mapPosition.y = mouse.scenePosition.y - mapContainer.y + mapContainer.pivot.y;
 
       mouseMoveEvent = null;
     }
