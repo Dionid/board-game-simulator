@@ -1,6 +1,6 @@
 import { Vector2 } from '.';
 
-export function cartisianToIso(vector: Vector2): Vector2 {
+export function cartesianToIso(vector: Vector2): Vector2 {
   return {
     x: vector.x - vector.y,
     y: (vector.x + vector.y) / 2,

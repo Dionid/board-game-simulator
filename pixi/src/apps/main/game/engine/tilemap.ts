@@ -172,15 +172,15 @@ export const initTileMap = async <MD extends typeof firstMapData>(props: {
             x: -tileData.tileSetPosition.x,
             y: -tileData.tileSetPosition.y,
           },
-          // x: isoPosition.x,
-          // y: isoPosition.y,
           x: (x * tileWidth) / 2 - (y * tileWidth) / 2,
+          // y: (x * tileHeight) / 2 + (y * tileHeight) / 2,
           y: (x * tileHeight) / 2 + (y * tileHeight) / 2 - (spriteHeight - tileHeight),
           anchor: {
             x: 0,
             y: 0,
           },
           cullable: true,
+          visible: layer.visible,
         });
 
         // tile.zIndex = positionY + positionX;

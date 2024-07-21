@@ -35,3 +35,7 @@
 # Useful links
 
 1. Rendering isometric map (https://melmouk.medium.com/algorithm-to-render-isometric-maps-3d86d1a49713)
+1. Cartesian to Iso
+    1. https://codepen.io/StefanH/pen/qBgVPaQ
+    1. https://gist.github.com/jordwest/8a12196436ebcf8df98a2745251915b5
+    1. https://www.youtube.com/watch?v=04oQ2jOUjkU

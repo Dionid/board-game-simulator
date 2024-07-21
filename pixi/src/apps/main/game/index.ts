@@ -11,7 +11,7 @@ import {
   TilingSprite,
 } from 'pixi.js';
 import firstMapData from './assets/FirstMap.json';
-import { createWorldScene, setCameraPosition, WorldScene } from './engine';
+import { createWorldScene, setCameraPosition, Vector2, WorldScene } from './engine';
 import {
   applyCameraToContainer,
   render,
@@ -24,6 +24,7 @@ import {
 import { initTileMap } from './engine/tilemap';
 import humanAtlasData from './assets/human_atlas.json';
 import { newAnimatedSprites, newDirectionalAnimationFrames } from './engine/animation';
+import { cartesianToIso } from './engine/isometric';
 
 const fillSceneContainer = async (worldScene: WorldScene) => {
   const texture = (await Assets.load('assets/star.png')) as Texture;
@@ -131,7 +132,7 @@ export const initWorld = async (app: Application) => {
         x: 0,
         y: 0,
       },
-      scale: 0.5,
+      scale: 1,
       size: {
         width: app.renderer.width,
         height: app.renderer.height,
@@ -226,6 +227,31 @@ export const initWorld = async (app: Application) => {
     currentAnimation.gotoAndPlay(0);
 
     playerContainer.position.set(worldScene.input.mouse.mapPosition.x, worldScene.input.mouse.mapPosition.y);
+
+    const { x, y } = playerContainer.position;
+    const { tileWidth, tileHeight } = tileMap;
+
+    function tilePosition(row: number, col: number) {
+      return {
+        x: (row * tileWidth) / 2 - (col * tileWidth) / 2,
+        y: (row * tileHeight) / 2 + (col * tileHeight) / 2,
+      };
+    }
+
+    function tileRowCol(x: number, y: number) {
+      return {
+        col: Math.floor(x / tileWidth + y / tileHeight - 0.5),
+        row: Math.floor(y / tileHeight - x / tileWidth + 0.5),
+      };
+    }
+
+    console.log(
+      {
+        x,
+        y,
+      },
+      tileRowCol(x, y)
+    );
   });
 
   // # Systems
