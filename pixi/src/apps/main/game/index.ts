@@ -152,20 +152,26 @@ export const initWorld = async (app: Application) => {
   fillSceneContainer(worldScene);
 
   // # Init map
-  const mapContainer = await initTileMap({
+  const { mapContainer, tileMap } = await initTileMap({
     assetName: 'kennytilesheet',
     texture: 'assets/kennytilesheet.png',
     mapData: firstMapData,
+    layerTileDepthModifier: {
+      Floor: 410,
+      'Outer Walls': 400,
+      'Inner Walls': 400,
+      default: 460,
+    },
   });
-  // mapContainer.culled = true;
-  // mapContainer.cullableChildren = true;
-  console.log('mapContainer.width', mapContainer.width);
+
   mapContainer.label = 'map';
   // # Move pivot to top left corner
-  mapContainer.pivot.x = -mapContainer.width / 2;
-  mapContainer.pivot.y = 0;
-  // mapContainer.y = 100;
-  // mapContainer.x = mapContainer.width / 2 + mapContainer.width / 6;
+  mapContainer.pivot.x = -mapContainer.width / 2 + tileMap.tileWidth / 2;
+  mapContainer.pivot.y = -tileMap.spriteHeight + tileMap.tileHeight;
+  // # Move map littlebit
+  mapContainer.x = 100;
+  mapContainer.y = 100;
+
   worldScene.container.addChild(mapContainer);
 
   // # Init player

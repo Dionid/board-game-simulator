@@ -1,7 +1,5 @@
 import { Texture, Assets, Container, TilingSprite } from 'pixi.js';
 import firstMapData from '../assets/FirstMap.json';
-import { Vector2 } from '.';
-import { cartisianToIso } from './isometric';
 
 export type Tile = {
   id: number;
@@ -17,8 +15,8 @@ export type TileSet = {
   texture: Texture;
   imageHeight: number;
   imageWidth: number;
-  tileWidth: number;
-  tileHeight: number;
+  spriteWidth: number;
+  spriteHeight: number;
   tilesCount: number;
   columns: number;
   rows: number;
@@ -37,13 +35,15 @@ export type TileLayer = {
   x: number;
   y: number;
   opacity: number;
-  container: Container;
 };
 
 export type TileMap<D> = {
   data: D;
   columns: number;
   rows: number;
+  tileWidth: number;
+  tileHeight: number;
+  spriteHeight: number;
   tileSet: {
     [key: string]: TileSet;
   };
@@ -57,6 +57,9 @@ export const initTileMap = async <MD extends typeof firstMapData>(props: {
   assetName: string;
   texture: Texture | string;
   mapData: MD;
+  layerTileDepthModifier: {
+    [key in MD['layers'][number]['name']]: number;
+  } & { default: number };
 }) => {
   const mapContainer = new Container();
 
@@ -74,6 +77,9 @@ export const initTileMap = async <MD extends typeof firstMapData>(props: {
     data: mapData,
     columns: mapData.width,
     rows: mapData.height,
+    tileWidth: mapData.tilewidth,
+    tileHeight: mapData.tileheight,
+    spriteHeight: mapData.tilewidth * 2,
     tileSet: {},
     layers: {},
     activeTileSet: props.assetName,
@@ -85,8 +91,8 @@ export const initTileMap = async <MD extends typeof firstMapData>(props: {
       texture: tileSetTexture,
       imageHeight: tileSetData.imageheight,
       imageWidth: tileSetData.imagewidth,
-      tileWidth: tileSetData.tilewidth,
-      tileHeight: tileSetData.tileheight,
+      spriteWidth: tileSetData.tilewidth,
+      spriteHeight: tileSetData.tileheight,
       tilesCount: tileSetData.tilecount,
       columns: tileSetData.columns,
       rows: tileSetData.imageheight / tileSetData.tileheight,
@@ -98,8 +104,8 @@ export const initTileMap = async <MD extends typeof firstMapData>(props: {
         id: tileData.id,
         properties: tileData.properties,
         tileSetPosition: {
-          x: (tileData.id % tileSet.columns) * tileSet.tileWidth,
-          y: Math.floor(tileData.id / tileSet.columns) * tileSet.tileHeight,
+          x: (tileData.id % tileSet.columns) * tileSet.spriteWidth,
+          y: Math.floor(tileData.id / tileSet.columns) * tileSet.spriteHeight,
         },
       };
     }
@@ -122,10 +128,7 @@ export const initTileMap = async <MD extends typeof firstMapData>(props: {
       x: layerData.x,
       y: layerData.y,
       opacity: layerData.opacity,
-      container: new Container(),
     };
-
-    // mapContainer.addChild(tileLayer.container);
 
     tileMap.layers[layerData.name] = tileLayer;
   }
@@ -141,48 +144,75 @@ export const initTileMap = async <MD extends typeof firstMapData>(props: {
           continue;
         }
 
+        const tileSet = tileMap.tileSet[tileMap.activeTileSet];
+
         const tileId = layerTileId - 1;
 
-        const tileData = tileMap.tileSet[tileMap.activeTileSet].tile[tileId];
+        const tileData = tileSet.tile[tileId];
 
         if (!tileData) {
           throw new Error(`Tile with id ${tileId} not found`);
         }
 
-        const positionX = (c * tileMap.tileSet[tileMap.activeTileSet].tileWidth) / 2;
-        const positionY = (r * tileMap.tileSet[tileMap.activeTileSet].tileHeight) / 4;
+        // const positionX = (c * tileSet.tileWidth) / 2;
+        // const positionY = (r * tileSet.tileHeight) / 4;
+        // const isoPosition = cartisianToIso({ x: positionX, y: positionY });
 
-        const isoPosition = cartisianToIso({ x: positionX, y: positionY });
+        const tileWidth = tileMap.tileWidth; // 256
+        const tileHeight = tileMap.tileHeight; // 128
+        const spriteHeight = tileMap.spriteHeight; // 512
+
+        console.log(tileWidth, tileHeight, spriteHeight);
+
+        const x = c;
+        const y = r;
 
         const tile = new TilingSprite({
           label: `${layerName.toLocaleLowerCase().replaceAll(' ', '_')}-tile-${r}-${c}`,
-          texture: tileMap.tileSet[tileMap.activeTileSet].texture,
-          width: tileMap.tileSet[tileMap.activeTileSet].tileWidth,
-          height: tileMap.tileSet[tileMap.activeTileSet].tileHeight,
+          texture: tileSet.texture,
+          width: tileSet.spriteWidth,
+          height: tileSet.spriteHeight,
           tilePosition: {
             x: -tileData.tileSetPosition.x,
             y: -tileData.tileSetPosition.y,
           },
-          x: isoPosition.x,
-          y: isoPosition.y,
+          // x: isoPosition.x,
+          // y: isoPosition.y,
+          x: (x * tileWidth) / 2 - (y * tileWidth) / 2,
+          y: (x * tileHeight) / 2 + (y * tileHeight) / 2 - (spriteHeight - tileHeight),
           anchor: {
-            x: 0.5,
+            x: 0,
             y: 0,
           },
+          cullable: true,
         });
 
-        tile.cullable = true;
-        tile.zIndex = layerName === 'Floor' ? isoPosition.y + 410 : isoPosition.y + 460;
+        // tile.zIndex = positionY + positionX;
+        // tile.zIndex = positionY;
+        // tile.zIndex = ((positionY + positionX) * tileSet.tileWidth) / 4;
+
+        // const depthModifier =
+        //   props.layerTileDepthModifier[layerName as MD['layers'][number]['name']] ??
+        //   props.layerTileDepthModifier.default ??
+        //   0;
+
+        // tile.zIndex = isoPosition.y + depthModifier;
+        // tile.zIndex = positionY + depthModifier;
+
+        // tile.zIndex = isoPosition.x + isoPosition.y;
 
         // layer.container.addChild(tile);
+
         mapContainer.addChild(tile);
       }
     }
   }
 
-  // mapContainer.scale.set(0.5);
   mapContainer.position.set(0, 0);
   mapContainer.pivot.set(0, 0);
 
-  return mapContainer;
+  return {
+    mapContainer,
+    tileMap,
+  };
 };
