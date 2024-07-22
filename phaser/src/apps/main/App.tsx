@@ -11,8 +11,8 @@ function App() {
 
     var config: Phaser.Types.Core.GameConfig = {
       type: Phaser.AUTO,
-      width: "100%",
-      height: "100%",
+      width: 500,
+      height: 500,
       parent: canvas,
       scene: MainScene,
       plugins: {
@@ -37,8 +37,8 @@ function App() {
       },
       scale: {
         mode: Phaser.Scale.NONE,
-        width: window.innerWidth / 0.5,
-        height: window.innerHeight / 0.5,
+        // width: window.innerWidth / 0.5,
+        // height: window.innerHeight / 0.5,
         zoom: 0.5,
       },
     };  

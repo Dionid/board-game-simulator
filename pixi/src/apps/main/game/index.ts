@@ -116,7 +116,7 @@ export const initWorld = async (app: Application) => {
   // mapContainer.y = 100;
 
   // # Main Scene Container
-  const worldScene = newGame(map, {
+  const game = newGame({
     app,
     camera: {
       // position: {
@@ -124,10 +124,10 @@ export const initWorld = async (app: Application) => {
       //   y: 0,
       // },
       // scale: 0.5,
-      // size: {
-      //   width: app.renderer.width,
-      //   height: app.renderer.height,
-      // },
+      size: {
+        width: app.renderer.width,
+        height: app.renderer.height,
+      },
     },
     size: {
       width: 5000,
@@ -135,7 +135,7 @@ export const initWorld = async (app: Application) => {
     },
   });
 
-  console.log(worldScene.cameras.main);
+  game.container.addChild(map.container);
 
   // # Center camera
   // setCameraPosition(
@@ -145,7 +145,7 @@ export const initWorld = async (app: Application) => {
   // );
 
   // ## Fill with some data
-  fillSceneContainer(worldScene);
+  fillSceneContainer(game);
 
   // # Init player
   const playerContainer = new Container();
@@ -214,7 +214,7 @@ export const initWorld = async (app: Application) => {
   app.canvas.addEventListener('click', (e) => {
     currentAnimation.gotoAndPlay(0);
 
-    playerContainer.position.set(worldScene.input.mouse.mapPosition.x, worldScene.input.mouse.mapPosition.y);
+    playerContainer.position.set(game.input.mouse.mapPosition.x, game.input.mouse.mapPosition.y);
 
     // const { x, y } = playerContainer.position;
     // const { tileWidth, tileHeight } = tileMap;
@@ -224,13 +224,13 @@ export const initWorld = async (app: Application) => {
 
   // # Systems
   // ## Inputs
-  registerSystem(essence, mapMouseInput(worldScene, mapContainer));
+  registerSystem(essence, mapMouseInput(game, mapContainer));
   // # Camera
-  registerSystem(essence, moveCameraByDragging(worldScene));
-  registerSystem(essence, zoom(worldScene));
-  registerSystem(essence, applyWorldBoundariesToCamera(worldScene));
-  registerSystem(essence, moveCamera(worldScene));
-  registerSystem(essence, applyCameraToContainer(worldScene));
+  registerSystem(essence, moveCameraByDragging(game));
+  registerSystem(essence, zoom(game));
+  registerSystem(essence, applyWorldBoundariesToCamera(game));
+  registerSystem(essence, moveCamera(game));
+  registerSystem(essence, applyCameraToContainer(game));
   // # Render
   registerSystem(essence, render(essence, app), 'postUpdate');
 

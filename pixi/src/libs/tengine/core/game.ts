@@ -1,13 +1,18 @@
 import { Application, ApplicationOptions, Container } from 'pixi.js';
-import { Map } from '../tilemap';
-import { Size, Vector2 } from './types';
+import { Size } from './types';
 import { Camera, newCamera, NewCameraProps } from './camera';
 import { MouseInput, newMouseInput } from './input';
 
+export type GameCanvas = {
+  parentElement: HTMLElement;
+  size: Size;
+  element: HTMLCanvasElement;
+  resizeTo?: HTMLElement | Window;
+};
+
 export type Game = {
   app: Application;
-  map: Map<any>;
-  parent: HTMLElement;
+  canvas: GameCanvas;
   container: Container;
   size: Size;
   input: {
@@ -19,10 +24,9 @@ export type Game = {
 };
 
 export const newGame = (
-  map: Map<any>,
   props: {
     app?: Application;
-    parent?: HTMLElement;
+    canvas?: Partial<Omit<GameCanvas, 'element'>>;
     camera?: NewCameraProps;
     size?: Size;
   } = {}
@@ -39,9 +43,6 @@ export const newGame = (
   // # Add container to App
   app.stage.addChild(container);
 
-  // # Add Map
-  container.addChild(map.container);
-
   // # World size
   const worldSize = {
     width: props.size?.width ?? window.innerWidth,
@@ -55,7 +56,7 @@ export const newGame = (
   });
 
   // # Add parent html element
-  let parent = props.parent;
+  let parent = props.canvas?.parentElement;
 
   if (!parent) {
     const parentElement = document.createElement('div');
@@ -65,8 +66,15 @@ export const newGame = (
 
   const game: Game = {
     app,
-    map,
-    parent,
+    canvas: {
+      parentElement: parent,
+      size: {
+        width: props.canvas?.size?.width ?? window.innerWidth,
+        height: props.canvas?.size?.height ?? window.innerHeight,
+      },
+      resizeTo: props.canvas?.resizeTo,
+      element: undefined as unknown as HTMLCanvasElement,
+    },
     container: container,
     input: {
       mouse: newMouseInput(),
@@ -87,7 +95,13 @@ export const newGame = (
 };
 
 export async function initGame(game: Game, options: Partial<ApplicationOptions> = {}) {
-  await game.app.init(options);
+  await game.app.init({
+    ...options,
+    width: game.canvas.size.width,
+    height: game.canvas.size.width,
+    resizeTo: game.canvas.resizeTo,
+  });
 
-  game.parent.appendChild(game.app.canvas);
+  game.canvas.element = game.app.canvas;
+  game.canvas.parentElement.appendChild(game.app.canvas);
 }
