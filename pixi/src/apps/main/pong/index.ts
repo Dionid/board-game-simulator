@@ -1,6 +1,6 @@
 import { Application } from 'pixi.js';
-import { newWorld } from '../../../libs/tecs';
+import { newEssence } from '../../../libs/tecs';
 
 export function initPongGame(app: Application) {
-  const essence = newWorld();
+  const essence = newEssence();
 }

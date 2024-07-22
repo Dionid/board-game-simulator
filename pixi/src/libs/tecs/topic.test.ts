@@ -1,5 +1,5 @@
 import { Topic } from './topic';
-import { World } from './world';
+import { Essence } from './essence';
 
 type AddedEvent = {
   type: 'added';
@@ -28,7 +28,7 @@ describe('topic', () => {
     expect([...topic]).toEqual([{ type: 'added', id: 1 }]);
   });
   it('sequence', () => {
-    const world = World.new();
+    const essence = Essence.new();
 
     const topic = Topic.new<CustomEvent>();
 
@@ -55,13 +55,13 @@ describe('topic', () => {
       }
     };
 
-    World.registerTopic(world, topic);
-    World.registerSystem(world, SpawnEventSystem);
-    World.registerSystem(world, TopicSystem);
+    Essence.registerTopic(essence, topic);
+    Essence.registerSystem(essence, SpawnEventSystem);
+    Essence.registerSystem(essence, TopicSystem);
 
-    World.step(world);
+    Essence.step(essence);
 
-    World.step(world);
+    Essence.step(essence);
 
     expect(seq).toBe(2);
   });

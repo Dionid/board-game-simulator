@@ -13,4 +13,4 @@ export {
   componentsList,
 } from './archetype';
 export * from './operations';
-export * from './world';
+export * from './essence';

@@ -9,9 +9,9 @@ import { safeGuard } from './switch';
 import { Topic } from './topic';
 
 /**
- * World is a container for Entities, Components and Archetypes.
+ * Essence is a container for Entities, Components and Archetypes.
  */
-export type World = {
+export type Essence = {
   // # State
   isFirstStep: boolean;
   state: 'running' | 'idle';
@@ -54,48 +54,48 @@ export type World = {
 
 // # Entity
 
-export const spawnEntity = <SL extends Schema[]>(world: World, arch?: Archetype<SL>) => {
+export const spawnEntity = <SL extends Schema[]>(essence: Essence, arch?: Archetype<SL>) => {
   let entity: number;
-  if (world.entityGraveyard.length > 0) {
-    entity = world.entityGraveyard.pop()!;
+  if (essence.entityGraveyard.length > 0) {
+    entity = essence.entityGraveyard.pop()!;
   } else {
-    entity = world.nextEntityId++;
+    entity = essence.nextEntityId++;
   }
   if (arch) {
     Archetype.addEntity(arch, entity);
-    world.archetypeByEntity[entity] = arch;
+    essence.archetypeByEntity[entity] = arch;
   }
   return entity;
 };
 
-export const killEntity = (world: World, entity: number): void => {
-  if (world.deferredOperations.killed.has(entity)) {
+export const killEntity = (essence: Essence, entity: number): void => {
+  if (essence.deferredOperations.killed.has(entity)) {
     return;
   }
 
-  if (world.deferredOperations.deferred) {
-    world.deferredOperations.operations.push({
+  if (essence.deferredOperations.deferred) {
+    essence.deferredOperations.operations.push({
       type: 'killEntity',
       entityId: entity,
     });
     return;
   }
 
-  world.entityGraveyard.push(entity);
+  essence.entityGraveyard.push(entity);
 
-  const archetype = world.archetypeByEntity[entity];
+  const archetype = essence.archetypeByEntity[entity];
   if (archetype) {
     Archetype.removeEntity(archetype, entity);
   }
-  world.archetypeByEntity[entity] = undefined;
+  essence.archetypeByEntity[entity] = undefined;
 };
 
 // # Archetype
 
-export const createArchetype = <SL extends Schema[]>(world: World, ...schemas: SL): Archetype<SL> => {
+export const createArchetype = <SL extends Schema[]>(essence: Essence, ...schemas: SL): Archetype<SL> => {
   const archId = ArchetypeId.create(schemas);
 
-  let archetype = world.archetypesById.get(archId) as Archetype<SL> | undefined;
+  let archetype = essence.archetypesById.get(archId) as Archetype<SL> | undefined;
 
   if (archetype !== undefined) {
     return archetype;
@@ -105,39 +105,42 @@ export const createArchetype = <SL extends Schema[]>(world: World, ...schemas: S
   const newArchetype = Archetype.new(...schemas);
 
   // # Index new Archetype
-  world.archetypesById.set(newArchetype.id, newArchetype);
+  essence.archetypesById.set(newArchetype.id, newArchetype);
 
   // # Add to queries
-  world.queries.forEach((query) => {
+  essence.queries.forEach((query) => {
     Query.tryAddArchetype(query, newArchetype);
   });
 
   return newArchetype;
 };
 
-export const registerArchetype = <SL extends Schema[]>(world: World, newArchetype: Archetype<SL>): Archetype<SL> => {
+export const registerArchetype = <SL extends Schema[]>(
+  essence: Essence,
+  newArchetype: Archetype<SL>
+): Archetype<SL> => {
   const archId = ArchetypeId.create(newArchetype.type);
 
-  let existingArchetype = world.archetypesById.get(archId) as Archetype<SL> | undefined;
+  let existingArchetype = essence.archetypesById.get(archId) as Archetype<SL> | undefined;
 
   if (existingArchetype !== undefined) {
     return existingArchetype;
   }
 
   // # Index new Archetype
-  world.archetypesById.set(newArchetype.id, newArchetype);
+  essence.archetypesById.set(newArchetype.id, newArchetype);
 
   // # Add to queries
-  world.queries.forEach((query) => {
+  essence.queries.forEach((query) => {
     Query.tryAddArchetype(query, newArchetype);
   });
 
   return newArchetype;
 };
 
-export function addEntity<CL extends Schema[]>(world: World, arch: Archetype<CL>, entity: Entity): void {
-  if (world.deferredOperations.deferred) {
-    world.deferredOperations.operations.push({
+export function addEntity<CL extends Schema[]>(essence: Essence, arch: Archetype<CL>, entity: Entity): void {
+  if (essence.deferredOperations.deferred) {
+    essence.deferredOperations.operations.push({
       type: 'addEntity',
       entityId: entity,
       archetype: arch,
@@ -155,20 +158,20 @@ export function addEntity<CL extends Schema[]>(world: World, arch: Archetype<CL>
  * will contain this Component Schema, move Entity and Components to this new
  * Archetype.
  *
- * @param world
+ * @param essence
  * @param entity
  * @param schema
  * @param component
  * @returns
  */
 export const setComponent = <S extends Schema>(
-  world: World,
+  essence: Essence,
   entity: Entity,
   schema: S,
   component?: SchemaType<S>
 ): void => {
-  if (world.deferredOperations.deferred) {
-    world.deferredOperations.operations.push({
+  if (essence.deferredOperations.deferred) {
+    essence.deferredOperations.operations.push({
       type: 'setComponent',
       entityId: entity,
       schema,
@@ -180,13 +183,13 @@ export const setComponent = <S extends Schema>(
   const schemaId = Internals.getSchemaId(schema);
 
   // # Get current archetype
-  let archetype = world.archetypeByEntity[entity] as Archetype<any> | undefined;
+  let archetype = essence.archetypeByEntity[entity] as Archetype<any> | undefined;
   if (archetype === undefined) {
     // # If there were no archetype, create new one
-    const newArchetype = World.createArchetype(world, schema);
+    const newArchetype = Essence.createArchetype(essence, schema);
 
     // # Index archetype by entity
-    world.archetypeByEntity[entity] = newArchetype;
+    essence.archetypeByEntity[entity] = newArchetype;
 
     // # Add entity to archetype
     Archetype.setComponent(newArchetype, entity, schemaId, component);
@@ -202,10 +205,10 @@ export const setComponent = <S extends Schema>(
   }
 
   // # If not, create new Archetype
-  const newArchetype = World.createArchetype(world, schema, ...archetype.type) as unknown as Archetype<[S]>;
+  const newArchetype = Essence.createArchetype(essence, schema, ...archetype.type) as unknown as Archetype<[S]>;
 
   // # Index archetype by entity
-  world.archetypeByEntity[entity] = newArchetype;
+  essence.archetypeByEntity[entity] = newArchetype;
 
   // # Move Entity to new Archetype
   Archetype.moveEntity(archetype, newArchetype, entity);
@@ -223,16 +226,16 @@ export const setComponent = <S extends Schema>(
  * will not contain this component, but will contain all other components from
  * current Archetype, and move entity and Components to this new Archetype.
  *
- * @param world
+ * @param essence
  * @param entity
  * @param schema
  * @returns
  *
  * @example
  */
-export const removeComponent = <S extends Schema>(world: World, entity: Entity, schema: S): void => {
-  if (world.deferredOperations.deferred) {
-    world.deferredOperations.operations.push({
+export const removeComponent = <S extends Schema>(essence: Essence, entity: Entity, schema: S): void => {
+  if (essence.deferredOperations.deferred) {
+    essence.deferredOperations.operations.push({
       type: 'removeComponent',
       entityId: entity,
       schema,
@@ -243,7 +246,7 @@ export const removeComponent = <S extends Schema>(world: World, entity: Entity, 
   const schemaId = Internals.getSchemaId(schema);
 
   // # Get current archetype
-  let archetype = world.archetypeByEntity[entity] as Archetype<Schema[]> | undefined;
+  let archetype = essence.archetypeByEntity[entity] as Archetype<Schema[]> | undefined;
   if (archetype === undefined) {
     throw new Error(`Can't find archetype for entity ${entity}`);
   }
@@ -254,7 +257,7 @@ export const removeComponent = <S extends Schema>(world: World, entity: Entity, 
   }
 
   // # Find or create new archetype
-  const newArchetype = World.createArchetype(world, ...archetype.type.filter((c) => c !== schema));
+  const newArchetype = Essence.createArchetype(essence, ...archetype.type.filter((c) => c !== schema));
 
   // # Move entity to new archetype
   Archetype.moveEntity(archetype, newArchetype, entity);
@@ -265,33 +268,33 @@ export const removeComponent = <S extends Schema>(world: World, entity: Entity, 
 // # Queries
 
 // TODO: add query index by id to check for similar filters
-export function registerQuery<Q extends Query<Schema[]>>(world: World, query: Q): Q {
-  if (world.queries.includes(query)) {
+export function registerQuery<Q extends Query<Schema[]>>(essence: Essence, query: Q): Q {
+  if (essence.queries.includes(query)) {
     return query;
   }
 
-  world.queries.push(query);
+  essence.queries.push(query);
 
-  world.archetypesById.forEach((archetype) => {
+  essence.archetypesById.forEach((archetype) => {
     Query.tryAddArchetype(query, archetype);
   });
 
   return query;
 }
 
-export function applyDeferredOp(world: World, operation: Operation): void {
+export function applyDeferredOp(essence: Essence, operation: Operation): void {
   switch (operation.type) {
     case 'addEntity':
-      addEntity(world, operation.archetype, operation.entityId);
+      addEntity(essence, operation.archetype, operation.entityId);
       break;
     case 'killEntity':
-      killEntity(world, operation.entityId);
+      killEntity(essence, operation.entityId);
       break;
     case 'setComponent':
-      setComponent(world, operation.entityId, operation.schema, operation.component);
+      setComponent(essence, operation.entityId, operation.schema, operation.component);
       break;
     case 'removeComponent':
-      removeComponent(world, operation.entityId, operation.schema);
+      removeComponent(essence, operation.entityId, operation.schema);
       break;
     default:
       return safeGuard(operation);
@@ -299,105 +302,105 @@ export function applyDeferredOp(world: World, operation: Operation): void {
 }
 
 export function registerSystem(
-  world: World,
+  essence: Essence,
   system: System,
   type?: 'onFirstStep' | 'preUpdate' | 'update' | 'postUpdate'
 ) {
-  world.systems[type || 'update'].push(system);
+  essence.systems[type || 'update'].push(system);
 }
 
-export function registerTopic(world: World, topic: Topic<unknown>) {
-  if (world.topics.includes(topic)) {
+export function registerTopic(essence: Essence, topic: Topic<unknown>) {
+  if (essence.topics.includes(topic)) {
     return;
   }
 
-  world.topics.push(topic);
+  essence.topics.push(topic);
 }
 
-export function step(world: World): void {
+export function step(essence: Essence): void {
   // # Set state
-  world.state = 'running';
+  essence.state = 'running';
   const now = Date.now();
-  world.currentStepTime = now;
-  if (world.lastStepTime === 0) {
-    world.lastStepTime = now;
+  essence.currentStepTime = now;
+  if (essence.lastStepTime === 0) {
+    essence.lastStepTime = now;
   }
 
   // # Set delta
-  let deltaTime = Math.max(0, now - world.lastStepTime);
+  let deltaTime = Math.max(0, now - essence.lastStepTime);
   let deltaFrameTime = deltaTime / 16.668;
 
   // # Execute deferred operations
-  const operations = world.deferredOperations.operations;
+  const operations = essence.deferredOperations.operations;
 
   for (let i = 0; i < operations.length; i++) {
-    applyDeferredOp(world, operations[i]);
+    applyDeferredOp(essence, operations[i]);
   }
 
-  world.deferredOperations.operations = [];
+  essence.deferredOperations.operations = [];
 
   // # Flush topics
-  for (let i = 0; i < world.topics.length; i++) {
-    Topic.flush(world.topics[i]);
+  for (let i = 0; i < essence.topics.length; i++) {
+    Topic.flush(essence.topics[i]);
   }
 
   // # Execute systems
-  world.deferredOperations.deferred = true;
+  essence.deferredOperations.deferred = true;
 
-  if (world.isFirstStep) {
-    for (let i = 0, l = world.systems.onFirstStep.length; i < l; i++) {
-      const system = world.systems.onFirstStep[i];
+  if (essence.isFirstStep) {
+    for (let i = 0, l = essence.systems.onFirstStep.length; i < l; i++) {
+      const system = essence.systems.onFirstStep[i];
       system({
         stage: 'onFirstStep',
-        world,
+        essence,
         deltaTime,
         deltaFrameTime,
       });
     }
   }
 
-  for (let i = 0, l = world.systems.preUpdate.length; i < l; i++) {
-    const system = world.systems.preUpdate[i];
+  for (let i = 0, l = essence.systems.preUpdate.length; i < l; i++) {
+    const system = essence.systems.preUpdate[i];
     system({
-      world,
+      essence,
       deltaTime,
       deltaFrameTime,
       stage: 'preUpdate',
     });
   }
 
-  for (let i = 0, l = world.systems.update.length; i < l; i++) {
-    const system = world.systems.update[i];
+  for (let i = 0, l = essence.systems.update.length; i < l; i++) {
+    const system = essence.systems.update[i];
     system({
-      world,
+      essence,
       deltaTime,
       deltaFrameTime,
       stage: 'update',
     });
   }
 
-  for (let i = 0, l = world.systems.postUpdate.length; i < l; i++) {
-    const system = world.systems.postUpdate[i];
+  for (let i = 0, l = essence.systems.postUpdate.length; i < l; i++) {
+    const system = essence.systems.postUpdate[i];
     system({
-      world,
+      essence,
       deltaTime,
       deltaFrameTime,
       stage: 'postUpdate',
     });
   }
 
-  world.deferredOperations.deferred = false;
+  essence.deferredOperations.deferred = false;
 
   // # Reset killed
-  world.deferredOperations.killed.clear();
+  essence.deferredOperations.killed.clear();
 
   // # Set state
-  world.lastStepTime = now;
-  world.state = 'idle';
-  world.isFirstStep = false;
+  essence.lastStepTime = now;
+  essence.state = 'idle';
+  essence.isFirstStep = false;
 }
 
-export function newWorld(
+export function newEssence(
   props: {
     queries?: Query<any>[];
     topics?: Topic<unknown>[];
@@ -408,7 +411,7 @@ export function newWorld(
       postUpdate?: System[];
     };
   } = {}
-): World {
+): Essence {
   return {
     isFirstStep: true,
     state: 'idle',
@@ -435,19 +438,19 @@ export function newWorld(
 }
 
 // MAYBE NOT REQUESTANIMATIONFRAME
-export function run(world: World): void {
+export function run(essence: Essence): void {
   const frame = () => {
-    step(world);
+    step(essence);
     requestAnimationFrame(frame);
   };
   frame();
 }
 
 // OK
-export const immediately = (world: World, fn: () => void) => {
-  world.deferredOperations.deferred = false;
+export const immediately = (essence: Essence, fn: () => void) => {
+  essence.deferredOperations.deferred = false;
   fn();
-  world.deferredOperations.deferred = true;
+  essence.deferredOperations.deferred = true;
 };
 
 // OK
@@ -457,11 +460,11 @@ export const registerSchema = Internals.registerSchema;
 export const getSchemaId = Internals.getSchemaId;
 
 // OK
-export const archetypeByEntity = (world: World, entity: Entity) => world.archetypeByEntity[entity];
+export const archetypeByEntity = (essence: Essence, entity: Entity) => essence.archetypeByEntity[entity];
 
 // OK
-export const hasComponent = <S extends Schema>(world: World, entity: Entity, schema: S): boolean => {
-  const archetype = world.archetypeByEntity[entity];
+export const hasComponent = <S extends Schema>(essence: Essence, entity: Entity, schema: S): boolean => {
+  const archetype = essence.archetypeByEntity[entity];
   if (!archetype) {
     return false;
   }
@@ -471,11 +474,11 @@ export const hasComponent = <S extends Schema>(world: World, entity: Entity, sch
 
 // OK
 export const componentByEntity = <S extends Schema>(
-  world: World,
+  essence: Essence,
   entity: Entity,
   schema: S
 ): SchemaType<S> | undefined => {
-  const archetype = world.archetypeByEntity[entity];
+  const archetype = essence.archetypeByEntity[entity];
   if (!archetype) {
     return;
   }
@@ -492,8 +495,8 @@ export const componentByEntity = <S extends Schema>(
 };
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const World = {
-  new: newWorld,
+export const Essence = {
+  new: newEssence,
   archetypeByEntity,
 
   // # Entity

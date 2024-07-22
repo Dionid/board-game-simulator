@@ -7,7 +7,7 @@ import {
   newSchema,
   number,
   string,
-  World,
+  Essence,
   registerQuery,
   System,
   table,
@@ -52,10 +52,10 @@ const drawQuery = Query.new(View, Position);
 
 // # Systems
 
-export const render = (world: World, app: Application): System => {
+export const render = (world: Essence, app: Application): System => {
   const query = registerQuery(world, drawQuery);
 
-  return ({ world, deltaFrameTime }) => {
+  return () => {
     for (const archetype of query.archetypes) {
       const positionT = table(archetype, Position);
       const graphicsT = tryTable(archetype, pGraphics);

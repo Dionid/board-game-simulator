@@ -1,4 +1,4 @@
-import { newWorld, registerSystem } from '../../../libs/tecs';
+import { newEssence, registerSystem } from '../../../libs/tecs';
 import { Application, Assets, Container, Sprite, Spritesheet, Texture } from 'pixi.js';
 import firstMapData from './assets/FirstMap.json';
 import { newGame, Game } from '../../../libs/tengine/game';
@@ -88,7 +88,29 @@ const fillSceneContainer = async (game: Game) => {
 };
 
 export const initWorld = async (app: Application) => {
-  const essence = newWorld();
+  const essence = newEssence();
+
+  // # Game
+  const game = newGame({
+    app,
+    camera: {
+      // position: {
+      //   x: 0,
+      //   y: 0,
+      // },
+      // scale: 0.5,
+      size: {
+        width: app.renderer.width,
+        height: app.renderer.height,
+      },
+    },
+    world: {
+      size: {
+        width: 5000,
+        height: 3000,
+      },
+    },
+  });
 
   // # Init map
   const map = await initTileMap({
@@ -113,28 +135,6 @@ export const initWorld = async (app: Application) => {
   // # Move map littlebit
   // mapContainer.x = 100;
   // mapContainer.y = 100;
-
-  // # Main Scene Container
-  const game = newGame({
-    app,
-    camera: {
-      // position: {
-      //   x: 0,
-      //   y: 0,
-      // },
-      // scale: 0.5,
-      size: {
-        width: app.renderer.width,
-        height: app.renderer.height,
-      },
-    },
-    world: {
-      size: {
-        width: 5000,
-        height: 3000,
-      },
-    },
-  });
 
   game.world.container.addChild(map.container);
 

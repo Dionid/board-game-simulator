@@ -66,7 +66,7 @@ export const zoom = (game: Game): System => {
     return newScale;
   };
 
-  return ({ world, deltaFrameTime }) => {
+  return () => {
     if (scaleEvent !== null) {
       const newScale = calculateScale(scaleEvent);
       camera.target.scale = newScale;
