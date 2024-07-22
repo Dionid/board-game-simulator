@@ -60,8 +60,8 @@ export function mapMouseInput(worldScene: Game, mapContainer: Container): System
       mouse.delta.clientPosition.x = mouseMoveEvent.x - mouse.previous.clientPosition.x;
       mouse.delta.clientPosition.y = mouseMoveEvent.y - mouse.previous.clientPosition.y;
 
-      mouse.scenePosition.x = Math.floor(mouseMoveEvent.x / camera.scale + camera.scaled.position.x);
-      mouse.scenePosition.y = Math.floor(mouseMoveEvent.y / camera.scale + camera.scaled.position.y);
+      mouse.scenePosition.x = Math.floor(mouseMoveEvent.x / camera.scale.x + camera.scaled.position.x);
+      mouse.scenePosition.y = Math.floor(mouseMoveEvent.y / camera.scale.y + camera.scaled.position.y);
 
       mouse.delta.scenePosition.x = mouse.scenePosition.x - mouse.previous.scenePosition.x;
       mouse.delta.scenePosition.y = mouse.scenePosition.y - mouse.previous.scenePosition.y;

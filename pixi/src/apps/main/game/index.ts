@@ -96,13 +96,19 @@ export const initWorld = async (app: Application) => {
       //   x: 0,
       //   y: 0,
       // },
-      // scale: 0.5,
-      size: {
-        width: window.innerWidth * 2,
-        height: window.innerHeight * 2,
-        // height: 3000,
-        // width: 5000,
+      scale: {
+        x: 0.5,
+        y: 0.5,
       },
+      zoom: {
+        min: 0.1,
+        max: 2,
+        step: 0.1,
+      },
+      // size: {
+      //   width: window.innerWidth * 2,
+      //   height: window.innerHeight * 2,
+      // },
     },
     world: {
       size: {

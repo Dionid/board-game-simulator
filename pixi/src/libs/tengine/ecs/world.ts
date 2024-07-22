@@ -18,8 +18,8 @@ export const applyCameraToWorld = (game: Game): System => {
     // );
     // container.scale = scale;
     // # Scale world by camera scale and size
-    container.scale.x = (window.innerWidth / camera.size.width) * camera.scale;
-    container.scale.y = (window.innerHeight / camera.size.height) * camera.scale;
+    container.scale.x = (window.innerWidth / camera.size.width) * camera.scale.x;
+    container.scale.y = (window.innerHeight / camera.size.height) * camera.scale.y;
     // ---
     // container.scale.x = camera.scale;
     // container.scale.y = camera.scale;

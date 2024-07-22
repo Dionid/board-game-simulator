@@ -1,28 +1,34 @@
-import { Size, Vector2 } from './types';
+import { MinMax, Size, Vector2 } from './types';
+
+export type CameraScale = Vector2;
+
+export type CameraZoom = MinMax & {
+  step: number;
+};
 
 export type Camera = {
   position: Vector2;
   size: Size;
-  scale: number;
+  scale: CameraScale;
   scaled: {
     position: Vector2;
     size: Size;
   };
+  zoom: CameraZoom;
   target: {
     position: Vector2;
-    scale: number;
+    scale: Vector2;
   };
 };
 
 export type NewCameraProps = {
   position?: Vector2;
   size?: Partial<Size>;
-  scale?: number;
+  scale?: Partial<CameraScale>;
+  zoom?: Partial<CameraZoom>;
 };
 
 export function newCamera(props: NewCameraProps = {}): Camera {
-  const scale = props.scale ?? 1;
-
   const position = {
     x: props.position?.x ?? 0,
     y: props.position?.y ?? 0,
@@ -31,6 +37,17 @@ export function newCamera(props: NewCameraProps = {}): Camera {
   const size = {
     width: props.size?.width ?? 0,
     height: props.size?.height ?? 0,
+  };
+
+  const scale = {
+    x: props.scale?.x ?? 1,
+    y: props.scale?.y ?? 1,
+  };
+
+  const zoom = {
+    min: props.zoom?.min ?? 0.5,
+    max: props.zoom?.max ?? 2,
+    step: props.zoom?.step ?? 0.1,
   };
 
   return {
@@ -42,15 +59,16 @@ export function newCamera(props: NewCameraProps = {}): Camera {
       width: size.width,
       height: size.height,
     },
+    zoom,
     scale,
     scaled: {
       position: {
-        x: position.x / scale,
-        y: position.y / scale,
+        x: position.x / scale.x,
+        y: position.y / scale.y,
       },
       size: {
-        width: size.width / scale,
-        height: size.height / scale,
+        width: size.width / scale.x,
+        height: size.height / scale.y,
       },
     },
     target: {
@@ -70,6 +88,6 @@ export function setCameraPosition(camera: Camera, x: number, y: number) {
   camera.target.position.x = x;
   camera.target.position.y = y;
 
-  camera.scaled.position.x = x / camera.scale;
-  camera.scaled.position.y = y / camera.scale;
+  camera.scaled.position.x = x / camera.scale.x;
+  camera.scaled.position.y = y / camera.scale.y;
 }

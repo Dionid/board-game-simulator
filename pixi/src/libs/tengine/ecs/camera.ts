@@ -29,13 +29,14 @@ export function moveCamera(worldScene: Game): System {
 
     camera.position.x += stepX;
     camera.position.y += stepY;
-    camera.scaled.position.x = camera.position.x / camera.scale;
-    camera.scaled.position.y = camera.position.y / camera.scale;
+    camera.scaled.position.x = camera.position.x / camera.scale.x;
+    camera.scaled.position.y = camera.position.y / camera.scale.y;
   };
 }
 
 export const zoom = (game: Game): System => {
   const camera = game.camera.main;
+  const { zoom, scale } = camera;
 
   let scaleEvent: KeyboardEvent | null = null;
 
@@ -48,19 +49,21 @@ export const zoom = (game: Game): System => {
   });
 
   const calculateScale = (scaleEvent: KeyboardEvent) => {
-    const delta = scaleEvent.key === 'ArrowUp' ? 0.1 : -0.1;
+    const delta = scaleEvent.key === 'ArrowUp' ? zoom.step : -zoom.step;
 
-    const currentScale = camera.scale;
-    let newScale = parseFloat((currentScale + delta).toFixed(1));
+    let newScale = {
+      x: camera.target.scale.x + delta,
+      y: camera.target.scale.y + delta,
+    };
 
-    if (newScale < 0.5) {
-      return currentScale;
-    } else if (newScale > 2) {
-      return currentScale;
-    } else if (camera.size.width / newScale > game.world.size.width) {
-      return currentScale;
-    } else if (camera.size.height / newScale > game.world.size.height) {
-      return currentScale;
+    if (newScale.x < zoom.min || newScale.y < zoom.min) {
+      return scale;
+    } else if (newScale.x > zoom.max || newScale.y > zoom.max) {
+      return scale;
+    } else if (camera.size.width / newScale.x > game.world.size.width) {
+      return scale;
+    } else if (camera.size.height / newScale.y > game.world.size.height) {
+      return scale;
     }
 
     return newScale;
@@ -82,18 +85,26 @@ export const zoom = (game: Game): System => {
     }
 
     // # Calculate step
-    let step = (targetScale - camera.scale) * 0.3;
+    let stepX = (targetScale.x - camera.scale.x) * 0.3;
+    let stepY = (targetScale.x - camera.scale.x) * 0.3;
 
     // # Apply step threshold
-    if (Math.abs(step) < 0.0001) {
-      step = targetScale - camera.scale;
+    if (Math.abs(stepX) < 0.0001) {
+      stepX = targetScale.x - camera.scale.x;
     }
 
-    camera.scale += step;
-    camera.scaled.position.x = camera.position.x / camera.scale;
-    camera.scaled.position.y = camera.position.y / camera.scale;
-    camera.scaled.size.width = camera.size.width / camera.scale;
-    camera.scaled.size.height = camera.size.height / camera.scale;
+    if (Math.abs(stepX) < 0.0001) {
+      stepY = targetScale.y - camera.scale.y;
+    }
+
+    camera.scale.x += stepX;
+    camera.scale.y += stepY;
+
+    camera.scaled.position.x = camera.position.x / camera.scale.x;
+    camera.scaled.position.y = camera.position.y / camera.scale.y;
+
+    camera.scaled.size.width = camera.size.width / camera.scale.x;
+    camera.scaled.size.height = camera.size.height / camera.scale.y;
   };
 };
 
@@ -111,14 +122,14 @@ export function applyWorldBoundariesToCamera(game: Game): System {
 
     if (newCameraX < 0) {
       newCameraX = 0;
-    } else if (newCameraX / camera.scale > game.world.size.width - camera.scaled.size.width) {
-      newCameraX = (game.world.size.width - camera.scaled.size.width) * camera.scale;
+    } else if (newCameraX / camera.scale.x > game.world.size.width - camera.scaled.size.width) {
+      newCameraX = (game.world.size.width - camera.scaled.size.width) * camera.scale.x;
     }
 
     if (newCameraY < 0) {
       newCameraY = 0;
-    } else if (newCameraY / camera.scale > game.world.size.height - camera.scaled.size.height) {
-      newCameraY = (game.world.size.height - camera.scaled.size.height) * camera.scale;
+    } else if (newCameraY / camera.scale.y > game.world.size.height - camera.scaled.size.height) {
+      newCameraY = (game.world.size.height - camera.scaled.size.height) * camera.scale.y;
     }
 
     camera.target.position.x = newCameraX;

@@ -1,5 +1,10 @@
 import { Container } from 'pixi.js';
 
+export type MinMax = {
+  min: number;
+  max: number;
+};
+
 export type Vector2 = {
   x: number;
   y: number;
