@@ -6,9 +6,7 @@ export {
   hasSchema as isSchemaInArchetype,
   hasEntity as isEntityInArchetype,
   table,
-  tryTable,
   tablesList,
-  tryTablesList,
   component,
   componentsList,
 } from './archetype';
