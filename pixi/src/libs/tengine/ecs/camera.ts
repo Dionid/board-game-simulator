@@ -2,7 +2,7 @@ import { System } from '../../tecs';
 import { Game } from '../game';
 
 export function moveCamera(worldScene: Game): System {
-  const camera = worldScene.cameras.main;
+  const camera = worldScene.camera.main;
 
   const movementEase = 1;
 
@@ -35,7 +35,7 @@ export function moveCamera(worldScene: Game): System {
 }
 
 export const zoom = (game: Game): System => {
-  const camera = game.cameras.main;
+  const camera = game.camera.main;
 
   let scaleEvent: KeyboardEvent | null = null;
 
@@ -96,7 +96,7 @@ export const zoom = (game: Game): System => {
 };
 
 export function applyWorldBoundariesToCamera(game: Game): System {
-  const camera = game.cameras.main;
+  const camera = game.camera.main;
 
   return () => {
     // # Calculate new camera
@@ -125,7 +125,7 @@ export function applyWorldBoundariesToCamera(game: Game): System {
 }
 
 export function moveCameraByDragging(worldScene: Game): System {
-  const camera = worldScene.cameras.main;
+  const camera = worldScene.camera.main;
   const mouse = worldScene.input.mouse;
 
   const cameraSpeed = 1;

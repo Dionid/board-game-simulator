@@ -22,7 +22,7 @@ export type Game = {
   input: {
     mouse: MouseInput;
   };
-  cameras: {
+  camera: {
     main: Camera;
   };
 };
@@ -83,7 +83,7 @@ export const newGame = (
     input: {
       mouse: newMouseInput(),
     },
-    cameras: {
+    camera: {
       main: camera,
     },
   };
@@ -106,5 +106,5 @@ export async function initGame(game: Game, options: Partial<ApplicationOptions> 
   });
 
   game.canvas.element = game.app.canvas;
-  game.canvas.parentElement.appendChild(game.app.canvas);
+  game.canvas.parentElement.appendChild(game.canvas.element);
 }

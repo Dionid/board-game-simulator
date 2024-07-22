@@ -2,7 +2,7 @@ import { System } from '../../tecs';
 import { Game } from '../game';
 
 export const applyCameraToContainer = (game: Game): System => {
-  const camera = game.cameras.main;
+  const camera = game.camera.main;
   const container = game.world.container;
 
   return () => {

@@ -6,7 +6,7 @@ export function mapMouseInput(worldScene: Game, mapContainer: Container): System
   const input = worldScene.input;
   const mouse = input.mouse;
   const canvas = worldScene.app.canvas;
-  const camera = worldScene.cameras.main;
+  const camera = worldScene.camera.main;
 
   let mouseUp = false;
   let mouseDown = false;
