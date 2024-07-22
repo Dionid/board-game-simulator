@@ -1,7 +1,7 @@
 import { newWorld, registerSystem } from '../../../libs/tecs';
 import { Application, Assets, Container, Sprite, Spritesheet, Texture } from 'pixi.js';
 import firstMapData from './assets/FirstMap.json';
-import { createWorldScene, WorldScene } from '../../../libs/tengine';
+import { createWorldScene, WorldScene } from '../../../libs/tengine/core';
 import {
   applyCameraToContainer,
   render,

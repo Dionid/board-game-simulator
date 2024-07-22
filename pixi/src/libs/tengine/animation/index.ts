@@ -1,5 +1,5 @@
-import { AnimatedSprite, Spritesheet, Texture } from 'pixi.js';
-import { Vector2 } from '.';
+import { AnimatedSprite, Texture } from 'pixi.js';
+import { Vector2 } from '../core';
 
 export function newAnimationFrames(start: number, end: number, prefix: string, postfix: string) {
   const frames = [];

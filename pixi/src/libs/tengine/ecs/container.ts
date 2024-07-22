@@ -1,5 +1,5 @@
 import { System } from '../../tecs';
-import { WorldScene } from '../';
+import { WorldScene } from '../core';
 
 export const applyCameraToContainer = (worldScene: WorldScene): System => {
   const camera = worldScene.cameras.main;

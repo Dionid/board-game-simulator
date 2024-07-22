@@ -1,5 +1,5 @@
 import { Application, Container } from 'pixi.js';
-import { Map } from './tilemap';
+import { Map } from '../tilemap';
 
 export type TablePosition = {
   row: number;

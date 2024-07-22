@@ -1,4 +1,4 @@
-import { Size, TablePosition, Vector2 } from '.';
+import { Size, TablePosition, Vector2 } from '../core';
 
 // export function cartesianToIso(vector: Vector2): Vector2 {
 //   return {
