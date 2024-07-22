@@ -1,16 +1,18 @@
 import { registerQuery, System, table, tryTable } from '../../tecs';
 import { newQuery } from '../../tecs/query';
-import { View, Position, pGraphics, Color } from './components';
+import { View, Position, pGraphics, Color, Size } from './components';
 import { Game } from '../game';
+import { Map } from '../core';
 
-const drawQuery = newQuery(View, Position);
+const drawQuery = newQuery(View, Position, Size);
 
-export const calculateGameObjects = (game: Game): System => {
+export const renderGameObjects = (game: Game, map: Map): System => {
   const query = registerQuery(game.essence, drawQuery);
 
   return () => {
     for (const archetype of query.archetypes) {
       const positionT = table(archetype, Position);
+      const sizeT = table(archetype, Size);
       const graphicsT = tryTable(archetype, pGraphics);
       const colorT = tryTable(archetype, Color);
 
@@ -19,14 +21,14 @@ export const calculateGameObjects = (game: Game): System => {
           const graphics = graphicsT[i].value;
 
           graphics.clear();
-          graphics.circle(positionT[i].x, positionT[i].y, 50);
+          graphics.rect(positionT[i].x, positionT[i].y, sizeT[i].width, sizeT[i].height);
 
           if (colorT) {
             graphics.fill(colorT[i].value);
           }
 
           if (graphics.parent === null) {
-            game.app.stage.addChild(graphics);
+            map.container.addChild(graphics);
           }
         }
       }

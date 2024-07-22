@@ -1,8 +1,17 @@
 import { Container, Graphics } from 'pixi.js';
 import { initGame, newGame } from '../../../libs/tengine/game';
-import { registerSystem } from '../../../libs/tecs';
-import { mapKeyboardInput, mapMouseInput } from '../../../libs/tengine/ecs';
-import { moveByArrows } from './ecs';
+import { registerSystem, setComponent, spawnEntity } from '../../../libs/tecs';
+import {
+  mapKeyboardInput,
+  mapMouseInput,
+  pGraphics,
+  Position,
+  Size,
+  View,
+  Color,
+  renderGameObjects,
+} from '../../../libs/tengine/ecs';
+import { moveByArrows, Player } from './ecs';
 
 export async function initPongGame(parentElement: HTMLElement) {
   const game = newGame({
@@ -29,15 +38,25 @@ export async function initPongGame(parentElement: HTMLElement) {
     height: 200,
   };
 
-  const player = new Graphics().rect(
+  const playerEntity = spawnEntity(game.essence);
+  const playerG = new Graphics().rect(
     game.world.size.width / 6 - characterSize.width / 2,
     game.world.size.height / 2 - characterSize.height / 2,
     characterSize.width,
     characterSize.height
   );
-  player.label = 'player';
-  player.fill(0xfff);
-  map.container.addChild(player);
+  playerG.label = 'player';
+  setComponent(game.essence, playerEntity, Player);
+  setComponent(game.essence, playerEntity, View);
+  setComponent(game.essence, playerEntity, pGraphics, { value: playerG });
+  setComponent(game.essence, playerEntity, Position, {
+    x: game.world.size.width / 6 - characterSize.width / 2,
+    y: game.world.size.height / 2 - characterSize.height / 2,
+  });
+  setComponent(game.essence, playerEntity, Size, { width: characterSize.width, height: characterSize.height });
+  setComponent(game.essence, playerEntity, Color, { value: '0xfff' });
+
+  // map.container.addChild(playerG);
 
   const enemy = new Graphics().rect(
     (game.world.size.width / 6) * 5 - characterSize.width / 2,
@@ -54,7 +73,9 @@ export async function initPongGame(parentElement: HTMLElement) {
   registerSystem(game.essence, mapKeyboardInput(game));
   registerSystem(game.essence, mapMouseInput(game, map));
   // ## Movement
-  registerSystem(game.essence, moveByArrows(game));
+  registerSystem(game.essence, moveByArrows(game, playerEntity));
+  // # GameObjects
+  registerSystem(game.essence, renderGameObjects(game, map), 'postUpdate');
 
   return game;
 }

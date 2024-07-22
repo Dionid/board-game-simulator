@@ -1,9 +1,12 @@
-import { System } from '../../../../libs/tecs';
+import { archetypeByEntity, Entity, newTag, System, tryTable } from '../../../../libs/tecs';
+import { Position } from '../../../../libs/tengine/ecs';
 import { Game } from '../../../../libs/tengine/game';
+
+export const Player = newTag();
 
 export type Directions = 'up' | 'down' | 'left' | 'right';
 
-export const moveByArrows = (game: Game): System => {
+export const moveByArrows = (game: Game, playerEntity: Entity): System => {
   const input = game.input;
   const keyboard = input.keyboard;
 
@@ -29,17 +32,36 @@ export const moveByArrows = (game: Game): System => {
 
   return () => {
     const direction = getDirection();
-    if (direction === 'up') {
-      console.log('up');
+
+    if (!direction) {
+      return;
     }
-    if (direction === 'down') {
-      console.log('down');
+
+    const playerArchetype = archetypeByEntity(game.essence, playerEntity);
+
+    if (!playerArchetype) {
+      return;
     }
-    if (direction === 'left') {
-      console.log('left');
+
+    const positionT = tryTable(playerArchetype, Position);
+
+    if (!positionT) {
+      return;
     }
-    if (direction === 'right') {
-      console.log('right');
+
+    const position = positionT[0];
+
+    if (!position) {
+      return;
+    }
+
+    switch (direction) {
+      case 'up':
+        position.y -= 5;
+        break;
+      case 'down':
+        position.y += 5;
+        break;
     }
   };
 };

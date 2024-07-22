@@ -9,7 +9,7 @@ function App() {
   useEffect(() => {
     const gameHolder = document.getElementById('gameHolder') as HTMLCanvasElement;
     
-    // PsyOps
+    // # PsyOps
     // const app = new Application();
     // (globalThis as any).__PIXI_APP__ = app;
     // app.init({ resizeTo: window, backgroundColor: 'white', autoStart: false }).then(async () => {
@@ -18,6 +18,7 @@ function App() {
     //   run(world)
     // })
 
+    // # Pong
     initPongGame(gameHolder).then((game) => {
       run(game)
     })
