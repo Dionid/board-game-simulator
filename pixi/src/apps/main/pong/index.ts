@@ -55,7 +55,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, playerEntity, pGraphicsTag);
   setComponent(game.essence, playerEntity, Pivot, { x: 0, y: 0 });
   setComponent(game.essence, playerEntity, Shape, { name: 'rect' });
-  setComponent(game.essence, playerEntity, Speed, { value: 5 });
+  setComponent(game.essence, playerEntity, Speed, { value: 2 });
   setComponent(game.essence, playerEntity, Acceleration, {
     x: 0,
     y: 0,
@@ -80,7 +80,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, enemyEntity, pGraphicsTag);
   setComponent(game.essence, enemyEntity, Shape, { name: 'rect' });
   setComponent(game.essence, enemyEntity, Pivot, { x: 0, y: 0 });
-  setComponent(game.essence, enemyEntity, Speed, { value: 5 });
+  setComponent(game.essence, enemyEntity, Speed, { value: 1 });
   setComponent(game.essence, enemyEntity, Acceleration, {
     x: 0,
     y: 0,

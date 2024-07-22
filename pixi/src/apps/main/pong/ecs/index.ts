@@ -8,7 +8,7 @@ import {
   table,
   tryTable,
 } from '../../../../libs/tecs';
-import { Pivot, Position, Size, Speed, Velocity } from '../../../../libs/tengine/ecs';
+import { Acceleration, Pivot, Position, Size, Speed, Velocity } from '../../../../libs/tengine/ecs';
 import { Game } from '../../../../libs/tengine/game';
 
 export const GameObject = newTag();
@@ -42,25 +42,25 @@ export const moveByArrows = (game: Game, playerEntity: Entity): System => {
       return;
     }
 
-    const velocityT = tryTable(playerArchetype, Velocity);
+    const accelerationT = tryTable(playerArchetype, Acceleration);
 
-    if (!velocityT) {
+    if (!accelerationT) {
       return;
     }
 
-    const velocity = velocityT[0];
+    const acceleration = accelerationT[0];
 
-    if (!velocity) {
+    if (!acceleration) {
       return;
     }
 
     const directionY = getYDirection();
 
-    velocity.y = -1 * directionY * deltaTime;
+    acceleration.y = -1 * directionY * deltaTime;
   };
 };
 
-export const velocityPositionQuery = newQuery(Velocity, Position, Speed);
+export const velocityPositionQuery = newQuery(Velocity, Position, Speed, Acceleration);
 
 export const addVelocityToPosition = (game: Game): System => {
   const query = registerQuery(game.essence, velocityPositionQuery);
@@ -71,14 +71,25 @@ export const addVelocityToPosition = (game: Game): System => {
       const velocityT = table(archetype, Velocity);
       const positionT = table(archetype, Position);
       const speedT = table(archetype, Speed);
+      const accelerationT = table(archetype, Acceleration);
 
       for (let j = 0; j < archetype.entities.length; j++) {
         const velocity = velocityT[j];
         const position = positionT[j];
         const speed = speedT[j];
+        const acceleration = accelerationT[j];
 
-        position.x += velocity.x * deltaTime * speed.value;
-        position.y += velocity.y * deltaTime * speed.value;
+        // # Apply acceleration to velocity
+        velocity.x += acceleration.x * deltaTime * speed.value;
+        velocity.y += acceleration.y * deltaTime * speed.value;
+
+        // # Apply velocity to position
+        position.x += velocity.x * deltaTime;
+        position.y += velocity.y * deltaTime;
+
+        // # Apply friction to velocity
+        velocity.x *= 0.85 * deltaTime;
+        velocity.y *= 0.85 * deltaTime;
       }
     }
   };
