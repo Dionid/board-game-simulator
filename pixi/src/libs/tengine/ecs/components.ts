@@ -51,6 +51,11 @@ export const Velocity = newSchema({
   y: number,
 });
 
+export const Acceleration = newSchema({
+  x: number,
+  y: number,
+});
+
 export const Speed = newSchema({
   value: number,
 });

@@ -14,9 +14,9 @@ import {
   pGraphicsTag,
   Shape,
   Pivot,
+  Acceleration,
 } from '../../../libs/tengine/ecs';
 import { addVelocityToPosition, Ball, GameObject, Enemy, moveByArrows, Player, applyGOWorldBoundaries } from './ecs';
-import { matterSyncPhysicsBodyPosition } from '../../../libs/tengine/matter/physics';
 import { drawDebugLines } from '../../../libs/tengine/ecs/debug';
 
 export async function initPongGame(parentElement: HTMLElement) {
@@ -56,6 +56,10 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, playerEntity, Pivot, { x: 0, y: 0 });
   setComponent(game.essence, playerEntity, Shape, { name: 'rect' });
   setComponent(game.essence, playerEntity, Speed, { value: 5 });
+  setComponent(game.essence, playerEntity, Acceleration, {
+    x: 0,
+    y: 0,
+  });
   setComponent(game.essence, playerEntity, Velocity, {
     x: 0,
     y: 0,
@@ -77,6 +81,10 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, enemyEntity, Shape, { name: 'rect' });
   setComponent(game.essence, enemyEntity, Pivot, { x: 0, y: 0 });
   setComponent(game.essence, enemyEntity, Speed, { value: 5 });
+  setComponent(game.essence, enemyEntity, Acceleration, {
+    x: 0,
+    y: 0,
+  });
   setComponent(game.essence, enemyEntity, Velocity, {
     x: 0,
     y: 0,
@@ -96,8 +104,12 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, ballEntity, View);
   setComponent(game.essence, ballEntity, pGraphicsTag);
   setComponent(game.essence, ballEntity, Shape, { name: 'circle' });
-  setComponent(game.essence, ballEntity, Pivot, { x: 25, y: 25 });
+  setComponent(game.essence, ballEntity, Pivot, { x: 25, y: 25 }); // because pixi.circle has pivot in center
   setComponent(game.essence, ballEntity, Speed, { value: 0.4 });
+  setComponent(game.essence, ballEntity, Acceleration, {
+    x: 0,
+    y: 0,
+  });
   setComponent(game.essence, ballEntity, Velocity, {
     x: 0,
     y: 0,

@@ -36,6 +36,7 @@
 1. ...
 1. Tweens
 1. ...
+1. ? Fixed update
 1. ? Convert scale from float to int
 
 # Caution
@@ -43,10 +44,20 @@
 1. It's better not to change Camera size directly, use zoom for this
 1. ...
 
+# Collision
+
+1. Phases
+    1. Broad
+    1. Narrow
+    1. Response
+
 # Useful links
 
-1. Rendering isometric map (https://melmouk.medium.com/algorithm-to-render-isometric-maps-3d86d1a49713)
-1. Cartesian to Iso
-    1. https://codepen.io/StefanH/pen/qBgVPaQ
-    1. https://gist.github.com/jordwest/8a12196436ebcf8df98a2745251915b5
-    1. https://www.youtube.com/watch?v=04oQ2jOUjkU
+1. Isometric
+    1. Rendering isometric map (https://melmouk.medium.com/algorithm-to-render-isometric-maps-3d86d1a49713)
+    1. Cartesian to Iso
+        1. https://codepen.io/StefanH/pen/qBgVPaQ
+        1. https://gist.github.com/jordwest/8a12196436ebcf8df98a2745251915b5
+        1. https://www.youtube.com/watch?v=04oQ2jOUjkU
+1. Collision
+    1. https://www.youtube.com/watch?v=eED4bSkYCB8
