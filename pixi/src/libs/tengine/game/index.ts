@@ -107,7 +107,6 @@ export const newGame = (
 
 export async function initGame(game: Game, options: Partial<ApplicationOptions> = {}) {
   await game.app.init({
-    // autoStart: false,
     ...options,
     width: game.canvas.size.width,
     height: game.canvas.size.width,
