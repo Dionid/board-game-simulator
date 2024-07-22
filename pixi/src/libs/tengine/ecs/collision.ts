@@ -16,6 +16,43 @@ export const areCirclesColliding = (
   return distance < minDistance;
 };
 
+export const areCircleAndRectangleColliding = (
+  circlePosition: SchemaType<typeof Position>,
+  circleSize: SchemaType<typeof Size>,
+  rectanglePosition: SchemaType<typeof Position>,
+  rectangleSize: SchemaType<typeof Size>
+) => {
+  const dx = Math.max(
+    rectanglePosition.x - circlePosition.x,
+    0,
+    circlePosition.x - rectanglePosition.x - rectangleSize.width
+  );
+  const dy = Math.max(
+    rectanglePosition.y - circlePosition.y,
+    0,
+    circlePosition.y - rectanglePosition.y - rectangleSize.height
+  );
+  const distance = Math.sqrt(dx * dx + dy * dy);
+  const minDistance = circleSize.width / 2;
+
+  return distance < minDistance;
+};
+
+// # Check if two rectangles are colliding using AABB algorithm
+export const areRectanglesColliding = (
+  positionA: SchemaType<typeof Position>,
+  sizeA: SchemaType<typeof Size>,
+  positionB: SchemaType<typeof Position>,
+  sizeB: SchemaType<typeof Size>
+) => {
+  return (
+    positionA.x < positionB.x + sizeB.width &&
+    positionA.x + sizeA.width > positionB.x &&
+    positionA.y < positionB.y + sizeB.height &&
+    positionA.y + sizeA.height > positionB.y
+  );
+};
+
 export type CollidingEvent = {
   a: Entity;
   b: Entity;
@@ -29,46 +66,116 @@ export const runNarrowPhaseSimple = (game: Game): System => {
   const query = registerQuery(game.essence, collisionQuery);
 
   return () => {
+    const entitiesWIthColliders: {
+      entity: Entity;
+      collisionBodyPosition: SchemaType<typeof Position>;
+      collisionBody: SchemaType<typeof CollisionBody>;
+    }[] = [];
+
     for (let i = 0; i < query.archetypes.length; i++) {
       const archetype = query.archetypes[i];
+
       const positionT = table(archetype, Position);
       const collisionBodyT = table(archetype, CollisionBody);
 
       for (let a = 0; a < archetype.entities.length; a++) {
-        const entityA = archetype.entities[a];
-        const positionA = positionT[a];
-        const collisionBodyA = collisionBodyT[a];
-        const collisionBodyPositionA = collisionBodyA.position;
+        const entity = archetype.entities[a];
 
-        for (let b = a + 1; b < archetype.entities.length; b++) {
-          const entityB = archetype.entities[b];
-          const positionB = positionT[b];
-          const collisionBodyB = collisionBodyT[b];
-          const collisionBodyPositionB = collisionBodyB.position;
+        const position = positionT[a];
+        const collisionBody = collisionBodyT[a];
+        const collisionBodyPosition = {
+          x: position.x + collisionBody.position.x,
+          y: position.y + collisionBody.position.y,
+        };
 
-          for (const partA of collisionBodyA.parts) {
-            const partPositionA = {
-              x: positionA.x + collisionBodyPositionA.x + partA.position.x,
-              y: positionA.y + collisionBodyPositionA.x + partA.position.y,
+        entitiesWIthColliders.push({
+          entity,
+          collisionBody,
+          collisionBodyPosition,
+        });
+      }
+    }
+
+    // debugger;
+    for (let a = 0; a < entitiesWIthColliders.length; a++) {
+      const entityA = entitiesWIthColliders[a].entity;
+      const collisionBodyPositionA = entitiesWIthColliders[a].collisionBodyPosition;
+      const collisionBodyA = entitiesWIthColliders[a].collisionBody;
+
+      for (let b = a + 1; b < entitiesWIthColliders.length; b++) {
+        const entityB = entitiesWIthColliders[b].entity;
+        const collisionBodyB = entitiesWIthColliders[b].collisionBody;
+        const collisionBodyPositionB = entitiesWIthColliders[b].collisionBodyPosition;
+
+        for (const partA of collisionBodyA.parts) {
+          const partPositionA = {
+            x: collisionBodyPositionA.x + partA.position.x,
+            y: collisionBodyPositionA.x + partA.position.y,
+          };
+
+          for (const partB of collisionBodyB.parts) {
+            const partPositionB = {
+              x: collisionBodyPositionB.x + partB.position.x,
+              y: collisionBodyPositionB.x + partB.position.y,
             };
 
-            for (const partB of collisionBodyB.parts) {
-              const partPositionB = {
-                x: positionB.x + collisionBodyPositionB.x + partB.position.x,
-                y: positionB.y + collisionBodyPositionB.x + partB.position.y,
-              };
+            if (partA.shape.name === 'circle' && partB.shape.name === 'circle') {
+              const areColliding = areCirclesColliding(partPositionA, partA.size, partPositionB, partB.size);
 
-              if (partA.shape.name === 'circle' && partB.shape.name === 'circle') {
-                const isColliding = areCirclesColliding(partPositionA, partA.size, partPositionB, partB.size);
-                // debugger;
-
-                if (isColliding) {
-                  emit(collidingTopic, {
+              if (areColliding) {
+                emit(
+                  collidingTopic,
+                  {
                     a: entityA,
                     b: entityB,
-                  });
-                }
+                  },
+                  true
+                );
               }
+
+              continue;
+            }
+
+            if (
+              (partA.shape.name === 'circle' && partB.shape.name === 'rectangle') ||
+              (partA.shape.name === 'rectangle' && partB.shape.name === 'circle')
+            ) {
+              const areColliding = areCircleAndRectangleColliding(
+                partA.shape.name === 'circle' ? partPositionA : partPositionB,
+                partA.shape.name === 'circle' ? partA.size : partB.size,
+                partA.shape.name === 'rectangle' ? partPositionA : partPositionB,
+                partA.shape.name === 'rectangle' ? partA.size : partB.size
+              );
+
+              if (areColliding) {
+                emit(
+                  collidingTopic,
+                  {
+                    a: entityA,
+                    b: entityB,
+                  },
+                  true
+                );
+              }
+
+              continue;
+            }
+
+            if (partA.shape.name === 'rectangle' && partB.shape.name === 'rectangle') {
+              const areColliding = areRectanglesColliding(partPositionA, partA.size, partPositionB, partB.size);
+
+              if (areColliding) {
+                emit(
+                  collidingTopic,
+                  {
+                    a: entityA,
+                    b: entityB,
+                  },
+                  true
+                );
+              }
+
+              continue;
             }
           }
         }

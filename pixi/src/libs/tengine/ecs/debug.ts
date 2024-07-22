@@ -15,7 +15,7 @@ export const drawShapeLines = (
   strokeWidth = 2
 ) => {
   switch (shape.name) {
-    case 'rect':
+    case 'rectangle':
       globalGraphics.rect(position.x, position.y, size.width, size.height);
       globalGraphics.stroke({ width: strokeWidth, color });
       break;

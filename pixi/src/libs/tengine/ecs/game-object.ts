@@ -30,7 +30,7 @@ export const renderGameObjects = (game: Game, map: Map): System => {
 
         if (graphicsTag && graphicsType) {
           switch (graphicsType[i].name) {
-            case 'rect':
+            case 'rectangle':
               globalGraphics.rect(position.x, position.y, size.width, size.height);
               break;
             case 'circle':

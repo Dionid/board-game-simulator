@@ -27,6 +27,7 @@
 1. ~~Types: Boolean, Array ~~
 1. ~~Defer add and remove entities and components on the same Essence.step or deferred~~
 1. ~~Topics~~
+1. Debug
 1. ...
 1. Complex queries
 1. Singleton Component

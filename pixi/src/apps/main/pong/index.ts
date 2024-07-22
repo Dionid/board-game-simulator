@@ -56,7 +56,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, playerEntity, View);
   setComponent(game.essence, playerEntity, pGraphicsTag);
   setComponent(game.essence, playerEntity, Pivot, { x: 0, y: 0 });
-  setComponent(game.essence, playerEntity, Shape, { name: 'rect' });
+  setComponent(game.essence, playerEntity, Shape, { name: 'rectangle' });
   setComponent(game.essence, playerEntity, Speed, { value: 2 });
   setComponent(game.essence, playerEntity, Acceleration, {
     x: 0,
@@ -76,7 +76,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, playerEntity, CollisionBody, {
     parts: [
       {
-        shape: { name: 'rect' },
+        shape: { name: 'rectangle' },
         position: { x: 0, y: 0 },
         size: { width: characterSize.width, height: characterSize.height },
       },
@@ -93,7 +93,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, enemyEntity, Enemy);
   setComponent(game.essence, enemyEntity, View);
   setComponent(game.essence, enemyEntity, pGraphicsTag);
-  setComponent(game.essence, enemyEntity, Shape, { name: 'rect' });
+  setComponent(game.essence, enemyEntity, Shape, { name: 'rectangle' });
   setComponent(game.essence, enemyEntity, Pivot, { x: 0, y: 0 });
   setComponent(game.essence, enemyEntity, Speed, { value: 1 });
   setComponent(game.essence, enemyEntity, Acceleration, {
@@ -114,7 +114,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, enemyEntity, CollisionBody, {
     parts: [
       {
-        shape: { name: 'rect' },
+        shape: { name: 'rectangle' },
         position: { x: 0, y: 0 },
         size: { width: characterSize.width, height: characterSize.height },
       },
@@ -163,43 +163,43 @@ export async function initPongGame(parentElement: HTMLElement) {
     },
   });
 
-  // # Ball
-  const secondBallEntity = spawnEntity(game.essence);
-  setComponent(game.essence, secondBallEntity, Ball);
-  setComponent(game.essence, secondBallEntity, GameObject);
-  setComponent(game.essence, secondBallEntity, View);
-  setComponent(game.essence, secondBallEntity, pGraphicsTag);
-  setComponent(game.essence, secondBallEntity, Shape, { name: 'circle' });
-  setComponent(game.essence, secondBallEntity, Pivot, { x: 25, y: 25 }); // because pixi.circle has pivot in center
-  setComponent(game.essence, secondBallEntity, Speed, { value: 0.4 });
-  setComponent(game.essence, secondBallEntity, Acceleration, {
-    x: 0,
-    y: 0,
-  });
-  setComponent(game.essence, secondBallEntity, Velocity, {
-    x: 0,
-    y: 0,
-  });
-  const secondBallPosition = {
-    x: game.world.size.width / 2 - 10 + 100,
-    y: game.world.size.height / 2 - 10,
-  };
-  setComponent(game.essence, secondBallEntity, Position, secondBallPosition);
-  setComponent(game.essence, secondBallEntity, Size, { width: 50, height: 0 });
-  setComponent(game.essence, secondBallEntity, Color, { value: '0xfff' });
-  setComponent(game.essence, secondBallEntity, CollisionBody, {
-    parts: [
-      {
-        shape: { name: 'circle' },
-        position: { x: 0, y: 0 },
-        size: { width: 50, height: 0 },
-      },
-    ],
-    position: {
-      x: 0,
-      y: 0,
-    },
-  });
+  // // # Ball
+  // const secondBallEntity = spawnEntity(game.essence);
+  // setComponent(game.essence, secondBallEntity, Ball);
+  // setComponent(game.essence, secondBallEntity, GameObject);
+  // setComponent(game.essence, secondBallEntity, View);
+  // setComponent(game.essence, secondBallEntity, pGraphicsTag);
+  // setComponent(game.essence, secondBallEntity, Shape, { name: 'circle' });
+  // setComponent(game.essence, secondBallEntity, Pivot, { x: 25, y: 25 }); // because pixi.circle has pivot in center
+  // setComponent(game.essence, secondBallEntity, Speed, { value: 0.4 });
+  // setComponent(game.essence, secondBallEntity, Acceleration, {
+  //   x: 0,
+  //   y: 0,
+  // });
+  // setComponent(game.essence, secondBallEntity, Velocity, {
+  //   x: 0,
+  //   y: 0,
+  // });
+  // const secondBallPosition = {
+  //   x: game.world.size.width / 2 - 10 + 100,
+  //   y: game.world.size.height / 2 - 10,
+  // };
+  // setComponent(game.essence, secondBallEntity, Position, secondBallPosition);
+  // setComponent(game.essence, secondBallEntity, Size, { width: 50, height: 0 });
+  // setComponent(game.essence, secondBallEntity, Color, { value: '0xfff' });
+  // setComponent(game.essence, secondBallEntity, CollisionBody, {
+  //   parts: [
+  //     {
+  //       shape: { name: 'circle' },
+  //       position: { x: 0, y: 0 },
+  //       size: { width: 50, height: 0 },
+  //     },
+  //   ],
+  //   position: {
+  //     x: 0,
+  //     y: 0,
+  //   },
+  // });
 
   // # Topics
   registerTopic(game.essence, collidingTopic);
@@ -216,8 +216,8 @@ export async function initPongGame(parentElement: HTMLElement) {
   registerSystem(game.essence, runNarrowPhaseSimple(game));
   registerSystem(game.essence, () => {
     for (const collisionEvent of collidingTopic) {
-      // console.log(collisionEvent);
-      // debugger;
+      console.log(collisionEvent);
+      debugger;
     }
   });
   // # Render
