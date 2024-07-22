@@ -1,7 +1,7 @@
 import { Graphics } from 'pixi.js';
 import { newQuery, registerQuery, System, table, tryTable } from '../../tecs';
 import { Game } from '../game';
-import { View, Position, Size, Shape, mBody } from './components';
+import { View, Position, Size, Shape } from './components';
 import { Map } from '../core';
 
 const drawQuery = newQuery(View, Position, Size);
@@ -10,13 +10,11 @@ export const drawDebugLines = (
   game: Game,
   map: Map,
   options: {
-    physics?: boolean;
     graphics?: boolean;
     xy?: boolean;
   } = {}
 ): System => {
   options = {
-    physics: true,
     graphics: true,
     xy: true,
     ...options,
@@ -38,7 +36,6 @@ export const drawDebugLines = (
       const sizeT = table(archetype, Size);
 
       const graphicsTypeT = tryTable(archetype, Shape);
-      const mBodyT = tryTable(archetype, mBody);
 
       for (let j = 0; j < archetype.entities.length; j++) {
         const position = positionT[j];
@@ -48,21 +45,6 @@ export const drawDebugLines = (
         if (options.xy) {
           globalGraphics.circle(position.x, position.y, 4);
           globalGraphics.fill({ color: 'red' });
-        }
-
-        if (mBodyT && options.physics) {
-          const mBody = mBodyT[j];
-          const vertices = mBody.value.vertices;
-
-          for (let k = 0; k < vertices.length; k++) {
-            const vertex = vertices[k];
-            const nextVertex = vertices[(k + 1) % vertices.length];
-
-            globalGraphics.moveTo(vertex.x, vertex.y);
-            globalGraphics.lineTo(nextVertex.x, nextVertex.y);
-          }
-
-          globalGraphics.stroke({ width: 2, color: 'yellow' });
         }
 
         if (options.graphics) {

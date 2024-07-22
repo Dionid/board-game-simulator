@@ -15,16 +15,8 @@ import {
   Shape,
   Pivot,
 } from '../../../libs/tengine/ecs';
-import {
-  addVelocityToPosition,
-  Ball,
-  GameObject,
-  Enemy,
-  moveByArrows,
-  Player,
-  applyCharactersWorldBoundaries,
-} from './ecs';
-import { syncPhysicsBodyPosition } from '../../../libs/tengine/ecs/physics';
+import { addVelocityToPosition, Ball, GameObject, Enemy, moveByArrows, Player, applyGOWorldBoundaries } from './ecs';
+import { matterSyncPhysicsBodyPosition } from '../../../libs/tengine/matter/physics';
 import { drawDebugLines } from '../../../libs/tengine/ecs/debug';
 
 export async function initPongGame(parentElement: HTMLElement) {
@@ -107,7 +99,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, ballEntity, Pivot, { x: 25, y: 25 });
   setComponent(game.essence, ballEntity, Speed, { value: 0.4 });
   setComponent(game.essence, ballEntity, Velocity, {
-    x: 5,
+    x: 0,
     y: 0,
   });
   const ballPosition = {
@@ -125,17 +117,10 @@ export async function initPongGame(parentElement: HTMLElement) {
   // ## Movement
   registerSystem(game.essence, moveByArrows(game, playerEntity));
   registerSystem(game.essence, addVelocityToPosition(game));
-  registerSystem(game.essence, applyCharactersWorldBoundaries(game));
-  registerSystem(game.essence, syncPhysicsBodyPosition(game));
+  registerSystem(game.essence, applyGOWorldBoundaries(game));
   // # Render
   registerSystem(game.essence, renderGameObjects(game, map));
-  registerSystem(
-    game.essence,
-    drawDebugLines(game, map, {
-      // xy: false,
-      // graphics: false,
-    })
-  );
+  registerSystem(game.essence, drawDebugLines(game, map));
 
   return game;
 }

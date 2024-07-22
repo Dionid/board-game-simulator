@@ -1,11 +1,11 @@
 import { Game } from '../game';
 import { newQuery, registerQuery, System, table } from '../../tecs';
-import { Position, Size, body, mBody } from './components';
-import Matter, { Body } from 'matter-js';
+import { Position, Size, body, mBody } from '../ecs/components';
+import Matter from 'matter-js';
 
 const physicsBodyPositionQuery = newQuery(Position, Size, mBody);
 
-export const syncPhysicsBodyPosition = (game: Game): System => {
+export const matterSyncPhysicsBodyPosition = (game: Game): System => {
   const query = registerQuery(game.essence, physicsBodyPositionQuery);
 
   return () => {

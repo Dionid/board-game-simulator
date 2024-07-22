@@ -86,7 +86,7 @@ export const addVelocityToPosition = (game: Game): System => {
 
 const characterVelocityQ = newQuery(GameObject, Position, Size, Pivot);
 
-export const applyCharactersWorldBoundaries = (game: Game): System => {
+export const applyGOWorldBoundaries = (game: Game): System => {
   const query = registerQuery(game.essence, characterVelocityQ);
 
   return ({ deltaTime }) => {
