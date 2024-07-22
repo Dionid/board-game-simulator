@@ -109,7 +109,7 @@ export const applyCharactersWorldBoundaries = (game: Game): System => {
         }
 
         if (position.x + size.width > game.world.size.width) {
-          position.x = game.world.size.width;
+          position.x = game.world.size.width - size.width;
         }
 
         if (position.y + size.height > game.world.size.height) {

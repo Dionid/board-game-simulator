@@ -25,13 +25,17 @@ export const renderGameObjects = (game: Game, map: Map): System => {
       const colorT = tryTable(archetype, Color);
 
       for (let i = 0, l = archetype.entities.length; i < l; i++) {
+        const position = positionT[i];
+        const size = sizeT[i];
+
         if (graphicsTag && graphicsType) {
           switch (graphicsType[i].type) {
             case 'rect':
-              globalGraphics.rect(positionT[i].x, positionT[i].y, sizeT[i].width, sizeT[i].height);
+              globalGraphics.rect(position.x, position.y, size.width, size.height);
               break;
             case 'circle':
-              globalGraphics.circle(positionT[i].x, positionT[i].y, sizeT[i].width / 2);
+              const circle = globalGraphics.circle(position.x, position.y, size.width / 2);
+              // circle.pivot.set(size.width / 2, size.height / 2);
               break;
             default:
               break;
