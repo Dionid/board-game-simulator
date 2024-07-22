@@ -57,6 +57,13 @@ export const moveByArrows = (game: Game, playerEntity: Entity): System => {
     const directionY = getYDirection();
 
     acceleration.y = -1 * directionY * deltaTime;
+
+    // if (directionY === 0) {
+    //   acceleration.y = 0;
+    //   return;
+    // }
+
+    // acceleration.y += -1 * directionY * deltaTime * 0.1;
   };
 };
 

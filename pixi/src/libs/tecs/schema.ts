@@ -99,7 +99,7 @@ export const boolean = {
 export const number = float64;
 export const string = string16;
 
-export function arrayOf<K extends Kind>(field: K) {
+export function arrayOf<K extends Kind | Schema>(field: K) {
   return {
     field,
     [$kind]: $array,
