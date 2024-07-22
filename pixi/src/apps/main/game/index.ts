@@ -10,7 +10,7 @@ import {
   zoom,
   moveCamera,
   applyWorldBoundariesToCamera,
-} from './ecs';
+} from '../../../libs/tengine/ecs';
 import { initTileMap } from '../../../libs/tengine/tilemap';
 import humanAtlasData from './assets/human_atlas.json';
 import { newAnimatedSprites, newDirectionalAnimationFrames } from '../../../libs/tengine/animation';

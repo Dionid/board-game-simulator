@@ -1,5 +1,5 @@
 import { Texture, Assets, Container, TilingSprite } from 'pixi.js';
-import firstMapData from '../assets/FirstMap.json';
+import firstMapData from './assets/FirstMap.json';
 
 export type Tile = {
   id: number;

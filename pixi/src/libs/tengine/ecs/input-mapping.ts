@@ -1,6 +1,6 @@
 import { Container } from 'pixi.js';
-import { System } from '../../../../libs/tecs';
-import { WorldScene } from '../../../../libs/tengine';
+import { System } from '../../tecs';
+import { WorldScene } from '../';
 
 export function mapMouseInput(worldScene: WorldScene, mapContainer: Container): System {
   const input = worldScene.input;

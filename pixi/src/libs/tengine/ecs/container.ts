@@ -1,5 +1,5 @@
-import { System } from '../../../../libs/tecs';
-import { WorldScene } from '../../../../libs/tengine';
+import { System } from '../../tecs';
+import { WorldScene } from '../';
 
 export const applyCameraToContainer = (worldScene: WorldScene): System => {
   const camera = worldScene.cameras.main;

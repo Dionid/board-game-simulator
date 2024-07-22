@@ -12,9 +12,8 @@ import {
   System,
   table,
   tryTable,
-} from '../../../../libs/tecs';
-import { Query } from '../../../../libs/tecs/query';
-import { WorldScene } from '../../../../libs/tengine';
+} from '../../tecs';
+import { Query } from '../../../libs/tecs/query';
 export * from './input-mapping';
 export * from './camera';
 export * from './container';
