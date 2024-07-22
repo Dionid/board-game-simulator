@@ -88,8 +88,6 @@ const fillSceneContainer = async (game: Game) => {
 };
 
 export const initWorld = async (app: Application) => {
-  const essence = newEssence();
-
   // # Game
   const game = newGame({
     app,
@@ -225,15 +223,15 @@ export const initWorld = async (app: Application) => {
 
   // # Systems
   // ## Inputs
-  registerSystem(essence, mapMouseInput(game, mapContainer));
+  registerSystem(game.essence, mapMouseInput(game, mapContainer));
   // # Camera
-  registerSystem(essence, moveCameraByDragging(game));
-  registerSystem(essence, zoom(game));
-  registerSystem(essence, applyWorldBoundariesToCamera(game));
-  registerSystem(essence, moveCamera(game));
-  registerSystem(essence, applyCameraToContainer(game));
+  registerSystem(game.essence, moveCameraByDragging(game));
+  registerSystem(game.essence, zoom(game));
+  registerSystem(game.essence, applyWorldBoundariesToCamera(game));
+  registerSystem(game.essence, moveCamera(game));
+  registerSystem(game.essence, applyCameraToContainer(game));
   // # Render
-  registerSystem(essence, render(essence, app), 'postUpdate');
+  registerSystem(game.essence, render(game.essence, app), 'postUpdate');
 
   // const entity = spawnEntity(world);
   // const circle = new Graphics().circle(0, 0, 50);
@@ -243,5 +241,5 @@ export const initWorld = async (app: Application) => {
   // setComponent(world, entity, Size, { width: 100, height: 100 });
   // setComponent(world, entity, Color, { value: 'red' });
 
-  return essence;
+  return game;
 };

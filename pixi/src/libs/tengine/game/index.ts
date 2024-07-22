@@ -2,6 +2,7 @@ import { Application, ApplicationOptions, Container } from 'pixi.js';
 import { Size } from '../core/types';
 import { Camera, newCamera, NewCameraProps } from '../core/camera';
 import { MouseInput, newMouseInput } from '../core/input';
+import { Essence, newEssence, run as runEssence } from '../../tecs';
 
 export type GameCanvas = {
   parentElement: HTMLElement;
@@ -25,6 +26,7 @@ export type Game = {
   camera: {
     main: Camera;
   };
+  essence: Essence;
 };
 
 export const newGame = (
@@ -33,6 +35,7 @@ export const newGame = (
     canvas?: Partial<Omit<GameCanvas, 'element'>>;
     camera?: NewCameraProps;
     world?: Partial<GameWorld>;
+    essence?: Essence;
   } = {}
 ): Game => {
   // # App
@@ -86,6 +89,7 @@ export const newGame = (
     camera: {
       main: camera,
     },
+    essence: props.essence ?? newEssence(),
   };
 
   if ((globalThis as any).__TENGINE_GAME__) {
@@ -109,3 +113,13 @@ export async function initGame(game: Game, options: Partial<ApplicationOptions> 
   game.canvas.element = game.app.canvas;
   game.canvas.parentElement.appendChild(game.canvas.element);
 }
+
+export function run(game: Game) {
+  runEssence(game.essence);
+}
+
+export const Game = {
+  new: newGame,
+  init: initGame,
+  run,
+};

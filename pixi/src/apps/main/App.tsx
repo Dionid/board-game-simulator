@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import './App.css';
 import { Application } from 'pixi.js';
 import { initWorld } from './game';
-import { run } from '../../libs/tecs';
+import { run } from '../../libs/tengine/game';
 
 function App() {
   useEffect(() => {
