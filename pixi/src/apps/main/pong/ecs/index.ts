@@ -1,8 +1,18 @@
-import { archetypeByEntity, Entity, newTag, System, tryTable } from '../../../../libs/tecs';
-import { Position } from '../../../../libs/tengine/ecs';
+import {
+  archetypeByEntity,
+  Entity,
+  newQuery,
+  newTag,
+  registerQuery,
+  System,
+  table,
+  tryTable,
+} from '../../../../libs/tecs';
+import { Position, Size, Speed, Velocity } from '../../../../libs/tengine/ecs';
 import { Game } from '../../../../libs/tengine/game';
 
 export const Player = newTag();
+export const Character = newTag();
 
 export type Directions = 'up' | 'down' | 'left' | 'right';
 
@@ -10,58 +20,100 @@ export const moveByArrows = (game: Game, playerEntity: Entity): System => {
   const input = game.input;
   const keyboard = input.keyboard;
 
-  const getDirection = (): Directions | null => {
+  const getYDirection = (): number => {
     if (keyboard.keyDown['ArrowUp'] || keyboard.keyDown['w']) {
-      return 'up';
+      return 1;
     }
 
     if (keyboard.keyDown['ArrowDown'] || keyboard.keyDown['s']) {
-      return 'down';
+      return -1;
     }
 
-    if (keyboard.keyDown['ArrowLeft'] || keyboard.keyDown['a']) {
-      return 'left';
-    }
-
-    if (keyboard.keyDown['ArrowRight'] || keyboard.keyDown['d']) {
-      return 'right';
-    }
-
-    return null;
+    return 0;
   };
 
-  return () => {
-    const direction = getDirection();
-
-    if (!direction) {
-      return;
-    }
-
+  return ({ deltaTime }) => {
     const playerArchetype = archetypeByEntity(game.essence, playerEntity);
 
     if (!playerArchetype) {
       return;
     }
 
-    const positionT = tryTable(playerArchetype, Position);
+    const velocityT = tryTable(playerArchetype, Velocity);
+    const speedT = tryTable(playerArchetype, Speed);
 
-    if (!positionT) {
+    if (!velocityT || !speedT) {
       return;
     }
 
-    const position = positionT[0];
+    const velocity = velocityT[0];
+    const speed = speedT[0];
 
-    if (!position) {
+    if (!velocity) {
       return;
     }
 
-    switch (direction) {
-      case 'up':
-        position.y -= 5;
-        break;
-      case 'down':
-        position.y += 5;
-        break;
+    const directionY = getYDirection();
+
+    velocity.y = -1 * directionY * speed.value * deltaTime;
+  };
+};
+
+export const velocityPositionQuery = newQuery(Velocity, Position);
+
+export const addVelocityToPosition = (game: Game): System => {
+  const query = registerQuery(game.essence, velocityPositionQuery);
+
+  return ({ deltaTime }) => {
+    for (let i = 0; i < query.archetypes.length; i++) {
+      const archetype = query.archetypes[i];
+      const velocityT = table(archetype, Velocity);
+      const positionT = table(archetype, Position);
+
+      for (let j = 0; j < archetype.entities.length; j++) {
+        const velocity = velocityT[j];
+        const position = positionT[j];
+
+        position.x += velocity.x * deltaTime;
+        position.y += velocity.y * deltaTime;
+      }
+    }
+  };
+};
+
+const characterVelocityQ = newQuery(Character, Position, Size);
+
+export const applyCharactersWorldBoundaries = (game: Game): System => {
+  const query = registerQuery(game.essence, characterVelocityQ);
+
+  return ({ deltaTime }) => {
+    for (let i = 0; i < query.archetypes.length; i++) {
+      const archetype = query.archetypes[i];
+      // const velocityT = table(archetype, Velocity);
+      const positionT = table(archetype, Position);
+      const sizeT = table(archetype, Size);
+
+      for (let j = 0; j < archetype.entities.length; j++) {
+        // const velocity = velocityT[j];
+        const position = positionT[j];
+        const size = sizeT[j];
+
+        if (position.x < 0) {
+          position.x = 0;
+        }
+
+        if (position.y < 0) {
+          position.y = 0;
+        }
+
+        if (position.x + size.width > game.world.size.width) {
+          position.x = game.world.size.width;
+        }
+
+        if (position.y + size.height > game.world.size.height) {
+          position.y = game.world.size.height - size.height;
+        }
+      }
     }
   };
 };

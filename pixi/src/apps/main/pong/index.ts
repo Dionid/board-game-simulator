@@ -10,8 +10,10 @@ import {
   View,
   Color,
   renderGameObjects,
+  Velocity,
+  Speed,
 } from '../../../libs/tengine/ecs';
-import { moveByArrows, Player } from './ecs';
+import { addVelocityToPosition, applyCharactersWorldBoundaries, Character, moveByArrows, Player } from './ecs';
 
 export async function initPongGame(parentElement: HTMLElement) {
   const game = newGame({
@@ -47,8 +49,14 @@ export async function initPongGame(parentElement: HTMLElement) {
   );
   playerG.label = 'player';
   setComponent(game.essence, playerEntity, Player);
+  setComponent(game.essence, playerEntity, Character);
   setComponent(game.essence, playerEntity, View);
   setComponent(game.essence, playerEntity, pGraphics, { value: playerG });
+  setComponent(game.essence, playerEntity, Speed, { value: 5 });
+  setComponent(game.essence, playerEntity, Velocity, {
+    x: 0,
+    y: 0,
+  });
   setComponent(game.essence, playerEntity, Position, {
     x: game.world.size.width / 6 - characterSize.width / 2,
     y: game.world.size.height / 2 - characterSize.height / 2,
@@ -74,6 +82,8 @@ export async function initPongGame(parentElement: HTMLElement) {
   registerSystem(game.essence, mapMouseInput(game, map));
   // ## Movement
   registerSystem(game.essence, moveByArrows(game, playerEntity));
+  registerSystem(game.essence, addVelocityToPosition(game));
+  registerSystem(game.essence, applyCharactersWorldBoundaries(game));
   // # GameObjects
   registerSystem(game.essence, renderGameObjects(game, map), 'postUpdate');
 

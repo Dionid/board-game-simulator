@@ -12,5 +12,6 @@ export {
   component,
   componentsList,
 } from './archetype';
+export * from './query';
 export * from './operations';
 export * from './essence';
