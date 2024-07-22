@@ -434,6 +434,15 @@ export function newWorld(
   };
 }
 
+// MAYBE NOT REQUESTANIMATIONFRAME
+export function run(world: World): void {
+  const frame = () => {
+    step(world);
+    requestAnimationFrame(frame);
+  };
+  frame();
+}
+
 // OK
 export const immediately = (world: World, fn: () => void) => {
   world.deferredOperations.deferred = false;

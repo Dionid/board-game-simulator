@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import './App.css';
-import { Application, Assets, Container, Sprite, Texture } from 'pixi.js';
+import { Application } from 'pixi.js';
 import { initWorld } from './game';
-import { step } from '../../libs/tecs';
+import { run } from '../../libs/tecs';
 
 function App() {
   useEffect(() => {
@@ -12,11 +12,7 @@ function App() {
     app.init({ resizeTo: window, backgroundColor: 'white', autoStart: false }).then(async () => {
       canvas.appendChild(app.canvas);
       const world = await initWorld(app)
-      const animation = () => {
-        step(world)
-        requestAnimationFrame(animation);
-      }
-      animation()
+      run(world)
     })
   }, [])
 
