@@ -12,8 +12,19 @@ import {
   renderGameObjects,
   Velocity,
   Speed,
+  pGraphicsTag,
+  pGraphicsType,
+  Radius,
 } from '../../../libs/tengine/ecs';
-import { addVelocityToPosition, applyCharactersWorldBoundaries, Character, moveByArrows, Player } from './ecs';
+import {
+  addVelocityToPosition,
+  applyCharactersWorldBoundaries,
+  Ball,
+  Character,
+  Enemy,
+  moveByArrows,
+  Player,
+} from './ecs';
 
 export async function initPongGame(parentElement: HTMLElement) {
   const game = newGame({
@@ -40,18 +51,13 @@ export async function initPongGame(parentElement: HTMLElement) {
     height: 200,
   };
 
+  // # Player
   const playerEntity = spawnEntity(game.essence);
-  const playerG = new Graphics().rect(
-    game.world.size.width / 6 - characterSize.width / 2,
-    game.world.size.height / 2 - characterSize.height / 2,
-    characterSize.width,
-    characterSize.height
-  );
-  playerG.label = 'player';
   setComponent(game.essence, playerEntity, Player);
   setComponent(game.essence, playerEntity, Character);
   setComponent(game.essence, playerEntity, View);
-  setComponent(game.essence, playerEntity, pGraphics, { value: playerG });
+  setComponent(game.essence, playerEntity, pGraphicsTag);
+  setComponent(game.essence, playerEntity, pGraphicsType, { type: 'rect' });
   setComponent(game.essence, playerEntity, Speed, { value: 5 });
   setComponent(game.essence, playerEntity, Velocity, {
     x: 0,
@@ -64,17 +70,43 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, playerEntity, Size, { width: characterSize.width, height: characterSize.height });
   setComponent(game.essence, playerEntity, Color, { value: '0xfff' });
 
-  // map.container.addChild(playerG);
+  // # Enemy
+  const enemyEntity = spawnEntity(game.essence);
+  setComponent(game.essence, enemyEntity, Character);
+  setComponent(game.essence, enemyEntity, Enemy);
+  setComponent(game.essence, enemyEntity, View);
+  setComponent(game.essence, enemyEntity, pGraphicsTag);
+  setComponent(game.essence, enemyEntity, pGraphicsType, { type: 'rect' });
+  setComponent(game.essence, enemyEntity, Speed, { value: 5 });
+  setComponent(game.essence, enemyEntity, Velocity, {
+    x: 0,
+    y: 0,
+  });
+  setComponent(game.essence, enemyEntity, Position, {
+    x: (game.world.size.width / 6) * 5 - characterSize.width / 2,
+    y: game.world.size.height / 2 - characterSize.height / 2,
+  });
+  setComponent(game.essence, enemyEntity, Size, { width: characterSize.width, height: characterSize.height });
+  setComponent(game.essence, enemyEntity, Color, { value: '0xff0000' });
 
-  const enemy = new Graphics().rect(
-    (game.world.size.width / 6) * 5 - characterSize.width / 2,
-    game.world.size.height / 2 - characterSize.height / 2,
-    characterSize.width,
-    characterSize.height
-  );
-  enemy.label = 'enemy';
-  enemy.fill(0xff0000);
-  map.container.addChild(enemy);
+  // # Ball
+  const ballEntity = spawnEntity(game.essence);
+  setComponent(game.essence, ballEntity, Ball);
+  setComponent(game.essence, ballEntity, Character);
+  setComponent(game.essence, ballEntity, View);
+  setComponent(game.essence, ballEntity, pGraphicsTag);
+  setComponent(game.essence, ballEntity, pGraphicsType, { type: 'circle' });
+  setComponent(game.essence, ballEntity, Speed, { value: 5 });
+  setComponent(game.essence, ballEntity, Velocity, {
+    x: 0,
+    y: 0,
+  });
+  setComponent(game.essence, ballEntity, Position, {
+    x: game.world.size.width / 2 - 10,
+    y: game.world.size.height / 2 - 10,
+  });
+  setComponent(game.essence, ballEntity, Radius, { value: 20 });
+  setComponent(game.essence, ballEntity, Color, { value: '0xfff' });
 
   // # Systems
   // ## Input

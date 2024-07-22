@@ -3,6 +3,8 @@ import { newTag, $kind, $defaultFn, newSchema, number, string } from '../../tecs
 
 export const View = newTag();
 
+export const pGraphicsTag = newTag();
+
 export const $graphics = Symbol('graphics');
 
 export const graphics = {
@@ -13,6 +15,10 @@ export const graphics = {
 
 export const pGraphics = newSchema({
   value: graphics,
+});
+
+export const pGraphicsType = newSchema({
+  type: string,
 });
 
 export const Position = newSchema({
@@ -32,6 +38,10 @@ export const Speed = newSchema({
 export const Size = newSchema({
   width: number,
   height: number,
+});
+
+export const Radius = newSchema({
+  value: number,
 });
 
 export const Color = newSchema({

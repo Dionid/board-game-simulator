@@ -11,8 +11,10 @@ import {
 import { Position, Size, Speed, Velocity } from '../../../../libs/tengine/ecs';
 import { Game } from '../../../../libs/tengine/game';
 
-export const Player = newTag();
 export const Character = newTag();
+export const Player = newTag();
+export const Enemy = newTag();
+export const Ball = newTag();
 
 export type Directions = 'up' | 'down' | 'left' | 'right';
 
