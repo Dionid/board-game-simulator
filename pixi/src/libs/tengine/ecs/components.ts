@@ -40,10 +40,6 @@ export const Size = newSchema({
   height: number,
 });
 
-export const Radius = newSchema({
-  value: number,
-});
-
 export const Color = newSchema({
   value: string,
 });

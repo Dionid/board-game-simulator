@@ -11,7 +11,8 @@ import {
 import { Position, Size, Speed, Velocity } from '../../../../libs/tengine/ecs';
 import { Game } from '../../../../libs/tengine/game';
 
-export const Character = newTag();
+export const GameObject = newTag();
+
 export const Player = newTag();
 export const Enemy = newTag();
 export const Ball = newTag();
@@ -83,7 +84,7 @@ export const addVelocityToPosition = (game: Game): System => {
   };
 };
 
-const characterVelocityQ = newQuery(Character, Position, Size);
+const characterVelocityQ = newQuery(GameObject, Position, Size);
 
 export const applyCharactersWorldBoundaries = (game: Game): System => {
   const query = registerQuery(game.essence, characterVelocityQ);

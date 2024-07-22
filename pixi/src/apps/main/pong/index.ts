@@ -14,13 +14,12 @@ import {
   Speed,
   pGraphicsTag,
   pGraphicsType,
-  Radius,
 } from '../../../libs/tengine/ecs';
 import {
   addVelocityToPosition,
   applyCharactersWorldBoundaries,
   Ball,
-  Character,
+  GameObject,
   Enemy,
   moveByArrows,
   Player,
@@ -54,7 +53,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   // # Player
   const playerEntity = spawnEntity(game.essence);
   setComponent(game.essence, playerEntity, Player);
-  setComponent(game.essence, playerEntity, Character);
+  setComponent(game.essence, playerEntity, GameObject);
   setComponent(game.essence, playerEntity, View);
   setComponent(game.essence, playerEntity, pGraphicsTag);
   setComponent(game.essence, playerEntity, pGraphicsType, { type: 'rect' });
@@ -72,7 +71,7 @@ export async function initPongGame(parentElement: HTMLElement) {
 
   // # Enemy
   const enemyEntity = spawnEntity(game.essence);
-  setComponent(game.essence, enemyEntity, Character);
+  setComponent(game.essence, enemyEntity, GameObject);
   setComponent(game.essence, enemyEntity, Enemy);
   setComponent(game.essence, enemyEntity, View);
   setComponent(game.essence, enemyEntity, pGraphicsTag);
@@ -92,7 +91,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   // # Ball
   const ballEntity = spawnEntity(game.essence);
   setComponent(game.essence, ballEntity, Ball);
-  setComponent(game.essence, ballEntity, Character);
+  setComponent(game.essence, ballEntity, GameObject);
   setComponent(game.essence, ballEntity, View);
   setComponent(game.essence, ballEntity, pGraphicsTag);
   setComponent(game.essence, ballEntity, pGraphicsType, { type: 'circle' });
@@ -105,7 +104,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     x: game.world.size.width / 2 - 10,
     y: game.world.size.height / 2 - 10,
   });
-  setComponent(game.essence, ballEntity, Radius, { value: 20 });
+  setComponent(game.essence, ballEntity, Size, { width: 50, height: 0 });
   setComponent(game.essence, ballEntity, Color, { value: '0xfff' });
 
   // # Systems
