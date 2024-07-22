@@ -39,3 +39,10 @@
     1. https://codepen.io/StefanH/pen/qBgVPaQ
     1. https://gist.github.com/jordwest/8a12196436ebcf8df98a2745251915b5
     1. https://www.youtube.com/watch?v=04oQ2jOUjkU
+
+# Game, Camera, Scene, Application, Map
+
+1. Application contains backgroundColor, resizeTo -> It is our main canvas
+1. Map contains all game elements (position and depth sorting)
+1. In Game there can be a lot of Maps
+1. Camera is virtual

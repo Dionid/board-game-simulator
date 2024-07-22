@@ -1,7 +1,7 @@
 import { newWorld, registerSystem } from '../../../libs/tecs';
 import { Application, Assets, Container, Sprite, Spritesheet, Texture } from 'pixi.js';
 import firstMapData from './assets/FirstMap.json';
-import { createWorldScene, WorldScene } from '../../../libs/tengine/core';
+import { newGame, Game } from '../../../libs/tengine/core';
 import {
   applyCameraToContainer,
   render,
@@ -16,7 +16,7 @@ import humanAtlasData from './assets/human_atlas.json';
 import { newAnimatedSprites, newDirectionalAnimationFrames } from '../../../libs/tengine/animation';
 import { cartesianTileRowCol, tileCartesianPosition } from '../../../libs/tengine/isometric';
 
-const fillSceneContainer = async (worldScene: WorldScene) => {
+const fillSceneContainer = async (worldScene: Game) => {
   const texture = (await Assets.load('assets/star.png')) as Texture;
 
   const starsContrainer = new Container();
@@ -116,28 +116,26 @@ export const initWorld = async (app: Application) => {
   // mapContainer.y = 100;
 
   // # Main Scene Container
-  const worldScene = createWorldScene(app, map, {
+  const worldScene = newGame(map, {
+    app,
     camera: {
-      position: {
-        x: 0,
-        y: 0,
-      },
-      scale: 0.5,
-      size: {
-        width: app.renderer.width,
-        height: app.renderer.height,
-      },
+      // position: {
+      //   x: 0,
+      //   y: 0,
+      // },
+      // scale: 0.5,
+      // size: {
+      //   width: app.renderer.width,
+      //   height: app.renderer.height,
+      // },
     },
-    worldScene: {
-      size: {
-        x: 5000,
-        y: 3000,
-      },
+    size: {
+      width: 5000,
+      height: 3000,
     },
   });
 
-  // # Add to stage
-  app.stage.addChild(worldScene.container);
+  console.log(worldScene.cameras.main);
 
   // # Center camera
   // setCameraPosition(
@@ -218,12 +216,10 @@ export const initWorld = async (app: Application) => {
 
     playerContainer.position.set(worldScene.input.mouse.mapPosition.x, worldScene.input.mouse.mapPosition.y);
 
-    const { x, y } = playerContainer.position;
-    const { tileWidth, tileHeight } = tileMap;
-
-    const rc = cartesianTileRowCol(playerContainer.position, { width: tileWidth, height: tileHeight });
-
-    console.log({ x, y }, rc, tileCartesianPosition(rc, { width: tileWidth, height: tileHeight }));
+    // const { x, y } = playerContainer.position;
+    // const { tileWidth, tileHeight } = tileMap;
+    // const rc = cartesianTileRowCol(playerContainer.position, { width: tileWidth, height: tileHeight });
+    // console.log({ x, y }, rc, tileCartesianPosition(rc, { width: tileWidth, height: tileHeight }));
   });
 
   // # Systems

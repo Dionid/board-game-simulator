@@ -1,7 +1,7 @@
 import { System } from '../../tecs';
-import { WorldScene } from '../core';
+import { Game } from '../core';
 
-export function moveCamera(worldScene: WorldScene): System {
+export function moveCamera(worldScene: Game): System {
   const camera = worldScene.cameras.main;
 
   const movementEase = 1;
@@ -34,7 +34,7 @@ export function moveCamera(worldScene: WorldScene): System {
   };
 }
 
-export const zoom = (worldScene: WorldScene): System => {
+export const zoom = (worldScene: Game): System => {
   const camera = worldScene.cameras.main;
 
   let scaleEvent: KeyboardEvent | null = null;
@@ -95,7 +95,7 @@ export const zoom = (worldScene: WorldScene): System => {
   };
 };
 
-export function applyWorldBoundariesToCamera(worldScene: WorldScene): System {
+export function applyWorldBoundariesToCamera(worldScene: Game): System {
   const camera = worldScene.cameras.main;
 
   return () => {
@@ -124,7 +124,7 @@ export function applyWorldBoundariesToCamera(worldScene: WorldScene): System {
   };
 }
 
-export function moveCameraByDragging(worldScene: WorldScene): System {
+export function moveCameraByDragging(worldScene: Game): System {
   const camera = worldScene.cameras.main;
   const mouse = worldScene.input.mouse;
 

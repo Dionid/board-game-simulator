@@ -1,8 +1,8 @@
 import { Container } from 'pixi.js';
 import { System } from '../../tecs';
-import { WorldScene } from '../core';
+import { Game } from '../core';
 
-export function mapMouseInput(worldScene: WorldScene, mapContainer: Container): System {
+export function mapMouseInput(worldScene: Game, mapContainer: Container): System {
   const input = worldScene.input;
   const mouse = input.mouse;
   const canvas = worldScene.app.canvas;
