@@ -10,11 +10,15 @@ export type GameCanvas = {
   resizeTo?: HTMLElement | Window;
 };
 
+export type GameWorld = {
+  container: Container;
+  size: Size;
+};
+
 export type Game = {
   app: Application;
   canvas: GameCanvas;
-  container: Container;
-  size: Size;
+  world: GameWorld;
   input: {
     mouse: MouseInput;
   };
@@ -28,31 +32,31 @@ export const newGame = (
     app?: Application;
     canvas?: Partial<Omit<GameCanvas, 'element'>>;
     camera?: NewCameraProps;
-    size?: Size;
+    world?: Partial<GameWorld>;
   } = {}
 ): Game => {
   // # App
   const app = props.app ?? new Application();
 
   // # Container
-  const container = new Container({
-    isRenderGroup: true,
-    label: 'game',
-  });
+  const world: GameWorld = {
+    container: new Container({
+      isRenderGroup: true,
+      label: 'game',
+    }),
+    size: {
+      width: props.world?.size?.width ?? window.innerWidth,
+      height: props.world?.size?.height ?? window.innerHeight,
+    },
+  };
 
   // # Add container to App
-  app.stage.addChild(container);
-
-  // # World size
-  const worldSize = {
-    width: props.size?.width ?? window.innerWidth,
-    height: props.size?.height ?? window.innerHeight,
-  };
+  app.stage.addChild(world.container);
 
   // # Camera
   const camera = newCamera({
     ...props.camera,
-    size: props.camera?.size ?? worldSize,
+    size: props.camera?.size ?? world.size,
   });
 
   // # Add parent html element
@@ -75,11 +79,10 @@ export const newGame = (
       resizeTo: props.canvas?.resizeTo,
       element: undefined as unknown as HTMLCanvasElement,
     },
-    container: container,
+    world,
     input: {
       mouse: newMouseInput(),
     },
-    size: worldSize,
     cameras: {
       main: camera,
     },

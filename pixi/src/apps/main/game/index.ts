@@ -16,7 +16,7 @@ import humanAtlasData from './assets/human_atlas.json';
 import { newAnimatedSprites, newDirectionalAnimationFrames } from '../../../libs/tengine/animation';
 import { cartesianTileRowCol, tileCartesianPosition } from '../../../libs/tengine/isometric';
 
-const fillSceneContainer = async (worldScene: Game) => {
+const fillSceneContainer = async (game: Game) => {
   const texture = (await Assets.load('assets/star.png')) as Texture;
 
   const starsContrainer = new Container();
@@ -36,7 +36,7 @@ const fillSceneContainer = async (worldScene: Game) => {
 
   const rtElement = new Sprite({
     texture: texture,
-    x: worldScene.size.width - (texture.width / 2) * scale,
+    x: game.world.size.width - (texture.width / 2) * scale,
     y: 0 + texture.height * 0.7 * scale,
     scale: scale,
     anchor: {
@@ -49,7 +49,7 @@ const fillSceneContainer = async (worldScene: Game) => {
   const lbElement = new Sprite({
     texture: texture,
     x: 0 + (texture.width / 2) * scale,
-    y: worldScene.size.height - texture.height * 0.7 * scale,
+    y: game.world.size.height - texture.height * 0.7 * scale,
     scale: scale,
     anchor: {
       x: 0.5,
@@ -60,8 +60,8 @@ const fillSceneContainer = async (worldScene: Game) => {
 
   const rbElement = new Sprite({
     texture: texture,
-    x: worldScene.size.width - (texture.width / 2) * scale,
-    y: worldScene.size.height - texture.height * 0.7 * scale,
+    x: game.world.size.width - (texture.width / 2) * scale,
+    y: game.world.size.height - texture.height * 0.7 * scale,
     scale: scale,
     anchor: {
       x: 0.5,
@@ -72,8 +72,8 @@ const fillSceneContainer = async (worldScene: Game) => {
 
   const centerElement = new Sprite({
     texture: texture,
-    x: worldScene.size.width / 2 - texture.width / 2 + (texture.width / 2) * scale,
-    y: worldScene.size.height / 2 - texture.height * 0.3 + texture.height * 0.7 * scale,
+    x: game.world.size.width / 2 - texture.width / 2 + (texture.width / 2) * scale,
+    y: game.world.size.height / 2 - texture.height * 0.3 + texture.height * 0.7 * scale,
     scale: scale,
     anchor: {
       x: 0.5,
@@ -85,7 +85,7 @@ const fillSceneContainer = async (worldScene: Game) => {
   // sort the trees by their y position
   starsContrainer.children.sort((a, b) => a.position.y - b.position.y);
 
-  worldScene.container.addChild(starsContrainer);
+  game.world.container.addChild(starsContrainer);
 };
 
 export const initWorld = async (app: Application) => {
@@ -129,13 +129,15 @@ export const initWorld = async (app: Application) => {
         height: app.renderer.height,
       },
     },
-    size: {
-      width: 5000,
-      height: 3000,
+    world: {
+      size: {
+        width: 5000,
+        height: 3000,
+      },
     },
   });
 
-  game.container.addChild(map.container);
+  game.world.container.addChild(map.container);
 
   // # Center camera
   // setCameraPosition(

@@ -1,9 +1,9 @@
 import { System } from '../../tecs';
 import { Game } from '../core';
 
-export const applyCameraToContainer = (worldScene: Game): System => {
-  const camera = worldScene.cameras.main;
-  const container = worldScene.container;
+export const applyCameraToContainer = (game: Game): System => {
+  const camera = game.cameras.main;
+  const container = game.world.container;
 
   return () => {
     // # Position

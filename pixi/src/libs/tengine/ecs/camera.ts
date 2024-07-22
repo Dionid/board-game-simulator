@@ -34,8 +34,8 @@ export function moveCamera(worldScene: Game): System {
   };
 }
 
-export const zoom = (worldScene: Game): System => {
-  const camera = worldScene.cameras.main;
+export const zoom = (game: Game): System => {
+  const camera = game.cameras.main;
 
   let scaleEvent: KeyboardEvent | null = null;
 
@@ -57,9 +57,9 @@ export const zoom = (worldScene: Game): System => {
       return currentScale;
     } else if (newScale > 2) {
       return currentScale;
-    } else if (camera.size.width / newScale > worldScene.size.width) {
+    } else if (camera.size.width / newScale > game.world.size.width) {
       return currentScale;
-    } else if (camera.size.height / newScale > worldScene.size.height) {
+    } else if (camera.size.height / newScale > game.world.size.height) {
       return currentScale;
     }
 
@@ -95,8 +95,8 @@ export const zoom = (worldScene: Game): System => {
   };
 };
 
-export function applyWorldBoundariesToCamera(worldScene: Game): System {
-  const camera = worldScene.cameras.main;
+export function applyWorldBoundariesToCamera(game: Game): System {
+  const camera = game.cameras.main;
 
   return () => {
     // # Calculate new camera
@@ -109,14 +109,14 @@ export function applyWorldBoundariesToCamera(worldScene: Game): System {
 
     if (newCameraX < 0) {
       newCameraX = 0;
-    } else if (newCameraX / camera.scale > worldScene.size.width - camera.scaled.size.width) {
-      newCameraX = (worldScene.size.width - camera.scaled.size.width) * camera.scale;
+    } else if (newCameraX / camera.scale > game.world.size.width - camera.scaled.size.width) {
+      newCameraX = (game.world.size.width - camera.scaled.size.width) * camera.scale;
     }
 
     if (newCameraY < 0) {
       newCameraY = 0;
-    } else if (newCameraY / camera.scale > worldScene.size.height - camera.scaled.size.height) {
-      newCameraY = (worldScene.size.height - camera.scaled.size.height) * camera.scale;
+    } else if (newCameraY / camera.scale > game.world.size.height - camera.scaled.size.height) {
+      newCameraY = (game.world.size.height - camera.scaled.size.height) * camera.scale;
     }
 
     camera.target.position.x = newCameraX;
