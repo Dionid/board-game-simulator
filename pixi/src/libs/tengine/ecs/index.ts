@@ -14,6 +14,7 @@ import {
   tryTable,
 } from '../../tecs';
 import { Query } from '../../../libs/tecs/query';
+import { Game } from '../game';
 export * from './input-mapping';
 export * from './camera';
 export * from './world';
@@ -52,8 +53,8 @@ const drawQuery = Query.new(View, Position);
 
 // # Systems
 
-export const render = (world: Essence, app: Application): System => {
-  const query = registerQuery(world, drawQuery);
+export const render = (game: Game): System => {
+  const query = registerQuery(game.essence, drawQuery);
 
   return () => {
     for (const archetype of query.archetypes) {
@@ -73,12 +74,12 @@ export const render = (world: Essence, app: Application): System => {
           }
 
           if (graphics.parent === null) {
-            app.stage.addChild(graphics);
+            game.app.stage.addChild(graphics);
           }
         }
       }
     }
 
-    app.render();
+    game.app.render();
   };
 };

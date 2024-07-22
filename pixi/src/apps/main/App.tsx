@@ -3,22 +3,29 @@ import './App.css';
 import { Application } from 'pixi.js';
 import { initWorld } from './game';
 import { run } from '../../libs/tengine/game';
+import { initPongGame } from './pong';
 
 function App() {
   useEffect(() => {
-    const canvas = document.getElementById('canvas') as HTMLCanvasElement;
-    const app = new Application();
-    (globalThis as any).__PIXI_APP__ = app;
-    app.init({ resizeTo: window, backgroundColor: 'white', autoStart: false }).then(async () => {
-      canvas.appendChild(app.canvas);
-      const world = await initWorld(app)
-      run(world)
+    const gameHolder = document.getElementById('gameHolder') as HTMLCanvasElement;
+    
+    // PsyOps
+    // const app = new Application();
+    // (globalThis as any).__PIXI_APP__ = app;
+    // app.init({ resizeTo: window, backgroundColor: 'white', autoStart: false }).then(async () => {
+    //   canvas.appendChild(app.canvas);
+    //   const world = await initWorld(app)
+    //   run(world)
+    // })
+
+    initPongGame(gameHolder).then((game) => {
+      run(game)
     })
   }, [])
 
   return (
     <div className="App">
-      <div id="canvas"></div>
+      <div id="gameHolder"></div>
     </div>
   );
 }

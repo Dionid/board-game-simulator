@@ -105,10 +105,6 @@ export const initWorld = async (app: Application) => {
         max: 2,
         step: 0.1,
       },
-      // size: {
-      //   width: window.innerWidth * 2,
-      //   height: window.innerHeight * 2,
-      // },
     },
     world: {
       size: {
@@ -231,7 +227,7 @@ export const initWorld = async (app: Application) => {
 
   // # Systems
   // ## Inputs
-  registerSystem(game.essence, mapMouseInput(game, mapContainer));
+  registerSystem(game.essence, mapMouseInput(game, map));
   // # Camera
   registerSystem(game.essence, moveCameraByDragging(game));
   registerSystem(game.essence, zoom(game));
@@ -239,7 +235,7 @@ export const initWorld = async (app: Application) => {
   registerSystem(game.essence, moveCamera(game));
   registerSystem(game.essence, applyCameraToWorld(game));
   // # Render
-  registerSystem(game.essence, render(game.essence, app), 'postUpdate');
+  registerSystem(game.essence, render(game), 'postUpdate');
 
   // const entity = spawnEntity(world);
   // const circle = new Graphics().circle(0, 0, 50);

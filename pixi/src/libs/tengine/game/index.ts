@@ -2,7 +2,7 @@ import { Application, ApplicationOptions, Container } from 'pixi.js';
 import { Size } from '../core/types';
 import { Camera, newCamera, NewCameraProps } from '../core/camera';
 import { MouseInput, newMouseInput } from '../core/input';
-import { Essence, newEssence, run as runEssence } from '../../tecs';
+import { Essence, newEssence, run as runEssence, step, stepWithTicker } from '../../tecs';
 
 export type GameCanvas = {
   parentElement: HTMLElement;
@@ -40,6 +40,7 @@ export const newGame = (
 ): Game => {
   // # App
   const app = props.app ?? new Application();
+  (globalThis as any).__PIXI_APP__ = app;
 
   // # Container
   const world: GameWorld = {
@@ -106,7 +107,7 @@ export const newGame = (
 
 export async function initGame(game: Game, options: Partial<ApplicationOptions> = {}) {
   await game.app.init({
-    autoStart: false,
+    // autoStart: false,
     ...options,
     width: game.canvas.size.width,
     height: game.canvas.size.width,
@@ -118,7 +119,9 @@ export async function initGame(game: Game, options: Partial<ApplicationOptions> 
 }
 
 export function run(game: Game) {
-  runEssence(game.essence);
+  game.app.ticker.add((ticker) => {
+    stepWithTicker(game.essence, ticker);
+  });
 }
 
 export const Game = {

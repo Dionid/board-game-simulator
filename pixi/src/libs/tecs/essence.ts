@@ -317,7 +317,19 @@ export function registerTopic(essence: Essence, topic: Topic<unknown>) {
   essence.topics.push(topic);
 }
 
-export function step(essence: Essence): void {
+// TODO: think more about this
+export function stepWithTicker(
+  essence: Essence,
+  ticker: {
+    deltaTime: number;
+    deltaMS: number;
+    elapsedMS: number;
+    lastTime: number;
+    speed: number;
+    started: boolean;
+    FPS: number;
+  }
+): void {
   // # Set state
   essence.state = 'running';
   const now = Date.now();
@@ -327,8 +339,9 @@ export function step(essence: Essence): void {
   }
 
   // # Set delta
-  let deltaTime = Math.max(0, now - essence.lastStepTime);
-  let deltaFrameTime = deltaTime / 16.668;
+  const speed = ticker.speed;
+  const deltaTime = ticker.deltaTime;
+  const deltaMs = ticker.deltaMS;
 
   // # Execute deferred operations
   const operations = essence.deferredOperations.operations;
@@ -354,7 +367,8 @@ export function step(essence: Essence): void {
         stage: 'onFirstStep',
         essence,
         deltaTime,
-        deltaFrameTime,
+        deltaMs,
+        speed,
       });
     }
   }
@@ -364,7 +378,9 @@ export function step(essence: Essence): void {
     system({
       essence,
       deltaTime,
-      deltaFrameTime,
+
+      deltaMs,
+      speed,
       stage: 'preUpdate',
     });
   }
@@ -374,7 +390,9 @@ export function step(essence: Essence): void {
     system({
       essence,
       deltaTime,
-      deltaFrameTime,
+
+      deltaMs,
+      speed,
       stage: 'update',
     });
   }
@@ -384,7 +402,96 @@ export function step(essence: Essence): void {
     system({
       essence,
       deltaTime,
-      deltaFrameTime,
+
+      deltaMs,
+      speed,
+      stage: 'postUpdate',
+    });
+  }
+
+  essence.deferredOperations.deferred = false;
+
+  // # Reset killed
+  essence.deferredOperations.killed.clear();
+
+  // # Set state
+  essence.lastStepTime = now;
+  essence.state = 'idle';
+  essence.isFirstStep = false;
+}
+
+export function step(essence: Essence): void {
+  // # Set state
+  essence.state = 'running';
+  const now = Date.now();
+  essence.currentStepTime = now;
+  if (essence.lastStepTime === 0) {
+    essence.lastStepTime = now;
+  }
+
+  // # Set delta
+  let deltaMs = Math.max(0, now - essence.lastStepTime);
+  let deltaTime = deltaMs * 0.06;
+
+  // # Execute deferred operations
+  const operations = essence.deferredOperations.operations;
+
+  for (let i = 0; i < operations.length; i++) {
+    applyDeferredOp(essence, operations[i]);
+  }
+
+  essence.deferredOperations.operations = [];
+
+  // # Flush topics
+  for (let i = 0; i < essence.topics.length; i++) {
+    Topic.flush(essence.topics[i]);
+  }
+
+  // # Execute systems
+  essence.deferredOperations.deferred = true;
+
+  if (essence.isFirstStep) {
+    for (let i = 0, l = essence.systems.onFirstStep.length; i < l; i++) {
+      const system = essence.systems.onFirstStep[i];
+      system({
+        stage: 'onFirstStep',
+        essence,
+        deltaTime, // TODO: add this
+        deltaMs,
+        speed: 1, // TODO: add this
+      });
+    }
+  }
+
+  for (let i = 0, l = essence.systems.preUpdate.length; i < l; i++) {
+    const system = essence.systems.preUpdate[i];
+    system({
+      essence,
+      deltaTime,
+      deltaMs,
+      speed: 1, // TODO: add this
+      stage: 'preUpdate',
+    });
+  }
+
+  for (let i = 0, l = essence.systems.update.length; i < l; i++) {
+    const system = essence.systems.update[i];
+    system({
+      essence,
+      deltaTime,
+      deltaMs,
+      speed: 1, // TODO: add this
+      stage: 'update',
+    });
+  }
+
+  for (let i = 0, l = essence.systems.postUpdate.length; i < l; i++) {
+    const system = essence.systems.postUpdate[i];
+    system({
+      essence,
+      deltaTime,
+      deltaMs,
+      speed: 1, // TODO: add this
       stage: 'postUpdate',
     });
   }
