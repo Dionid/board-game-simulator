@@ -95,10 +95,10 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, ballEntity, View);
   setComponent(game.essence, ballEntity, pGraphicsTag);
   setComponent(game.essence, ballEntity, pGraphicsType, { type: 'circle' });
-  setComponent(game.essence, ballEntity, Speed, { value: 5 });
+  setComponent(game.essence, ballEntity, Speed, { value: 0.01 });
   setComponent(game.essence, ballEntity, Velocity, {
-    x: 0,
-    y: 0,
+    x: 10,
+    y: 10,
   });
   setComponent(game.essence, ballEntity, Position, {
     x: game.world.size.width / 2 - 10,

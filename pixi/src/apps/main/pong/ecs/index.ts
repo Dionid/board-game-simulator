@@ -43,14 +43,13 @@ export const moveByArrows = (game: Game, playerEntity: Entity): System => {
     }
 
     const velocityT = tryTable(playerArchetype, Velocity);
-    const speedT = tryTable(playerArchetype, Speed);
+    // const speedT = tryTable(playerArchetype, Speed);
 
-    if (!velocityT || !speedT) {
+    if (!velocityT) {
       return;
     }
 
     const velocity = velocityT[0];
-    const speed = speedT[0];
 
     if (!velocity) {
       return;
@@ -58,11 +57,11 @@ export const moveByArrows = (game: Game, playerEntity: Entity): System => {
 
     const directionY = getYDirection();
 
-    velocity.y = -1 * directionY * speed.value * deltaTime;
+    velocity.y = -1 * directionY * deltaTime;
   };
 };
 
-export const velocityPositionQuery = newQuery(Velocity, Position);
+export const velocityPositionQuery = newQuery(Velocity, Position, Speed);
 
 export const addVelocityToPosition = (game: Game): System => {
   const query = registerQuery(game.essence, velocityPositionQuery);
@@ -72,13 +71,15 @@ export const addVelocityToPosition = (game: Game): System => {
       const archetype = query.archetypes[i];
       const velocityT = table(archetype, Velocity);
       const positionT = table(archetype, Position);
+      const speedT = table(archetype, Speed);
 
       for (let j = 0; j < archetype.entities.length; j++) {
         const velocity = velocityT[j];
         const position = positionT[j];
+        const speed = speedT[j];
 
-        position.x += velocity.x * deltaTime;
-        position.y += velocity.y * deltaTime;
+        position.x += velocity.x * deltaTime * speed.value;
+        position.y += velocity.y * deltaTime * speed.value;
       }
     }
   };
