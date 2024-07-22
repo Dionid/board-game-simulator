@@ -14,7 +14,7 @@ import {
   tryTable,
 } from '../../../../libs/tecs';
 import { Query } from '../../../../libs/tecs/query';
-import { WorldScene } from '../engine';
+import { WorldScene } from '../../../../libs/tengine';
 export * from './input-mapping';
 export * from './camera';
 export * from './container';

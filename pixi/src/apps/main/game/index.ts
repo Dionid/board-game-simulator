@@ -1,17 +1,7 @@
 import { newWorld, registerSystem } from '../../../libs/tecs';
-import {
-  AnimatedSprite,
-  Application,
-  Assets,
-  Container,
-  Graphics,
-  Sprite,
-  Spritesheet,
-  Texture,
-  TilingSprite,
-} from 'pixi.js';
+import { Application, Assets, Container, Sprite, Spritesheet, Texture } from 'pixi.js';
 import firstMapData from './assets/FirstMap.json';
-import { createWorldScene, setCameraPosition, Vector2, WorldScene } from './engine';
+import { createWorldScene, WorldScene } from '../../../libs/tengine';
 import {
   applyCameraToContainer,
   render,
@@ -21,10 +11,10 @@ import {
   moveCamera,
   applyWorldBoundariesToCamera,
 } from './ecs';
-import { initTileMap } from './engine/tilemap';
+import { initTileMap } from '../../../libs/tengine/tilemap';
 import humanAtlasData from './assets/human_atlas.json';
-import { newAnimatedSprites, newDirectionalAnimationFrames } from './engine/animation';
-import { cartesianTileRowCol, tileCartesianPosition } from './engine/isometric';
+import { newAnimatedSprites, newDirectionalAnimationFrames } from '../../../libs/tengine/animation';
+import { cartesianTileRowCol, tileCartesianPosition } from '../../../libs/tengine/isometric';
 
 const fillSceneContainer = async (worldScene: WorldScene) => {
   const texture = (await Assets.load('assets/star.png')) as Texture;
