@@ -1,6 +1,7 @@
 import { Game } from '../game';
 import { newQuery, registerQuery, System, table } from '../../tecs';
-import { Position, Size, mBody } from './components';
+import { Position, Size, body, mBody } from './components';
+import Matter, { Body } from 'matter-js';
 
 const physicsBodyPositionQuery = newQuery(Position, Size, mBody);
 
@@ -19,10 +20,26 @@ export const syncPhysicsBodyPosition = (game: Game): System => {
         const mBody = mBodyT[j];
         const size = sizeT[j];
 
-        mBody.value.position.x = position.x;
-        mBody.value.position.y = position.y;
-        // mBody.value.position.x = position.x;
-        // mBody.value.position.y = position.y;
+        let newX: number;
+        let newY: number;
+
+        if (mBody.value.circleRadius) {
+          newX = position.x;
+          newY = position.y;
+        } else {
+          newX = position.x + size.width / 2;
+          newY = position.y + size.height / 2;
+        }
+
+        if (mBody.value.isStatic) {
+          Matter.Body.setPosition(mBody.value, { x: newX, y: newY });
+        } else {
+          mBody.value.position.x = newX;
+          mBody.value.position.y = newY;
+        }
+
+        // object don't interact
+        // Body.setPosition(mBody.value, { x: position.x, y: position.y });
       }
     }
   };

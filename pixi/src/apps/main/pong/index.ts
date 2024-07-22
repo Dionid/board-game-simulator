@@ -57,8 +57,16 @@ export async function initPongGame(parentElement: HTMLElement) {
     },
   });
 
-  // var boxA = Bodies.rectangle(400, 200, 80, 80);
-  // var boxB = Bodies.rectangle(450, 50, 80, 80);
+  engine.world.bounds = {
+    min: {
+      x: 0,
+      y: 0,
+    },
+    max: {
+      x: game.world.size.width,
+      y: game.world.size.height,
+    },
+  };
 
   // Engine.update(engine, 16.666);
 
@@ -87,7 +95,9 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, playerEntity, Position, playerPosition);
   setComponent(game.essence, playerEntity, Size, { width: characterSize.width, height: characterSize.height });
   setComponent(game.essence, playerEntity, Color, { value: '0xfff' });
-  const playerBody = Bodies.rectangle(playerPosition.x, playerPosition.y, characterSize.width, characterSize.height);
+  const playerBody = Bodies.rectangle(playerPosition.x, playerPosition.y, characterSize.width, characterSize.height, {
+    isStatic: true,
+  });
   setComponent(game.essence, playerEntity, mBody, {
     value: playerBody,
   });
@@ -111,7 +121,10 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, enemyEntity, Position, enemyPosition);
   setComponent(game.essence, enemyEntity, Size, { width: characterSize.width, height: characterSize.height });
   setComponent(game.essence, enemyEntity, Color, { value: '0xff0000' });
-  const enemyBody = Bodies.rectangle(enemyPosition.x, enemyPosition.y, characterSize.width, characterSize.height);
+  // # Matter.js body
+  const enemyBody = Bodies.rectangle(enemyPosition.x, enemyPosition.y, characterSize.width, characterSize.height, {
+    isStatic: true,
+  });
   setComponent(game.essence, enemyEntity, mBody, {
     value: enemyBody,
   });
@@ -125,7 +138,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, ballEntity, pGraphicsType, { type: 'circle' });
   setComponent(game.essence, ballEntity, Speed, { value: 0.4 });
   setComponent(game.essence, ballEntity, Velocity, {
-    x: 0,
+    x: 5,
     y: 0,
   });
   const ballPosition = {
@@ -142,11 +155,6 @@ export async function initPongGame(parentElement: HTMLElement) {
 
   Composite.add(engine.world, [ballBody, playerBody, enemyBody]);
 
-  // Events.on(engine, 'collisionStart', function (event) {
-  //   console.log('collisionStart', event.pairs);
-  //   debugger;
-  // });
-
   // # Systems
   // ## Input
   registerSystem(game.essence, mapKeyboardInput(game));
@@ -154,18 +162,21 @@ export async function initPongGame(parentElement: HTMLElement) {
   // ## Movement
   registerSystem(game.essence, moveByArrows(game, playerEntity));
   registerSystem(game.essence, addVelocityToPosition(game));
-  registerSystem(game.essence, applyCharactersWorldBoundaries(game));
+  // registerSystem(game.essence, applyCharactersWorldBoundaries(game));
   registerSystem(game.essence, syncPhysicsBodyPosition(game));
-  // # GameObjects
-  registerSystem(game.essence, renderGameObjects(game, map), 'postUpdate');
+  // # Render
+  registerSystem(game.essence, renderGameObjects(game, map));
+  // # Apply physics
+  registerSystem(game.essence, ({ deltaMs }) => {
+    Engine.update(engine, deltaMs);
+  });
   registerSystem(
     game.essence,
-    ({ deltaMs }) => {
-      Engine.update(engine, deltaMs);
-    },
-    'postUpdate'
+    drawDebugLines(game, map, {
+      xy: false,
+      graphics: false,
+    })
   );
-  registerSystem(game.essence, drawDebugLines(game, map));
 
   return game;
 }

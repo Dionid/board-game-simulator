@@ -6,7 +6,22 @@ import { Map } from '../core';
 
 const drawQuery = newQuery(View, Position, Size);
 
-export const drawDebugLines = (game: Game, map: Map): System => {
+export const drawDebugLines = (
+  game: Game,
+  map: Map,
+  options: {
+    physics?: boolean;
+    graphics?: boolean;
+    xy?: boolean;
+  } = {}
+): System => {
+  options = {
+    physics: true,
+    graphics: true,
+    xy: true,
+    ...options,
+  };
+
   const query = registerQuery(game.essence, drawQuery);
 
   const globalGraphics = new Graphics();
@@ -29,7 +44,13 @@ export const drawDebugLines = (game: Game, map: Map): System => {
         const position = positionT[j];
         const size = sizeT[j];
 
-        if (mBodyT) {
+        // # X Y position (anchor)
+        if (options.xy) {
+          globalGraphics.circle(position.x, position.y, 4);
+          globalGraphics.fill({ color: 'red' });
+        }
+
+        if (mBodyT && options.physics) {
           const mBody = mBodyT[j];
           const vertices = mBody.value.vertices;
 
@@ -44,32 +65,29 @@ export const drawDebugLines = (game: Game, map: Map): System => {
           globalGraphics.stroke({ width: 2, color: 'yellow' });
         }
 
-        if (graphicsTypeT) {
-          const graphicsType = graphicsTypeT[j];
+        if (options.graphics) {
+          if (graphicsTypeT) {
+            const graphicsType = graphicsTypeT[j];
 
-          switch (graphicsType.type) {
-            case 'rect':
-              globalGraphics.rect(
-                position.x - strokeWidth / 2,
-                position.y - strokeWidth / 2,
-                size.width + strokeWidth,
-                size.height + strokeWidth
-              );
-              globalGraphics.stroke({ width: 2, color: 'purple' });
-              break;
-            case 'circle':
-              globalGraphics.circle(position.x, position.y, size.width / 2);
-              globalGraphics.stroke({ width: 2, color: 'purple' });
-              break;
+            switch (graphicsType.type) {
+              case 'rect':
+                globalGraphics.rect(position.x, position.y, size.width, size.height);
+                globalGraphics.stroke({ width: 2, color: 'purple' });
+                break;
+              case 'circle':
+                globalGraphics.circle(position.x, position.y, size.width / 2);
+                globalGraphics.stroke({ width: 2, color: 'purple' });
+                break;
+            }
+          } else {
+            globalGraphics.rect(
+              position.x - strokeWidth / 2,
+              position.y - strokeWidth / 2,
+              size.width + strokeWidth,
+              size.height + strokeWidth
+            );
+            globalGraphics.stroke({ width: 2, color: 'purple' });
           }
-        } else {
-          globalGraphics.rect(
-            position.x - strokeWidth / 2,
-            position.y - strokeWidth / 2,
-            size.width + strokeWidth,
-            size.height + strokeWidth
-          );
-          globalGraphics.stroke({ width: 2, color: 'purple' });
         }
       }
     }
