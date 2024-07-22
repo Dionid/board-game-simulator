@@ -1,7 +1,7 @@
 import { Application, ApplicationOptions, Container } from 'pixi.js';
-import { Size } from './types';
-import { Camera, newCamera, NewCameraProps } from './camera';
-import { MouseInput, newMouseInput } from './input';
+import { Size } from '../core/types';
+import { Camera, newCamera, NewCameraProps } from '../core/camera';
+import { MouseInput, newMouseInput } from '../core/input';
 
 export type GameCanvas = {
   parentElement: HTMLElement;

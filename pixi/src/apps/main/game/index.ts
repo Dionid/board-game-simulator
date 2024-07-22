@@ -1,7 +1,7 @@
 import { newWorld, registerSystem } from '../../../libs/tecs';
 import { Application, Assets, Container, Sprite, Spritesheet, Texture } from 'pixi.js';
 import firstMapData from './assets/FirstMap.json';
-import { newGame, Game } from '../../../libs/tengine/core';
+import { newGame, Game } from '../../../libs/tengine/game';
 import {
   applyCameraToContainer,
   render,
@@ -14,7 +14,6 @@ import {
 import { initTileMap } from '../../../libs/tengine/tilemap';
 import humanAtlasData from './assets/human_atlas.json';
 import { newAnimatedSprites, newDirectionalAnimationFrames } from '../../../libs/tengine/animation';
-import { cartesianTileRowCol, tileCartesianPosition } from '../../../libs/tengine/isometric';
 
 const fillSceneContainer = async (game: Game) => {
   const texture = (await Assets.load('assets/star.png')) as Texture;

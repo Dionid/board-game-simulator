@@ -1,5 +1,5 @@
 import { System } from '../../tecs';
-import { Game } from '../core';
+import { Game } from '../game';
 
 export const applyCameraToContainer = (game: Game): System => {
   const camera = game.cameras.main;

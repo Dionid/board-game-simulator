@@ -1,5 +1,5 @@
 import { System } from '../../tecs';
-import { Game } from '../core';
+import { Game } from '../game';
 
 export function moveCamera(worldScene: Game): System {
   const camera = worldScene.cameras.main;
