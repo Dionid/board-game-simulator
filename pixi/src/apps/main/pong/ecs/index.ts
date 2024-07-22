@@ -8,7 +8,7 @@ import {
   table,
   tryTable,
 } from '../../../../libs/tecs';
-import { Position, Size, Speed, Velocity } from '../../../../libs/tengine/ecs';
+import { Pivot, Position, Size, Speed, Velocity } from '../../../../libs/tengine/ecs';
 import { Game } from '../../../../libs/tengine/game';
 
 export const GameObject = newTag();
@@ -84,7 +84,7 @@ export const addVelocityToPosition = (game: Game): System => {
   };
 };
 
-const characterVelocityQ = newQuery(GameObject, Position, Size);
+const characterVelocityQ = newQuery(GameObject, Position, Size, Pivot);
 
 export const applyCharactersWorldBoundaries = (game: Game): System => {
   const query = registerQuery(game.essence, characterVelocityQ);
@@ -95,10 +95,12 @@ export const applyCharactersWorldBoundaries = (game: Game): System => {
       // const velocityT = table(archetype, Velocity);
       const positionT = table(archetype, Position);
       const sizeT = table(archetype, Size);
+      const pivotT = table(archetype, Pivot);
 
       for (let j = 0; j < archetype.entities.length; j++) {
         const position = positionT[j];
         const size = sizeT[j];
+        const pivot = pivotT[j];
 
         if (position.x < 0) {
           position.x = 0;
@@ -108,12 +110,12 @@ export const applyCharactersWorldBoundaries = (game: Game): System => {
           position.y = 0;
         }
 
-        if (position.x + size.width > game.world.size.width) {
-          position.x = game.world.size.width - size.width;
+        if (position.x + size.width - pivot.x > game.world.size.width) {
+          position.x = game.world.size.width - size.width + pivot.x;
         }
 
-        if (position.y + size.height > game.world.size.height) {
-          position.y = game.world.size.height - size.height;
+        if (position.y + size.height - pivot.y > game.world.size.height) {
+          position.y = game.world.size.height - size.height + pivot.y;
         }
       }
     }

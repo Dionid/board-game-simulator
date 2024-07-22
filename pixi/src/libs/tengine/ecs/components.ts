@@ -32,8 +32,13 @@ export const mBody = newSchema({
   value: body,
 });
 
-export const pGraphicsType = newSchema({
-  type: string,
+export const Shape = newSchema({
+  name: string,
+});
+
+export const Pivot = newSchema({
+  x: number,
+  y: number,
 });
 
 export const Position = newSchema({

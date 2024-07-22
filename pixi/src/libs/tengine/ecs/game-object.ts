@@ -1,6 +1,6 @@
 import { registerQuery, System, table, tryTable } from '../../tecs';
 import { newQuery } from '../../tecs/query';
-import { View, Position, Color, Size, pGraphicsTag, pGraphicsType } from './components';
+import { View, Position, Color, Size, pGraphicsTag, Shape } from './components';
 import { Game } from '../game';
 import { Map } from '../core';
 import { Graphics } from 'pixi.js';
@@ -21,7 +21,7 @@ export const renderGameObjects = (game: Game, map: Map): System => {
       const sizeT = table(archetype, Size);
 
       const graphicsTag = tryTable(archetype, pGraphicsTag);
-      const graphicsType = tryTable(archetype, pGraphicsType);
+      const graphicsType = tryTable(archetype, Shape);
       const colorT = tryTable(archetype, Color);
 
       for (let i = 0, l = archetype.entities.length; i < l; i++) {
@@ -29,13 +29,12 @@ export const renderGameObjects = (game: Game, map: Map): System => {
         const size = sizeT[i];
 
         if (graphicsTag && graphicsType) {
-          switch (graphicsType[i].type) {
+          switch (graphicsType[i].name) {
             case 'rect':
               globalGraphics.rect(position.x, position.y, size.width, size.height);
               break;
             case 'circle':
-              const circle = globalGraphics.circle(position.x, position.y, size.width / 2);
-              // circle.pivot.set(size.width / 2, size.height / 2);
+              globalGraphics.circle(position.x, position.y, size.width / 2);
               break;
             default:
               break;

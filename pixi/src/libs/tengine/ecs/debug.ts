@@ -1,7 +1,7 @@
 import { Graphics } from 'pixi.js';
 import { newQuery, registerQuery, System, table, tryTable } from '../../tecs';
 import { Game } from '../game';
-import { View, Position, Size, pGraphicsType, mBody } from './components';
+import { View, Position, Size, Shape, mBody } from './components';
 import { Map } from '../core';
 
 const drawQuery = newQuery(View, Position, Size);
@@ -37,7 +37,7 @@ export const drawDebugLines = (
       const positionT = table(archetype, Position);
       const sizeT = table(archetype, Size);
 
-      const graphicsTypeT = tryTable(archetype, pGraphicsType);
+      const graphicsTypeT = tryTable(archetype, Shape);
       const mBodyT = tryTable(archetype, mBody);
 
       for (let j = 0; j < archetype.entities.length; j++) {
@@ -69,7 +69,7 @@ export const drawDebugLines = (
           if (graphicsTypeT) {
             const graphicsType = graphicsTypeT[j];
 
-            switch (graphicsType.type) {
+            switch (graphicsType.name) {
               case 'rect':
                 globalGraphics.rect(position.x, position.y, size.width, size.height);
                 globalGraphics.stroke({ width: 2, color: 'purple' });

@@ -12,7 +12,8 @@ import {
   Velocity,
   Speed,
   pGraphicsTag,
-  pGraphicsType,
+  Shape,
+  Pivot,
 } from '../../../libs/tengine/ecs';
 import {
   addVelocityToPosition,
@@ -60,7 +61,8 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, playerEntity, GameObject);
   setComponent(game.essence, playerEntity, View);
   setComponent(game.essence, playerEntity, pGraphicsTag);
-  setComponent(game.essence, playerEntity, pGraphicsType, { type: 'rect' });
+  setComponent(game.essence, playerEntity, Pivot, { x: 0, y: 0 });
+  setComponent(game.essence, playerEntity, Shape, { name: 'rect' });
   setComponent(game.essence, playerEntity, Speed, { value: 5 });
   setComponent(game.essence, playerEntity, Velocity, {
     x: 0,
@@ -80,7 +82,8 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, enemyEntity, Enemy);
   setComponent(game.essence, enemyEntity, View);
   setComponent(game.essence, enemyEntity, pGraphicsTag);
-  setComponent(game.essence, enemyEntity, pGraphicsType, { type: 'rect' });
+  setComponent(game.essence, enemyEntity, Shape, { name: 'rect' });
+  setComponent(game.essence, enemyEntity, Pivot, { x: 0, y: 0 });
   setComponent(game.essence, enemyEntity, Speed, { value: 5 });
   setComponent(game.essence, enemyEntity, Velocity, {
     x: 0,
@@ -100,7 +103,8 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, ballEntity, GameObject);
   setComponent(game.essence, ballEntity, View);
   setComponent(game.essence, ballEntity, pGraphicsTag);
-  setComponent(game.essence, ballEntity, pGraphicsType, { type: 'circle' });
+  setComponent(game.essence, ballEntity, Shape, { name: 'circle' });
+  setComponent(game.essence, ballEntity, Pivot, { x: 25, y: 25 });
   setComponent(game.essence, ballEntity, Speed, { value: 0.4 });
   setComponent(game.essence, ballEntity, Velocity, {
     x: 5,
