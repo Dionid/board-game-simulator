@@ -22,6 +22,10 @@ export type Game = {
   world: GameWorld;
   input: {
     mouse: MouseInput;
+    keyboard: {
+      keyDown: Record<string, boolean>;
+      keyUp: string[];
+    };
   };
   camera: {
     main: Camera;
@@ -43,15 +47,17 @@ export const newGame = (
   (globalThis as any).__PIXI_APP__ = app;
 
   // # Container
+  const worldSize = {
+    width: props.world?.size?.width ?? window.innerWidth,
+    height: props.world?.size?.height ?? window.innerHeight,
+  };
+
   const world: GameWorld = {
     container: new Container({
       isRenderGroup: true,
       label: 'game',
     }),
-    size: {
-      width: props.world?.size?.width ?? window.innerWidth,
-      height: props.world?.size?.height ?? window.innerHeight,
-    },
+    size: worldSize,
   };
 
   // # Add container to App
@@ -89,6 +95,10 @@ export const newGame = (
     world,
     input: {
       mouse: newMouseInput(),
+      keyboard: {
+        keyDown: {},
+        keyUp: [],
+      },
     },
     camera: {
       main: camera,
@@ -109,7 +119,7 @@ export async function initGame(game: Game, options: Partial<ApplicationOptions> 
   await game.app.init({
     ...options,
     width: game.canvas.size.width,
-    height: game.canvas.size.width,
+    height: game.canvas.size.height,
     resizeTo: game.canvas.resizeTo,
   });
 

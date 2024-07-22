@@ -1,18 +1,28 @@
-import { Graphics } from 'pixi.js';
+import { Container, Graphics } from 'pixi.js';
 import { initGame, newGame } from '../../../libs/tengine/game';
 import { registerSystem } from '../../../libs/tecs';
-import { render } from '../../../libs/tengine/ecs';
+import { mapKeyboardInput, mapMouseInput } from '../../../libs/tengine/ecs';
+import { moveByArrows } from './ecs';
 
 export async function initPongGame(parentElement: HTMLElement) {
   const game = newGame({
     canvas: {
       parentElement,
+      resizeTo: window,
     },
   });
 
   await initGame(game, {
     backgroundColor: 0x000000,
   });
+
+  const map = {
+    container: new Container({
+      label: 'map',
+    }),
+  };
+
+  game.world.container.addChild(map.container);
 
   const characterSize = {
     width: 50,
@@ -25,8 +35,9 @@ export async function initPongGame(parentElement: HTMLElement) {
     characterSize.width,
     characterSize.height
   );
+  player.label = 'player';
   player.fill(0xfff);
-  game.world.container.addChild(player);
+  map.container.addChild(player);
 
   const enemy = new Graphics().rect(
     (game.world.size.width / 6) * 5 - characterSize.width / 2,
@@ -34,11 +45,16 @@ export async function initPongGame(parentElement: HTMLElement) {
     characterSize.width,
     characterSize.height
   );
+  enemy.label = 'enemy';
   enemy.fill(0xff0000);
-  game.world.container.addChild(enemy);
+  map.container.addChild(enemy);
 
   // # Systems
-  // ...
+  // ## Input
+  registerSystem(game.essence, mapKeyboardInput(game));
+  registerSystem(game.essence, mapMouseInput(game, map));
+  // ## Movement
+  registerSystem(game.essence, moveByArrows(game));
 
   return game;
 }

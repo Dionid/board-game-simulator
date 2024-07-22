@@ -1,14 +1,15 @@
 import { System } from '../../tecs';
 import { Game } from '../game';
 import { Map } from '../core';
+import { mutableEmpty } from '../../tecs/array';
 
-export function mapMouseInput(worldScene: Game, map: Map): System {
+export function mapMouseInput(game: Game, map: Map): System {
   const mapContainer = map.container;
 
-  const input = worldScene.input;
+  const input = game.input;
   const mouse = input.mouse;
-  const canvas = worldScene.app.canvas;
-  const camera = worldScene.camera.main;
+  const canvas = game.app.canvas;
+  const camera = game.camera.main;
 
   let mouseUp = false;
   let mouseDown = false;
@@ -72,6 +73,43 @@ export function mapMouseInput(worldScene: Game, map: Map): System {
       mouse.mapPosition.y = mouse.scenePosition.y - mapContainer.y + mapContainer.pivot.y;
 
       mouseMoveEvent = null;
+    }
+  };
+}
+
+export function mapKeyboardInput(game: Game): System {
+  const input = game.input;
+  const keyboard = input.keyboard;
+
+  let keyDownEventsList: KeyboardEvent[] = [];
+  let keyUpEventsList: KeyboardEvent[] = [];
+
+  window.addEventListener('keydown', (e) => {
+    keyDownEventsList.push(e);
+  });
+
+  window.addEventListener('keyup', (e) => {
+    keyUpEventsList.push(e);
+  });
+
+  return () => {
+    mutableEmpty(keyboard.keyUp);
+
+    if (keyDownEventsList.length) {
+      for (const event of keyDownEventsList) {
+        keyboard.keyDown[event.key] = true;
+      }
+
+      keyDownEventsList = [];
+    }
+
+    if (keyUpEventsList.length) {
+      for (const event of keyUpEventsList) {
+        keyboard.keyDown[event.key] = false;
+        keyboard.keyUp.push(event.key);
+      }
+
+      keyUpEventsList = [];
     }
   };
 }
