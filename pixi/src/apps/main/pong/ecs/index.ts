@@ -43,7 +43,6 @@ export const moveByArrows = (game: Game, playerEntity: Entity): System => {
     }
 
     const velocityT = tryTable(playerArchetype, Velocity);
-    // const speedT = tryTable(playerArchetype, Speed);
 
     if (!velocityT) {
       return;
@@ -98,7 +97,6 @@ export const applyCharactersWorldBoundaries = (game: Game): System => {
       const sizeT = table(archetype, Size);
 
       for (let j = 0; j < archetype.entities.length; j++) {
-        // const velocity = velocityT[j];
         const position = positionT[j];
         const size = sizeT[j];
 

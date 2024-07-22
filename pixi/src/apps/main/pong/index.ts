@@ -14,6 +14,7 @@ import {
   Speed,
   pGraphicsTag,
   pGraphicsType,
+  mBody,
 } from '../../../libs/tengine/ecs';
 import {
   addVelocityToPosition,
@@ -24,6 +25,9 @@ import {
   moveByArrows,
   Player,
 } from './ecs';
+import { Bodies, Body, Composite, Engine, Events } from 'matter-js';
+import { syncPhysicsBodyPosition } from '../../../libs/tengine/ecs/physics';
+import { drawDebugLines } from '../../../libs/tengine/ecs/debug';
 
 export async function initPongGame(parentElement: HTMLElement) {
   const game = newGame({
@@ -45,6 +49,20 @@ export async function initPongGame(parentElement: HTMLElement) {
 
   game.world.container.addChild(map.container);
 
+  // create an engine
+  var engine = Engine.create({
+    gravity: {
+      x: 0,
+      y: 0,
+    },
+  });
+
+  // var boxA = Bodies.rectangle(400, 200, 80, 80);
+  // var boxB = Bodies.rectangle(450, 50, 80, 80);
+
+  // Engine.update(engine, 16.666);
+
+  // # Initial Game Objects
   const characterSize = {
     width: 50,
     height: 200,
@@ -62,12 +80,17 @@ export async function initPongGame(parentElement: HTMLElement) {
     x: 0,
     y: 0,
   });
-  setComponent(game.essence, playerEntity, Position, {
+  const playerPosition = {
     x: game.world.size.width / 6 - characterSize.width / 2,
     y: game.world.size.height / 2 - characterSize.height / 2,
-  });
+  };
+  setComponent(game.essence, playerEntity, Position, playerPosition);
   setComponent(game.essence, playerEntity, Size, { width: characterSize.width, height: characterSize.height });
   setComponent(game.essence, playerEntity, Color, { value: '0xfff' });
+  const playerBody = Bodies.rectangle(playerPosition.x, playerPosition.y, characterSize.width, characterSize.height);
+  setComponent(game.essence, playerEntity, mBody, {
+    value: playerBody,
+  });
 
   // # Enemy
   const enemyEntity = spawnEntity(game.essence);
@@ -81,12 +104,17 @@ export async function initPongGame(parentElement: HTMLElement) {
     x: 0,
     y: 0,
   });
-  setComponent(game.essence, enemyEntity, Position, {
+  const enemyPosition = {
     x: (game.world.size.width / 6) * 5 - characterSize.width / 2,
     y: game.world.size.height / 2 - characterSize.height / 2,
-  });
+  };
+  setComponent(game.essence, enemyEntity, Position, enemyPosition);
   setComponent(game.essence, enemyEntity, Size, { width: characterSize.width, height: characterSize.height });
   setComponent(game.essence, enemyEntity, Color, { value: '0xff0000' });
+  const enemyBody = Bodies.rectangle(enemyPosition.x, enemyPosition.y, characterSize.width, characterSize.height);
+  setComponent(game.essence, enemyEntity, mBody, {
+    value: enemyBody,
+  });
 
   // # Ball
   const ballEntity = spawnEntity(game.essence);
@@ -95,17 +123,29 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, ballEntity, View);
   setComponent(game.essence, ballEntity, pGraphicsTag);
   setComponent(game.essence, ballEntity, pGraphicsType, { type: 'circle' });
-  setComponent(game.essence, ballEntity, Speed, { value: 0.01 });
+  setComponent(game.essence, ballEntity, Speed, { value: 0.4 });
   setComponent(game.essence, ballEntity, Velocity, {
-    x: 10,
-    y: 10,
+    x: 0,
+    y: 0,
   });
-  setComponent(game.essence, ballEntity, Position, {
+  const ballPosition = {
     x: game.world.size.width / 2 - 10,
     y: game.world.size.height / 2 - 10,
-  });
+  };
+  setComponent(game.essence, ballEntity, Position, ballPosition);
   setComponent(game.essence, ballEntity, Size, { width: 50, height: 0 });
   setComponent(game.essence, ballEntity, Color, { value: '0xfff' });
+  const ballBody = Bodies.circle(ballPosition.x, ballPosition.y, 25);
+  setComponent(game.essence, ballEntity, mBody, {
+    value: ballBody,
+  });
+
+  Composite.add(engine.world, [ballBody, playerBody, enemyBody]);
+
+  // Events.on(engine, 'collisionStart', function (event) {
+  //   console.log('collisionStart', event.pairs);
+  //   debugger;
+  // });
 
   // # Systems
   // ## Input
@@ -115,8 +155,17 @@ export async function initPongGame(parentElement: HTMLElement) {
   registerSystem(game.essence, moveByArrows(game, playerEntity));
   registerSystem(game.essence, addVelocityToPosition(game));
   registerSystem(game.essence, applyCharactersWorldBoundaries(game));
+  registerSystem(game.essence, syncPhysicsBodyPosition(game));
   // # GameObjects
   registerSystem(game.essence, renderGameObjects(game, map), 'postUpdate');
+  registerSystem(
+    game.essence,
+    ({ deltaMs }) => {
+      Engine.update(engine, deltaMs);
+    },
+    'postUpdate'
+  );
+  registerSystem(game.essence, drawDebugLines(game, map));
 
   return game;
 }

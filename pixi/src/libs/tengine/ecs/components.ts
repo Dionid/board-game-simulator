@@ -1,10 +1,12 @@
 import { Graphics } from 'pixi.js';
 import { newTag, $kind, $defaultFn, newSchema, number, string } from '../../tecs';
+import { Body } from 'matter-js';
 
 export const View = newTag();
 
 export const pGraphicsTag = newTag();
 
+// # pGraphics
 export const $graphics = Symbol('graphics');
 
 export const graphics = {
@@ -15,6 +17,19 @@ export const graphics = {
 
 export const pGraphics = newSchema({
   value: graphics,
+});
+
+// # mBody
+export const $mBody = Symbol('mBody');
+
+export const body = {
+  [$kind]: $mBody,
+  byteLength: 8,
+  [$defaultFn]: () => Body.create({}),
+} as const;
+
+export const mBody = newSchema({
+  value: body,
 });
 
 export const pGraphicsType = newSchema({
