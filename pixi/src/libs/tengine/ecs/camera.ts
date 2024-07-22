@@ -67,24 +67,26 @@ export const zoom = (game: Game): System => {
   };
 
   return () => {
+    // # Set camera target scale
     if (scaleEvent !== null) {
       const newScale = calculateScale(scaleEvent);
       camera.target.scale = newScale;
       scaleEvent = null;
     }
 
-    const newScale = camera.target.scale;
+    // # Animate camera scaling
+    const targetScale = camera.target.scale;
 
-    if (camera.scale === newScale) {
+    if (camera.scale === targetScale) {
       return;
     }
 
     // # Calculate step
-    let step = (newScale - camera.scale) * 0.3;
+    let step = (targetScale - camera.scale) * 0.3;
 
     // # Apply step threshold
     if (Math.abs(step) < 0.0001) {
-      step = newScale - camera.scale;
+      step = targetScale - camera.scale;
     }
 
     camera.scale += step;

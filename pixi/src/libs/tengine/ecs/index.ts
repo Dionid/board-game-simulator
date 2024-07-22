@@ -16,7 +16,7 @@ import {
 import { Query } from '../../../libs/tecs/query';
 export * from './input-mapping';
 export * from './camera';
-export * from './container';
+export * from './world';
 
 export const View = newTag();
 

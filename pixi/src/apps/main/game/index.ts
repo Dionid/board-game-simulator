@@ -3,7 +3,7 @@ import { Application, Assets, Container, Sprite, Spritesheet, Texture } from 'pi
 import firstMapData from './assets/FirstMap.json';
 import { newGame, Game } from '../../../libs/tengine/game';
 import {
-  applyCameraToContainer,
+  applyCameraToWorld,
   render,
   mapMouseInput,
   moveCameraByDragging,
@@ -98,8 +98,10 @@ export const initWorld = async (app: Application) => {
       // },
       // scale: 0.5,
       size: {
-        width: app.renderer.width,
-        height: app.renderer.height,
+        width: window.innerWidth * 2,
+        height: window.innerHeight * 2,
+        // height: 3000,
+        // width: 5000,
       },
     },
     world: {
@@ -229,7 +231,7 @@ export const initWorld = async (app: Application) => {
   registerSystem(game.essence, zoom(game));
   registerSystem(game.essence, applyWorldBoundariesToCamera(game));
   registerSystem(game.essence, moveCamera(game));
-  registerSystem(game.essence, applyCameraToContainer(game));
+  registerSystem(game.essence, applyCameraToWorld(game));
   // # Render
   registerSystem(game.essence, render(game.essence, app), 'postUpdate');
 

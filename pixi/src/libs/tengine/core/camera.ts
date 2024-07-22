@@ -16,7 +16,7 @@ export type Camera = {
 
 export type NewCameraProps = {
   position?: Vector2;
-  size?: Size;
+  size?: Partial<Size>;
   scale?: number;
 };
 

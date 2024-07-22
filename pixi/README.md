@@ -40,9 +40,22 @@
     1. https://gist.github.com/jordwest/8a12196436ebcf8df98a2745251915b5
     1. https://www.youtube.com/watch?v=04oQ2jOUjkU
 
-# Game, Camera, Scene, Application, Map
+# Entities
 
-1. Application contains backgroundColor, resizeTo -> It is our main canvas
-1. Map contains all game elements (position and depth sorting)
-1. In Game there can be a lot of Maps
-1. Camera is virtual
+1. Basic
+    1. Canvas is html canvas element
+    1. Essence is ECS engine
+    1. Container is pixi elements container
+    1. Input input interface data
+    1. Camera is virtual object determines position, size and zoom of what we see
+    1. App is pixi.Application
+1. Complex
+    1. Map has Container, Size, pixi elements
+    1. World has Container, Maps and size
+1. Game
+    1. Game has Canvas, Essence, Camera, Input, App, World
+
+
+# How Camera size must work
+
+I want to have option to set Camera size and World must be scaled to fit Camera size

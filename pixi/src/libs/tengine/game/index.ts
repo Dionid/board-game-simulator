@@ -59,7 +59,10 @@ export const newGame = (
   // # Camera
   const camera = newCamera({
     ...props.camera,
-    size: props.camera?.size ?? world.size,
+    size: {
+      width: props.camera?.size?.width ?? window.innerWidth,
+      height: props.camera?.size?.height ?? window.innerHeight,
+    },
   });
 
   // # Add parent html element
