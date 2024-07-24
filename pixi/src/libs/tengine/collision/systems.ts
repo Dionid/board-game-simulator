@@ -108,7 +108,7 @@ export const checkNarrowCollisionSimple = (game: Game): System => {
                 y: colliderB.position.y + colliderSetNewPositionB.y,
               };
 
-              const areColliding = compareColliders(
+              const overlap = compareColliders(
                 {
                   ...colliderA,
                   position: colliderNewPositionA,
@@ -119,21 +119,24 @@ export const checkNarrowCollisionSimple = (game: Game): System => {
                 }
               );
 
-              if (areColliding) {
+              if (overlap >= 0) {
                 emit(
                   willCollideTopic,
                   {
+                    name: 'willCollide',
                     a: {
                       entity: entityA,
                       colliderSet: colliderSetA,
                       collider: colliderA,
-                      newPosition: colliderSetNewPositionA,
+                      collidingPosition: colliderSetNewPositionA,
+                      overlap,
                     },
                     b: {
                       entity: entityB,
                       colliderSet: colliderSetB,
                       collider: colliderB,
-                      newPosition: colliderSetNewPositionB,
+                      collidingPosition: colliderSetNewPositionB,
+                      overlap,
                     },
                   },
                   true

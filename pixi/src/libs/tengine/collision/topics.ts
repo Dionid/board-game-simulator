@@ -2,19 +2,37 @@ import { Entity, SchemaType, newTopic } from '../../tecs';
 import { Position } from '../core';
 import { Collider, ColliderSet } from './components';
 
-export type CollidingEvent = {
+export type CollisionStartedEvent = {
+  name: 'collisionStarted';
   a: {
     entity: Entity;
     colliderSet: SchemaType<typeof ColliderSet>;
     collider: SchemaType<typeof Collider>;
-    newPosition: Position;
   };
   b: {
     entity: Entity;
     colliderSet: SchemaType<typeof ColliderSet>;
     collider: SchemaType<typeof Collider>;
-    newPosition: Position;
   };
 };
 
-export const willCollideTopic = newTopic<CollidingEvent>();
+export type WillCollideEvent = {
+  name: 'willCollide';
+  a: {
+    entity: Entity;
+    colliderSet: SchemaType<typeof ColliderSet>;
+    collider: SchemaType<typeof Collider>;
+    collidingPosition: Position;
+    overlap: number;
+  };
+  b: {
+    entity: Entity;
+    colliderSet: SchemaType<typeof ColliderSet>;
+    collider: SchemaType<typeof Collider>;
+    collidingPosition: Position;
+    overlap: number;
+  };
+};
+
+export const collideStartedTopic = newTopic<CollisionStartedEvent>();
+export const willCollideTopic = newTopic<WillCollideEvent>();

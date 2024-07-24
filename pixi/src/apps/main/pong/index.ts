@@ -24,7 +24,12 @@ import {
   ColliderSet,
   willCollideTopic,
 } from '../../../libs/tengine/collision';
-import { applyAccelerationToVelocity, applyVelocityToPosition, resolveCollision } from '../../../libs/tengine/physics';
+import {
+  applyAccelerationToVelocity,
+  applyVelocityToPosition,
+  Dynamic,
+  resolveCollision,
+} from '../../../libs/tengine/physics';
 
 export async function initPongGame(parentElement: HTMLElement) {
   const game = newGame({
@@ -81,6 +86,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, playerEntity, ColliderSet, {
     list: [
       {
+        type: 'solid',
         shape: { name: 'rectangle' },
         position: { x: 0, y: 0 },
         size: { width: characterSize.width, height: characterSize.height },
@@ -116,6 +122,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, enemyEntity, ColliderSet, {
     list: [
       {
+        type: 'solid',
         shape: { name: 'rectangle' },
         position: { x: 0, y: 0 },
         size: { width: characterSize.width, height: characterSize.height },
@@ -148,10 +155,12 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, ballEntity, Position, ballPosition);
   setComponent(game.essence, ballEntity, Size, { width: 50, height: 0 });
   setComponent(game.essence, ballEntity, Color, { value: '0xfff' });
+  setComponent(game.essence, ballEntity, Dynamic);
   setComponent(game.essence, ballEntity, ActiveCollisions);
   setComponent(game.essence, ballEntity, ColliderSet, {
     list: [
       {
+        type: 'solid',
         shape: { name: 'circle' },
         position: { x: 0, y: 0 },
         size: { width: 50, height: 0 },

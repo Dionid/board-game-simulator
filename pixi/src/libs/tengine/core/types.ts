@@ -29,3 +29,13 @@ export type TablePosition = {
 export type Map = {
   container: Container;
 };
+
+export type Rectangle = {
+  position: Position;
+  size: Size;
+};
+
+export type Circle = {
+  position: Position;
+  radius: number;
+};

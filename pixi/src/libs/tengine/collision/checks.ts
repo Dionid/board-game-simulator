@@ -8,7 +8,8 @@ export const areCirclesColliding = (positionA: Position, sizeA: Size, positionB:
   const distance = Math.sqrt(dx * dx + dy * dy);
   const minDistance = sizeA.width / 2 + sizeB.width / 2;
 
-  return distance < minDistance;
+  // return distance < minDistance;
+  return minDistance - distance;
 };
 
 export const areCircleAndRectangleColliding = (
@@ -30,20 +31,28 @@ export const areCircleAndRectangleColliding = (
   const distance = Math.sqrt(dx * dx + dy * dy);
   const minDistance = circleSize.width / 2;
 
-  return distance < minDistance;
+  // return distance < minDistance;
+  return minDistance - distance;
 };
 
 // # Check if two rectangles are colliding using AABB algorithm
 export const areRectanglesColliding = (positionA: Position, sizeA: Size, positionB: Position, sizeB: Size) => {
-  return (
+  if (
     positionA.x < positionB.x + sizeB.width &&
     positionA.x + sizeA.width > positionB.x &&
     positionA.y < positionB.y + sizeB.height &&
     positionA.y + sizeA.height > positionB.y
-  );
+  ) {
+    return 0;
+  }
+
+  return -1;
 };
 
-export const compareColliders = (colliderA: SchemaType<typeof Collider>, colliderB: SchemaType<typeof Collider>) => {
+export const compareColliders = (
+  colliderA: SchemaType<typeof Collider>,
+  colliderB: SchemaType<typeof Collider>
+): number => {
   if (colliderA.shape.name === 'circle' && colliderB.shape.name === 'circle') {
     return areCirclesColliding(colliderA.position, colliderA.size, colliderB.position, colliderB.size);
   }
@@ -64,5 +73,5 @@ export const compareColliders = (colliderA: SchemaType<typeof Collider>, collide
     return areRectanglesColliding(colliderA.position, colliderA.size, colliderB.position, colliderB.size);
   }
 
-  return false;
+  return -1;
 };

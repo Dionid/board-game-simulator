@@ -1,5 +1,5 @@
 import { Graphics } from 'pixi.js';
-import { newTag, $kind, $defaultFn, newSchema, number, string, arrayOf } from '../../tecs';
+import { newTag, $kind, $defaultFn, newSchema, number, string, boolean } from '../../tecs';
 
 export const View = newTag();
 
@@ -33,8 +33,18 @@ export const Position = newSchema({
   y: number,
 });
 
+export const LockTranslation = newSchema({
+  x: boolean,
+  y: boolean,
+});
+
 export const Rotation = newSchema({
   value: number,
+});
+
+export const LockRotation = newSchema({
+  x: boolean,
+  y: boolean,
 });
 
 export const Velocity = newSchema({

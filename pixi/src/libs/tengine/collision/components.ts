@@ -1,4 +1,4 @@
-import { newSchema, string, arrayOf, Tag } from '../../tecs';
+import { newSchema, arrayOf, Tag, string } from '../../tecs';
 import { Shape, Size, Position, Rotation } from '../ecs';
 
 export const ActiveCollisions = Tag.new();
@@ -8,6 +8,7 @@ export const ActiveCollisions = Tag.new();
 // export const ColliderSensor = Tag.new();
 
 export const Collider = newSchema({
+  type: string, // 'solid' | 'sensor'
   shape: Shape,
   size: Size,
   position: Position, // this is relative to the entity CollisionBody
