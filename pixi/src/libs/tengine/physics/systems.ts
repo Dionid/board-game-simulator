@@ -1,6 +1,6 @@
 import { componentByEntity, emit, newQuery, registerQuery, registerTopic, System, table } from '../../tecs';
 import { Game } from '../game';
-import { Acceleration, Position, Velocity } from '../ecs';
+import { Acceleration, Position, Size, Velocity } from '../ecs';
 import { collideStartedTopic, willCollideTopic } from '../collision';
 import { Dynamic, Kinematic, Static } from './components';
 import { resolveOverlap } from './resolve';
@@ -44,10 +44,17 @@ export const resolveCollision = (game: Game): System => {
     for (const event of topic) {
       const { a, b } = event;
 
-      const aVelocity = componentByEntity(game.essence, a.entity, Velocity);
       const aPosition = componentByEntity(game.essence, a.entity, Position);
-      const bVelocity = componentByEntity(game.essence, b.entity, Velocity);
+      const aVelocity = componentByEntity(game.essence, a.entity, Velocity);
+      const aSize = componentByEntity(game.essence, a.entity, Size);
+
       const bPosition = componentByEntity(game.essence, b.entity, Position);
+      const bVelocity = componentByEntity(game.essence, b.entity, Velocity);
+      const bSize = componentByEntity(game.essence, b.entity, Size);
+
+      if (!aPosition || !bPosition || !aSize || !bSize) {
+        continue;
+      }
 
       // # Determine type of colliders
       const aSolid = a.collider.type === 'solid';
@@ -58,7 +65,27 @@ export const resolveCollision = (game: Game): System => {
 
       // # Fix position if both solid
       if (aSolid && bSolid) {
-        resolveOverlap(a.collider, b.collider);
+        // TODO: need to rewrite this
+        // resolveOverlap(
+        //   a.collider.shape.name,
+        //   a.collidingPosition,
+        //   aSize,
+        //   aVelocity ?? {
+        //     x: 0,
+        //     y: 0,
+        //   },
+        //   b.collider.shape.name,
+        //   b.collidingPosition,
+        //   bSize,
+        //   bVelocity ?? {
+        //     x: 0,
+        //     y: 0,
+        //   }
+        // );
+        // aPosition.x = a.collidingPosition.x;
+        // aPosition.y = a.collidingPosition.y;
+        // bPosition.x = b.collidingPosition.x;
+        // bPosition.y = b.collidingPosition.y;
       }
 
       // # Emit collision started event
@@ -117,17 +144,18 @@ export const resolveCollision = (game: Game): System => {
       }
 
       const aAcceleration = componentByEntity(game.essence, a.entity, Acceleration);
-
       const bAcceleration = componentByEntity(game.essence, b.entity, Acceleration);
-
-      if (!aAcceleration || !bAcceleration || !aVelocity || !bVelocity || !aPosition || !bPosition) {
-        continue;
-      }
 
       // TODO: # Dynamic bodies collision response
       // ...
 
+      //   debugger;
+
       // TODO: MOVE THIS
+      if (!aAcceleration || !bAcceleration || !aVelocity || !bVelocity || !aPosition || !bPosition) {
+        continue;
+      }
+
       aAcceleration.x *= -1;
       aAcceleration.y *= -1;
       bAcceleration.x *= -1;
@@ -137,11 +165,6 @@ export const resolveCollision = (game: Game): System => {
       aVelocity.y = 0;
       bVelocity.x = 0;
       bVelocity.y = 0;
-
-      // aPosition.x = a.fixedPosition.x;
-      // aPosition.y = a.fixedPosition.y;
-      // bPosition.x = b.fixedPosition.x;
-      // bPosition.y = b.fixedPosition.y;
     }
   };
 };

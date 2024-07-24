@@ -141,7 +141,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, ballEntity, Pivot, { x: 25, y: 25 }); // because pixi.circle has pivot in center
   setComponent(game.essence, ballEntity, Speed, { value: 0.4 });
   setComponent(game.essence, ballEntity, Acceleration, {
-    x: 1,
+    x: 5,
     y: 0,
   });
   setComponent(game.essence, ballEntity, Velocity, {

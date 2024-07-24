@@ -334,7 +334,7 @@ export function stepWithTicker(
 ): void {
   // # Set state
   essence.state = 'running';
-  const now = Date.now();
+  const now = performance.now();
   essence.currentStepTime = now;
   if (essence.lastStepTime === 0) {
     essence.lastStepTime = now;

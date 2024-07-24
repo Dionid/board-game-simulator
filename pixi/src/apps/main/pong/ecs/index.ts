@@ -60,50 +60,6 @@ export const moveByArrows = (game: Game, playerEntity: Entity): System => {
   };
 };
 
-// TODO: move to tengine
-export const velocityPositionQuery = newQuery(Velocity, Position, Speed, Acceleration);
-
-export const addVelocityToPosition = (game: Game): System => {
-  const query = registerQuery(game.essence, velocityPositionQuery);
-
-  return ({ deltaTime }) => {
-    for (let i = 0; i < query.archetypes.length; i++) {
-      const archetype = query.archetypes[i];
-      const velocityT = table(archetype, Velocity);
-      const positionT = table(archetype, Position);
-      const speedT = table(archetype, Speed);
-      const accelerationT = table(archetype, Acceleration);
-
-      const ballT = tryTable(archetype, Ball);
-
-      for (let j = 0; j < archetype.entities.length; j++) {
-        const velocity = velocityT[j];
-        const position = positionT[j];
-        const speed = speedT[j];
-        const acceleration = accelerationT[j];
-
-        if (velocity.x === 0) {
-          if (ballT) {
-            // debugger;
-          }
-        }
-
-        // # Apply acceleration to velocity
-        velocity.x += acceleration.x * deltaTime * speed.value;
-        velocity.y += acceleration.y * deltaTime * speed.value;
-
-        // # Apply velocity to position
-        position.x += velocity.x * deltaTime;
-        position.y += velocity.y * deltaTime;
-
-        // # Apply friction to velocity
-        velocity.x *= 0.85 * deltaTime;
-        velocity.y *= 0.85 * deltaTime;
-      }
-    }
-  };
-};
-
 const characterVelocityQ = newQuery(GameObject, Position, Size, Pivot);
 
 export const applyGOWorldBoundaries = (game: Game): System => {
