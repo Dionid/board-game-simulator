@@ -57,16 +57,10 @@ export const moveByArrows = (game: Game, playerEntity: Entity): System => {
     const directionY = getYDirection();
 
     acceleration.y = -1 * directionY * deltaTime;
-
-    // if (directionY === 0) {
-    //   acceleration.y = 0;
-    //   return;
-    // }
-
-    // acceleration.y += -1 * directionY * deltaTime * 0.1;
   };
 };
 
+// TODO: move to tengine
 export const velocityPositionQuery = newQuery(Velocity, Position, Speed, Acceleration);
 
 export const addVelocityToPosition = (game: Game): System => {
@@ -80,11 +74,19 @@ export const addVelocityToPosition = (game: Game): System => {
       const speedT = table(archetype, Speed);
       const accelerationT = table(archetype, Acceleration);
 
+      const ballT = tryTable(archetype, Ball);
+
       for (let j = 0; j < archetype.entities.length; j++) {
         const velocity = velocityT[j];
         const position = positionT[j];
         const speed = speedT[j];
         const acceleration = accelerationT[j];
+
+        if (velocity.x === 0) {
+          if (ballT) {
+            // debugger;
+          }
+        }
 
         // # Apply acceleration to velocity
         velocity.x += acceleration.x * deltaTime * speed.value;

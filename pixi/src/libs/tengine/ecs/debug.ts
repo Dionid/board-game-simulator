@@ -1,8 +1,9 @@
 import { Graphics } from 'pixi.js';
 import { newQuery, registerQuery, SchemaType, System, table, tryTable } from '../../tecs';
 import { Game } from '../game';
-import { View, Position, Size, Shape, CollisionBody } from './components';
+import { View, Position, Size, Shape } from './components';
 import { Map } from '../core';
+import { CollisionBody } from './collision';
 
 const drawQuery = newQuery(View, Position, Size);
 

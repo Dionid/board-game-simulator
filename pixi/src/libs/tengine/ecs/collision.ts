@@ -1,6 +1,33 @@
-import { emit, Entity, newQuery, newTopic, registerQuery, SchemaType, System, table } from '../../tecs';
+import {
+  arrayOf,
+  emit,
+  Entity,
+  newQuery,
+  newSchema,
+  newTopic,
+  registerQuery,
+  SchemaType,
+  System,
+  table,
+  Tag,
+} from '../../tecs';
 import { Game } from '../game';
-import { CollisionBody, Position, Size } from './components';
+import { Position, Shape, Size } from './components';
+
+// QUESTION: must be part of CollisionBodyPart, but how to do it?
+export const ColliderSolid = Tag.new();
+export const ColliderSensor = Tag.new();
+
+export const CollisionBodyPart = newSchema({
+  shape: Shape,
+  size: Size,
+  position: Position, // this is relative to the entity CollisionBody
+});
+
+export const CollisionBody = newSchema({
+  parts: arrayOf(CollisionBodyPart), // QUESTION: must be array of entities???
+  position: Position, // this is relative to the entity Position
+});
 
 export const areCirclesColliding = (
   positionA: SchemaType<typeof Position>,
@@ -110,19 +137,21 @@ export const runNarrowPhaseSimple = (game: Game): System => {
         for (const partA of collisionBodyA.parts) {
           const partPositionA = {
             x: collisionBodyPositionA.x + partA.position.x,
-            y: collisionBodyPositionA.x + partA.position.y,
+            y: collisionBodyPositionA.y + partA.position.y,
           };
 
           for (const partB of collisionBodyB.parts) {
             const partPositionB = {
               x: collisionBodyPositionB.x + partB.position.x,
-              y: collisionBodyPositionB.x + partB.position.y,
+              y: collisionBodyPositionB.y + partB.position.y,
             };
 
             if (partA.shape.name === 'circle' && partB.shape.name === 'circle') {
               const areColliding = areCirclesColliding(partPositionA, partA.size, partPositionB, partB.size);
 
               if (areColliding) {
+                // console.log('areCirclesColliding', partPositionA, partA.size, partPositionB, partB.size, areColliding);
+                // debugger;
                 emit(
                   collidingTopic,
                   {

@@ -14,6 +14,7 @@ import {
 import { initTileMap } from '../../../libs/tengine/tilemap';
 import humanAtlasData from './assets/human_atlas.json';
 import { newAnimatedSprites, newDirectionalAnimationFrames } from '../../../libs/tengine/animation';
+import { cartesianTileRowCol, tileCartesianPosition } from '../../../libs/tengine/isometric';
 
 const fillSceneContainer = async (game: Game) => {
   const texture = (await Assets.load('assets/star.png')) as Texture;
@@ -219,10 +220,10 @@ export const initWorld = async (app: Application) => {
 
     playerContainer.position.set(game.input.mouse.mapPosition.x, game.input.mouse.mapPosition.y);
 
-    // const { x, y } = playerContainer.position;
-    // const { tileWidth, tileHeight } = tileMap;
-    // const rc = cartesianTileRowCol(playerContainer.position, { width: tileWidth, height: tileHeight });
-    // console.log({ x, y }, rc, tileCartesianPosition(rc, { width: tileWidth, height: tileHeight }));
+    const { x, y } = playerContainer.position;
+    const { tileWidth, tileHeight } = tileMap;
+    const rc = cartesianTileRowCol(playerContainer.position, { width: tileWidth, height: tileHeight });
+    console.log({ x, y }, rc, tileCartesianPosition(rc, { width: tileWidth, height: tileHeight }));
   });
 
   // # Systems

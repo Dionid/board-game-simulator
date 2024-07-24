@@ -20,6 +20,7 @@ import {
 import { addVelocityToPosition, Ball, GameObject, Enemy, moveByArrows, Player, applyGOWorldBoundaries } from './ecs';
 import { drawDebugLines } from '../../../libs/tengine/ecs/debug';
 import { collidingTopic, runNarrowPhaseSimple } from '../../../libs/tengine/ecs/collision';
+import { responseToCollision } from './ecs/collision-response';
 
 export async function initPongGame(parentElement: HTMLElement) {
   const game = newGame({
@@ -72,7 +73,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   };
   setComponent(game.essence, playerEntity, Position, playerPosition);
   setComponent(game.essence, playerEntity, Size, { width: characterSize.width, height: characterSize.height });
-  setComponent(game.essence, playerEntity, Color, { value: '0xfff' });
+  setComponent(game.essence, playerEntity, Color, { value: 'blue' });
   setComponent(game.essence, playerEntity, CollisionBody, {
     parts: [
       {
@@ -135,11 +136,11 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, ballEntity, Pivot, { x: 25, y: 25 }); // because pixi.circle has pivot in center
   setComponent(game.essence, ballEntity, Speed, { value: 0.4 });
   setComponent(game.essence, ballEntity, Acceleration, {
-    x: 0,
+    x: 2,
     y: 0,
   });
   setComponent(game.essence, ballEntity, Velocity, {
-    x: 0,
+    x: 0.1,
     y: 0,
   });
   const ballPosition = {
@@ -163,7 +164,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     },
   });
 
-  // // # Ball
+  // // # Second Ball
   // const secondBallEntity = spawnEntity(game.essence);
   // setComponent(game.essence, secondBallEntity, Ball);
   // setComponent(game.essence, secondBallEntity, GameObject);
@@ -201,10 +202,10 @@ export async function initPongGame(parentElement: HTMLElement) {
   //   },
   // });
 
-  // # Topics
-  registerTopic(game.essence, collidingTopic);
-
   // # Systems
+  // # Collision
+  registerSystem(game.essence, runNarrowPhaseSimple(game));
+  registerSystem(game.essence, responseToCollision(game));
   // ## Input
   registerSystem(game.essence, mapKeyboardInput(game));
   registerSystem(game.essence, mapMouseInput(game, map));
@@ -212,14 +213,6 @@ export async function initPongGame(parentElement: HTMLElement) {
   registerSystem(game.essence, moveByArrows(game, playerEntity));
   registerSystem(game.essence, addVelocityToPosition(game));
   registerSystem(game.essence, applyGOWorldBoundaries(game));
-  // # Collision
-  registerSystem(game.essence, runNarrowPhaseSimple(game));
-  registerSystem(game.essence, () => {
-    for (const collisionEvent of collidingTopic) {
-      console.log(collisionEvent);
-      debugger;
-    }
-  });
   // # Render
   registerSystem(game.essence, renderGameObjects(game, map));
   registerSystem(
@@ -227,7 +220,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     drawDebugLines(game, map, {
       graphics: false,
       xy: true,
-      collision: true,
+      collision: false,
     })
   );
 

@@ -68,14 +68,3 @@ export const Size = newSchema({
 export const Color = newSchema({
   value: string,
 });
-
-export const CollisionBodyPart = newSchema({
-  shape: Shape,
-  size: Size,
-  position: Position, // this is relative to the entity CollisionBody
-});
-
-export const CollisionBody = newSchema({
-  parts: arrayOf(CollisionBodyPart),
-  position: Position, // this is relative to the entity Position
-});
