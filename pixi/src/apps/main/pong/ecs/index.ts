@@ -54,9 +54,21 @@ export const moveByArrows = (game: Game, playerEntity: Entity): System => {
       return;
     }
 
+    const speedT = tryTable(playerArchetype, Speed);
+
+    if (!speedT) {
+      return;
+    }
+
+    const speed = speedT[0];
+
+    if (!speed) {
+      return;
+    }
+
     const directionY = getYDirection();
 
-    acceleration.y = -1 * directionY * deltaTime;
+    acceleration.y = -speed.value * directionY * deltaTime;
   };
 };
 
@@ -68,7 +80,6 @@ export const applyGOWorldBoundaries = (game: Game): System => {
   return ({ deltaTime }) => {
     for (let i = 0; i < query.archetypes.length; i++) {
       const archetype = query.archetypes[i];
-      // const velocityT = table(archetype, Velocity);
       const positionT = table(archetype, Position);
       const sizeT = table(archetype, Size);
       const pivotT = table(archetype, Pivot);
@@ -78,12 +89,12 @@ export const applyGOWorldBoundaries = (game: Game): System => {
         const size = sizeT[j];
         const pivot = pivotT[j];
 
-        if (position.x < 0) {
-          position.x = 0;
+        if (position.x - pivot.x < 0) {
+          position.x = pivot.x;
         }
 
-        if (position.y < 0) {
-          position.y = 0;
+        if (position.y - pivot.y < 0) {
+          position.y = pivot.y;
         }
 
         if (position.x + size.width - pivot.x > game.world.size.width) {

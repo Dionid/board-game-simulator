@@ -16,7 +16,7 @@ import {
   Pivot,
   Acceleration,
 } from '../../../libs/tengine/ecs';
-import { Ball, GameObject, Enemy, Player } from './ecs';
+import { Ball, GameObject, Enemy, Player, moveByArrows, applyGOWorldBoundaries } from './ecs';
 import { drawDebugLines } from '../../../libs/tengine/ecs/debug';
 import {
   ActiveCollisions,
@@ -139,13 +139,9 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, ballEntity, pGraphicsTag);
   setComponent(game.essence, ballEntity, Shape, { name: 'circle' });
   setComponent(game.essence, ballEntity, Pivot, { x: 25, y: 25 }); // because pixi.circle has pivot in center
-  setComponent(game.essence, ballEntity, Speed, { value: 0.4 });
-  setComponent(game.essence, ballEntity, Acceleration, {
-    x: 5,
-    y: 0,
-  });
+  // setComponent(game.essence, ballEntity, Speed, { value: 1 });
   setComponent(game.essence, ballEntity, Velocity, {
-    x: 0.1,
+    x: 0,
     y: 0,
   });
   const ballPosition = {
@@ -182,9 +178,9 @@ export async function initPongGame(parentElement: HTMLElement) {
   registerSystem(game.essence, mapKeyboardInput(game));
   registerSystem(game.essence, mapMouseInput(game, map));
   // ## Movement
-  // registerSystem(game.essence, moveByArrows(game, playerEntity));
+  registerSystem(game.essence, moveByArrows(game, playerEntity));
   // registerSystem(game.essence, addVelocityToPosition(game));
-  // registerSystem(game.essence, applyGOWorldBoundaries(game));
+  registerSystem(game.essence, applyGOWorldBoundaries(game));
   // # Render
   registerSystem(game.essence, renderGameObjects(game, map));
   registerSystem(

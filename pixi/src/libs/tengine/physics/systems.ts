@@ -143,28 +143,20 @@ export const resolveCollision = (game: Game): System => {
         continue;
       }
 
-      const aAcceleration = componentByEntity(game.essence, a.entity, Acceleration);
-      const bAcceleration = componentByEntity(game.essence, b.entity, Acceleration);
-
       // TODO: # Dynamic bodies collision response
       // ...
 
       //   debugger;
 
       // TODO: MOVE THIS
-      if (!aAcceleration || !bAcceleration || !aVelocity || !bVelocity || !aPosition || !bPosition) {
+      if (!aVelocity || !bVelocity || !aPosition || !bPosition) {
         continue;
       }
 
-      aAcceleration.x *= -1;
-      aAcceleration.y *= -1;
-      bAcceleration.x *= -1;
-      bAcceleration.y *= -1;
-
-      aVelocity.x = 0;
-      aVelocity.y = 0;
-      bVelocity.x = 0;
-      bVelocity.y = 0;
+      aVelocity.x *= -1;
+      aVelocity.y *= -1;
+      bVelocity.x *= -1;
+      bVelocity.y *= -1;
     }
   };
 };
