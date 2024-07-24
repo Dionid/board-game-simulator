@@ -1,6 +1,5 @@
 import { Graphics } from 'pixi.js';
 import { newTag, $kind, $defaultFn, newSchema, number, string, arrayOf } from '../../tecs';
-import { Body } from 'matter-js';
 
 export const View = newTag();
 
@@ -19,21 +18,9 @@ export const pGraphics = newSchema({
   value: graphics,
 });
 
-// # mBody
-export const $mBody = Symbol('mBody');
-
-export const body = {
-  [$kind]: $mBody,
-  byteLength: 8,
-  [$defaultFn]: () => Body.create({}),
-} as const;
-
-export const mBody = newSchema({
-  value: body,
-});
-
 export const Shape = newSchema({
   name: string,
+  // TODO: add size by type
 });
 
 export const Pivot = newSchema({
@@ -44,6 +31,10 @@ export const Pivot = newSchema({
 export const Position = newSchema({
   x: number,
   y: number,
+});
+
+export const Rotation = newSchema({
+  value: number,
 });
 
 export const Velocity = newSchema({

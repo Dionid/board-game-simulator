@@ -22,6 +22,38 @@
     1. World has Container, Maps and size
 1. Game
     1. Game has Canvas, Essence, Camera, Input, App, World
+1. GameObject (GO)
+    1. GO can have
+        1. Position
+        1. Rotation
+        1. (???) Size
+        1. Sprite
+            1. Position
+            1. Texture
+            1. Size
+            1. Rotation
+            1. Scale
+            1. Anchor
+        1. Collider
+            1. Shape
+            1. Size
+            1. Position
+            1. Rotation
+            1. Type (Solid, Sensor)
+        1. RigidBody
+            1. Type (Static, Kinematic, Dynamic)
+            1. Acceleration
+            1. Velocity
+            1. Position
+            1. Rotation
+            1. CollidersList
+    1. As components
+        1. Acceleration
+        1. Velocity
+        1. Position
+        1. Rotation
+        1. Sprite
+        1. CollidersList
 
 # Roadmap
 
@@ -50,6 +82,10 @@
     1. Broad
     1. Narrow
     1. Response
+
+1. ...
+
+
 
 # Useful links
 

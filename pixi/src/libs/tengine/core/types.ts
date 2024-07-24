@@ -10,7 +10,11 @@ export type Vector2 = {
   y: number;
 };
 
+export type Acceleration = Vector2;
+
 export type Velocity = Vector2;
+
+export type Position = Vector2;
 
 export type Size = {
   width: number;

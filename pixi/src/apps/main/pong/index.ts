@@ -1,6 +1,6 @@
 import { Container } from 'pixi.js';
 import { initGame, newGame } from '../../../libs/tengine/game';
-import { registerSystem, registerTopic, setComponent, spawnEntity } from '../../../libs/tecs';
+import { registerSystem, setComponent, spawnEntity } from '../../../libs/tecs';
 import {
   mapKeyboardInput,
   mapMouseInput,
@@ -15,12 +15,16 @@ import {
   Shape,
   Pivot,
   Acceleration,
-  CollisionBody,
 } from '../../../libs/tengine/ecs';
-import { addVelocityToPosition, Ball, GameObject, Enemy, moveByArrows, Player, applyGOWorldBoundaries } from './ecs';
+import { Ball, GameObject, Enemy, Player } from './ecs';
 import { drawDebugLines } from '../../../libs/tengine/ecs/debug';
-import { collidingTopic, runNarrowPhaseSimple } from '../../../libs/tengine/ecs/collision';
-import { responseToCollision } from './ecs/collision-response';
+import {
+  ActiveCollisions,
+  checkNarrowCollisionSimple,
+  ColliderSet,
+  willCollideTopic,
+} from '../../../libs/tengine/collision';
+import { applyAccelerationToVelocity, applyVelocityToPosition, resolveCollision } from '../../../libs/tengine/physics';
 
 export async function initPongGame(parentElement: HTMLElement) {
   const game = newGame({
@@ -74,18 +78,15 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, playerEntity, Position, playerPosition);
   setComponent(game.essence, playerEntity, Size, { width: characterSize.width, height: characterSize.height });
   setComponent(game.essence, playerEntity, Color, { value: 'blue' });
-  setComponent(game.essence, playerEntity, CollisionBody, {
-    parts: [
+  setComponent(game.essence, playerEntity, ColliderSet, {
+    list: [
       {
         shape: { name: 'rectangle' },
         position: { x: 0, y: 0 },
         size: { width: characterSize.width, height: characterSize.height },
+        rotation: { value: 0 },
       },
     ],
-    position: {
-      x: 0,
-      y: 0,
-    },
   });
 
   // # Enemy
@@ -112,18 +113,15 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, enemyEntity, Position, enemyPosition);
   setComponent(game.essence, enemyEntity, Size, { width: characterSize.width, height: characterSize.height });
   setComponent(game.essence, enemyEntity, Color, { value: '0xff0000' });
-  setComponent(game.essence, enemyEntity, CollisionBody, {
-    parts: [
+  setComponent(game.essence, enemyEntity, ColliderSet, {
+    list: [
       {
         shape: { name: 'rectangle' },
         position: { x: 0, y: 0 },
         size: { width: characterSize.width, height: characterSize.height },
+        rotation: { value: 0 },
       },
     ],
-    position: {
-      x: 0,
-      y: 0,
-    },
   });
 
   // # Ball
@@ -136,7 +134,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, ballEntity, Pivot, { x: 25, y: 25 }); // because pixi.circle has pivot in center
   setComponent(game.essence, ballEntity, Speed, { value: 0.4 });
   setComponent(game.essence, ballEntity, Acceleration, {
-    x: 2,
+    x: 1,
     y: 0,
   });
   setComponent(game.essence, ballEntity, Velocity, {
@@ -150,69 +148,34 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, ballEntity, Position, ballPosition);
   setComponent(game.essence, ballEntity, Size, { width: 50, height: 0 });
   setComponent(game.essence, ballEntity, Color, { value: '0xfff' });
-  setComponent(game.essence, ballEntity, CollisionBody, {
-    parts: [
+  setComponent(game.essence, ballEntity, ActiveCollisions);
+  setComponent(game.essence, ballEntity, ColliderSet, {
+    list: [
       {
         shape: { name: 'circle' },
         position: { x: 0, y: 0 },
         size: { width: 50, height: 0 },
+        rotation: { value: 0 },
       },
     ],
-    position: {
-      x: 0,
-      y: 0,
-    },
   });
-
-  // // # Second Ball
-  // const secondBallEntity = spawnEntity(game.essence);
-  // setComponent(game.essence, secondBallEntity, Ball);
-  // setComponent(game.essence, secondBallEntity, GameObject);
-  // setComponent(game.essence, secondBallEntity, View);
-  // setComponent(game.essence, secondBallEntity, pGraphicsTag);
-  // setComponent(game.essence, secondBallEntity, Shape, { name: 'circle' });
-  // setComponent(game.essence, secondBallEntity, Pivot, { x: 25, y: 25 }); // because pixi.circle has pivot in center
-  // setComponent(game.essence, secondBallEntity, Speed, { value: 0.4 });
-  // setComponent(game.essence, secondBallEntity, Acceleration, {
-  //   x: 0,
-  //   y: 0,
-  // });
-  // setComponent(game.essence, secondBallEntity, Velocity, {
-  //   x: 0,
-  //   y: 0,
-  // });
-  // const secondBallPosition = {
-  //   x: game.world.size.width / 2 - 10 + 100,
-  //   y: game.world.size.height / 2 - 10,
-  // };
-  // setComponent(game.essence, secondBallEntity, Position, secondBallPosition);
-  // setComponent(game.essence, secondBallEntity, Size, { width: 50, height: 0 });
-  // setComponent(game.essence, secondBallEntity, Color, { value: '0xfff' });
-  // setComponent(game.essence, secondBallEntity, CollisionBody, {
-  //   parts: [
-  //     {
-  //       shape: { name: 'circle' },
-  //       position: { x: 0, y: 0 },
-  //       size: { width: 50, height: 0 },
-  //     },
-  //   ],
-  //   position: {
-  //     x: 0,
-  //     y: 0,
-  //   },
-  // });
 
   // # Systems
   // # Collision
-  registerSystem(game.essence, runNarrowPhaseSimple(game));
-  registerSystem(game.essence, responseToCollision(game));
+  registerSystem(game.essence, applyAccelerationToVelocity(game));
+  registerSystem(game.essence, checkNarrowCollisionSimple(game));
+  registerSystem(game.essence, resolveCollision(game));
+  registerSystem(game.essence, applyVelocityToPosition(game));
+  // registerSystem(game.essence, responseToCollision(game));
+  // # Physics
+  // ...
   // ## Input
   registerSystem(game.essence, mapKeyboardInput(game));
   registerSystem(game.essence, mapMouseInput(game, map));
   // ## Movement
-  registerSystem(game.essence, moveByArrows(game, playerEntity));
-  registerSystem(game.essence, addVelocityToPosition(game));
-  registerSystem(game.essence, applyGOWorldBoundaries(game));
+  // registerSystem(game.essence, moveByArrows(game, playerEntity));
+  // registerSystem(game.essence, addVelocityToPosition(game));
+  // registerSystem(game.essence, applyGOWorldBoundaries(game));
   // # Render
   registerSystem(game.essence, renderGameObjects(game, map));
   registerSystem(

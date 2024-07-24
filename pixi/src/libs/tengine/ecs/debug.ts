@@ -3,7 +3,7 @@ import { newQuery, registerQuery, SchemaType, System, table, tryTable } from '..
 import { Game } from '../game';
 import { View, Position, Size, Shape } from './components';
 import { Map } from '../core';
-import { CollisionBody } from './collision';
+import { ColliderSet } from '../collision';
 
 const drawQuery = newQuery(View, Position, Size);
 
@@ -58,7 +58,7 @@ export const drawDebugLines = (
       const positionT = table(archetype, Position);
       const sizeT = table(archetype, Size);
 
-      const collisionBodyT = tryTable(archetype, CollisionBody);
+      const collisionBodyT = tryTable(archetype, ColliderSet);
       const shapeT = tryTable(archetype, Shape);
 
       for (let j = 0; j < archetype.entities.length; j++) {
@@ -75,13 +75,13 @@ export const drawDebugLines = (
           if (collisionBodyT) {
             const collisionBody = collisionBodyT[j];
 
-            for (const part of collisionBody.parts) {
+            for (const part of collisionBody.list) {
               drawShapeLines(
                 globalGraphics,
                 part.shape,
                 {
-                  x: position.x + collisionBody.position.x + part.position.x,
-                  y: position.y + collisionBody.position.y + part.position.y,
+                  x: position.x + part.position.x,
+                  y: position.y + part.position.y,
                 },
                 part.size,
                 'gray',

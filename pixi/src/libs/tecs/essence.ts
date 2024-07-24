@@ -309,12 +309,14 @@ export function registerSystem(
   essence.systems[type || 'update'].push(system);
 }
 
-export function registerTopic(essence: Essence, topic: Topic<unknown>) {
+export function registerTopic<T extends Topic<unknown>>(essence: Essence, topic: T): T {
   if (essence.topics.includes(topic)) {
-    return;
+    return topic;
   }
 
   essence.topics.push(topic);
+
+  return topic;
 }
 
 // TODO: think more about this
