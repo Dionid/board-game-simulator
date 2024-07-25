@@ -57,9 +57,8 @@
 
 # Roadmap
 
-1. Collision
-1. Depth Sorting
-1. Add collider
+1. ~~Add collider~~
+1. Move Size to Shape
 1. ...
 1. Preload assets
 1. Culling
@@ -84,7 +83,6 @@
     1. Response
 
 1. ...
-
 
 
 # Useful links
@@ -159,3 +157,54 @@
     1. Attached to RigidBody
 1. We can lock translation or rotation (https://rapier.rs/docs/user_guides/rust/rigid_bodies#locking-translationsrotations)
 1. Sleeping
+
+
+1. Make so that we firstly calc new position, then check collision, than resolve it
+
+
+# Matter
+
+1. Apply Gravity to Forces
+
+1. Collision Response
+    1. Update Bodies
+        1. Body ->
+                Change Velocity -> Save previous position -> Apply Velocity to Position
+                -> Change AngularVelocity -> Save prev Angle -> Apply AngularVelocity to Angle
+            -> For Parts
+                -> Translate parts vertices -> Apply body velocity tp parts.position
+                -> Rotate Parts
+                -> Update bounds
+    1. Constraints
+        1. PresolveAll ???
+        1. Solve All
+    1. Detect collisions
+    1. Update collision Pairs
+    1. Wake up bodies
+    1. CollisionStartEvent on new Pairs
+    1. (!!!) SolvePosition
+        1. preSolvePosition -> set total contacts
+        1. solvePosition (find impulses required to resolve penetration)
+            1. ```
+                pair.separation =
+                collision.depth +
+                collision.normal.x * (bodyB.positionImpulse.x - bodyA.positionImpulse.x) +
+                collision.normal.y * (bodyB.positionImpulse.y - bodyA.positionImpulse.y);
+                ```
+            1. positionImpulse = pair.separation - pair.slop * slopDampen;
+            1. if body not static and not sleeping apply impulse
+                ```
+                bodyA.positionImpulse.x +=
+                  normal.x * positionImpulse * contactShare;
+                bodyA.positionImpulse.y +=
+                  normal.y * positionImpulse * contactShare;
+                ```
+        1. postSolvePosition (apply impulses to all bodies)
+            1. for bodies
+                1. reset totalContacts
+                1. If there is any positionImpulse
+                    1. verticesTranslate
+                    1. boundsUpdate
+                    1. ??? move previous body position without changing velocity
+                    1. Reset cached impulse if the body has velocity along it OR
+                    warm the next iteration (by reducing it)

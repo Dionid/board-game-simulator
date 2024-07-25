@@ -1,5 +1,5 @@
 import { componentByEntity, registerTopic, System } from '../../../../libs/tecs';
-import { willCollideTopic } from '../../../../libs/tengine/collision';
+import { colliding } from '../../../../libs/tengine/collision';
 import { Acceleration, Position, Velocity } from '../../../../libs/tengine/ecs';
 import { Game } from '../../../../libs/tengine/game';
 

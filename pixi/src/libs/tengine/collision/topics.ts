@@ -16,8 +16,8 @@ export type CollisionStartedEvent = {
   };
 };
 
-export type WillCollideEvent = {
-  name: 'willCollide';
+export type CollidingEvent = {
+  name: 'colliding';
   a: {
     entity: Entity;
     colliderSet: SchemaType<typeof ColliderSet>;
@@ -35,4 +35,4 @@ export type WillCollideEvent = {
 };
 
 export const collideStartedTopic = newTopic<CollisionStartedEvent>();
-export const willCollideTopic = newTopic<WillCollideEvent>();
+export const colliding = newTopic<CollidingEvent>();

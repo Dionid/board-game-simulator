@@ -18,12 +18,7 @@ import {
 } from '../../../libs/tengine/ecs';
 import { Ball, GameObject, Enemy, Player, moveByArrows, applyGOWorldBoundaries } from './ecs';
 import { drawDebugLines } from '../../../libs/tengine/ecs/debug';
-import {
-  ActiveCollisions,
-  checkNarrowCollisionSimple,
-  ColliderSet,
-  willCollideTopic,
-} from '../../../libs/tengine/collision';
+import { ActiveCollisions, checkNarrowCollisionSimple, ColliderSet } from '../../../libs/tengine/collision';
 import {
   applyAccelerationToVelocity,
   applyVelocityToPosition,
@@ -89,6 +84,7 @@ export async function initPongGame(parentElement: HTMLElement) {
         type: 'solid',
         shape: { name: 'rectangle' },
         position: { x: 0, y: 0 },
+        offset: { x: 0, y: 0 },
         size: { width: characterSize.width, height: characterSize.height },
         rotation: { value: 0 },
       },
@@ -125,6 +121,7 @@ export async function initPongGame(parentElement: HTMLElement) {
         type: 'solid',
         shape: { name: 'rectangle' },
         position: { x: 0, y: 0 },
+        offset: { x: 0, y: 0 },
         size: { width: characterSize.width, height: characterSize.height },
         rotation: { value: 0 },
       },
@@ -139,9 +136,8 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, ballEntity, pGraphicsTag);
   setComponent(game.essence, ballEntity, Shape, { name: 'circle' });
   setComponent(game.essence, ballEntity, Pivot, { x: 25, y: 25 }); // because pixi.circle has pivot in center
-  // setComponent(game.essence, ballEntity, Speed, { value: 1 });
   setComponent(game.essence, ballEntity, Velocity, {
-    x: 0,
+    x: 5,
     y: 0,
   });
   const ballPosition = {
@@ -159,6 +155,7 @@ export async function initPongGame(parentElement: HTMLElement) {
         type: 'solid',
         shape: { name: 'circle' },
         position: { x: 0, y: 0 },
+        offset: { x: 0, y: 0 },
         size: { width: 50, height: 0 },
         rotation: { value: 0 },
       },
@@ -168,9 +165,9 @@ export async function initPongGame(parentElement: HTMLElement) {
   // # Systems
   // # Collision
   registerSystem(game.essence, applyAccelerationToVelocity(game));
+  registerSystem(game.essence, applyVelocityToPosition(game));
   registerSystem(game.essence, checkNarrowCollisionSimple(game));
   registerSystem(game.essence, resolveCollision(game));
-  registerSystem(game.essence, applyVelocityToPosition(game));
   // registerSystem(game.essence, responseToCollision(game));
   // # Physics
   // ...

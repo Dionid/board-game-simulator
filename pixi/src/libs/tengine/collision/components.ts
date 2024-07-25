@@ -11,7 +11,11 @@ export const Collider = newSchema({
   type: string, // 'solid' | 'sensor'
   shape: Shape,
   size: Size,
-  position: Position, // this is relative to the entity CollisionBody
+  // Position relative to the entity Position
+  offset: Position,
+  // QUESTION: is it needed?
+  // Global position
+  position: Position,
   rotation: Rotation,
 });
 
