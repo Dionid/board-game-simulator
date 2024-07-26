@@ -9,6 +9,11 @@
 1. Essence – contains Entities, Archetypes, Queries and indexes
 1. Internals – contains registered Schemas
 
+# Features
+
+1. Schema -> string, number, boolean, array, typed, union, literal
+1. ...
+
 # Decision
 
 1. BitSet 100%

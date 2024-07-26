@@ -1,31 +1,11 @@
 import { Graphics } from 'pixi.js';
-import { newQuery, registerQuery, KindToType, System, table, tryTable } from '../../tecs';
+import { newQuery, registerQuery, System, table, tryTable } from '../../tecs';
 import { Game } from '../game';
-import { View, Position2, Size2 } from '../core/components';
+import { View, Position2, Rectangle, Circle } from '../core/components';
 import { Map } from '../core';
 import { ColliderSet } from '../collision';
 
-const drawQuery = newQuery(View, Position2, Size2);
-
-// export const drawShapeLines = (
-//   globalGraphics: Graphics,
-//   shape: SchemaToType<typeof Shape>,
-//   position: SchemaToType<typeof Position2>,
-//   size: SchemaToType<typeof Size2>,
-//   color: string,
-//   strokeWidth = 2
-// ) => {
-//   switch (shape.name) {
-//     case 'rectangle':
-//       globalGraphics.rect(position.x, position.y, size.width, size.height);
-//       globalGraphics.stroke({ width: strokeWidth, color });
-//       break;
-//     case 'circle':
-//       globalGraphics.circle(position.x, position.y, size.width / 2);
-//       globalGraphics.stroke({ width: strokeWidth, color });
-//       break;
-//   }
-// };
+const drawQuery = newQuery(View, Position2);
 
 export const drawDebugLines = (
   game: Game,
@@ -56,14 +36,13 @@ export const drawDebugLines = (
     for (let i = 0; i < query.archetypes.length; i++) {
       const archetype = query.archetypes[i];
       const positionT = table(archetype, Position2);
-      const sizeT = table(archetype, Size2);
 
-      const collisionBodyT = tryTable(archetype, ColliderSet);
-      // const shapeT = tryTable(archetype, Shape);
+      const colliderSetT = tryTable(archetype, ColliderSet);
+      const rectangleT = tryTable(archetype, Rectangle);
+      const circleT = tryTable(archetype, Circle);
 
       for (let j = 0; j < archetype.entities.length; j++) {
         const position = positionT[j];
-        const size = sizeT[j];
 
         // # X Y position (anchor)
         if (options.xy) {
@@ -72,36 +51,46 @@ export const drawDebugLines = (
         }
 
         if (options.collision) {
-          // if (collisionBodyT) {
-          //   const collisionBody = collisionBodyT[j];
-          //   for (const part of collisionBody.list) {
-          //     drawShapeLines(
-          //       globalGraphics,
-          //       part.shape,
-          //       {
-          //         x: position.x + part.position.x,
-          //         y: position.y + part.position.y,
-          //       },
-          //       part.size,
-          //       'gray',
-          //       2
-          //     );
-          //   }
-          // }
+          if (colliderSetT) {
+            const colliderSet = colliderSetT[j];
+            for (const collider of colliderSet.list) {
+              switch (collider.shape.type) {
+                case 'rectangle':
+                  globalGraphics.rect(
+                    position.x,
+                    position.y,
+                    collider.shape.width,
+                    collider.shape.height
+                  );
+                  globalGraphics.stroke({ width: strokeWidth, color: 'gray' });
+                  break;
+                case 'circle':
+                  globalGraphics.circle(position.x, position.y, collider.shape.radius);
+                  globalGraphics.stroke({ width: strokeWidth, color: 'gray' });
+                  break;
+              }
+            }
+          }
         }
 
         if (options.graphics) {
-          if (false) {
-            // const shape = shapeT[j];
-            // drawShapeLines(globalGraphics, shape, position, size, 'purple');
-          } else {
+          if (rectangleT) {
+            const rectangle = rectangleT[j];
             globalGraphics.rect(
-              position.x - strokeWidth / 2,
-              position.y - strokeWidth / 2,
-              size.width + strokeWidth,
-              size.height + strokeWidth
+              position.x + rectangle.offset.x,
+              position.y + rectangle.offset.y,
+              rectangle.size.width,
+              rectangle.size.height
             );
-            globalGraphics.stroke({ width: 2, color: 'purple' });
+            globalGraphics.stroke({ width: strokeWidth, color: 'purple' });
+          } else if (circleT) {
+            const circle = circleT[j];
+            globalGraphics.circle(
+              position.x + circle.offset.x,
+              position.y + circle.offset.y,
+              circle.radius
+            );
+            globalGraphics.stroke({ width: strokeWidth, color: 'purple' });
           }
         }
       }

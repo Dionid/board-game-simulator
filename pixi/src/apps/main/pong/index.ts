@@ -4,12 +4,11 @@ import { registerSystem, setComponent, spawnEntity } from '../../../libs/tecs';
 import { mapKeyboardInput, mapMouseInput, drawViews } from '../../../libs/tengine/ecs';
 import {
   Position2,
-  Size2,
   View,
   Color,
   Velocity2,
   Speed,
-  GraphicsTag,
+  // GraphicsTag,
   Pivot2,
   Acceleration2,
   Rectangle,
@@ -34,7 +33,6 @@ import {
   applyAccelerationToVelocity,
   applyVelocityToPosition,
   Kinematic,
-  resolveCollision,
 } from '../../../libs/tengine/physics';
 
 export async function initPongGame(parentElement: HTMLElement) {
@@ -81,8 +79,6 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, playerEntity, Pivot2, { x: 0, y: 0 }); // ???
   // # Visuals
   setComponent(game.essence, playerEntity, View); // ???
-  setComponent(game.essence, playerEntity, GraphicsTag);
-  // ## Geometry
   setComponent(game.essence, playerEntity, Rectangle, {
     offset: { x: 0, y: 0 }, // ???
     size: { width: characterSize.width, height: characterSize.height },
@@ -113,14 +109,11 @@ export async function initPongGame(parentElement: HTMLElement) {
       },
     ],
   });
-  // # Physics
-  setComponent(game.essence, playerEntity, Kinematic);
 
   // # Enemy
   const enemyEntity = spawnEntity(game.essence);
   setComponent(game.essence, enemyEntity, GameObject);
   setComponent(game.essence, enemyEntity, Enemy);
-  setComponent(game.essence, enemyEntity, GraphicsTag);
   setComponent(game.essence, enemyEntity, View);
   setComponent(game.essence, enemyEntity, Rectangle, {
     offset: { x: 0, y: 0 },
@@ -163,7 +156,6 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, ballEntity, Ball);
   setComponent(game.essence, ballEntity, GameObject);
   setComponent(game.essence, ballEntity, View);
-  setComponent(game.essence, ballEntity, GraphicsTag);
   setComponent(game.essence, ballEntity, Circle, {
     offset: { x: 0, y: 0 },
     radius: 25,
@@ -179,7 +171,6 @@ export async function initPongGame(parentElement: HTMLElement) {
     y: game.world.size.height / 2 - 10,
   };
   setComponent(game.essence, ballEntity, Position2, ballPosition);
-  setComponent(game.essence, ballEntity, Size2, { width: 50, height: 0 });
   setComponent(game.essence, ballEntity, Color, { value: '0xfff' });
   setComponent(game.essence, ballEntity, Kinematic);
   setComponent(game.essence, ballEntity, ActiveCollisions);
@@ -202,7 +193,6 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, sBallEntity, Ball);
   setComponent(game.essence, sBallEntity, GameObject);
   setComponent(game.essence, sBallEntity, View);
-  setComponent(game.essence, sBallEntity, GraphicsTag);
   setComponent(game.essence, sBallEntity, Circle, {
     offset: { x: 0, y: 0 },
     radius: 25,
@@ -218,10 +208,8 @@ export async function initPongGame(parentElement: HTMLElement) {
     y: game.world.size.height / 2 - 10,
   };
   setComponent(game.essence, sBallEntity, Position2, sBallPosition);
-  setComponent(game.essence, sBallEntity, Size2, { width: 50, height: 0 });
   setComponent(game.essence, sBallEntity, Color, { value: '0xfff' });
   setComponent(game.essence, sBallEntity, Kinematic);
-  // setComponent(game.essence, sBallEntity, ActiveCollisions);
   setComponent(game.essence, sBallEntity, ColliderSet, {
     list: [
       {
@@ -237,23 +225,19 @@ export async function initPongGame(parentElement: HTMLElement) {
   });
 
   // # Systems
-  // # Collision
+  // ## Collision
   registerSystem(game.essence, applyAccelerationToVelocity(game));
   registerSystem(game.essence, applyVelocityToPosition(game));
   registerSystem(game.essence, applyPositionToCollider(game));
   registerSystem(game.essence, checkNarrowCollisionSimple(game));
-  registerSystem(game.essence, resolveCollision(game));
-  // registerSystem(game.essence, responseToCollision(game));
-  // # Physics
   // ...
   // ## Input
   registerSystem(game.essence, mapKeyboardInput(game));
   registerSystem(game.essence, mapMouseInput(game, map));
   // ## Movement
-  // registerSystem(game.essence, accelerateByArrows(game, playerEntity));
   registerSystem(game.essence, changeVelocityByArrows(game, ballEntity));
   registerSystem(game.essence, applyGOWorldBoundaries(game));
-  // # Render
+  // ## Render
   registerSystem(game.essence, drawViews(game, map));
   registerSystem(
     game.essence,

@@ -69,7 +69,9 @@ export const Polygon = newSchema({
 
 // # pixi specific
 
-export const GraphicsTag = newTag();
+// export const GraphicsTag = newTag();
+
+// # pixi.Graphics component
 
 // export const $graphics = Symbol('graphics');
 

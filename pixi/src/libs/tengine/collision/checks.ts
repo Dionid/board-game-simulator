@@ -2,7 +2,7 @@ import { KindToType } from '../../tecs';
 import { Position2, Size2 } from '../core';
 import { Collider } from './components';
 
-export const areCirclesColliding = (
+export const circlesCollisionDepth = (
   positionA: Position2,
   radiusA: number,
   positionB: Position2,
@@ -13,32 +13,8 @@ export const areCirclesColliding = (
   const distance = Math.sqrt(dx * dx + dy * dy);
   const minDistance = radiusA + radiusB;
 
-  // return distance < minDistance;
   return minDistance - distance;
 };
-
-// export const areCircleAndRectangleColliding = (
-//   circlePosition: Position,
-//   circleSize: Size,
-//   rectanglePosition: Position,
-//   rectangleSize: Size
-// ) => {
-//   const dx = Math.max(
-//     rectanglePosition.x - circlePosition.x,
-//     0,
-//     circlePosition.x - rectanglePosition.x - rectangleSize.width
-//   );
-//   const dy = Math.max(
-//     rectanglePosition.y - circlePosition.y,
-//     0,
-//     circlePosition.y - rectanglePosition.y - rectangleSize.height
-//   );
-//   const distance = Math.sqrt(dx * dx + dy * dy);
-//   const minDistance = circleSize.width / 2;
-
-//   // return distance < minDistance;
-//   return minDistance - distance;
-// };
 
 export function areCircleAndRectangleColliding(
   circlePosition: Position2,
@@ -61,31 +37,6 @@ export function areCircleAndRectangleColliding(
 
   return distance <= radius + rectangleSize.width / 2;
 }
-
-export const circleAndRectanglePenetrationDepth = (
-  circlePosition: Position2,
-  circleSize: Size2,
-  rectanglePosition: Position2,
-  rectangleSize: Size2
-) => {
-  const radius = circleSize.width / 2;
-
-  const dx = Math.abs(circlePosition.x - (rectanglePosition.x + rectangleSize.width / 2));
-  const dy = Math.abs(circlePosition.y - (rectanglePosition.y + rectangleSize.height / 2));
-
-  if (dx > rectangleSize.width / 2 + radius)
-    return Math.max(0, rectangleSize.height / 2 - radius - dy);
-  if (dy > rectangleSize.height / 2 + radius)
-    return Math.max(0, rectangleSize.width / 2 - radius - dx);
-
-  // debugger;
-
-  // if (dx <= rectangleSize.width / 2) return 0;
-  // if (dy <= rectangleSize.height / 2) return 0;
-
-  const distance = Math.sqrt(dx * dx + dy * dy);
-  return Math.max(0, radius + rectangleSize.width / 2 - distance);
-};
 
 // # Check if two rectangles are colliding using AABB algorithm
 export const areRectanglesColliding = (
@@ -111,7 +62,7 @@ export const compareColliders = (
   colliderB: KindToType<typeof Collider>
 ): number => {
   if (colliderA.shape.type === 'circle' && colliderB.shape.type === 'circle') {
-    return areCirclesColliding(
+    return circlesCollisionDepth(
       colliderA.position,
       colliderA.shape.radius,
       colliderB.position,
