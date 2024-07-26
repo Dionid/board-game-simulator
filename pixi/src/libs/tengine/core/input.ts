@@ -1,5 +1,10 @@
 import { Vector2 } from './types';
 
+export type KeyBoardInput = {
+  keyDown: Record<string, boolean>;
+  keyUp: string[];
+};
+
 export type MouseInput = {
   clientPosition: Vector2;
   scenePosition: Vector2;

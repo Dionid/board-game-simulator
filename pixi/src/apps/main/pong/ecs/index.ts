@@ -8,6 +8,7 @@ import {
   table,
   tryTable,
 } from '../../../../libs/tecs';
+import { KeyBoardInput } from '../../../../libs/tengine/core';
 import { Acceleration, Pivot, Position, Size, Speed, Velocity } from '../../../../libs/tengine/ecs';
 import { Game } from '../../../../libs/tengine/game';
 
@@ -19,21 +20,33 @@ export const Ball = newTag();
 
 export type Directions = 'up' | 'down' | 'left' | 'right';
 
-export const moveByArrows = (game: Game, playerEntity: Entity): System => {
+const getXDirection = (keyboard: KeyBoardInput): number => {
+  if (keyboard.keyDown['ArrowRight'] || keyboard.keyDown['d']) {
+    return -1;
+  }
+
+  if (keyboard.keyDown['ArrowLeft'] || keyboard.keyDown['a']) {
+    return 1;
+  }
+
+  return 0;
+};
+
+const getYDirection = (keyboard: KeyBoardInput): number => {
+  if (keyboard.keyDown['ArrowUp'] || keyboard.keyDown['w']) {
+    return 1;
+  }
+
+  if (keyboard.keyDown['ArrowDown'] || keyboard.keyDown['s']) {
+    return -1;
+  }
+
+  return 0;
+};
+
+export const accelerateByArrows = (game: Game, playerEntity: Entity): System => {
   const input = game.input;
   const keyboard = input.keyboard;
-
-  const getYDirection = (): number => {
-    if (keyboard.keyDown['ArrowUp'] || keyboard.keyDown['w']) {
-      return 1;
-    }
-
-    if (keyboard.keyDown['ArrowDown'] || keyboard.keyDown['s']) {
-      return -1;
-    }
-
-    return 0;
-  };
 
   return ({ deltaTime }) => {
     const playerArchetype = archetypeByEntity(game.essence, playerEntity);
@@ -66,9 +79,54 @@ export const moveByArrows = (game: Game, playerEntity: Entity): System => {
       return;
     }
 
-    const directionY = getYDirection();
+    const directionY = getYDirection(keyboard);
+    const directionX = getXDirection(keyboard);
 
     acceleration.y = -speed.value * directionY * deltaTime;
+    acceleration.x = -speed.value * directionX * deltaTime;
+  };
+};
+
+export const changeVelocityByArrows = (game: Game, charEntity: Entity): System => {
+  const input = game.input;
+  const keyboard = input.keyboard;
+
+  return ({ deltaTime }) => {
+    const charArchetype = archetypeByEntity(game.essence, charEntity);
+
+    if (!charArchetype) {
+      return;
+    }
+
+    const velocityT = tryTable(charArchetype, Velocity);
+
+    if (!velocityT) {
+      return;
+    }
+
+    const velocity = velocityT[0];
+
+    if (!velocity) {
+      return;
+    }
+
+    const speedT = tryTable(charArchetype, Speed);
+
+    if (!speedT) {
+      return;
+    }
+
+    const speed = speedT[0];
+
+    if (!speed) {
+      return;
+    }
+
+    const directionY = getYDirection(keyboard);
+    const directionX = getXDirection(keyboard);
+
+    velocity.y = -speed.value * directionY * deltaTime;
+    velocity.x = -speed.value * directionX * deltaTime;
   };
 };
 

@@ -1,3 +1,23 @@
+# Roadmap
+
+1. ~~Add collider~~
+1. SAT
+    1. SAT collision detection
+    1. Calc MTV
+    1. MTV Collision resolution
+1. Dedup collision pairs
+1. What is Constraints (matter.js)
+1. ...
+1. Preload assets
+1. Culling
+1. ...
+1. Top-down Tilemap
+1. ...
+1. Tweens
+1. ...
+1. ? Fixed update
+1. ? Convert scale from float to int
+
 # Features
 
 1. Game loop
@@ -55,21 +75,6 @@
         1. Sprite
         1. CollidersList
 
-# Roadmap
-
-1. ~~Add collider~~
-1. Move Size to Shape
-1. ...
-1. Preload assets
-1. Culling
-1. ...
-1. Top-down Tilemap
-1. ...
-1. Tweens
-1. ...
-1. ? Fixed update
-1. ? Convert scale from float to int
-
 # Caution
 
 1. It's better not to change Camera size directly, use zoom for this
@@ -97,6 +102,8 @@
     1. https://www.youtube.com/watch?v=eED4bSkYCB8
     1. https://brm.io/game-physics-for-beginners/
     1. https://www.toptal.com/game/video-game-physics-part-ii-collision-detection-for-solid-objects
+    1. SAT
+        1. https://github.com/xSnapi/SAT-Collision
 1. Physics
     1. https://www.youtube.com/watch?v=3lBYVSplAuo
     1. RigidBody

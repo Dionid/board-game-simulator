@@ -1,7 +1,7 @@
 import { Application, ApplicationOptions, Container } from 'pixi.js';
 import { Size } from '../core/types';
 import { Camera, newCamera, NewCameraProps } from '../core/camera';
-import { MouseInput, newMouseInput } from '../core/input';
+import { KeyBoardInput, MouseInput, newMouseInput } from '../core/input';
 import { Essence, newEssence, run as runEssence, step, stepWithTicker } from '../../tecs';
 
 export type GameCanvas = {
@@ -22,10 +22,7 @@ export type Game = {
   world: GameWorld;
   input: {
     mouse: MouseInput;
-    keyboard: {
-      keyDown: Record<string, boolean>;
-      keyUp: string[];
-    };
+    keyboard: KeyBoardInput;
   };
   camera: {
     main: Camera;

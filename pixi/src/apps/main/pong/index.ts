@@ -16,7 +16,15 @@ import {
   Pivot,
   Acceleration,
 } from '../../../libs/tengine/ecs';
-import { Ball, GameObject, Enemy, Player, moveByArrows, applyGOWorldBoundaries } from './ecs';
+import {
+  Ball,
+  GameObject,
+  Enemy,
+  Player,
+  accelerateByArrows,
+  applyGOWorldBoundaries,
+  changeVelocityByArrows,
+} from './ecs';
 import { drawDebugLines } from '../../../libs/tengine/ecs/debug';
 import {
   ActiveCollisions,
@@ -151,8 +159,9 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, ballEntity, pGraphicsTag);
   setComponent(game.essence, ballEntity, Shape, { name: 'circle' });
   setComponent(game.essence, ballEntity, Pivot, { x: 25, y: 25 }); // because pixi.circle has pivot in center
+  setComponent(game.essence, ballEntity, Speed, { value: 10 });
   setComponent(game.essence, ballEntity, Velocity, {
-    x: 10,
+    x: 0,
     y: 0,
   });
   const ballPosition = {
@@ -178,75 +187,40 @@ export async function initPongGame(parentElement: HTMLElement) {
     ],
   });
 
-  // // # Ball
-  // const sBallEntity = spawnEntity(game.essence);
-  // setComponent(game.essence, sBallEntity, Ball);
-  // setComponent(game.essence, sBallEntity, GameObject);
-  // setComponent(game.essence, sBallEntity, View);
-  // setComponent(game.essence, sBallEntity, pGraphicsTag);
-  // setComponent(game.essence, sBallEntity, Shape, { name: 'circle' });
-  // setComponent(game.essence, sBallEntity, Pivot, { x: 25, y: 25 }); // because pixi.circle has pivot in center
-  // setComponent(game.essence, sBallEntity, Velocity, {
-  //   x: 0,
-  //   y: 0,
-  // });
-  // const sBallPosition = {
-  //   x: game.world.size.width / 2 + 150,
-  //   y: game.world.size.height / 2 - 10,
-  // };
-  // setComponent(game.essence, sBallEntity, Position, sBallPosition);
-  // setComponent(game.essence, sBallEntity, Size, { width: 50, height: 0 });
-  // setComponent(game.essence, sBallEntity, Color, { value: '0xfff' });
-  // setComponent(game.essence, sBallEntity, Kinematic);
-  // // setComponent(game.essence, sBallEntity, ActiveCollisions);
-  // setComponent(game.essence, sBallEntity, ColliderSet, {
-  //   list: [
-  //     {
-  //       type: 'solid',
-  //       shape: { name: 'circle' },
-  //       position: { x: 0, y: 0 },
-  //       offset: { x: 0, y: 0 },
-  //       center: { x: 0, y: 0 },
-  //       size: { width: 50, height: 0 },
-  //       rotation: { value: 0 },
-  //     },
-  //   ],
-  // });
-
-  // // # Ball
-  // const tBallEntity = spawnEntity(game.essence);
-  // setComponent(game.essence, tBallEntity, Ball);
-  // setComponent(game.essence, tBallEntity, GameObject);
-  // setComponent(game.essence, tBallEntity, View);
-  // setComponent(game.essence, tBallEntity, pGraphicsTag);
-  // setComponent(game.essence, tBallEntity, Shape, { name: 'circle' });
-  // setComponent(game.essence, tBallEntity, Pivot, { x: 25, y: 25 }); // because pixi.circle has pivot in center
-  // setComponent(game.essence, tBallEntity, Velocity, {
-  //   x: 0,
-  //   y: 0,
-  // });
-  // const tBallPosition = {
-  //   x: game.world.size.width / 2 - 170,
-  //   y: game.world.size.height / 2 - 10,
-  // };
-  // setComponent(game.essence, tBallEntity, Position, tBallPosition);
-  // setComponent(game.essence, tBallEntity, Size, { width: 50, height: 0 });
-  // setComponent(game.essence, tBallEntity, Color, { value: '0xfff' });
-  // setComponent(game.essence, tBallEntity, Kinematic);
-  // // setComponent(game.essence, tBallEntity, ActiveCollisions);
-  // setComponent(game.essence, tBallEntity, ColliderSet, {
-  //   list: [
-  //     {
-  //       type: 'solid',
-  //       shape: { name: 'circle' },
-  //       position: { x: 0, y: 0 },
-  //       offset: { x: 0, y: 0 },
-  //       center: { x: 0, y: 0 },
-  //       size: { width: 50, height: 0 },
-  //       rotation: { value: 0 },
-  //     },
-  //   ],
-  // });
+  const ballSEntity = spawnEntity(game.essence);
+  setComponent(game.essence, ballSEntity, Ball);
+  setComponent(game.essence, ballSEntity, GameObject);
+  setComponent(game.essence, ballSEntity, View);
+  setComponent(game.essence, ballSEntity, pGraphicsTag);
+  setComponent(game.essence, ballSEntity, Shape, { name: 'circle' });
+  setComponent(game.essence, ballSEntity, Pivot, { x: 25, y: 25 }); // because pixi.circle has pivot in center
+  setComponent(game.essence, ballSEntity, Speed, { value: 10 });
+  setComponent(game.essence, ballSEntity, Velocity, {
+    x: 0,
+    y: 0,
+  });
+  const ballSPosition = {
+    x: game.world.size.width / 2 + 100,
+    y: game.world.size.height / 2 - 10,
+  };
+  setComponent(game.essence, ballSEntity, Position, ballSPosition);
+  setComponent(game.essence, ballSEntity, Size, { width: 50, height: 0 });
+  setComponent(game.essence, ballSEntity, Color, { value: '0xfff' });
+  setComponent(game.essence, ballSEntity, Kinematic);
+  setComponent(game.essence, ballSEntity, ActiveCollisions);
+  setComponent(game.essence, ballSEntity, ColliderSet, {
+    list: [
+      {
+        type: 'solid',
+        shape: { name: 'circle' },
+        position: { x: 0, y: 0 },
+        offset: { x: 0, y: 0 },
+        center: { x: 0, y: 0 },
+        size: { width: 50, height: 0 },
+        rotation: { value: 0 },
+      },
+    ],
+  });
 
   // # Systems
   // # Collision
@@ -261,8 +235,8 @@ export async function initPongGame(parentElement: HTMLElement) {
   registerSystem(game.essence, mapKeyboardInput(game));
   registerSystem(game.essence, mapMouseInput(game, map));
   // ## Movement
-  registerSystem(game.essence, moveByArrows(game, playerEntity));
-  // registerSystem(game.essence, addVelocityToPosition(game));
+  // registerSystem(game.essence, accelerateByArrows(game, playerEntity));
+  registerSystem(game.essence, changeVelocityByArrows(game, ballEntity));
   registerSystem(game.essence, applyGOWorldBoundaries(game));
   // # Render
   registerSystem(game.essence, renderGameObjects(game, map));
