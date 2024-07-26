@@ -217,3 +217,38 @@
                     1. ??? move previous body position without changing velocity
                     1. ??? Reset cached impulse if the body has velocity along it OR
                     warm the next iteration (by reducing it)
+
+
+# How Entity must compose
+
+1. Position
+1. Velocity
+1. Acceleration
+1. Scale
+1. Rotation
+1. View
+    1. Offset
+    1. Scale
+    1. Type
+        1. Sprite
+        1. Graphics
+            1. Shape
+1. Collider Set
+    1. Collider
+        1. Type
+        1. Offset
+        1. Shape
+    1. ...
+1. RigidBody
+    1. Type (Static, Kinematic, Dynamic)
+    1. Offset
+    1. Mass
+1. View
+    1. Offset
+    1. Type (Sprite / Graphics)
+    1. ??? Pivot
+
+## Problems
+
+1. What if I want to create cloud, that will be moving, using tweens, but I don't won't to 
+    apply physics to it

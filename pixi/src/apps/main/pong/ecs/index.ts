@@ -13,7 +13,7 @@ import { Pivot2, Position2 } from 'libs/tengine/physics/components';
 import { Game } from 'libs/tengine/game';
 import { Acceleration2, Speed, Velocity2 } from 'libs/tengine/physics';
 
-export const GameObject = newTag();
+// export const GameObject = newTag();
 
 export const Player = newTag();
 export const Enemy = newTag();
@@ -131,7 +131,7 @@ export const changeVelocityByArrows = (game: Game, charEntity: Entity): System =
   };
 };
 
-const characterVelocityQ = newQuery(GameObject, Position2, Pivot2);
+const characterVelocityQ = newQuery(Position2, Pivot2);
 
 export const applyGOWorldBoundaries = (game: Game): System => {
   const query = registerQuery(game.essence, characterVelocityQ);

@@ -1,24 +1,38 @@
-import { newSchema, newTag, number, string } from 'libs/tecs';
-import { Position2, Size2 } from '../physics/components';
+import { literal, newSchema, number, string, union } from 'libs/tecs';
+import { Size2, Vector2 } from '../core';
 
-export const View = newTag();
+// export const View = newTag();
 
 export const Rectangle = newSchema({
-  offset: Position2, // relative to the entity position
+  type: literal('rectangle'),
   size: Size2,
 });
 
 export const Circle = newSchema({
-  offset: Position2, // relative to the entity position
+  type: literal('circle'),
   radius: number,
 });
 
 export const Polygon = newSchema({
+  type: literal('polygon'),
   // ...
 });
 
-export const Color = newSchema({
-  value: string,
+export const Graphics = newSchema({
+  type: literal('graphics'),
+  shape: union(Rectangle, Circle, Polygon),
+  color: string,
+});
+
+export const Sprite = newSchema({
+  type: literal('sprite'),
+  texture: string,
+});
+
+export const View = newSchema({
+  offset: Vector2,
+  scale: Vector2,
+  model: union(Graphics, Sprite),
 });
 
 // # pixi specific

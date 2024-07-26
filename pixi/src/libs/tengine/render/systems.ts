@@ -1,10 +1,10 @@
-import { newQuery, registerQuery, System, table, tryTable } from 'libs/tecs';
+import { newQuery, registerQuery, System, table } from 'libs/tecs';
 import { Position2 } from '../physics/components';
-import { Rectangle, Circle, Color } from 'libs/tengine/render';
 import { Map } from 'libs/tengine/core';
 import { Game } from 'libs/tengine/game';
 import { Graphics } from 'pixi.js';
 import { View } from './components';
+import { safeGuard } from 'libs/tecs/switch';
 
 export const drawQuery = newQuery(View, Position2);
 
@@ -19,35 +19,42 @@ export const drawViews = (game: Game, map: Map): System => {
 
     for (const archetype of query.archetypes) {
       const positionT = table(archetype, Position2);
-
-      const rectangleT = tryTable(archetype, Rectangle);
-      const circleT = tryTable(archetype, Circle);
-      const colorT = tryTable(archetype, Color);
+      const viewT = table(archetype, View);
 
       for (let i = 0, l = archetype.entities.length; i < l; i++) {
         const position = positionT[i];
-        const rectangle = rectangleT && rectangleT[i];
-        const circle = circleT && circleT[i];
+        const view = viewT[i];
 
-        if (rectangle) {
-          globalGraphics.rect(
-            position.x + rectangle.offset.x,
-            position.y + rectangle.offset.y,
-            rectangle.size.width,
-            rectangle.size.height
-          );
-        }
+        switch (view.model.type) {
+          case 'graphics': {
+            switch (view.model.shape.type) {
+              case 'rectangle': {
+                globalGraphics.rect(
+                  position.x + view.offset.x,
+                  position.y + view.offset.y,
+                  view.model.shape.size.width,
+                  view.model.shape.size.height
+                );
+                break;
+              }
+              case 'circle': {
+                globalGraphics.circle(
+                  position.x + view.offset.x,
+                  position.y + view.offset.y,
+                  view.model.shape.radius
+                );
+                break;
+              }
+            }
 
-        if (circle) {
-          globalGraphics.circle(
-            position.x + circle.offset.x,
-            position.y + circle.offset.y,
-            circle.radius
-          );
-        }
-
-        if (colorT) {
-          globalGraphics.fill(colorT[i].value);
+            globalGraphics.fill(view.model.color);
+            break;
+          }
+          case 'sprite': {
+            break;
+          }
+          default:
+            safeGuard(view.model);
         }
       }
     }

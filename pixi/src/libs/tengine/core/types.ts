@@ -1,3 +1,4 @@
+import { newSchema, number } from 'libs/tecs';
 import { Container } from 'pixi.js';
 
 export type MinMax = {
@@ -9,6 +10,11 @@ export type Vector2 = {
   x: number;
   y: number;
 };
+
+export const Vector2 = newSchema({
+  x: number,
+  y: number,
+});
 
 export const multiplyVector2 = (v: Vector2, scalar: number): Vector2 => {
   return {
@@ -25,6 +31,11 @@ export type Size2 = {
   width: number;
   height: number;
 };
+
+export const Size2 = newSchema({
+  width: number,
+  height: number,
+});
 
 export type TablePosition = {
   row: number;

@@ -112,9 +112,9 @@ export const $literal = Symbol('literal');
 //   [$defaultFn]: () => V;
 // };
 
-export type literal = ReturnType<typeof newLiteral>;
+export type literal = ReturnType<typeof literal>;
 
-export const newLiteral = <V extends string | number | boolean>(
+export const literal = <V extends string | number | boolean>(
   value: V
 ): {
   [$kind]: typeof $literal;

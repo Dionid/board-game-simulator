@@ -1,23 +1,23 @@
-import { newSchema, arrayOf, Tag, union, newLiteral, number } from '../../tecs';
+import { newSchema, arrayOf, Tag, union, literal, number } from '../../tecs';
 import { Position2 } from '../physics/components';
 
 export const ActiveCollisions = Tag.new();
 
 export const ColliderRectangle = newSchema({
-  type: newLiteral('rectangle'),
+  type: literal('rectangle'),
   width: number,
   height: number,
 });
 
 export const ColliderCircle = newSchema({
-  type: newLiteral('circle'),
+  type: literal('circle'),
   radius: number,
 });
 
 export const ColliderShape = union(ColliderRectangle, ColliderCircle);
 
 export const Collider = newSchema({
-  type: union(newLiteral('solid'), newLiteral('sensor')),
+  type: union(literal('solid'), literal('sensor')),
   offset: Position2,
   position: Position2,
   shape: ColliderShape,
