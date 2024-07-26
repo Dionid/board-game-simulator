@@ -7,16 +7,11 @@ import {
   System,
   table,
   tryTable,
-} from '../../../../libs/tecs';
-import { KeyBoardInput } from '../../../../libs/tengine/core';
-import {
-  Acceleration2,
-  Pivot2,
-  Position2,
-  Speed,
-  Velocity2,
-} from '../../../../libs/tengine/core/components';
-import { Game } from '../../../../libs/tengine/game';
+} from 'libs/tecs';
+import { KeyBoardInput } from 'libs/tengine/core';
+import { Pivot2, Position2 } from 'libs/tengine/core/components';
+import { Game } from 'libs/tengine/game';
+import { Acceleration2, Speed, Velocity2 } from 'libs/tengine/physics';
 
 export const GameObject = newTag();
 

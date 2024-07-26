@@ -26,20 +26,6 @@ export const LockRotation2 = newSchema({
   y: boolean,
 });
 
-export const Velocity2 = newSchema({
-  x: number,
-  y: number,
-});
-
-export const Acceleration2 = newSchema({
-  x: number,
-  y: number,
-});
-
-export const Speed = newSchema({
-  value: number,
-});
-
 export const Size2 = newSchema({
   width: number,
   height: number,
@@ -50,8 +36,6 @@ export const Color = newSchema({
 });
 
 // # Shapes
-
-// export const Shape = Tag.new();
 
 export const Rectangle = newSchema({
   offset: Position2, // relative to the entity position
@@ -69,9 +53,7 @@ export const Polygon = newSchema({
 
 // # pixi specific
 
-// export const GraphicsTag = newTag();
-
-// # pixi.Graphics component
+// ## pixi.Graphics component
 
 // export const $graphics = Symbol('graphics');
 

@@ -6,11 +6,7 @@ import {
   Position2,
   View,
   Color,
-  Velocity2,
-  Speed,
-  // GraphicsTag,
   Pivot2,
-  Acceleration2,
   Rectangle,
   Circle,
 } from '../../../libs/tengine/core/components';
@@ -22,18 +18,21 @@ import {
   applyGOWorldBoundaries,
   changeVelocityByArrows,
 } from './ecs';
-import { drawDebugLines } from '../../../libs/tengine/ecs/debug';
+import { drawDebugLines } from 'libs/tengine/ecs/debug';
 import {
   ActiveCollisions,
   applyPositionToCollider,
   checkNarrowCollisionSimple,
   ColliderSet,
-} from '../../../libs/tengine/collision';
+} from 'libs/tengine/collision';
 import {
   applyAccelerationToVelocity,
   applyVelocityToPosition,
   Kinematic,
-} from '../../../libs/tengine/physics';
+  Velocity2,
+  Speed,
+  Acceleration2,
+} from 'libs/tengine/physics';
 
 export async function initPongGame(parentElement: HTMLElement) {
   const game = newGame({
@@ -54,8 +53,6 @@ export async function initPongGame(parentElement: HTMLElement) {
   };
 
   game.world.container.addChild(map.container);
-
-  // create an engine
 
   // # Initial Game Objects
   const characterSize = {
@@ -172,7 +169,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   };
   setComponent(game.essence, ballEntity, Position2, ballPosition);
   setComponent(game.essence, ballEntity, Color, { value: '0xfff' });
-  setComponent(game.essence, ballEntity, Kinematic);
+  // # Collisions
   setComponent(game.essence, ballEntity, ActiveCollisions);
   setComponent(game.essence, ballEntity, ColliderSet, {
     list: [
@@ -209,7 +206,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   };
   setComponent(game.essence, sBallEntity, Position2, sBallPosition);
   setComponent(game.essence, sBallEntity, Color, { value: '0xfff' });
-  setComponent(game.essence, sBallEntity, Kinematic);
+  // # Collisions
   setComponent(game.essence, sBallEntity, ColliderSet, {
     list: [
       {
@@ -225,10 +222,11 @@ export async function initPongGame(parentElement: HTMLElement) {
   });
 
   // # Systems
-  // ## Collision
+  // ## Basic physics
   registerSystem(game.essence, applyAccelerationToVelocity(game));
   registerSystem(game.essence, applyVelocityToPosition(game));
   registerSystem(game.essence, applyPositionToCollider(game));
+  // ## Collision
   registerSystem(game.essence, checkNarrowCollisionSimple(game));
   // ...
   // ## Input

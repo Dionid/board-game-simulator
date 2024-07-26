@@ -7,9 +7,9 @@ import {
   table,
 } from '../../tecs';
 import { Game } from '../game';
-import { Acceleration2, Position2, Velocity2 } from '../core/components';
+import { Position2 } from '../core/components';
 import { colliding } from '../collision';
-import { Dynamic, Kinematic, Static } from './components';
+import { Dynamic, Kinematic, Static, Acceleration2, Velocity2 } from './components';
 
 export const accelerationVelocityQuery = newQuery(Acceleration2, Velocity2);
 
