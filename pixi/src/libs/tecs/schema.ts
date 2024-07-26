@@ -1,5 +1,5 @@
 // # Types
-import { $defaultFn, Id, $kind } from './core';
+import { $defaultFn, $kind, Id } from './core';
 import { safeGuard } from './switch';
 
 export type KindSt = {
@@ -118,7 +118,7 @@ export const $array = Symbol('array');
 export const $union = Symbol('union');
 
 // ## Array
-export function arrayOf<K extends KindSt | DataSchema>(field: K) {
+export function arrayOf<K extends KindSt | Schema>(field: K) {
   return {
     field,
     [$kind]: $array,
@@ -178,37 +178,17 @@ export function isKind(value: unknown): value is Kind {
 
 // # Schema
 
-export type SchemaSt = {
-  [$kind]: symbol;
-};
-
-// ## Data Schema
-
 export const $aos = Symbol('aos');
 export const $soa = Symbol('soa');
-
-export type DataSchemaKind = typeof $aos | typeof $soa;
-
-export type DataSchema = {
-  [key: string]: KindSt | DataSchema;
-  [$kind]: DataSchemaKind;
-  [$defaultFn]: () => unknown;
-};
-
-// # Tag Schema
 export const $tag = Symbol('tag');
 
-export type TagSchemaKind = typeof $tag;
+export type SchemaKind = typeof $aos | typeof $soa | typeof $tag;
 
-export type TagSchema = {
-  [$kind]: TagSchemaKind;
+export type Schema = {
+  [key: string]: KindSt | Schema;
+  [$kind]: SchemaKind;
   [$defaultFn]: () => unknown;
 };
-
-// # Schema
-
-export type SchemaKind = DataSchemaKind | TagSchemaKind;
-export type Schema = DataSchema | TagSchema;
 
 export type SchemaId = Id;
 
@@ -253,25 +233,22 @@ export function isSchema(value: unknown): value is Schema {
   );
 }
 
-export function schemaDefault<S extends Omit<Schema, typeof $defaultFn>>(
+export function defaultFromSchema<S extends Omit<Schema, typeof $defaultFn>>(
   schema: S
 ): SchemaToType<S> {
   switch (schema[$kind]) {
     case $aos:
-      const component = {} as SchemaToType<DataSchema>;
+      const component = {} as SchemaToType<S>;
       for (const key in schema) {
         const field = schema[key];
 
-        if (isKind(field)) {
-          component[key] = field[$defaultFn]() as any;
-          continue;
-        } else if (isSchema(field)) {
-          component[key] = Schema.default(field) as any;
+        if (isKind(field) || isSchema(field)) {
+          component[key as keyof SchemaToType<S>] = field[$defaultFn]() as any;
         } else {
           throw new Error('Invalid schema');
         }
       }
-      return component as SchemaToType<S>;
+      return component;
     case $tag:
       return {} as SchemaToType<S>;
     case $soa:
@@ -281,22 +258,22 @@ export function schemaDefault<S extends Omit<Schema, typeof $defaultFn>>(
   }
 }
 
-export function newSchema<S extends Omit<DataSchema, typeof $kind | typeof $defaultFn>>(
+export function newSchema<S extends Omit<Schema, typeof $kind | typeof $defaultFn>>(
   schema: S,
-  kind?: DataSchemaKind,
+  kind?: SchemaKind,
   defaultFn?: () => SchemaToType<S>
-): S & { [$kind]: DataSchemaKind; [$defaultFn]: () => SchemaToType<S> } {
-  const newSchema: S & { [$kind]: DataSchemaKind } = {
+): S & { [$kind]: SchemaKind; [$defaultFn]: () => SchemaToType<S> } {
+  const newSchema: S & { [$kind]: SchemaKind } = {
     ...schema,
     [$kind]: kind ?? $aos,
   };
 
-  const newDefaultFn = defaultFn ?? (() => schemaDefault(newSchema));
+  const newDefaultFn = defaultFn ?? (() => defaultFromSchema(newSchema));
 
   return {
     ...newSchema,
     [$defaultFn]: newDefaultFn,
-  } as S & { [$kind]: DataSchemaKind; [$defaultFn]: () => SchemaToType<S> };
+  } as S & { [$kind]: SchemaKind; [$defaultFn]: () => SchemaToType<S> };
 }
 
 export const Schema = {
@@ -314,7 +291,9 @@ export const Schema = {
   },
 };
 
-export const newTag = (): TagSchema => {
+// # Tag
+
+export const newTag = (): Schema & { [$kind]: typeof $tag } => {
   return {
     [$kind]: $tag,
     [$defaultFn]: () => {},

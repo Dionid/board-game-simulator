@@ -10,7 +10,6 @@ import {
   Velocity2,
   Speed,
   GraphicsTag,
-  Shape,
   Pivot2,
   Acceleration2,
   Rectangle,
@@ -83,7 +82,6 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, playerEntity, View); // ???
   setComponent(game.essence, playerEntity, GraphicsTag);
   // ## Geometry
-  setComponent(game.essence, playerEntity, Shape);
   setComponent(game.essence, playerEntity, Rectangle, {
     offset: { x: 0, y: 0 }, // ???
     size: { width: characterSize.width, height: characterSize.height },
@@ -118,7 +116,6 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, enemyEntity, Enemy);
   setComponent(game.essence, enemyEntity, GraphicsTag);
   setComponent(game.essence, enemyEntity, View);
-  // setComponent(game.essence, enemyEntity, Shape);
   setComponent(game.essence, enemyEntity, Rectangle, {
     offset: { x: 0, y: 0 },
     size: { width: characterSize.width, height: characterSize.height },
@@ -156,7 +153,6 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, ballEntity, GameObject);
   setComponent(game.essence, ballEntity, View);
   setComponent(game.essence, ballEntity, GraphicsTag);
-  setComponent(game.essence, ballEntity, Shape);
   setComponent(game.essence, ballEntity, Circle, {
     offset: { x: 0, y: 0 },
     radius: 25,

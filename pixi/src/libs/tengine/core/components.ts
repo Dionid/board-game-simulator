@@ -51,7 +51,7 @@ export const Color = newSchema({
 
 // # Shapes
 
-export const Shape = Tag.new();
+// export const Shape = Tag.new();
 
 export const Rectangle = newSchema({
   offset: Position2, // relative to the entity position

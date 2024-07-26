@@ -1,7 +1,7 @@
 import { Graphics } from 'pixi.js';
 import { newQuery, registerQuery, SchemaToType, System, table, tryTable } from '../../tecs';
 import { Game } from '../game';
-import { View, Position2, Size2, Shape } from '../core/components';
+import { View, Position2, Size2 } from '../core/components';
 import { Map } from '../core';
 import { ColliderSet } from '../collision';
 
@@ -59,7 +59,7 @@ export const drawDebugLines = (
       const sizeT = table(archetype, Size2);
 
       const collisionBodyT = tryTable(archetype, ColliderSet);
-      const shapeT = tryTable(archetype, Shape);
+      // const shapeT = tryTable(archetype, Shape);
 
       for (let j = 0; j < archetype.entities.length; j++) {
         const position = positionT[j];
@@ -91,7 +91,7 @@ export const drawDebugLines = (
         }
 
         if (options.graphics) {
-          if (shapeT) {
+          if (false) {
             // const shape = shapeT[j];
             // drawShapeLines(globalGraphics, shape, position, size, 'purple');
           } else {
