@@ -104,6 +104,11 @@ export async function initPongGame(parentElement: HTMLElement) {
         type: 'solid',
         offset: { x: 0, y: 0 },
         // size: { width: characterSize.width, height: characterSize.height },
+        shape: {
+          type: 'rectangle',
+          width: characterSize.width,
+          height: characterSize.height,
+        },
       },
     ],
   });
@@ -143,6 +148,11 @@ export async function initPongGame(parentElement: HTMLElement) {
         type: 'solid',
         offset: { x: 0, y: 0 },
         // size: { width: characterSize.width, height: characterSize.height },
+        shape: {
+          type: 'rectangle',
+          width: characterSize.width,
+          height: characterSize.height,
+        },
       },
     ],
   });
@@ -177,6 +187,10 @@ export async function initPongGame(parentElement: HTMLElement) {
       {
         type: 'solid',
         offset: { x: 0, y: 0 },
+        shape: {
+          type: 'circle',
+          radius: 25,
+        },
       },
     ],
   });

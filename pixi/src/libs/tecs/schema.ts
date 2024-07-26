@@ -199,6 +199,12 @@ export function arrayOf<K extends KindSt | Schema>(field: K) {
 
 // ## Union
 
+export type union<V extends (PrimitiveKind | Schema)[]> = {
+  variants: V;
+  [$kind]: typeof $union;
+  [$defaultFn]: () => V[number];
+};
+
 export function union<V extends (PrimitiveKind | Schema)[]>(
   ...variants: V
 ): {
@@ -214,7 +220,7 @@ export function union<V extends (PrimitiveKind | Schema)[]>(
 }
 
 export type ArrayKind = ReturnType<typeof arrayOf>;
-export type UnionKind = ReturnType<typeof union>;
+export type UnionKind = union<any>;
 
 export type ComplexKind = ArrayKind | UnionKind;
 
