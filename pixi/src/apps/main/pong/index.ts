@@ -116,10 +116,10 @@ export async function initPongGame(parentElement: HTMLElement) {
   const enemyEntity = spawnEntity(game.essence);
   setComponent(game.essence, enemyEntity, GameObject);
   setComponent(game.essence, enemyEntity, Enemy);
-  setComponent(game.essence, enemyEntity, View);
   setComponent(game.essence, enemyEntity, GraphicsTag);
-  setComponent(game.essence, enemyEntity, Shape);
-  setComponent(game.essence, playerEntity, Rectangle, {
+  setComponent(game.essence, enemyEntity, View);
+  // setComponent(game.essence, enemyEntity, Shape);
+  setComponent(game.essence, enemyEntity, Rectangle, {
     offset: { x: 0, y: 0 },
     size: { width: characterSize.width, height: characterSize.height },
   });
@@ -138,10 +138,6 @@ export async function initPongGame(parentElement: HTMLElement) {
     y: game.world.size.height / 2 - characterSize.height / 2,
   };
   setComponent(game.essence, enemyEntity, Position2, enemyPosition);
-  setComponent(game.essence, enemyEntity, Size2, {
-    width: characterSize.width,
-    height: characterSize.height,
-  });
   setComponent(game.essence, enemyEntity, Color, { value: '0xff0000' });
   setComponent(game.essence, enemyEntity, Kinematic);
   setComponent(game.essence, enemyEntity, ColliderSet, {
