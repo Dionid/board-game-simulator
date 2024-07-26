@@ -1,6 +1,7 @@
 # Roadmap
 
 1. ~~Add collider~~
+1. ? Add RigidBody (because velocity and acceleration must be part of RigidBody)
 1. SAT
     1. SAT collision detection
     1. Calc MTV

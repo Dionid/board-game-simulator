@@ -10,13 +10,16 @@ export type Vector2 = {
   y: number;
 };
 
-export type Acceleration2 = Vector2;
+export const multiplyVector2 = (v: Vector2, scalar: number): Vector2 => {
+  return {
+    x: v.x * scalar,
+    y: v.y * scalar,
+  };
+};
 
 export type Velocity2 = Vector2;
 
 export type Position2 = Vector2;
-
-export type Axis2 = Vector2;
 
 export type Size2 = {
   width: number;
@@ -26,16 +29,6 @@ export type Size2 = {
 export type TablePosition = {
   row: number;
   col: number;
-};
-
-export type Rectangle2 = {
-  position: Position2;
-  size: Size2;
-};
-
-export type Circle2 = {
-  position: Position2;
-  radius: number;
 };
 
 export type Map = {
