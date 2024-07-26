@@ -9,7 +9,14 @@ import {
   tryTable,
 } from '../../../../libs/tecs';
 import { KeyBoardInput } from '../../../../libs/tengine/core';
-import { Acceleration, Pivot, Position, Size, Speed, Velocity } from '../../../../libs/tengine/ecs';
+import {
+  Acceleration2,
+  Pivot2,
+  Position2,
+  Size2,
+  Speed,
+  Velocity2,
+} from '../../../../libs/tengine/core/components';
 import { Game } from '../../../../libs/tengine/game';
 
 export const GameObject = newTag();
@@ -55,7 +62,7 @@ export const accelerateByArrows = (game: Game, playerEntity: Entity): System => 
       return;
     }
 
-    const accelerationT = tryTable(playerArchetype, Acceleration);
+    const accelerationT = tryTable(playerArchetype, Acceleration2);
 
     if (!accelerationT) {
       return;
@@ -98,7 +105,7 @@ export const changeVelocityByArrows = (game: Game, charEntity: Entity): System =
       return;
     }
 
-    const velocityT = tryTable(charArchetype, Velocity);
+    const velocityT = tryTable(charArchetype, Velocity2);
 
     if (!velocityT) {
       return;
@@ -130,7 +137,7 @@ export const changeVelocityByArrows = (game: Game, charEntity: Entity): System =
   };
 };
 
-const characterVelocityQ = newQuery(GameObject, Position, Size, Pivot);
+const characterVelocityQ = newQuery(GameObject, Position2, Size2, Pivot2);
 
 export const applyGOWorldBoundaries = (game: Game): System => {
   const query = registerQuery(game.essence, characterVelocityQ);
@@ -138,9 +145,9 @@ export const applyGOWorldBoundaries = (game: Game): System => {
   return ({ deltaTime }) => {
     for (let i = 0; i < query.archetypes.length; i++) {
       const archetype = query.archetypes[i];
-      const positionT = table(archetype, Position);
-      const sizeT = table(archetype, Size);
-      const pivotT = table(archetype, Pivot);
+      const positionT = table(archetype, Position2);
+      const sizeT = table(archetype, Size2);
+      const pivotT = table(archetype, Pivot2);
 
       for (let j = 0; j < archetype.entities.length; j++) {
         const position = positionT[j];

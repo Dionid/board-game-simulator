@@ -1,4 +1,4 @@
-import { Entity, SchemaType, newTopic } from '../../tecs';
+import { Entity, KindToType, newTopic } from '../../tecs';
 import { Vector2 } from '../core';
 import { Collider, ColliderSet } from './components';
 
@@ -6,13 +6,13 @@ export type CollisionStartedEvent = {
   name: 'collisionStarted';
   a: {
     entity: Entity;
-    colliderSet: SchemaType<typeof ColliderSet>;
-    collider: SchemaType<typeof Collider>;
+    colliderSet: KindToType<typeof ColliderSet>;
+    collider: KindToType<typeof Collider>;
   };
   b: {
     entity: Entity;
-    colliderSet: SchemaType<typeof ColliderSet>;
-    collider: SchemaType<typeof Collider>;
+    colliderSet: KindToType<typeof ColliderSet>;
+    collider: KindToType<typeof Collider>;
   };
 };
 
@@ -21,13 +21,13 @@ export type CollidingEvent = {
   depth: number;
   a: {
     entity: Entity;
-    colliderSet: SchemaType<typeof ColliderSet>;
-    collider: SchemaType<typeof Collider>;
+    colliderSet: KindToType<typeof ColliderSet>;
+    collider: KindToType<typeof Collider>;
   };
   b: {
     entity: Entity;
-    colliderSet: SchemaType<typeof ColliderSet>;
-    collider: SchemaType<typeof Collider>;
+    colliderSet: KindToType<typeof ColliderSet>;
+    collider: KindToType<typeof Collider>;
   };
 };
 

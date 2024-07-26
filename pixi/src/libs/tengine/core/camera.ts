@@ -1,4 +1,4 @@
-import { MinMax, Size, Vector2 } from './types';
+import { MinMax, Size2, Vector2 } from './types';
 
 export type CameraScale = Vector2;
 
@@ -8,11 +8,11 @@ export type CameraZoom = MinMax & {
 
 export type Camera = {
   position: Vector2;
-  size: Size;
+  size: Size2;
   scale: CameraScale;
   scaled: {
     position: Vector2;
-    size: Size;
+    size: Size2;
   };
   zoom: CameraZoom;
   target: {
@@ -23,7 +23,7 @@ export type Camera = {
 
 export type NewCameraProps = {
   position?: Vector2;
-  size?: Partial<Size>;
+  size?: Partial<Size2>;
   scale?: Partial<CameraScale>;
   zoom?: Partial<CameraZoom>;
 };

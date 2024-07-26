@@ -1,4 +1,4 @@
-import { Position, Size, Vector2, Velocity } from '../core';
+import { Position2, Size2, Vector2, Velocity2 } from '../core';
 
 // export function resolveCircleCircleOverlap(
 //   a: Circle,
@@ -108,12 +108,12 @@ import { Position, Size, Vector2, Velocity } from '../core';
 // }
 
 export function resolveCircleCircleOverlap(
-  circle1Position: Position,
+  circle1Position: Position2,
   circle1Radius: number,
-  circle1Velocity: Velocity,
-  circle2Position: Position,
+  circle1Velocity: Velocity2,
+  circle2Position: Position2,
   circle2Radius: number,
-  circle2Velocity: Velocity
+  circle2Velocity: Velocity2
 ): void {
   const dx = circle2Position.x - circle1Position.x;
   const dy = circle2Position.y - circle1Position.y;
@@ -139,13 +139,13 @@ export function resolveCircleCircleOverlap(
 }
 
 function resolveCircleRectangleOverlap(
-  circlePosition: Position,
+  circlePosition: Position2,
   circleRadius: number,
-  circleVelocity: Velocity,
+  circleVelocity: Velocity2,
 
-  rectanglePosition: Position,
-  rectangleSize: Size,
-  rectangleVelocity: Velocity
+  rectanglePosition: Position2,
+  rectangleSize: Size2,
+  rectangleVelocity: Velocity2
 ): void {
   const closestX = Math.max(
     rectanglePosition.x,
@@ -243,12 +243,12 @@ function resolveCircleRectangleOverlap(
 function resolveCircleRectangleCollision(
   penetrationDepth: number,
 
-  circlePosition: Position,
-  circleVelocity: Velocity,
+  circlePosition: Position2,
+  circleVelocity: Velocity2,
 
-  rectanglePosition: Position,
-  rectangleSize: Size,
-  rectangleVelocity: Velocity
+  rectanglePosition: Position2,
+  rectangleSize: Size2,
+  rectangleVelocity: Velocity2
 ): void {
   if (penetrationDepth === 0) {
     return;
@@ -278,14 +278,14 @@ export const resolveKinematicAndStaticOverlap = (
   depth: number,
 
   aShape: string,
-  aPosition: Position,
-  aSize: Size,
-  aVelocity: Velocity,
+  aPosition: Position2,
+  aSize: Size2,
+  aVelocity: Velocity2,
 
   bShape: string,
-  bPosition: Position,
-  bSize: Size,
-  bVelocity: Velocity
+  bPosition: Position2,
+  bSize: Size2,
+  bVelocity: Velocity2
 ) => {
   if (aShape === 'circle' && bShape === 'rectangle') {
     return resolveCircleRectangleCollision(

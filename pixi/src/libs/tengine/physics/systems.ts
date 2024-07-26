@@ -8,12 +8,12 @@ import {
   tryTable,
 } from '../../tecs';
 import { Game } from '../game';
-import { Acceleration, Position, Size, Velocity } from '../ecs';
+import { Acceleration2, Position2, Size2, Velocity2 } from '../core/components';
 import { ColliderSet, colliding } from '../collision';
 import { Dynamic, Kinematic, Static } from './components';
 import { resolveKinematicAndStaticOverlap } from './resolve';
 
-export const accelerationVelocityQuery = newQuery(Acceleration, Velocity);
+export const accelerationVelocityQuery = newQuery(Acceleration2, Velocity2);
 
 export const applyAccelerationToVelocity = (game: Game): System => {
   const query = registerQuery(game.essence, accelerationVelocityQuery);
@@ -21,8 +21,8 @@ export const applyAccelerationToVelocity = (game: Game): System => {
   return ({ deltaTime }) => {
     for (let i = 0; i < query.archetypes.length; i++) {
       const archetype = query.archetypes[i];
-      const accelerationT = table(archetype, Acceleration);
-      const velocityT = table(archetype, Velocity);
+      const accelerationT = table(archetype, Acceleration2);
+      const velocityT = table(archetype, Velocity2);
 
       for (let i = 0; i < archetype.entities.length; i++) {
         const acceleration = accelerationT[i];
@@ -73,11 +73,11 @@ export const resolveCollision = (game: Game): System => {
       //   true
       // );
 
-      const aPosition = componentByEntity(game.essence, a.entity, Position);
-      const aSize = componentByEntity(game.essence, a.entity, Size);
+      const aPosition = componentByEntity(game.essence, a.entity, Position2);
+      const aSize = componentByEntity(game.essence, a.entity, Size2);
 
-      const bPosition = componentByEntity(game.essence, b.entity, Position);
-      const bSize = componentByEntity(game.essence, b.entity, Size);
+      const bPosition = componentByEntity(game.essence, b.entity, Position2);
+      const bSize = componentByEntity(game.essence, b.entity, Size2);
 
       if (!aPosition || !bPosition || !aSize || !bSize) {
         continue;
@@ -128,34 +128,6 @@ export const resolveCollision = (game: Game): System => {
         (aKinematic && bStatic) ||
         (aStatic && bKinematic)
       ) {
-        const aVelocity = componentByEntity(game.essence, a.entity, Velocity) || {
-          x: 0,
-          y: 0,
-        };
-        const bVelocity = componentByEntity(game.essence, b.entity, Velocity) || {
-          x: 0,
-          y: 0,
-        };
-
-        // resolveKinematicAndStaticOverlap(
-        //   event.depth,
-
-        //   a.collider.shape.name,
-        //   a.collider.position,
-        //   b.collider.size,
-        //   aVelocity,
-
-        //   b.collider.shape.name,
-        //   b.collider.position,
-        //   b.collider.size,
-        //   bVelocity
-        // );
-
-        // # MOVE AWAY
-        aVelocity.x *= -1;
-        aVelocity.y *= -1;
-        bVelocity.x *= -1;
-        bVelocity.y *= -1;
         continue;
       }
 
@@ -167,7 +139,7 @@ export const resolveCollision = (game: Game): System => {
 
 // # Position
 
-export const velocityPositionQuery = newQuery(Velocity, Position);
+export const velocityPositionQuery = newQuery(Velocity2, Position2);
 
 export const applyVelocityToPosition = (game: Game): System => {
   const query = registerQuery(game.essence, velocityPositionQuery);
@@ -175,10 +147,8 @@ export const applyVelocityToPosition = (game: Game): System => {
   return ({ deltaTime }) => {
     for (let i = 0; i < query.archetypes.length; i++) {
       const archetype = query.archetypes[i];
-      const positionT = table(archetype, Position);
-      const velocityT = table(archetype, Velocity);
-
-      const colliderSetT = tryTable(archetype, ColliderSet);
+      const positionT = table(archetype, Position2);
+      const velocityT = table(archetype, Velocity2);
 
       for (let j = 0; j < archetype.entities.length; j++) {
         const position = positionT[j];
@@ -189,21 +159,6 @@ export const applyVelocityToPosition = (game: Game): System => {
 
         position.x = newXPosition;
         position.y = newYPosition;
-
-        if (!colliderSetT) {
-          continue;
-        }
-
-        const colliderSet = colliderSetT[j];
-
-        if (!colliderSet) {
-          continue;
-        }
-
-        for (const collider of colliderSet.list) {
-          collider.position.x = newXPosition + collider.offset.x;
-          collider.position.y = newYPosition + collider.offset.y;
-        }
       }
     }
   };

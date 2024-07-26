@@ -1,31 +1,31 @@
 import { Graphics } from 'pixi.js';
-import { newQuery, registerQuery, SchemaType, System, table, tryTable } from '../../tecs';
+import { newQuery, registerQuery, KindToType, System, table, tryTable } from '../../tecs';
 import { Game } from '../game';
-import { View, Position, Size, Shape } from './components';
+import { View, Position2, Size2 } from '../core/components';
 import { Map } from '../core';
 import { ColliderSet } from '../collision';
 
-const drawQuery = newQuery(View, Position, Size);
+const drawQuery = newQuery(View, Position2, Size2);
 
-export const drawShapeLines = (
-  globalGraphics: Graphics,
-  shape: SchemaType<typeof Shape>,
-  position: SchemaType<typeof Position>,
-  size: SchemaType<typeof Size>,
-  color: string,
-  strokeWidth = 2
-) => {
-  switch (shape.name) {
-    case 'rectangle':
-      globalGraphics.rect(position.x, position.y, size.width, size.height);
-      globalGraphics.stroke({ width: strokeWidth, color });
-      break;
-    case 'circle':
-      globalGraphics.circle(position.x, position.y, size.width / 2);
-      globalGraphics.stroke({ width: strokeWidth, color });
-      break;
-  }
-};
+// export const drawShapeLines = (
+//   globalGraphics: Graphics,
+//   shape: SchemaToType<typeof Shape>,
+//   position: SchemaToType<typeof Position2>,
+//   size: SchemaToType<typeof Size2>,
+//   color: string,
+//   strokeWidth = 2
+// ) => {
+//   switch (shape.name) {
+//     case 'rectangle':
+//       globalGraphics.rect(position.x, position.y, size.width, size.height);
+//       globalGraphics.stroke({ width: strokeWidth, color });
+//       break;
+//     case 'circle':
+//       globalGraphics.circle(position.x, position.y, size.width / 2);
+//       globalGraphics.stroke({ width: strokeWidth, color });
+//       break;
+//   }
+// };
 
 export const drawDebugLines = (
   game: Game,
@@ -55,11 +55,11 @@ export const drawDebugLines = (
 
     for (let i = 0; i < query.archetypes.length; i++) {
       const archetype = query.archetypes[i];
-      const positionT = table(archetype, Position);
-      const sizeT = table(archetype, Size);
+      const positionT = table(archetype, Position2);
+      const sizeT = table(archetype, Size2);
 
       const collisionBodyT = tryTable(archetype, ColliderSet);
-      const shapeT = tryTable(archetype, Shape);
+      // const shapeT = tryTable(archetype, Shape);
 
       for (let j = 0; j < archetype.entities.length; j++) {
         const position = positionT[j];
@@ -72,29 +72,28 @@ export const drawDebugLines = (
         }
 
         if (options.collision) {
-          if (collisionBodyT) {
-            const collisionBody = collisionBodyT[j];
-
-            for (const part of collisionBody.list) {
-              drawShapeLines(
-                globalGraphics,
-                part.shape,
-                {
-                  x: position.x + part.position.x,
-                  y: position.y + part.position.y,
-                },
-                part.size,
-                'gray',
-                2
-              );
-            }
-          }
+          // if (collisionBodyT) {
+          //   const collisionBody = collisionBodyT[j];
+          //   for (const part of collisionBody.list) {
+          //     drawShapeLines(
+          //       globalGraphics,
+          //       part.shape,
+          //       {
+          //         x: position.x + part.position.x,
+          //         y: position.y + part.position.y,
+          //       },
+          //       part.size,
+          //       'gray',
+          //       2
+          //     );
+          //   }
+          // }
         }
 
         if (options.graphics) {
-          if (shapeT) {
-            const shape = shapeT[j];
-            drawShapeLines(globalGraphics, shape, position, size, 'purple');
+          if (false) {
+            // const shape = shapeT[j];
+            // drawShapeLines(globalGraphics, shape, position, size, 'purple');
           } else {
             globalGraphics.rect(
               position.x - strokeWidth / 2,

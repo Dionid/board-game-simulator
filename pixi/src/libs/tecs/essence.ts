@@ -1,7 +1,7 @@
-import { Entity } from './core';
+import { $kind, Entity } from './core';
 import { Archetype, ArchetypeId } from './archetype';
 import { Internals } from './internals';
-import { Schema, SchemaType } from './schema';
+import { $tag, Schema, KindToType } from './schema';
 import { Query } from './query';
 import { System } from './system';
 import { Operation } from './operations';
@@ -92,7 +92,10 @@ export const killEntity = (essence: Essence, entity: number): void => {
 
 // # Archetype
 
-export const createArchetype = <SL extends Schema[]>(essence: Essence, ...schemas: SL): Archetype<SL> => {
+export const createArchetype = <SL extends Schema[]>(
+  essence: Essence,
+  ...schemas: SL
+): Archetype<SL> => {
   const archId = ArchetypeId.create(schemas);
 
   let archetype = essence.archetypesById.get(archId) as Archetype<SL> | undefined;
@@ -138,7 +141,11 @@ export const registerArchetype = <SL extends Schema[]>(
   return newArchetype;
 };
 
-export function addEntity<CL extends Schema[]>(essence: Essence, arch: Archetype<CL>, entity: Entity): void {
+export function addEntity<CL extends Schema[]>(
+  essence: Essence,
+  arch: Archetype<CL>,
+  entity: Entity
+): void {
   if (essence.deferredOperations.deferred) {
     essence.deferredOperations.operations.push({
       type: 'addEntity',
@@ -168,7 +175,7 @@ export const setComponent = <S extends Schema>(
   essence: Essence,
   entity: Entity,
   schema: S,
-  component?: SchemaType<S>
+  component?: S[typeof $kind] extends typeof $tag ? never : KindToType<S>
 ): void => {
   if (essence.deferredOperations.deferred) {
     essence.deferredOperations.operations.push({
@@ -205,7 +212,11 @@ export const setComponent = <S extends Schema>(
   }
 
   // # If not, create new Archetype
-  const newArchetype = Essence.createArchetype(essence, schema, ...archetype.type) as unknown as Archetype<[S]>;
+  const newArchetype = Essence.createArchetype(
+    essence,
+    schema,
+    ...archetype.type
+  ) as unknown as Archetype<[S]>;
 
   // # Index archetype by entity
   essence.archetypeByEntity[entity] = newArchetype;
@@ -233,7 +244,11 @@ export const setComponent = <S extends Schema>(
  *
  * @example
  */
-export const removeComponent = <S extends Schema>(essence: Essence, entity: Entity, schema: S): void => {
+export const removeComponent = <S extends Schema>(
+  essence: Essence,
+  entity: Entity,
+  schema: S
+): void => {
   if (essence.deferredOperations.deferred) {
     essence.deferredOperations.operations.push({
       type: 'removeComponent',
@@ -257,7 +272,10 @@ export const removeComponent = <S extends Schema>(essence: Essence, entity: Enti
   }
 
   // # Find or create new archetype
-  const newArchetype = Essence.createArchetype(essence, ...archetype.type.filter((c) => c !== schema));
+  const newArchetype = Essence.createArchetype(
+    essence,
+    ...archetype.type.filter((c) => c !== schema)
+  );
 
   // # Move entity to new archetype
   Archetype.moveEntity(archetype, newArchetype, entity);
@@ -569,10 +587,15 @@ export const registerSchema = Internals.registerSchema;
 export const getSchemaId = Internals.getSchemaId;
 
 // OK
-export const archetypeByEntity = (essence: Essence, entity: Entity) => essence.archetypeByEntity[entity];
+export const archetypeByEntity = (essence: Essence, entity: Entity) =>
+  essence.archetypeByEntity[entity];
 
 // OK
-export const hasComponent = <S extends Schema>(essence: Essence, entity: Entity, schema: S): boolean => {
+export const hasComponent = <S extends Schema>(
+  essence: Essence,
+  entity: Entity,
+  schema: S
+): boolean => {
   const archetype = essence.archetypeByEntity[entity];
   if (!archetype) {
     return false;
@@ -586,7 +609,7 @@ export const componentByEntity = <S extends Schema>(
   essence: Essence,
   entity: Entity,
   schema: S
-): SchemaType<S> | undefined => {
+): KindToType<S> | undefined => {
   const archetype = essence.archetypeByEntity[entity];
   if (!archetype) {
     return;
