@@ -2,7 +2,7 @@ import { newQuery, registerQuery, Entity, KindToType, System, table, emit } from
 import { Position2 } from '../core/types';
 import { Game } from '../game';
 import { collidersDepth } from './checks';
-import { ColliderSet, ActiveCollisions } from './components';
+import { ColliderSet, CollisionsMonitoring } from './components';
 import { colliding } from './topics';
 
 // 1. Get all entities that have CollisionSource + ColliderSet + Position (+ Awaken)
@@ -10,7 +10,7 @@ import { colliding } from './topics';
 // 1. Check if the next position collides with any other ColliderSet
 // 1. If collides create event
 
-export const checkCollisionsQuery = newQuery(ActiveCollisions, ColliderSet, Position2);
+export const checkCollisionsQuery = newQuery(CollisionsMonitoring, ColliderSet, Position2);
 export const collidersQuery = newQuery(ColliderSet, Position2);
 
 export const checkNarrowCollisionSimple = (game: Game): System => {

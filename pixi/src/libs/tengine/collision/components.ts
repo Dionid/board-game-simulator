@@ -1,7 +1,15 @@
-import { newSchema, arrayOf, Tag, union, literal, number } from '../../tecs';
+import { newSchema, arrayOf, union, literal, number, newTag } from '../../tecs';
 import { Position2 } from '../core/types';
 
-export const ActiveCollisions = Tag.new();
+// # Check this object for collisions with any other Colliders
+export const CollisionsMonitoring = newTag();
+
+// # Forbid penetration of solid Colliders
+export const ForbidSolidPenetration = newTag();
+
+export const CantBeAffectedByPenetrationResolution = newTag();
+
+// # Collider
 
 export const ColliderRectangle = newSchema({
   type: literal('rectangle'),

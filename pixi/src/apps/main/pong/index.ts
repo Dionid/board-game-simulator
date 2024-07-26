@@ -6,10 +6,12 @@ import { RigidBody } from 'libs/tengine/physics/components';
 import { Position2, Velocity2, Speed, Acceleration2 } from 'libs/tengine/core';
 import { Ball, Enemy, Player, applyGOWorldBoundaries, changeVelocityByArrows } from './ecs';
 import {
-  ActiveCollisions,
+  CollisionsMonitoring,
   applyPositionToCollider,
   checkNarrowCollisionSimple,
   ColliderSet,
+  ForbidSolidPenetration,
+  CantBeAffectedByPenetrationResolution,
 } from 'libs/tengine/collision';
 import {
   applyRigidBodyAccelerationToVelocity,
@@ -171,7 +173,8 @@ export async function initPongGame(parentElement: HTMLElement) {
   // # Physics
   setComponent(game.essence, ballEntity, RigidBody);
   // # Collisions
-  setComponent(game.essence, ballEntity, ActiveCollisions);
+  setComponent(game.essence, ballEntity, CollisionsMonitoring);
+  setComponent(game.essence, ballEntity, ForbidSolidPenetration);
   setComponent(game.essence, ballEntity, ColliderSet, {
     list: [
       {
@@ -214,6 +217,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   // # Physics
   setComponent(game.essence, sBallEntity, RigidBody);
   // # Collisions
+  setComponent(game.essence, sBallEntity, CantBeAffectedByPenetrationResolution);
   setComponent(game.essence, sBallEntity, ColliderSet, {
     list: [
       {
