@@ -101,6 +101,40 @@ export const boolean = {
 export const number = float64;
 export const string = string16;
 
+// ## Literal
+
+export const $literal = Symbol('literal');
+
+// export type literal<V extends string | number | boolean> = {
+//   [$kind]: typeof $literal;
+//   value: V;
+//   byteLength: number;
+//   [$defaultFn]: () => V;
+// };
+
+export type literal = ReturnType<typeof newLiteral>;
+
+export const newLiteral = <V extends string | number | boolean>(
+  value: V
+): {
+  [$kind]: typeof $literal;
+  value: V;
+  byteLength: number;
+  [$defaultFn]: () => V;
+} => {
+  return {
+    value,
+    byteLength:
+      typeof value === 'string'
+        ? string.byteLength
+        : typeof value === 'number'
+        ? number.byteLength
+        : boolean.byteLength,
+    [$kind]: $literal,
+    [$defaultFn]: () => value,
+  };
+};
+
 export type PrimitiveKind =
   | typeof uint8
   | typeof uint16
@@ -114,7 +148,8 @@ export type PrimitiveKind =
   | typeof string16
   | typeof boolean
   | typeof number
-  | typeof string;
+  | typeof string
+  | literal;
 
 export function isPrimitive(value: unknown): value is PrimitiveKind {
   return (
@@ -129,11 +164,14 @@ export function isPrimitive(value: unknown): value is PrimitiveKind {
       value[$kind] === $float64 ||
       value[$kind] === $string8 ||
       value[$kind] === $string16 ||
-      value[$kind] === $boolean)
+      value[$kind] === $boolean ||
+      value[$kind] === $literal)
   );
 }
 
-export type PrimitiveToType<T> = T extends typeof uint8 | typeof uint16 | typeof uint32
+export type PrimitiveToType<T> = T extends literal
+  ? T['value']
+  : T extends typeof uint8 | typeof uint16 | typeof uint32
   ? number
   : T extends typeof int8 | typeof int16 | typeof int32
   ? number
