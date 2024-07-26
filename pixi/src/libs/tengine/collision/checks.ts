@@ -16,48 +16,22 @@ export const circlesCollisionDepth = (
   return minDistance - distance;
 };
 
-export function areCircleAndRectangleColliding(
-  circlePosition: Position2,
-  circleSize: Size2,
-  rectanglePosition: Position2,
-  rectangleSize: Size2
-): boolean {
-  const radius = circleSize.width / 2;
-
-  const dx = Math.abs(circlePosition.x - (rectanglePosition.x + rectangleSize.width / 2));
-  const dy = Math.abs(circlePosition.y - (rectanglePosition.y + rectangleSize.height / 2));
-
-  if (dx > rectangleSize.width / 2 + radius) return false;
-  if (dy > rectangleSize.height / 2 + radius) return false;
-
-  if (dx <= rectangleSize.width / 2) return true;
-  if (dy <= rectangleSize.height / 2) return true;
-
-  const distance = Math.sqrt(dx * dx + dy * dy);
-
-  return distance <= radius + rectangleSize.width / 2;
-}
-
 // # Check if two rectangles are colliding using AABB algorithm
 export const areRectanglesColliding = (
   positionA: Position2,
   sizeA: Size2,
   positionB: Position2,
   sizeB: Size2
-) => {
-  if (
+): boolean => {
+  return (
     positionA.x < positionB.x + sizeB.width &&
     positionA.x + sizeA.width > positionB.x &&
     positionA.y < positionB.y + sizeB.height &&
     positionA.y + sizeA.height > positionB.y
-  ) {
-    return 0;
-  }
-
-  return -1;
+  );
 };
 
-export const compareColliders = (
+export const collidersDepth = (
   colliderA: KindToType<typeof Collider>,
   colliderB: KindToType<typeof Collider>
 ): number => {

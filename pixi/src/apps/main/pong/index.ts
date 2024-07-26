@@ -17,6 +17,7 @@ import {
   Kinematic,
 } from 'libs/tengine/physics';
 import { drawViews, View, drawDebugLines } from 'libs/tengine/render';
+import { penetrationResolution } from 'libs/tengine/collision/penetration-resolution';
 
 export async function initPongGame(parentElement: HTMLElement) {
   const game = newGame({
@@ -234,6 +235,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   registerSystem(game.essence, applyPositionToCollider(game));
   // ## Collision
   registerSystem(game.essence, checkNarrowCollisionSimple(game));
+  registerSystem(game.essence, penetrationResolution(game));
   // ...
   // ## Input
   registerSystem(game.essence, mapKeyboardInput(game));
