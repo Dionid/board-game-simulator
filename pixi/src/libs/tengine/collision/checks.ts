@@ -1,4 +1,4 @@
-import { SchemaType } from '../../tecs';
+import { SchemaToType } from '../../tecs';
 import { Position2, Size2 } from '../core';
 import { Collider } from './components';
 
@@ -107,47 +107,44 @@ export const areRectanglesColliding = (
 };
 
 export const compareColliders = (
-  colliderA: SchemaType<typeof Collider>,
-  colliderB: SchemaType<typeof Collider>
+  colliderA: SchemaToType<typeof Collider>,
+  colliderB: SchemaToType<typeof Collider>
 ): number => {
-  if (colliderA.shape.name === 'circle' && colliderB.shape.name === 'circle') {
-    return areCirclesColliding(
-      colliderA.position,
-      colliderA.size,
-      colliderB.position,
-      colliderB.size
-    );
-  }
-
-  if (
-    (colliderA.shape.name === 'circle' && colliderB.shape.name === 'rectangle') ||
-    (colliderA.shape.name === 'rectangle' && colliderB.shape.name === 'circle')
-  ) {
-    if (
-      areCircleAndRectangleColliding(
-        colliderA.shape.name === 'circle' ? colliderA.position : colliderB.position,
-        colliderA.shape.name === 'circle' ? colliderA.size : colliderB.size,
-        colliderA.shape.name === 'rectangle' ? colliderA.position : colliderB.position,
-        colliderA.shape.name === 'rectangle' ? colliderA.size : colliderB.size
-      )
-    ) {
-      return circleAndRectanglePenetrationDepth(
-        colliderA.shape.name === 'circle' ? colliderA.position : colliderB.position,
-        colliderA.shape.name === 'circle' ? colliderA.size : colliderB.size,
-        colliderA.shape.name === 'rectangle' ? colliderA.position : colliderB.position,
-        colliderA.shape.name === 'rectangle' ? colliderA.size : colliderB.size
-      );
-    }
-  }
-
-  if (colliderA.shape.name === 'rectangle' && colliderB.shape.name === 'rectangle') {
-    return areRectanglesColliding(
-      colliderA.position,
-      colliderA.size,
-      colliderB.position,
-      colliderB.size
-    );
-  }
-
+  // if (colliderA.shape.name === 'circle' && colliderB.shape.name === 'circle') {
+  //   return areCirclesColliding(
+  //     colliderA.position,
+  //     colliderA.size,
+  //     colliderB.position,
+  //     colliderB.size
+  //   );
+  // }
+  // if (
+  //   (colliderA.shape.name === 'circle' && colliderB.shape.name === 'rectangle') ||
+  //   (colliderA.shape.name === 'rectangle' && colliderB.shape.name === 'circle')
+  // ) {
+  //   if (
+  //     areCircleAndRectangleColliding(
+  //       colliderA.shape.name === 'circle' ? colliderA.position : colliderB.position,
+  //       colliderA.shape.name === 'circle' ? colliderA.size : colliderB.size,
+  //       colliderA.shape.name === 'rectangle' ? colliderA.position : colliderB.position,
+  //       colliderA.shape.name === 'rectangle' ? colliderA.size : colliderB.size
+  //     )
+  //   ) {
+  //     return circleAndRectanglePenetrationDepth(
+  //       colliderA.shape.name === 'circle' ? colliderA.position : colliderB.position,
+  //       colliderA.shape.name === 'circle' ? colliderA.size : colliderB.size,
+  //       colliderA.shape.name === 'rectangle' ? colliderA.position : colliderB.position,
+  //       colliderA.shape.name === 'rectangle' ? colliderA.size : colliderB.size
+  //     );
+  //   }
+  // }
+  // if (colliderA.shape.name === 'rectangle' && colliderB.shape.name === 'rectangle') {
+  //   return areRectanglesColliding(
+  //     colliderA.position,
+  //     colliderA.size,
+  //     colliderB.position,
+  //     colliderB.size
+  //   );
+  // }
   return -1;
 };

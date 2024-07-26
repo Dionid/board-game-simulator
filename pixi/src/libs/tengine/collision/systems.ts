@@ -2,13 +2,13 @@ import {
   newQuery,
   registerQuery,
   Entity,
-  SchemaType,
+  SchemaToType,
   System,
   table,
   emit,
   tryTable,
 } from '../../tecs';
-import { Position } from '../ecs';
+import { Position2 } from '../core/components';
 import { Game } from '../game';
 import { compareColliders } from './checks';
 import { ColliderSet, ActiveCollisions } from './components';
@@ -21,8 +21,8 @@ import { colliding } from './topics';
 
 const EPSILON = 1.0e-6;
 
-export const checkCollisionsQuery = newQuery(ActiveCollisions, ColliderSet, Position);
-export const collidersQuery = newQuery(ColliderSet, Position);
+export const checkCollisionsQuery = newQuery(ActiveCollisions, ColliderSet, Position2);
+export const collidersQuery = newQuery(ColliderSet, Position2);
 
 export const checkNarrowCollisionSimple = (game: Game): System => {
   const forCheckQ = registerQuery(game.essence, checkCollisionsQuery);
@@ -31,15 +31,15 @@ export const checkNarrowCollisionSimple = (game: Game): System => {
   return () => {
     const forCheckColliders: {
       entity: Entity;
-      colliderSet: SchemaType<typeof ColliderSet>;
-      position: SchemaType<typeof Position>;
+      colliderSet: SchemaToType<typeof ColliderSet>;
+      position: SchemaToType<typeof Position2>;
     }[] = [];
 
     for (let i = 0; i < forCheckQ.archetypes.length; i++) {
       const archetype = forCheckQ.archetypes[i];
 
       const colliderSetT = table(archetype, ColliderSet);
-      const positionT = table(archetype, Position);
+      const positionT = table(archetype, Position2);
 
       for (let i = 0; i < archetype.entities.length; i++) {
         const entity = archetype.entities[i];
