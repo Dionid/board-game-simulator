@@ -128,34 +128,6 @@ export const resolveCollision = (game: Game): System => {
         (aKinematic && bStatic) ||
         (aStatic && bKinematic)
       ) {
-        const aVelocity = componentByEntity(game.essence, a.entity, Velocity2) || {
-          x: 0,
-          y: 0,
-        };
-        const bVelocity = componentByEntity(game.essence, b.entity, Velocity2) || {
-          x: 0,
-          y: 0,
-        };
-
-        // resolveKinematicAndStaticOverlap(
-        //   event.depth,
-
-        //   a.collider.shape.name,
-        //   a.collider.position,
-        //   b.collider.size,
-        //   aVelocity,
-
-        //   b.collider.shape.name,
-        //   b.collider.position,
-        //   b.collider.size,
-        //   bVelocity
-        // );
-
-        // # MOVE AWAY
-        aVelocity.x *= -1;
-        aVelocity.y *= -1;
-        bVelocity.x *= -1;
-        bVelocity.y *= -1;
         continue;
       }
 
@@ -178,8 +150,6 @@ export const applyVelocityToPosition = (game: Game): System => {
       const positionT = table(archetype, Position2);
       const velocityT = table(archetype, Velocity2);
 
-      const colliderSetT = tryTable(archetype, ColliderSet);
-
       for (let j = 0; j < archetype.entities.length; j++) {
         const position = positionT[j];
         const velocity = velocityT[j];
@@ -189,21 +159,6 @@ export const applyVelocityToPosition = (game: Game): System => {
 
         position.x = newXPosition;
         position.y = newYPosition;
-
-        if (!colliderSetT) {
-          continue;
-        }
-
-        // const colliderSet = colliderSetT[j];
-
-        // if (!colliderSet) {
-        //   continue;
-        // }
-
-        // for (const collider of colliderSet.list) {
-        //   collider.position.x = newXPosition + collider.offset.x;
-        //   collider.position.y = newYPosition + collider.offset.y;
-        // }
       }
     }
   };

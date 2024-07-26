@@ -26,6 +26,7 @@ import {
 import { drawDebugLines } from '../../../libs/tengine/ecs/debug';
 import {
   ActiveCollisions,
+  applyPositionToCollider,
   checkNarrowCollisionSimple,
   ColliderSet,
 } from '../../../libs/tengine/collision';
@@ -103,7 +104,7 @@ export async function initPongGame(parentElement: HTMLElement) {
       {
         type: 'solid',
         offset: { x: 0, y: 0 },
-        // size: { width: characterSize.width, height: characterSize.height },
+        position: { x: 0, y: 0 },
         shape: {
           type: 'rectangle',
           width: characterSize.width,
@@ -147,7 +148,7 @@ export async function initPongGame(parentElement: HTMLElement) {
       {
         type: 'solid',
         offset: { x: 0, y: 0 },
-        // size: { width: characterSize.width, height: characterSize.height },
+        position: { x: 0, y: 0 },
         shape: {
           type: 'rectangle',
           width: characterSize.width,
@@ -187,6 +188,46 @@ export async function initPongGame(parentElement: HTMLElement) {
       {
         type: 'solid',
         offset: { x: 0, y: 0 },
+        position: { x: 0, y: 0 },
+        shape: {
+          type: 'circle',
+          radius: 25,
+        },
+      },
+    ],
+  });
+
+  // # Ball
+  const sBallEntity = spawnEntity(game.essence);
+  setComponent(game.essence, sBallEntity, Ball);
+  setComponent(game.essence, sBallEntity, GameObject);
+  setComponent(game.essence, sBallEntity, View);
+  setComponent(game.essence, sBallEntity, GraphicsTag);
+  setComponent(game.essence, sBallEntity, Circle, {
+    offset: { x: 0, y: 0 },
+    radius: 25,
+  });
+  setComponent(game.essence, sBallEntity, Pivot2, { x: 25, y: 25 }); // because pixi.circle has pivot in center
+  setComponent(game.essence, sBallEntity, Speed, { value: 10 });
+  setComponent(game.essence, sBallEntity, Velocity2, {
+    x: 0,
+    y: 0,
+  });
+  const sBallPosition = {
+    x: game.world.size.width / 2 + 100,
+    y: game.world.size.height / 2 - 10,
+  };
+  setComponent(game.essence, sBallEntity, Position2, sBallPosition);
+  setComponent(game.essence, sBallEntity, Size2, { width: 50, height: 0 });
+  setComponent(game.essence, sBallEntity, Color, { value: '0xfff' });
+  setComponent(game.essence, sBallEntity, Kinematic);
+  // setComponent(game.essence, sBallEntity, ActiveCollisions);
+  setComponent(game.essence, sBallEntity, ColliderSet, {
+    list: [
+      {
+        type: 'solid',
+        offset: { x: 0, y: 0 },
+        position: { x: 0, y: 0 },
         shape: {
           type: 'circle',
           radius: 25,
@@ -199,6 +240,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   // # Collision
   registerSystem(game.essence, applyAccelerationToVelocity(game));
   registerSystem(game.essence, applyVelocityToPosition(game));
+  registerSystem(game.essence, applyPositionToCollider(game));
   registerSystem(game.essence, checkNarrowCollisionSimple(game));
   registerSystem(game.essence, resolveCollision(game));
   // registerSystem(game.essence, responseToCollision(game));
