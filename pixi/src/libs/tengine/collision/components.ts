@@ -7,8 +7,10 @@ export const ActiveCollisions = Tag.new();
 // export const ColliderSolid = Tag.new();
 // export const ColliderSensor = Tag.new();
 
+const colliderType = union(string, 'solid', 'sensor');
+
 export const Collider = newSchema({
-  type: union(string, 'solid', 'sensor'),
+  type: colliderType,
   offset: Position2,
 });
 

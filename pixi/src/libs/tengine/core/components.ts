@@ -1,4 +1,4 @@
-import { newTag, newSchema, number, string, boolean, Tag } from '../../tecs';
+import { newTag, newSchema, number, string, boolean } from '../../tecs';
 
 export const View = newTag();
 
