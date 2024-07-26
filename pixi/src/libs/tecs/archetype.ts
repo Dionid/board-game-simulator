@@ -1,11 +1,11 @@
 import { Entity, $kind } from './core';
 import { SparseSet } from './sparse-set';
-import { Schema, SchemaToType, SchemaId, $tag, $aos, $soa } from './schema';
+import { Schema, KindToType, SchemaId, $tag, $aos, $soa } from './schema';
 import { Internals } from './internals';
 import { ArrayContains } from './ts-types';
 import { safeGuard } from './switch';
 
-export type ArchetypeTableRow<S extends Schema> = SchemaToType<S>[];
+export type ArchetypeTableRow<S extends Schema> = KindToType<S>[];
 
 export type ArchetypeTable<SL extends ReadonlyArray<Schema>> = {
   [K in keyof SL]: ArchetypeTableRow<SL[K]>;
@@ -193,7 +193,7 @@ export function setArchetypeComponent<S extends Schema>(
   arch: Archetype<any>,
   entity: Entity,
   schemaOrId: SchemaId | Schema,
-  component?: SchemaToType<S>
+  component?: KindToType<S>
 ): boolean {
   const schemaId = typeof schemaOrId === 'number' ? schemaOrId : Internals.getSchemaId(schemaOrId);
   const schema = (
@@ -272,7 +272,7 @@ export function componentsList<SL extends ReadonlyArray<Schema>, A extends Arche
     const componentIndex = archetype.entitiesSS.sparse[entity];
     return archetype.table[schemaId][componentIndex];
   }) as {
-    [K in keyof SL]: SchemaToType<SL[K]>;
+    [K in keyof SL]: KindToType<SL[K]>;
   };
 }
 
@@ -287,7 +287,7 @@ export function component<S extends Schema, A extends Archetype<ReadonlyArray<Sc
       ? S
       : never
     : never
-): SchemaToType<S> {
+): KindToType<S> {
   const componentId = Internals.getSchemaId(schema);
   const componentIndex = archetype.entitiesSS.sparse[entity];
   const componentTable = archetype.table[componentId];
@@ -295,13 +295,13 @@ export function component<S extends Schema, A extends Archetype<ReadonlyArray<Sc
     throw new Error(`Can't find component ${componentId} on this archetype ${archetype.id}`);
   }
   if (schema[$kind] === $tag) {
-    return {} as SchemaToType<S>;
+    return {} as KindToType<S>;
   }
   const component = componentTable[componentIndex];
   if (!component) {
     throw new Error(`Can't find component ${componentId} on this archetype ${archetype.id}`);
   }
-  return component as SchemaToType<S>;
+  return component as KindToType<S>;
 }
 
 // OK
@@ -343,7 +343,7 @@ export const tablesList = <SL extends ReadonlyArray<Schema>, A extends Archetype
     const componentId = Internals.getSchemaId(component);
     return archetype.table[componentId];
   }) as {
-    [K in keyof SL]: SchemaToType<SL[K]>[];
+    [K in keyof SL]: KindToType<SL[K]>[];
   };
 };
 
@@ -356,7 +356,7 @@ export const tryTablesList = <SL extends ReadonlyArray<Schema>>(
     const componentId = Internals.getSchemaId(component);
     return archetype.table[componentId];
   }) as {
-    [K in keyof SL]: SchemaToType<SL[K]>[] | undefined;
+    [K in keyof SL]: KindToType<SL[K]>[] | undefined;
   };
 };
 

@@ -1,4 +1,4 @@
-import { SchemaToType } from '../../tecs';
+import { KindToType } from '../../tecs';
 import { Position2, Size2 } from '../core';
 import { Collider } from './components';
 
@@ -107,8 +107,8 @@ export const areRectanglesColliding = (
 };
 
 export const compareColliders = (
-  colliderA: SchemaToType<typeof Collider>,
-  colliderB: SchemaToType<typeof Collider>
+  colliderA: KindToType<typeof Collider>,
+  colliderB: KindToType<typeof Collider>
 ): number => {
   // if (colliderA.shape.name === 'circle' && colliderB.shape.name === 'circle') {
   //   return areCirclesColliding(

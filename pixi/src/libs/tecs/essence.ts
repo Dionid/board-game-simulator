@@ -1,7 +1,7 @@
 import { $kind, Entity } from './core';
 import { Archetype, ArchetypeId } from './archetype';
 import { Internals } from './internals';
-import { $tag, Schema, SchemaToType } from './schema';
+import { $tag, Schema, KindToType } from './schema';
 import { Query } from './query';
 import { System } from './system';
 import { Operation } from './operations';
@@ -175,7 +175,7 @@ export const setComponent = <S extends Schema>(
   essence: Essence,
   entity: Entity,
   schema: S,
-  component?: S[typeof $kind] extends typeof $tag ? never : SchemaToType<S>
+  component?: S[typeof $kind] extends typeof $tag ? never : KindToType<S>
 ): void => {
   if (essence.deferredOperations.deferred) {
     essence.deferredOperations.operations.push({
@@ -609,7 +609,7 @@ export const componentByEntity = <S extends Schema>(
   essence: Essence,
   entity: Entity,
   schema: S
-): SchemaToType<S> | undefined => {
+): KindToType<S> | undefined => {
   const archetype = essence.archetypeByEntity[entity];
   if (!archetype) {
     return;

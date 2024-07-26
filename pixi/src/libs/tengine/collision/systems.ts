@@ -2,7 +2,7 @@ import {
   newQuery,
   registerQuery,
   Entity,
-  SchemaToType,
+  KindToType,
   System,
   table,
   emit,
@@ -31,8 +31,8 @@ export const checkNarrowCollisionSimple = (game: Game): System => {
   return () => {
     const forCheckColliders: {
       entity: Entity;
-      colliderSet: SchemaToType<typeof ColliderSet>;
-      position: SchemaToType<typeof Position2>;
+      colliderSet: KindToType<typeof ColliderSet>;
+      position: KindToType<typeof Position2>;
     }[] = [];
 
     for (let i = 0; i < forCheckQ.archetypes.length; i++) {

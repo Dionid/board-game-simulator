@@ -1,6 +1,6 @@
 import { Archetype } from './archetype';
 import { Entity } from './core';
-import { Schema, SchemaToType } from './schema';
+import { Schema, KindToType } from './schema';
 
 export type AddEntityOp = {
   type: 'addEntity';
@@ -17,7 +17,7 @@ export type SetComponentOp<S extends Schema> = {
   type: 'setComponent';
   entityId: Entity;
   schema: S;
-  component?: SchemaToType<S>;
+  component?: KindToType<S>;
 };
 
 export type RemoveComponentOp<S extends Schema> = {

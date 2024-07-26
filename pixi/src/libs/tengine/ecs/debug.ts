@@ -1,5 +1,5 @@
 import { Graphics } from 'pixi.js';
-import { newQuery, registerQuery, SchemaToType, System, table, tryTable } from '../../tecs';
+import { newQuery, registerQuery, KindToType, System, table, tryTable } from '../../tecs';
 import { Game } from '../game';
 import { View, Position2, Size2 } from '../core/components';
 import { Map } from '../core';

@@ -7,6 +7,10 @@ export type KindSt = {
   [$defaultFn]: () => unknown;
 };
 
+export function isKindSt(value: unknown): value is KindSt {
+  return value !== null && typeof value === 'object' && $kind in value && $defaultFn in value;
+}
+
 // # Primitive types
 
 export const $uint8 = Symbol('uint8');
@@ -112,6 +116,35 @@ export type PrimitiveKind =
   | typeof number
   | typeof string;
 
+export function isPrimitiveKind(value: unknown): value is PrimitiveKind {
+  return (
+    isKindSt(value) &&
+    (value[$kind] === $uint8 ||
+      value[$kind] === $uint16 ||
+      value[$kind] === $uint32 ||
+      value[$kind] === $int8 ||
+      value[$kind] === $int16 ||
+      value[$kind] === $int32 ||
+      value[$kind] === $float32 ||
+      value[$kind] === $float64 ||
+      value[$kind] === $string8 ||
+      value[$kind] === $string16 ||
+      value[$kind] === $boolean)
+  );
+}
+
+export type PrimitiveKindToType<T> = T extends typeof uint8 | typeof uint16 | typeof uint32
+  ? number
+  : T extends typeof int8 | typeof int16 | typeof int32
+  ? number
+  : T extends typeof float32 | typeof float64
+  ? number
+  : T extends typeof string8 | typeof string16
+  ? string
+  : T extends typeof boolean
+  ? boolean
+  : never;
+
 // # Complex types
 
 export const $array = Symbol('array');
@@ -145,36 +178,15 @@ export type UnionKind = ReturnType<typeof union>;
 
 export type ComplexKind = ArrayKind | UnionKind;
 
-export type Kind = PrimitiveKind | ComplexKind;
-
-export function isKindSt(value: unknown): value is KindSt {
-  return value !== null && typeof value === 'object' && $kind in value && $defaultFn in value;
-}
-
-export function isPrimitiveKind(value: unknown): value is PrimitiveKind {
-  return (
-    isKindSt(value) &&
-    (value[$kind] === $uint8 ||
-      value[$kind] === $uint16 ||
-      value[$kind] === $uint32 ||
-      value[$kind] === $int8 ||
-      value[$kind] === $int16 ||
-      value[$kind] === $int32 ||
-      value[$kind] === $float32 ||
-      value[$kind] === $float64 ||
-      value[$kind] === $string8 ||
-      value[$kind] === $string16 ||
-      value[$kind] === $boolean)
-  );
-}
-
 export function isComplexKind(value: unknown): value is ComplexKind {
   return isKindSt(value) && (value[$kind] === $array || value[$kind] === $union);
 }
 
-export function isKind(value: unknown): value is Kind {
-  return isPrimitiveKind(value) || isComplexKind(value);
-}
+export type ComplexKindToType<T> = T extends ArrayKind
+  ? KindToType<T['field']>[]
+  : T extends UnionKind
+  ? T['variants'][number]
+  : never;
 
 // # Schema
 
@@ -192,39 +204,7 @@ export type Schema = {
 
 export type SchemaId = Id;
 
-// # To Type
-
-export type PrimitiveKindToType<T> = T extends typeof uint8 | typeof uint16 | typeof uint32
-  ? number
-  : T extends typeof int8 | typeof int16 | typeof int32
-  ? number
-  : T extends typeof float32 | typeof float64
-  ? number
-  : T extends typeof string8 | typeof string16
-  ? string
-  : T extends typeof boolean
-  ? boolean
-  : never;
-
-export type ComplexKindToType<T> = T extends ArrayKind
-  ? SchemaToType<T['field']>[]
-  : T extends UnionKind
-  ? T['variants'][number]
-  : never;
-
-export type KindToType<T> = T extends PrimitiveKind
-  ? PrimitiveKindToType<T>
-  : T extends ComplexKind
-  ? ComplexKindToType<T>
-  : T extends KindSt
-  ? ReturnType<T[typeof $defaultFn]>
-  : never;
-
-export type SchemaToType<T> = T extends Schema
-  ? { [K in keyof T as K extends symbol ? never : K]: SchemaToType<T[K]> }
-  : KindToType<T>;
-
-export function isSchema(value: unknown): value is Schema {
+export function isSchemaKind(value: unknown): value is Schema {
   return (
     typeof value === 'object' &&
     value !== null &&
@@ -233,24 +213,28 @@ export function isSchema(value: unknown): value is Schema {
   );
 }
 
+export type SchemaToType<T> = T extends Schema
+  ? { [K in keyof T as K extends symbol ? never : K]: KindToType<T[K]> }
+  : never;
+
 export function defaultFromSchema<S extends Omit<Schema, typeof $defaultFn>>(
   schema: S
-): SchemaToType<S> {
+): KindToType<S> {
   switch (schema[$kind]) {
     case $aos:
-      const component = {} as SchemaToType<S>;
+      const component = {} as KindToType<S>;
       for (const key in schema) {
         const field = schema[key];
 
-        if (isKind(field) || isSchema(field)) {
-          component[key as keyof SchemaToType<S>] = field[$defaultFn]() as any;
+        if (isKind(field) || isSchemaKind(field)) {
+          component[key as keyof KindToType<S>] = field[$defaultFn]() as any;
         } else {
           throw new Error('Invalid schema');
         }
       }
       return component;
     case $tag:
-      return {} as SchemaToType<S>;
+      return {} as KindToType<S>;
     case $soa:
       throw new Error('Not implemented');
     default:
@@ -261,8 +245,8 @@ export function defaultFromSchema<S extends Omit<Schema, typeof $defaultFn>>(
 export function newSchema<S extends Omit<Schema, typeof $kind | typeof $defaultFn>>(
   schema: S,
   kind?: SchemaKind,
-  defaultFn?: () => SchemaToType<S>
-): S & { [$kind]: SchemaKind; [$defaultFn]: () => SchemaToType<S> } {
+  defaultFn?: () => KindToType<S>
+): S & { [$kind]: SchemaKind; [$defaultFn]: () => KindToType<S> } {
   const newSchema: S & { [$kind]: SchemaKind } = {
     ...schema,
     [$kind]: kind ?? $aos,
@@ -273,16 +257,16 @@ export function newSchema<S extends Omit<Schema, typeof $kind | typeof $defaultF
   return {
     ...newSchema,
     [$defaultFn]: newDefaultFn,
-  } as S & { [$kind]: SchemaKind; [$defaultFn]: () => SchemaToType<S> };
+  } as S & { [$kind]: SchemaKind; [$defaultFn]: () => KindToType<S> };
 }
 
 export const Schema = {
   new: newSchema,
-  default: <S extends Schema>(schema: S): SchemaToType<S> => {
+  default: <S extends Schema>(schema: S): KindToType<S> => {
     switch (schema[$kind]) {
       case $tag:
       case $aos:
-        return schema[$defaultFn]() as SchemaToType<S>;
+        return schema[$defaultFn]() as KindToType<S>;
       case $soa:
         throw new Error('Not implemented');
       default:
@@ -303,3 +287,21 @@ export const newTag = (): Schema & { [$kind]: typeof $tag } => {
 export const Tag = {
   new: newTag,
 };
+
+// # Kind
+
+export type Kind = PrimitiveKind | ComplexKind | SchemaKind;
+
+export function isKind(value: unknown): value is Kind {
+  return isPrimitiveKind(value) || isComplexKind(value) || isSchemaKind(value);
+}
+
+export type KindToType<T> = T extends PrimitiveKind
+  ? PrimitiveKindToType<T>
+  : T extends ComplexKind
+  ? ComplexKindToType<T>
+  : T extends Schema
+  ? SchemaToType<T>
+  : T extends KindSt
+  ? ReturnType<T[typeof $defaultFn]>
+  : never;
