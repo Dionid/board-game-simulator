@@ -1,19 +1,19 @@
 import { Application, ApplicationOptions, Container } from 'pixi.js';
-import { Size } from '../core/types';
+import { Size2 } from '../core/types';
 import { Camera, newCamera, NewCameraProps } from '../core/camera';
 import { KeyBoardInput, MouseInput, newMouseInput } from '../core/input';
-import { Essence, newEssence, run as runEssence, step, stepWithTicker } from '../../tecs';
+import { Essence, newEssence, stepWithTicker } from '../../tecs';
 
 export type GameCanvas = {
   parentElement: HTMLElement;
-  size: Size;
+  size: Size2;
   element: HTMLCanvasElement;
   resizeTo?: HTMLElement | Window;
 };
 
 export type GameWorld = {
   container: Container;
-  size: Size;
+  size: Size2;
 };
 
 export type Game = {

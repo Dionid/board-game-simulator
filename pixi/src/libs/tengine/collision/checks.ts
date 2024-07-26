@@ -1,12 +1,12 @@
 import { SchemaType } from '../../tecs';
-import { Position, Size } from '../core';
+import { Position2, Size2 } from '../core';
 import { Collider } from './components';
 
 export const areCirclesColliding = (
-  positionA: Position,
-  sizeA: Size,
-  positionB: Position,
-  sizeB: Size
+  positionA: Position2,
+  sizeA: Size2,
+  positionB: Position2,
+  sizeB: Size2
 ) => {
   const dx = positionA.x - positionB.x;
   const dy = positionA.y - positionB.y;
@@ -41,10 +41,10 @@ export const areCirclesColliding = (
 // };
 
 export function areCircleAndRectangleColliding(
-  circlePosition: Position,
-  circleSize: Size,
-  rectanglePosition: Position,
-  rectangleSize: Size
+  circlePosition: Position2,
+  circleSize: Size2,
+  rectanglePosition: Position2,
+  rectangleSize: Size2
 ): boolean {
   const radius = circleSize.width / 2;
 
@@ -63,10 +63,10 @@ export function areCircleAndRectangleColliding(
 }
 
 export const circleAndRectanglePenetrationDepth = (
-  circlePosition: Position,
-  circleSize: Size,
-  rectanglePosition: Position,
-  rectangleSize: Size
+  circlePosition: Position2,
+  circleSize: Size2,
+  rectanglePosition: Position2,
+  rectangleSize: Size2
 ) => {
   const radius = circleSize.width / 2;
 
@@ -89,10 +89,10 @@ export const circleAndRectanglePenetrationDepth = (
 
 // # Check if two rectangles are colliding using AABB algorithm
 export const areRectanglesColliding = (
-  positionA: Position,
-  sizeA: Size,
-  positionB: Position,
-  sizeB: Size
+  positionA: Position2,
+  sizeA: Size2,
+  positionB: Position2,
+  sizeB: Size2
 ) => {
   if (
     positionA.x < positionB.x + sizeB.width &&
