@@ -1,7 +1,7 @@
 import { Graphics } from 'pixi.js';
 import { newQuery, registerQuery, System, table, tryTable } from '../../tecs';
 import { Game } from '../game';
-import { Position2 } from '../core/components';
+import { Position2 } from '../physics/components';
 import { Map } from '../core';
 import { ColliderSet } from '../collision';
 import { Circle, Rectangle, View } from './components';

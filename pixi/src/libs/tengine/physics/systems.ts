@@ -7,7 +7,7 @@ import {
   table,
 } from '../../tecs';
 import { Game } from '../game';
-import { Position2 } from '../core/components';
+import { Position2 } from './components';
 import { colliding } from '../collision';
 import { Dynamic, Kinematic, Static, Acceleration2, Velocity2 } from './components';
 

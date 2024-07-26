@@ -1,5 +1,5 @@
 import { newSchema, newTag, number, string } from 'libs/tecs';
-import { Position2, Size2 } from '../core/components';
+import { Position2, Size2 } from '../physics/components';
 
 export const View = newTag();
 

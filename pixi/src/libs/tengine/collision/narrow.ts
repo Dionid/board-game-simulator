@@ -1,5 +1,5 @@
 import { newQuery, registerQuery, Entity, KindToType, System, table, emit } from '../../tecs';
-import { Position2 } from '../core/components';
+import { Position2 } from '../physics/components';
 import { Game } from '../game';
 import { compareColliders } from './checks';
 import { ColliderSet, ActiveCollisions } from './components';

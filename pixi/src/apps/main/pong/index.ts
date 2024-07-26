@@ -2,7 +2,7 @@ import { Container } from 'pixi.js';
 import { initGame, newGame } from '../../../libs/tengine/game';
 import { registerSystem, setComponent, spawnEntity } from '../../../libs/tecs';
 import { mapKeyboardInput, mapMouseInput } from '../../../libs/tengine/ecs';
-import { Position2, Pivot2 } from '../../../libs/tengine/core/components';
+import { Position2, Pivot2 } from 'libs/tengine/physics/components';
 import {
   Ball,
   GameObject,

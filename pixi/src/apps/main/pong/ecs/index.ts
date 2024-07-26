@@ -9,7 +9,7 @@ import {
   tryTable,
 } from 'libs/tecs';
 import { KeyBoardInput } from 'libs/tengine/core';
-import { Pivot2, Position2 } from 'libs/tengine/core/components';
+import { Pivot2, Position2 } from 'libs/tengine/physics/components';
 import { Game } from 'libs/tengine/game';
 import { Acceleration2, Speed, Velocity2 } from 'libs/tengine/physics';
 
