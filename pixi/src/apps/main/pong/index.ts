@@ -2,7 +2,8 @@ import { Container } from 'pixi.js';
 import { initGame, newGame } from '../../../libs/tengine/game';
 import { registerSystem, setComponent, spawnEntity } from '../../../libs/tecs';
 import { mapKeyboardInput, mapMouseInput } from '../../../libs/tengine/ecs';
-import { Position2, Pivot2 } from 'libs/tengine/physics/components';
+import { RigidBody } from 'libs/tengine/physics/components';
+import { Position2, Velocity2, Speed, Acceleration2 } from 'libs/tengine/core';
 import { Ball, Enemy, Player, applyGOWorldBoundaries, changeVelocityByArrows } from './ecs';
 import {
   ActiveCollisions,
@@ -14,9 +15,6 @@ import {
   applyAccelerationToVelocity,
   applyVelocityToPosition,
   Kinematic,
-  Velocity2,
-  Speed,
-  Acceleration2,
 } from 'libs/tengine/physics';
 import { drawViews, View, drawDebugLines } from 'libs/tengine/render';
 
@@ -58,7 +56,6 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, playerEntity, Player);
   // # Position
   setComponent(game.essence, playerEntity, Position2, playerPosition);
-  setComponent(game.essence, playerEntity, Pivot2, { x: 0, y: 0 }); // ???
   // # Visuals
   // setComponent(game.essence, playerEntity, View); // ???
   setComponent(game.essence, playerEntity, View, {
@@ -125,7 +122,6 @@ export async function initPongGame(parentElement: HTMLElement) {
       },
     },
   });
-  setComponent(game.essence, enemyEntity, Pivot2, { x: 0, y: 0 });
   setComponent(game.essence, enemyEntity, Speed, { value: 1 });
   setComponent(game.essence, enemyEntity, Acceleration2, {
     x: 0,
@@ -159,12 +155,6 @@ export async function initPongGame(parentElement: HTMLElement) {
   // # Ball
   const ballEntity = spawnEntity(game.essence);
   setComponent(game.essence, ballEntity, Ball);
-  // setComponent(game.essence, ballEntity, GameObject);
-  // setComponent(game.essence, ballEntity, View);
-  // setComponent(game.essence, ballEntity, Circle, {
-  //   offset: { x: 0, y: 0 },
-  //   radius: 25,
-  // });
   setComponent(game.essence, ballEntity, View, {
     offset: { x: 0, y: 0 },
     scale: { x: 1, y: 1 },
@@ -177,7 +167,6 @@ export async function initPongGame(parentElement: HTMLElement) {
       },
     },
   });
-  setComponent(game.essence, ballEntity, Pivot2, { x: 25, y: 25 }); // because pixi.circle has pivot in center
   setComponent(game.essence, ballEntity, Speed, { value: 10 });
   setComponent(game.essence, ballEntity, Velocity2, {
     x: 0,
@@ -188,7 +177,8 @@ export async function initPongGame(parentElement: HTMLElement) {
     y: game.world.size.height / 2 - 10,
   };
   setComponent(game.essence, ballEntity, Position2, ballPosition);
-  // setComponent(game.essence, ballEntity, Color, { value: '0xfff' });
+  // # Physics
+  setComponent(game.essence, ballEntity, RigidBody);
   // # Collisions
   setComponent(game.essence, ballEntity, ActiveCollisions);
   setComponent(game.essence, ballEntity, ColliderSet, {
@@ -208,12 +198,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   // # Ball
   const sBallEntity = spawnEntity(game.essence);
   setComponent(game.essence, sBallEntity, Ball);
-  // setComponent(game.essence, sBallEntity, GameObject);
-  // setComponent(game.essence, sBallEntity, View);
-  // setComponent(game.essence, sBallEntity, Circle, {
-  //   offset: { x: 0, y: 0 },
-  //   radius: 25,
-  // });
+  // # View
   setComponent(game.essence, sBallEntity, View, {
     offset: { x: 0, y: 0 },
     scale: { x: 1, y: 1 },
@@ -226,7 +211,6 @@ export async function initPongGame(parentElement: HTMLElement) {
       },
     },
   });
-  setComponent(game.essence, sBallEntity, Pivot2, { x: 25, y: 25 }); // because pixi.circle has pivot in center
   setComponent(game.essence, sBallEntity, Speed, { value: 10 });
   setComponent(game.essence, sBallEntity, Velocity2, {
     x: 0,
@@ -237,7 +221,8 @@ export async function initPongGame(parentElement: HTMLElement) {
     y: game.world.size.height / 2 - 10,
   };
   setComponent(game.essence, sBallEntity, Position2, sBallPosition);
-  // setComponent(game.essence, sBallEntity, Color, { value: '0xfff' });
+  // # Physics
+  setComponent(game.essence, sBallEntity, RigidBody);
   // # Collisions
   setComponent(game.essence, sBallEntity, ColliderSet, {
     list: [

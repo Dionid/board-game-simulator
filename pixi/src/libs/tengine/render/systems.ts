@@ -1,5 +1,5 @@
 import { newQuery, registerQuery, System, table } from 'libs/tecs';
-import { Position2 } from '../physics/components';
+import { Position2 } from '../core/types';
 import { Map } from 'libs/tengine/core';
 import { Game } from 'libs/tengine/game';
 import { Graphics } from 'pixi.js';

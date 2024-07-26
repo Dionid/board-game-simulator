@@ -1,5 +1,5 @@
 import { newSchema, arrayOf, Tag, union, literal, number } from '../../tecs';
-import { Position2 } from '../physics/components';
+import { Position2 } from '../core/types';
 
 export const ActiveCollisions = Tag.new();
 

@@ -1,10 +1,10 @@
 import { Graphics } from 'pixi.js';
 import { newQuery, registerQuery, System, table, tryTable } from '../../tecs';
 import { Game } from '../game';
-import { Acceleration2, Position2, Velocity2 } from '../physics/components';
-import { Map, Position2 as P2, Vector2 } from '../core';
+import { Acceleration2, Position2, Velocity2 } from '../core/types';
+import { Map, Vector2 } from '../core';
 import { ColliderSet } from '../collision';
-import { Circle, Rectangle, View } from './components';
+import { View } from './components';
 import { safeGuard } from 'libs/tecs/switch';
 
 const drawLineFromCenter = (
@@ -94,6 +94,24 @@ export const drawDebugLines = (
           }
         }
 
+        if (options.acceleration || options.velocity) {
+          // const center = {
+          //   x: position.x + rectangle.offset.x + rectangle.size.width / 2,
+          //   y: position.y + rectangle.offset.y + rectangle.size.height / 2,
+          // };
+          const center = {
+            x: position.x,
+            y: position.y,
+          };
+
+          if (options.acceleration && acceleration2T) {
+            drawLineFromCenter(globalGraphics, center, acceleration2T[j], strokeWidth, 'blue');
+          }
+          if (options.velocity && velocity2T) {
+            drawLineFromCenter(globalGraphics, center, velocity2T[j], strokeWidth, 'green');
+          }
+        }
+
         // # Graphics
         if (options.view && viewT) {
           const view = viewT[j];
@@ -129,50 +147,6 @@ export const drawDebugLines = (
             default:
               safeGuard(view.model);
           }
-
-          // if (rectangleT) {
-          //   const rectangle = rectangleT[j];
-          //   globalGraphics.rect(
-          //     position.x + rectangle.offset.x,
-          //     position.y + rectangle.offset.y,
-          //     rectangle.size.width,
-          //     rectangle.size.height
-          //   );
-          //   globalGraphics.stroke({ width: strokeWidth, color: 'purple' });
-          //   if (acceleration2T || velocity2T) {
-          //     const center = {
-          //       x: position.x + rectangle.offset.x + rectangle.size.width / 2,
-          //       y: position.y + rectangle.offset.y + rectangle.size.height / 2,
-          //     };
-          //     if (acceleration2T) {
-          //       drawLineFromCenter(globalGraphics, center, acceleration2T[j], strokeWidth, 'blue');
-          //     }
-          //     if (velocity2T) {
-          //       drawLineFromCenter(globalGraphics, center, velocity2T[j], strokeWidth, 'green');
-          //     }
-          //   }
-          // }
-          // if (circleT) {
-          //   const circle = circleT[j];
-          //   globalGraphics.circle(
-          //     position.x + circle.offset.x,
-          //     position.y + circle.offset.y,
-          //     circle.radius
-          //   );
-          //   globalGraphics.stroke({ width: strokeWidth, color: 'purple' });
-          //   if (acceleration2T || velocity2T) {
-          //     const center = {
-          //       x: position.x,
-          //       y: position.y,
-          //     };
-          //     if (acceleration2T) {
-          //       drawLineFromCenter(globalGraphics, center, acceleration2T[j], strokeWidth, 'blue');
-          //     }
-          //     if (velocity2T) {
-          //       drawLineFromCenter(globalGraphics, center, velocity2T[j], strokeWidth, 'green');
-          //     }
-          //   }
-          // }
         }
       }
     }

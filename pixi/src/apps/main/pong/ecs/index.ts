@@ -8,10 +8,9 @@ import {
   table,
   tryTable,
 } from 'libs/tecs';
-import { KeyBoardInput } from 'libs/tengine/core';
-import { Pivot2, Position2 } from 'libs/tengine/physics/components';
+import { KeyBoardInput, Acceleration2, Speed, Velocity2 } from 'libs/tengine/core';
+import { Position2 } from 'libs/tengine/core/types';
 import { Game } from 'libs/tengine/game';
-import { Acceleration2, Speed, Velocity2 } from 'libs/tengine/physics';
 
 // export const GameObject = newTag();
 
@@ -131,7 +130,7 @@ export const changeVelocityByArrows = (game: Game, charEntity: Entity): System =
   };
 };
 
-const characterVelocityQ = newQuery(Position2, Pivot2);
+const characterVelocityQ = newQuery(Position2);
 
 export const applyGOWorldBoundaries = (game: Game): System => {
   const query = registerQuery(game.essence, characterVelocityQ);
@@ -141,7 +140,7 @@ export const applyGOWorldBoundaries = (game: Game): System => {
       const archetype = query.archetypes[i];
       const positionT = table(archetype, Position2);
       // const sizeT = table(archetype, Size2);
-      const pivotT = table(archetype, Pivot2);
+      // const pivotT = table(archetype, Pivot2);
 
       for (let j = 0; j < archetype.entities.length; j++) {
         // const position = positionT[j];

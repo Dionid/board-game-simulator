@@ -7,11 +7,12 @@ import {
   table,
 } from '../../tecs';
 import { Game } from '../game';
-import { Position2 } from './components';
+import { Position2 } from '../core/types';
 import { colliding } from '../collision';
-import { Dynamic, Kinematic, Static, Acceleration2, Velocity2 } from './components';
+import { Dynamic, Kinematic, RigidBody, Static } from './components';
+import { Acceleration2, Velocity2 } from '../core/types';
 
-export const accelerationVelocityQuery = newQuery(Acceleration2, Velocity2);
+export const accelerationVelocityQuery = newQuery(RigidBody, Acceleration2, Velocity2);
 
 export const applyAccelerationToVelocity = (game: Game): System => {
   const query = registerQuery(game.essence, accelerationVelocityQuery);
@@ -43,7 +44,7 @@ export const applyAccelerationToVelocity = (game: Game): System => {
 
 // # Position
 
-export const velocityPositionQuery = newQuery(Velocity2, Position2);
+export const velocityPositionQuery = newQuery(RigidBody, Velocity2, Position2);
 
 export const applyVelocityToPosition = (game: Game): System => {
   const query = registerQuery(game.essence, velocityPositionQuery);
