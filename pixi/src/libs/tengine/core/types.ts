@@ -70,3 +70,10 @@ export type Speed = {
 export const Speed = newSchema({
   value: number,
 });
+
+export type Scale = Vector2;
+
+export const Scale = newSchema({
+  x: number,
+  y: number,
+});

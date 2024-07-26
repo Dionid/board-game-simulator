@@ -12,8 +12,8 @@ import {
   ColliderSet,
 } from 'libs/tengine/collision';
 import {
-  applyAccelerationToVelocity,
-  applyVelocityToPosition,
+  applyRigidBodyAccelerationToVelocity,
+  applyRigidBodyVelocityToPosition,
   Kinematic,
 } from 'libs/tengine/physics';
 import { drawViews, View, drawDebugLines } from 'libs/tengine/render';
@@ -47,17 +47,24 @@ export async function initPongGame(parentElement: HTMLElement) {
   // # Player
   const playerEntity = spawnEntity(game.essence);
 
-  const playerPosition = {
-    x: game.world.size.width / 6 - characterSize.width / 2,
-    y: game.world.size.height / 2 - characterSize.height / 2,
-  };
-
   // # Game Object
   setComponent(game.essence, playerEntity, Player);
   // # Position
-  setComponent(game.essence, playerEntity, Position2, playerPosition);
+  setComponent(game.essence, playerEntity, Position2, {
+    x: game.world.size.width / 6 - characterSize.width / 2,
+    y: game.world.size.height / 2 - characterSize.height / 2,
+  });
+  // # Acceleration based Movement
+  setComponent(game.essence, playerEntity, Speed, { value: 2 });
+  setComponent(game.essence, playerEntity, Acceleration2, {
+    x: 0,
+    y: 0,
+  });
+  setComponent(game.essence, playerEntity, Velocity2, {
+    x: 0,
+    y: 0,
+  });
   // # Visuals
-  // setComponent(game.essence, playerEntity, View); // ???
   setComponent(game.essence, playerEntity, View, {
     offset: { x: 0, y: 0 },
     scale: { x: 1, y: 1 },
@@ -72,21 +79,6 @@ export async function initPongGame(parentElement: HTMLElement) {
         },
       },
     },
-  });
-  // setComponent(game.essence, playerEntity, Rectangle, {
-  //   offset: { x: 0, y: 0 }, // ???
-  //   size: { width: characterSize.width, height: characterSize.height },
-  // });
-  // setComponent(game.essence, playerEntity, Color, { value: 'blue' });
-  // # Acceleration based Movement
-  setComponent(game.essence, playerEntity, Speed, { value: 2 });
-  setComponent(game.essence, playerEntity, Acceleration2, {
-    x: 0,
-    y: 0,
-  });
-  setComponent(game.essence, playerEntity, Velocity2, {
-    x: 0,
-    y: 0,
   });
   // # Collisions
   setComponent(game.essence, playerEntity, ColliderSet, {
@@ -131,11 +123,10 @@ export async function initPongGame(parentElement: HTMLElement) {
     x: 0,
     y: 0,
   });
-  const enemyPosition = {
+  setComponent(game.essence, enemyEntity, Position2, {
     x: (game.world.size.width / 6) * 5 - characterSize.width / 2,
     y: game.world.size.height / 2 - characterSize.height / 2,
-  };
-  setComponent(game.essence, enemyEntity, Position2, enemyPosition);
+  });
   setComponent(game.essence, enemyEntity, Kinematic);
   setComponent(game.essence, enemyEntity, ColliderSet, {
     list: [
@@ -172,11 +163,10 @@ export async function initPongGame(parentElement: HTMLElement) {
     x: 0,
     y: 0,
   });
-  const ballPosition = {
+  setComponent(game.essence, ballEntity, Position2, {
     x: game.world.size.width / 2 - 10,
     y: game.world.size.height / 2 - 10,
-  };
-  setComponent(game.essence, ballEntity, Position2, ballPosition);
+  });
   // # Physics
   setComponent(game.essence, ballEntity, RigidBody);
   // # Collisions
@@ -216,11 +206,10 @@ export async function initPongGame(parentElement: HTMLElement) {
     x: 0,
     y: 0,
   });
-  const sBallPosition = {
+  setComponent(game.essence, sBallEntity, Position2, {
     x: game.world.size.width / 2 + 100,
     y: game.world.size.height / 2 - 10,
-  };
-  setComponent(game.essence, sBallEntity, Position2, sBallPosition);
+  });
   // # Physics
   setComponent(game.essence, sBallEntity, RigidBody);
   // # Collisions
@@ -240,8 +229,8 @@ export async function initPongGame(parentElement: HTMLElement) {
 
   // # Systems
   // ## Basic physics
-  registerSystem(game.essence, applyAccelerationToVelocity(game));
-  registerSystem(game.essence, applyVelocityToPosition(game));
+  registerSystem(game.essence, applyRigidBodyAccelerationToVelocity(game));
+  registerSystem(game.essence, applyRigidBodyVelocityToPosition(game));
   registerSystem(game.essence, applyPositionToCollider(game));
   // ## Collision
   registerSystem(game.essence, checkNarrowCollisionSimple(game));

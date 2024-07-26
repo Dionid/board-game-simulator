@@ -14,7 +14,7 @@ import { Acceleration2, Velocity2 } from '../core/types';
 
 export const accelerationVelocityQuery = newQuery(RigidBody, Acceleration2, Velocity2);
 
-export const applyAccelerationToVelocity = (game: Game): System => {
+export const applyRigidBodyAccelerationToVelocity = (game: Game): System => {
   const query = registerQuery(game.essence, accelerationVelocityQuery);
 
   return ({ deltaTime }) => {
@@ -46,7 +46,7 @@ export const applyAccelerationToVelocity = (game: Game): System => {
 
 export const velocityPositionQuery = newQuery(RigidBody, Velocity2, Position2);
 
-export const applyVelocityToPosition = (game: Game): System => {
+export const applyRigidBodyVelocityToPosition = (game: Game): System => {
   const query = registerQuery(game.essence, velocityPositionQuery);
 
   return ({ deltaTime }) => {
@@ -71,7 +71,7 @@ export const applyVelocityToPosition = (game: Game): System => {
 
 // # Resolve Dynamic bodies Collision
 
-export const dynamicBodyCollisionResolution = (game: Game): System => {
+export const dynamicRigidBodyCollisionResolution = (game: Game): System => {
   const topic = registerTopic(game.essence, colliding);
 
   return () => {

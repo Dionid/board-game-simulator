@@ -225,12 +225,14 @@
 1. Velocity
 1. Acceleration
 1. Scale
-1. Rotation
+1. ??? Rotation
+1. ??? Mass
 1. View
     1. Offset
     1. Scale
     1. Type
         1. Sprite
+            1. Texture
         1. Graphics
             1. Shape
 1. Collider Set
@@ -238,15 +240,10 @@
         1. Type
         1. Offset
         1. Shape
-    1. ...
 1. RigidBody
-    1. Type (Static, Kinematic, Dynamic)
-    1. Offset
-    1. Mass
-1. View
-    1. Offset
-    1. Type (Sprite / Graphics)
-    1. ??? Pivot
+1. RigidBodyStatic
+1. RigidBodyKinematic
+1. RigidBodyDynamic
 
 ## Problems
 
