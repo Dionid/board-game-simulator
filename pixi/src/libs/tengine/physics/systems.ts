@@ -1,9 +1,17 @@
-import { componentByEntity, emit, newQuery, registerQuery, registerTopic, System, table, tryTable } from '../../tecs';
+import {
+  componentByEntity,
+  newQuery,
+  registerQuery,
+  registerTopic,
+  System,
+  table,
+  tryTable,
+} from '../../tecs';
 import { Game } from '../game';
 import { Acceleration, Position, Size, Velocity } from '../ecs';
-import { ColliderSet, collideStartedTopic, colliding } from '../collision';
+import { ColliderSet, colliding } from '../collision';
 import { Dynamic, Kinematic, Static } from './components';
-import { resolveOverlap } from './resolve';
+import { resolveKinematicAndStaticOverlap } from './resolve';
 
 export const accelerationVelocityQuery = newQuery(Acceleration, Velocity);
 
@@ -44,50 +52,6 @@ export const resolveCollision = (game: Game): System => {
     for (const event of topic) {
       const { a, b } = event;
 
-      const aPosition = componentByEntity(game.essence, a.entity, Position);
-      const aVelocity = componentByEntity(game.essence, a.entity, Velocity);
-      const aSize = componentByEntity(game.essence, a.entity, Size);
-
-      const bPosition = componentByEntity(game.essence, b.entity, Position);
-      const bVelocity = componentByEntity(game.essence, b.entity, Velocity);
-      const bSize = componentByEntity(game.essence, b.entity, Size);
-
-      if (!aPosition || !bPosition || !aSize || !bSize) {
-        continue;
-      }
-
-      // # Determine type of colliders
-      const aSolid = a.collider.type === 'solid';
-      const aSensor = a.collider.type === 'sensor';
-
-      const bSolid = b.collider.type === 'solid';
-      const bSensor = b.collider.type === 'sensor';
-
-      // # Fix position if both solid
-      if (aSolid && bSolid) {
-        // TODO: need to rewrite this
-        // resolveOverlap(
-        //   a.collider.shape.name,
-        //   a.collidingPosition,
-        //   aSize,
-        //   aVelocity ?? {
-        //     x: 0,
-        //     y: 0,
-        //   },
-        //   b.collider.shape.name,
-        //   b.collidingPosition,
-        //   bSize,
-        //   bVelocity ?? {
-        //     x: 0,
-        //     y: 0,
-        //   }
-        // );
-        // aPosition.x = a.collidingPosition.x;
-        // aPosition.y = a.collidingPosition.y;
-        // bPosition.x = b.collidingPosition.x;
-        // bPosition.y = b.collidingPosition.y;
-      }
-
       // # Emit collision started event
       // QUESTION: if collision was with sensor collider, than somehow need to determine
       // is it "started", "active" or "ended" collision
@@ -109,8 +73,30 @@ export const resolveCollision = (game: Game): System => {
       //   true
       // );
 
+      const aPosition = componentByEntity(game.essence, a.entity, Position);
+      const aSize = componentByEntity(game.essence, a.entity, Size);
+
+      const bPosition = componentByEntity(game.essence, b.entity, Position);
+      const bSize = componentByEntity(game.essence, b.entity, Size);
+
+      if (!aPosition || !bPosition || !aSize || !bSize) {
+        continue;
+      }
+
+      // # Determine type of colliders
+      const aSolid = a.collider.type === 'solid';
+      const aSensor = a.collider.type === 'sensor';
+
+      const bSolid = b.collider.type === 'solid';
+      const bSensor = b.collider.type === 'sensor';
+
       // # Skip physics if it is sensor
       if (aSensor || bSensor) {
+        continue;
+      }
+
+      // # Both must be solid
+      if (aSolid === undefined || bSolid === undefined) {
         continue;
       }
 
@@ -124,37 +110,57 @@ export const resolveCollision = (game: Game): System => {
       const bDynamic = componentByEntity(game.essence, b.entity, Dynamic);
 
       // # If not any of types, skip
-      if (!aStatic && !bStatic && !aKinematic && !bKinematic && !aDynamic && !bDynamic) {
-        continue;
-      }
-
-      // # Don't apply physics to kinematic bodies collision
-      if (aStatic && bStatic) {
-        continue;
-      }
-
-      // # Don't apply physics to kinematic bodies collision
-      if (aKinematic && bKinematic) {
+      if (
+        aStatic === undefined &&
+        bStatic === undefined &&
+        aKinematic === undefined &&
+        bKinematic === undefined &&
+        aDynamic === undefined &&
+        bDynamic === undefined
+      ) {
         continue;
       }
 
       // # Don't apply physics to kinematic and static bodies collision
-      if ((aKinematic && bStatic) || (aStatic && bKinematic)) {
+      if (
+        (aStatic && bStatic) ||
+        (aKinematic && bKinematic) ||
+        (aKinematic && bStatic) ||
+        (aStatic && bKinematic)
+      ) {
+        const aVelocity = componentByEntity(game.essence, a.entity, Velocity) || {
+          x: 0,
+          y: 0,
+        };
+        const bVelocity = componentByEntity(game.essence, b.entity, Velocity) || {
+          x: 0,
+          y: 0,
+        };
+
+        // resolveKinematicAndStaticOverlap(
+        //   event.depth,
+
+        //   a.collider.shape.name,
+        //   a.collider.position,
+        //   b.collider.size,
+        //   aVelocity,
+
+        //   b.collider.shape.name,
+        //   b.collider.position,
+        //   b.collider.size,
+        //   bVelocity
+        // );
+
+        // # MOVE AWAY
+        aVelocity.x *= -1;
+        aVelocity.y *= -1;
+        bVelocity.x *= -1;
+        bVelocity.y *= -1;
         continue;
       }
 
       // TODO: # Dynamic bodies collision response
       // ...
-
-      // TODO: MOVE THIS
-      // if (!aVelocity || !bVelocity || !aPosition || !bPosition) {
-      //   continue;
-      // }
-
-      // aVelocity.x *= -1;
-      // aVelocity.y *= -1;
-      // bVelocity.x *= -1;
-      // bVelocity.y *= -1;
     }
   };
 };

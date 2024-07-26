@@ -1,5 +1,5 @@
 import { newSchema, arrayOf, Tag, string } from '../../tecs';
-import { Shape, Size, Position, Rotation } from '../ecs';
+import { Shape, Size, Position, Rotation, Pivot } from '../ecs';
 
 export const ActiveCollisions = Tag.new();
 
@@ -11,12 +11,13 @@ export const Collider = newSchema({
   type: string, // 'solid' | 'sensor'
   shape: Shape,
   size: Size,
+  rotation: Rotation,
   // Position relative to the entity Position
   offset: Position,
+  center: Position,
   // QUESTION: is it needed?
   // Global position
   position: Position,
-  rotation: Rotation,
 });
 
 export const ColliderSet = newSchema({

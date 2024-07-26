@@ -1,5 +1,5 @@
 import { Entity, SchemaType, newTopic } from '../../tecs';
-import { Position } from '../core';
+import { Vector2 } from '../core';
 import { Collider, ColliderSet } from './components';
 
 export type CollisionStartedEvent = {
@@ -18,19 +18,16 @@ export type CollisionStartedEvent = {
 
 export type CollidingEvent = {
   name: 'colliding';
+  depth: number;
   a: {
     entity: Entity;
     colliderSet: SchemaType<typeof ColliderSet>;
     collider: SchemaType<typeof Collider>;
-    collidingPosition: Position;
-    overlap: number;
   };
   b: {
     entity: Entity;
     colliderSet: SchemaType<typeof ColliderSet>;
     collider: SchemaType<typeof Collider>;
-    collidingPosition: Position;
-    overlap: number;
   };
 };
 

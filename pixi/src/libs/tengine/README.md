@@ -96,6 +96,7 @@
 1. Collision
     1. https://www.youtube.com/watch?v=eED4bSkYCB8
     1. https://brm.io/game-physics-for-beginners/
+    1. https://www.toptal.com/game/video-game-physics-part-ii-collision-detection-for-solid-objects
 1. Physics
     1. https://www.youtube.com/watch?v=3lBYVSplAuo
     1. RigidBody
@@ -206,5 +207,5 @@
                     1. verticesTranslate
                     1. boundsUpdate
                     1. ??? move previous body position without changing velocity
-                    1. Reset cached impulse if the body has velocity along it OR
+                    1. ??? Reset cached impulse if the body has velocity along it OR
                     warm the next iteration (by reducing it)

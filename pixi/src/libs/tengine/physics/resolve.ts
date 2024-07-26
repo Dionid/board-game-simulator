@@ -1,4 +1,4 @@
-import { Position, Size, Velocity } from '../core';
+import { Position, Size, Vector2, Velocity } from '../core';
 
 // export function resolveCircleCircleOverlap(
 //   a: Circle,
@@ -147,7 +147,10 @@ function resolveCircleRectangleOverlap(
   rectangleSize: Size,
   rectangleVelocity: Velocity
 ): void {
-  const closestX = Math.max(rectanglePosition.x, Math.min(circlePosition.x, rectanglePosition.x + rectangleSize.width));
+  const closestX = Math.max(
+    rectanglePosition.x,
+    Math.min(circlePosition.x, rectanglePosition.x + rectangleSize.width)
+  );
   const closestY = Math.max(
     rectanglePosition.y,
     Math.min(circlePosition.y, rectanglePosition.y + rectangleSize.height)
@@ -237,7 +240,43 @@ function resolveCircleRectangleOverlap(
 //   // }
 // }
 
-export const resolveOverlap = (
+function resolveCircleRectangleCollision(
+  penetrationDepth: number,
+
+  circlePosition: Position,
+  circleVelocity: Velocity,
+
+  rectanglePosition: Position,
+  rectangleSize: Size,
+  rectangleVelocity: Velocity
+): void {
+  if (penetrationDepth === 0) {
+    return;
+  }
+
+  const normalX =
+    (circlePosition.x - (rectanglePosition.x + rectangleSize.width / 2)) / penetrationDepth;
+  const normalY =
+    (circlePosition.y - (rectanglePosition.y + rectangleSize.height / 2)) / penetrationDepth;
+
+  const dotProductCircleRect = normalX * circleVelocity.x + normalY * circleVelocity.y;
+  const dotProductRectCircle = normalX * rectangleVelocity.x + normalY * rectangleVelocity.y;
+
+  const projectionCircleRect = dotProductCircleRect * (normalX * normalX + normalY * normalY);
+  const projectionRectCircle = dotProductRectCircle * (normalX * normalX + normalY * normalY);
+
+  // debugger;
+
+  circlePosition.x -= projectionCircleRect * normalX;
+  circlePosition.y -= projectionCircleRect * normalY;
+
+  rectanglePosition.x += projectionRectCircle * normalX;
+  rectanglePosition.y += projectionRectCircle * normalY;
+}
+
+export const resolveKinematicAndStaticOverlap = (
+  depth: number,
+
   aShape: string,
   aPosition: Position,
   aSize: Size,
@@ -248,21 +287,101 @@ export const resolveOverlap = (
   bSize: Size,
   bVelocity: Velocity
 ) => {
-  if (aShape === 'circle' && bShape === 'circle') {
-    return resolveCircleCircleOverlap(aPosition, aSize.width / 2, aVelocity, bPosition, bSize.width / 2, bVelocity);
-  }
-
-  if ((aShape === 'circle' && bShape === 'rectangle') || (aShape === 'rectangle' && bShape === 'circle')) {
-    return resolveCircleRectangleOverlap(
-      aShape === 'circle' ? aPosition : bPosition,
-      aShape === 'circle' ? aSize.width / 2 : bSize.width / 2,
-      aShape === 'circle' ? aVelocity : bVelocity,
-      aShape === 'rectangle' ? aPosition : bPosition,
-      aShape === 'rectangle' ? aSize : bSize,
-      aShape === 'rectangle' ? aVelocity : bVelocity
+  if (aShape === 'circle' && bShape === 'rectangle') {
+    return resolveCircleRectangleCollision(
+      depth,
+      aPosition,
+      aVelocity,
+      bPosition,
+      bSize,
+      bVelocity
     );
   }
 
+  if (aShape === 'rectangle' && bShape === 'circle') {
+    return resolveCircleRectangleCollision(
+      depth,
+      bPosition,
+      bVelocity,
+      aPosition,
+      aSize,
+      aVelocity
+    );
+  }
+};
+
+export const resolveOverlap = (
+  separation: number,
+  slop: number,
+  slopDampen: number,
+  positionDampen: number,
+  normal: Vector2,
+
+  aShape: string,
+  aIsStatic: boolean,
+  aPositionImpulse: Vector2,
+
+  bShape: string,
+  bIsStatic: boolean,
+  bPositionImpulse: Vector2
+) => {
+  if (aShape === 'circle' && bShape === 'circle') {
+    let positionImpulse = separation - slop * slopDampen;
+
+    if (aIsStatic || bIsStatic) {
+      positionImpulse *= 2;
+    }
+
+    if (!aIsStatic) {
+      const contactShare = positionDampen / 2;
+      aPositionImpulse.x += normal.x * positionImpulse * contactShare;
+      aPositionImpulse.y += normal.y * positionImpulse * contactShare;
+    }
+
+    if (!bIsStatic) {
+      const contactShare = positionDampen / 2;
+      bPositionImpulse.x -= normal.x * positionImpulse * contactShare;
+      bPositionImpulse.y -= normal.y * positionImpulse * contactShare;
+    }
+  }
+
+  // if (aShape === 'circle' && bShape === 'circle') {
+  //   let positionImpulse = separation - pair.slop * slopDampen;
+
+  //   if (bodyA.isStatic || bodyB.isStatic) {
+  //     positionImpulse *= 2
+  //   };
+
+  //   if (!(bodyA.isStatic || bodyA.isSleeping)) {
+  //     contactShare = positionDampen / bodyA.totalContacts;
+  //     bodyA.positionImpulse.x +=
+  //       normal.x * positionImpulse * contactShare;
+  //     bodyA.positionImpulse.y +=
+  //       normal.y * positionImpulse * contactShare;
+  //   }
+
+  //   if (!(bodyB.isStatic || bodyB.isSleeping)) {
+  //     contactShare = positionDampen / bodyB.totalContacts;
+  //     bodyB.positionImpulse.x -=
+  //       normal.x * positionImpulse * contactShare;
+  //     bodyB.positionImpulse.y -=
+  //       normal.y * positionImpulse * contactShare;
+  //   }
+  // }
+
+  // if (aShape === 'circle' && bShape === 'circle') {
+  //   return resolveCircleCircleOverlap(aPosition, aSize.width / 2, aVelocity, bPosition, bSize.width / 2, bVelocity);
+  // }
+  // if ((aShape === 'circle' && bShape === 'rectangle') || (aShape === 'rectangle' && bShape === 'circle')) {
+  //   return resolveCircleRectangleOverlap(
+  //     aShape === 'circle' ? aPosition : bPosition,
+  //     aShape === 'circle' ? aSize.width / 2 : bSize.width / 2,
+  //     aShape === 'circle' ? aVelocity : bVelocity,
+  //     aShape === 'rectangle' ? aPosition : bPosition,
+  //     aShape === 'rectangle' ? aSize : bSize,
+  //     aShape === 'rectangle' ? aVelocity : bVelocity
+  //   );
+  // }
   // if (aShape === 'rectangle' && bShape === 'rectangle') {
   //   return resolveRectangleRectangleOverlap(colliderA, colliderB);
   // }

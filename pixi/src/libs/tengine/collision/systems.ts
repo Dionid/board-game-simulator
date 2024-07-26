@@ -1,5 +1,14 @@
-import { newQuery, registerQuery, Entity, SchemaType, System, table, emit, tryTable } from '../../tecs';
-import { Position, Velocity } from '../ecs';
+import {
+  newQuery,
+  registerQuery,
+  Entity,
+  SchemaType,
+  System,
+  table,
+  emit,
+  tryTable,
+} from '../../tecs';
+import { Position } from '../ecs';
 import { Game } from '../game';
 import { compareColliders } from './checks';
 import { ColliderSet, ActiveCollisions } from './components';
@@ -9,6 +18,8 @@ import { colliding } from './topics';
 // 1. Calculate the next position based on the current position + velocity
 // 1. Check if the next position collides with any other ColliderSet
 // 1. If collides create event
+
+const EPSILON = 1.0e-6;
 
 export const checkCollisionsQuery = newQuery(ActiveCollisions, ColliderSet, Position);
 export const collidersQuery = newQuery(ColliderSet, Position);
@@ -52,12 +63,10 @@ export const checkNarrowCollisionSimple = (game: Game): System => {
       const archetype = allCollidersQ.archetypes[i];
 
       const colliderSetTB = table(archetype, ColliderSet);
-      const positionTB = table(archetype, Position);
 
       for (let a = 0; a < forCheckColliders.length; a++) {
         const entityA = forCheckColliders[a].entity;
         const colliderSetA = forCheckColliders[a].colliderSet;
-        const positionA = forCheckColliders[a].position;
 
         for (let i = 0; i < archetype.entities.length; i++) {
           const entityB = archetype.entities[i];
@@ -67,30 +76,26 @@ export const checkNarrowCollisionSimple = (game: Game): System => {
           }
 
           const colliderSetB = colliderSetTB[i];
-          const positionB = positionTB[i];
 
           for (const colliderA of colliderSetA.list) {
             for (const colliderB of colliderSetB.list) {
-              const overlap = compareColliders(colliderA, colliderB);
+              const depth = compareColliders(colliderA, colliderB);
 
-              if (overlap >= 0) {
+              if (depth >= 0) {
                 emit(
                   colliding,
                   {
                     name: 'colliding',
+                    depth,
                     a: {
                       entity: entityA,
                       colliderSet: colliderSetA,
                       collider: colliderA,
-                      collidingPosition: positionA,
-                      overlap,
                     },
                     b: {
                       entity: entityB,
                       colliderSet: colliderSetB,
                       collider: colliderB,
-                      collidingPosition: positionB,
-                      overlap,
                     },
                   },
                   true
