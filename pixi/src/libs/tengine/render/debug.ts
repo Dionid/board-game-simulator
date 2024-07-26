@@ -1,10 +1,10 @@
 import { Graphics } from 'pixi.js';
 import { newQuery, registerQuery, System, table, tryTable } from '../../tecs';
 import { Game } from '../game';
-import { Position2, Rectangle, Circle } from '../core/components';
+import { Position2 } from '../core/components';
 import { Map } from '../core';
 import { ColliderSet } from '../collision';
-import { View } from './components';
+import { Circle, Rectangle, View } from './components';
 
 const drawQuery = newQuery(View, Position2);
 

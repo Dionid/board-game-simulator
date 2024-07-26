@@ -28,39 +28,3 @@ export const Size2 = newSchema({
   width: number,
   height: number,
 });
-
-export const Color = newSchema({
-  value: string,
-});
-
-// # Shapes
-
-export const Rectangle = newSchema({
-  offset: Position2, // relative to the entity position
-  size: Size2,
-});
-
-export const Circle = newSchema({
-  offset: Position2, // relative to the entity position
-  radius: number,
-});
-
-export const Polygon = newSchema({
-  // ...
-});
-
-// # pixi specific
-
-// ## pixi.Graphics component
-
-// export const $graphics = Symbol('graphics');
-
-// export const graphics = {
-//   [$kind]: $graphics,
-//   byteLength: 8,
-//   [$defaultFn]: () => new pGraphics(),
-// } as const;
-
-// export const Graphics = newSchema({
-//   value: graphics,
-// });

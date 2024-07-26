@@ -1,5 +1,6 @@
 import { newQuery, registerQuery, System, table, tryTable } from 'libs/tecs';
-import { Position2, Rectangle, Circle, Color } from 'libs/tengine/core/components';
+import { Position2 } from 'libs/tengine/core/components';
+import { Rectangle, Circle, Color } from 'libs/tengine/render';
 import { Map } from 'libs/tengine/core';
 import { Game } from 'libs/tengine/game';
 import { Graphics } from 'pixi.js';
