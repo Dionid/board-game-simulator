@@ -225,7 +225,11 @@ export function isComplex(value: unknown): value is ComplexKind {
 export type ComplexToType<T> = T extends ArrayKind
   ? KindToType<T['field']>[]
   : T extends UnionKind
-  ? KindToType<T['variants'][number]>
+  ? T['variants'][number] extends PrimitiveKind
+    ? PrimitiveToType<T['variants'][number]>
+    : T['variants'][number] extends Schema
+    ? SchemaToType<T['variants'][number]>
+    : never
   : never;
 
 // # Schema
