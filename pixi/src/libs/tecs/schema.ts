@@ -199,17 +199,14 @@ export function arrayOf<K extends KindSt | Schema>(field: K) {
 
 // ## Union
 
-export function union<P extends PrimitiveKind, V extends PrimitiveToType<P>[]>(
-  field: P,
+export function union<V extends (PrimitiveKind | Schema)[]>(
   ...variants: V
 ): {
-  field: P;
   variants: V;
   [$kind]: typeof $union;
   [$defaultFn]: () => V[number];
 } {
   return {
-    field,
     variants,
     [$kind]: $union,
     [$defaultFn]: () => variants[0],
@@ -228,7 +225,7 @@ export function isComplex(value: unknown): value is ComplexKind {
 export type ComplexToType<T> = T extends ArrayKind
   ? KindToType<T['field']>[]
   : T extends UnionKind
-  ? T['variants'][number]
+  ? KindToType<T['variants'][number]>
   : never;
 
 // # Schema
