@@ -1,8 +1,9 @@
-import { newQuery, registerQuery, System, table, tryTable } from '../../tecs';
-import { View, Position2, Rectangle, Circle, Color } from '../core/components';
-import { Map } from '../core';
-import { Game } from '../game';
+import { newQuery, registerQuery, System, table, tryTable } from 'libs/tecs';
+import { Position2, Rectangle, Circle, Color } from 'libs/tengine/core/components';
+import { Map } from 'libs/tengine/core';
+import { Game } from 'libs/tengine/game';
 import { Graphics } from 'pixi.js';
+import { View } from './components';
 
 export const drawQuery = newQuery(View, Position2);
 

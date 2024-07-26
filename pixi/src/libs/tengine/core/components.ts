@@ -1,6 +1,4 @@
-import { newTag, newSchema, number, string, boolean } from '../../tecs';
-
-export const View = newTag();
+import { newSchema, number, string, boolean } from 'libs/tecs';
 
 export const Pivot2 = newSchema({
   x: number,

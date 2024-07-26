@@ -1,15 +1,8 @@
 import { Container } from 'pixi.js';
 import { initGame, newGame } from '../../../libs/tengine/game';
 import { registerSystem, setComponent, spawnEntity } from '../../../libs/tecs';
-import { mapKeyboardInput, mapMouseInput, drawViews } from '../../../libs/tengine/ecs';
-import {
-  Position2,
-  View,
-  Color,
-  Pivot2,
-  Rectangle,
-  Circle,
-} from '../../../libs/tengine/core/components';
+import { mapKeyboardInput, mapMouseInput } from '../../../libs/tengine/ecs';
+import { Position2, Color, Pivot2, Rectangle, Circle } from '../../../libs/tengine/core/components';
 import {
   Ball,
   GameObject,
@@ -18,7 +11,6 @@ import {
   applyGOWorldBoundaries,
   changeVelocityByArrows,
 } from './ecs';
-import { drawDebugLines } from 'libs/tengine/ecs/debug';
 import {
   ActiveCollisions,
   applyPositionToCollider,
@@ -33,6 +25,7 @@ import {
   Speed,
   Acceleration2,
 } from 'libs/tengine/physics';
+import { drawViews, View, drawDebugLines } from 'libs/tengine/render';
 
 export async function initPongGame(parentElement: HTMLElement) {
   const game = newGame({

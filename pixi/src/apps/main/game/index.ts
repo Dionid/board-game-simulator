@@ -1,10 +1,9 @@
-import { newEssence, registerSystem } from '../../../libs/tecs';
+import { registerSystem } from '../../../libs/tecs';
 import { Application, Assets, Container, Sprite, Spritesheet, Texture } from 'pixi.js';
 import firstMapData from './assets/FirstMap.json';
 import { newGame, Game } from '../../../libs/tengine/game';
 import {
   applyCameraToWorld,
-  render,
   mapMouseInput,
   moveCameraByDragging,
   zoom,
@@ -15,6 +14,7 @@ import { initTileMap } from '../../../libs/tengine/tilemap';
 import humanAtlasData from './assets/human_atlas.json';
 import { newAnimatedSprites, newDirectionalAnimationFrames } from '../../../libs/tengine/animation';
 import { cartesianTileRowCol, tileCartesianPosition } from '../../../libs/tengine/isometric';
+import { render } from 'libs/tengine/render';
 
 const fillSceneContainer = async (game: Game) => {
   const texture = (await Assets.load('assets/star.png')) as Texture;
@@ -200,7 +200,10 @@ export const initWorld = async (app: Application) => {
   // Generate all the Textures asynchronously
   await playerSpritesheet.parse();
 
-  const playerAnimationSprites = newAnimatedSprites(playerSpritesheet.animations, { x: 0.5, y: 0.9 });
+  const playerAnimationSprites = newAnimatedSprites(playerSpritesheet.animations, {
+    x: 0.5,
+    y: 0.9,
+  });
 
   const currentAnimation = playerAnimationSprites.runB;
 
@@ -222,7 +225,10 @@ export const initWorld = async (app: Application) => {
 
     const { x, y } = playerContainer.position;
     const { tileWidth, tileHeight } = tileMap;
-    const rc = cartesianTileRowCol(playerContainer.position, { width: tileWidth, height: tileHeight });
+    const rc = cartesianTileRowCol(playerContainer.position, {
+      width: tileWidth,
+      height: tileHeight,
+    });
     console.log({ x, y }, rc, tileCartesianPosition(rc, { width: tileWidth, height: tileHeight }));
   });
 
