@@ -4,6 +4,7 @@ import { Position2 } from '../core/types';
 import { colliding, Immovable, Impenetrable, resolvePenetration } from '../collision';
 import { Dynamic, Kinematic, Static } from './components';
 import { dotV2, multV2, mutAddV2, normalizeV2, subV2, Velocity2 } from '../core';
+import { inverseMass } from './math';
 
 // # Resolve Dynamic bodies Collision
 
@@ -73,13 +74,16 @@ export const dynamicRigidBodyCollisionResolution = (game: Game): System => {
 
       // # Dynamic bodies collision response
 
+      const aMass = a.collider.mass;
+      const bMass = b.collider.mass;
+
       // # Resolve penetration
       resolvePenetration(
         aPosition,
-        aDynamic === undefined,
+        !!aKinematic || !!aStatic || aMass === 0 || aMass === Infinity,
         a.collider.shape,
         bPosition,
-        bDynamic === undefined,
+        !!bKinematic || !!bStatic || bMass === 0 || bMass === Infinity,
         b.collider.shape,
         depth
       );
@@ -91,20 +95,10 @@ export const dynamicRigidBodyCollisionResolution = (game: Game): System => {
 
       // ## Dynamic vs Dynamic
 
-      // const aElasticity = ;
-
       const elasticity: number = 1;
 
-      // # Of there is no elasticity, skip
+      // # If there is no elasticity, skip
       if (elasticity === 0) {
-        continue;
-      }
-
-      const aMass = a.collider.mass;
-      const bMass = b.collider.mass;
-
-      // # If both bodies have infinite or zero mass, skip
-      if (aMass === Infinity || aMass === 0 || bMass === Infinity || bMass === 0) {
         continue;
       }
 
@@ -118,14 +112,17 @@ export const dynamicRigidBodyCollisionResolution = (game: Game): System => {
         // # Calculate the separation velocity with elasticity
         const velocitySeparationWithElasticity = -1 * velocitySeparation * elasticity;
 
-        // # Get the separation velocity vector
-        const separationVelocityVector = multV2(
-          normalizedDirection,
-          velocitySeparationWithElasticity
-        );
+        const velocitySeparationDiff = velocitySeparationWithElasticity - velocitySeparation;
 
-        mutAddV2(aVelocity, separationVelocityVector);
-        mutAddV2(bVelocity, multV2(separationVelocityVector, -1));
+        const impulse = velocitySeparationDiff / inverseMass(aMass) + inverseMass(bMass);
+
+        const impulseVector = multV2(normalizedDirection, impulse);
+
+        aVelocity.x += impulseVector.x * inverseMass(aMass);
+        aVelocity.y += impulseVector.y * inverseMass(aMass);
+
+        bVelocity.x -= impulseVector.x * inverseMass(bMass);
+        bVelocity.y -= impulseVector.y * inverseMass(bMass);
 
         continue;
       }
