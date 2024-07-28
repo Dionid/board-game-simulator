@@ -1,7 +1,7 @@
 import { newQuery, registerQuery, Entity, KindToType, System, table, emit } from '../../tecs';
 import { Position2 } from '../core/types';
 import { Game } from '../game';
-import { collidersDepth } from './checks';
+import { collidersPenetrationDepth } from './checks';
 import { ColliderSet, CollisionsMonitoring } from './components';
 import { colliding } from './topics';
 
@@ -68,7 +68,7 @@ export const checkNarrowCollisionSimple = (game: Game): System => {
 
           for (const colliderA of colliderSetA.list) {
             for (const colliderB of colliderSetB.list) {
-              const depth = collidersDepth(colliderA, colliderB);
+              const depth = collidersPenetrationDepth(colliderA, colliderB);
 
               if (depth >= 0) {
                 emit(

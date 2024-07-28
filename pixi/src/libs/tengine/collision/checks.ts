@@ -31,7 +31,7 @@ export const areRectanglesColliding = (
   );
 };
 
-export const collidersDepth = (
+export const collidersPenetrationDepth = (
   colliderA: KindToType<typeof Collider>,
   colliderB: KindToType<typeof Collider>
 ): number => {

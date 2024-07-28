@@ -76,7 +76,7 @@ export const drawDebugLines = (
             const colliderSet = colliderSetT[j];
             for (const collider of colliderSet.list) {
               switch (collider.shape.type) {
-                case 'rectangle':
+                case 'constant_rectangle':
                   globalGraphics.rect(
                     position.x,
                     position.y,

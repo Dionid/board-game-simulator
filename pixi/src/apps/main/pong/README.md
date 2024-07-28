@@ -2,7 +2,7 @@
 
 
 1. ~~Fix debug~~
-1. Impenetrable + Immovable
+1. ~~Impenetrable + Immovable~~
 1. SAT + Resolution
 1. Fix applyGOWorldBoundaries
 1. Dedup collision pairs
@@ -13,6 +13,8 @@
 1. Score points
 1. Next round
 1. Enemy AI
+
+1. On resize
 
 # Questions
 

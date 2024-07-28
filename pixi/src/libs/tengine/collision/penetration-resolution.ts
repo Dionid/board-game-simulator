@@ -104,7 +104,7 @@ export const applyWorldBoundaries = (game: Game): System => {
                     position.y = game.world.size.height - part.shape.radius + pivot.y;
                   }
                   break;
-                case 'rectangle':
+                case 'constant_rectangle':
                   if (position.x - pivot.x < 0) {
                     position.x = pivot.x;
                   }

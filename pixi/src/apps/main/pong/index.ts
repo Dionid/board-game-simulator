@@ -92,7 +92,7 @@ export async function initPongGame(parentElement: HTMLElement) {
         offset: { x: 0, y: 0 },
         position: { x: 0, y: 0 },
         shape: {
-          type: 'rectangle',
+          type: 'constant_rectangle',
           width: characterSize.width,
           height: characterSize.height,
         },
@@ -139,7 +139,7 @@ export async function initPongGame(parentElement: HTMLElement) {
         offset: { x: 0, y: 0 },
         position: { x: 0, y: 0 },
         shape: {
-          type: 'rectangle',
+          type: 'constant_rectangle',
           width: characterSize.width,
           height: characterSize.height,
         },

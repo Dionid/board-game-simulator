@@ -12,7 +12,7 @@ export const Immovable = newTag();
 // # Collider
 
 export const ColliderRectangle = newSchema({
-  type: literal('rectangle'),
+  type: literal('constant_rectangle'),
   width: number,
   height: number,
 });
@@ -27,7 +27,7 @@ export const ColliderShape = union(ColliderRectangle, ColliderCircle);
 export const Collider = newSchema({
   type: union(literal('solid'), literal('sensor')),
   offset: Position2,
-  position: Position2,
+  position: Position2, // QUESTION: maybe remove
   shape: ColliderShape,
 });
 

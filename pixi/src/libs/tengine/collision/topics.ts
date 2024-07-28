@@ -1,5 +1,4 @@
 import { Entity, KindToType, newTopic } from '../../tecs';
-import { Vector2 } from '../core';
 import { Collider, ColliderSet } from './components';
 
 export type CollisionStartedEvent = {
