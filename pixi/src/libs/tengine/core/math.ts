@@ -91,6 +91,27 @@ export function mutUnitV2(v: Vector2) {
 export const normalizeV2 = unitV2;
 export const mutNormalizeV2 = mutUnitV2;
 
+export const normalV2 = (v: Vector2): Vector2 => {
+  return {
+    x: -v.y,
+    y: v.x,
+  };
+};
+
+export const mutNormalV2 = (v: Vector2): void => {
+  const x = v.x;
+  v.x = -v.y;
+  v.y = x;
+};
+
+export const unitNormalV2 = (v: Vector2): Vector2 => {
+  return unitV2(normalV2(v));
+};
+
+export const mutUnitNormalV2 = (v: Vector2): void => {
+  mutUnitV2(normalV2(v));
+};
+
 export type Velocity2 = Vector2;
 
 export const Velocity2 = newSchema({
