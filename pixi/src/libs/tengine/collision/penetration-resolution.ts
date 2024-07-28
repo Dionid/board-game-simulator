@@ -7,7 +7,7 @@ import {
   table,
 } from 'libs/tecs';
 import { Game } from '../game';
-import { mulScalarV2, mulV2, mutAddV2, mutSubV2, Position2, unitV2 } from '../core';
+import { mulScalarV2, mutAddV2, mutSubV2, Position2, unitV2 } from '../core';
 import { colliding } from './topics';
 import { ColliderSet, Immovable, Impenetrable } from './components';
 import { safeGuard } from 'libs/tecs/switch';
@@ -41,6 +41,14 @@ export const penetrationResolution = (game: Game): System => {
       if (!aPosition || !bPosition) {
         continue;
       }
+
+      // switch(a.collider.shape.type) {
+      //   case "circle":
+      //   case "constant_rectangle":
+      //     break;
+      //   default:
+      //     safeGuard(a.collider.shape);
+      // }
 
       // # Circle Collision Resolution
       if (a.collider.shape.type === 'circle' && b.collider.shape.type === 'circle') {
