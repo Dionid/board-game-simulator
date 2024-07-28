@@ -85,6 +85,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     },
   });
   // # Collisions
+  setComponent(game.essence, playerEntity, Immovable);
   setComponent(game.essence, playerEntity, ColliderSet, {
     list: [
       {
@@ -131,6 +132,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     x: (game.world.size.width / 6) * 5 - characterSize.width / 2,
     y: game.world.size.height / 2 - characterSize.height / 2,
   });
+  setComponent(game.essence, enemyEntity, Immovable);
   setComponent(game.essence, enemyEntity, Kinematic);
   setComponent(game.essence, enemyEntity, ColliderSet, {
     list: [

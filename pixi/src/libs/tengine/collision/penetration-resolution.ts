@@ -3,13 +3,14 @@ import {
   newQuery,
   registerQuery,
   registerTopic,
+  SchemaToType,
   System,
   table,
 } from 'libs/tecs';
 import { Game } from '../game';
-import { mulScalarV2, mutAddV2, mutSubV2, Position2, unitV2 } from '../core';
+import { mulScalarV2, mutAddV2, mutSubV2, normalizeV2, Position2 } from '../core';
 import { colliding } from './topics';
-import { ColliderSet, Immovable, Impenetrable } from './components';
+import { ColliderCircle, ColliderSet, Immovable, Impenetrable } from './components';
 import { safeGuard } from 'libs/tecs/switch';
 
 export const penetrationResolution = (game: Game): System => {
@@ -50,29 +51,119 @@ export const penetrationResolution = (game: Game): System => {
       //     safeGuard(a.collider.shape);
       // }
 
+      const aCollider = a.collider;
+      const bCollider = b.collider;
+
+      const aColliderShape = aCollider.shape;
+      const bColliderShape = b.collider.shape;
+
       // # Circle Collision Resolution
-      if (a.collider.shape.type === 'circle' && b.collider.shape.type === 'circle') {
-        const distance = {
+      if (aColliderShape.type === 'circle' && bColliderShape.type === 'circle') {
+        const normDist = normalizeV2({
           x: aPosition.x - bPosition.x,
           y: aPosition.y - bPosition.y,
-        };
+        });
 
         if (aImmovable) {
-          const resolution = mulScalarV2(unitV2(distance), depth);
+          const resolution = mulScalarV2(normDist, depth);
 
           mutAddV2(bPosition, resolution);
         } else if (bImmovable) {
-          const resolution = mulScalarV2(unitV2(distance), depth);
+          const resolution = mulScalarV2(normDist, depth);
 
           mutAddV2(aPosition, resolution);
         } else {
-          const resolution = mulScalarV2(unitV2(distance), depth / 2);
+          const resolution = mulScalarV2(normDist, depth / 2);
 
           mutAddV2(aPosition, resolution);
           mutSubV2(bPosition, resolution);
         }
 
         continue;
+      }
+
+      if (
+        (aColliderShape.type === 'circle' && bColliderShape.type === 'constant_rectangle') ||
+        (aColliderShape.type === 'constant_rectangle' && bColliderShape.type === 'circle')
+      ) {
+        const circleCollider =
+          aColliderShape.type === 'circle'
+            ? aCollider
+            : bColliderShape.type === 'circle'
+            ? bCollider
+            : null;
+        const rectCollider =
+          aColliderShape.type === 'constant_rectangle'
+            ? aCollider
+            : bColliderShape.type === 'constant_rectangle'
+            ? bCollider
+            : null;
+
+        if (!circleCollider || !rectCollider) {
+          throw new Error('Invalid collider');
+        }
+
+        const circleShape =
+          aColliderShape.type === 'circle'
+            ? aColliderShape
+            : bColliderShape.type === 'circle'
+            ? bColliderShape
+            : null;
+        const rectShape =
+          aColliderShape.type === 'constant_rectangle'
+            ? aColliderShape
+            : bColliderShape.type === 'constant_rectangle'
+            ? bColliderShape
+            : null;
+
+        if (!circleShape || !rectShape) {
+          throw new Error('Invalid collider shape');
+        }
+
+        const circlePosition = aColliderShape.type === 'circle' ? aPosition : bPosition;
+        const rectPosition = bColliderShape.type === 'constant_rectangle' ? bPosition : aPosition;
+
+        const circleImmovable =
+          aColliderShape.type === 'circle'
+            ? aImmovable
+            : bColliderShape.type === 'circle'
+            ? bImmovable
+            : null;
+
+        const rectImmovable =
+          aColliderShape.type === 'constant_rectangle'
+            ? aImmovable
+            : bColliderShape.type === 'constant_rectangle'
+            ? bImmovable
+            : null;
+
+        if (!circleImmovable && !rectImmovable) {
+          continue;
+        }
+
+        // const dist = {
+        //   x: Math.abs(circlePosition.x - rectPosition.x),
+        //   y: Math.abs(circlePosition.y - rectPosition.y),
+        // }
+
+        // const normDist = normalizeV2(dist);
+
+        // if (circleImmovable) {
+        //   const resolution = mulScalarV2(normDist, depth);
+
+        //   mutAddV2(rectPosition, resolution);
+        // } else if (rectImmovable) {
+        //   const resolution = mulScalarV2(normDist, depth);
+
+        //   mutAddV2(circlePosition, resolution);
+        // } else {
+        //   const resolution = mulScalarV2(normDist, depth / 2);
+
+        //   mutAddV2(circlePosition, resolution);
+        //   mutSubV2(rectPosition, resolution);
+        // }
+
+        // continue;
       }
     }
   };
