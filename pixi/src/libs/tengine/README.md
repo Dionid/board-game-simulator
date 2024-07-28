@@ -1,13 +1,12 @@
 # Roadmap
 
 1. ~~Add collider~~
-1. ? Add RigidBody (because velocity and acceleration must be part of RigidBody)
+1. ~~Add RigidBody~~
 1. SAT
     1. SAT collision detection
     1. Calc MTV
     1. MTV Collision resolution
 1. Dedup collision pairs
-1. What is Constraints (matter.js)
 1. ...
 1. Preload assets
 1. Culling

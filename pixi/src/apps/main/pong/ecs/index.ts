@@ -1,15 +1,5 @@
-import {
-  archetypeByEntity,
-  Entity,
-  newQuery,
-  newTag,
-  registerQuery,
-  System,
-  table,
-  tryTable,
-} from 'libs/tecs';
+import { archetypeByEntity, Entity, newTag, System, tryTable } from 'libs/tecs';
 import { KeyBoardInput, Acceleration2, Speed, Velocity2 } from 'libs/tengine/core';
-import { Position2 } from 'libs/tengine/core/types';
 import { Game } from 'libs/tengine/game';
 
 // export const GameObject = newTag();
@@ -127,38 +117,5 @@ export const changeVelocityByArrows = (game: Game, charEntity: Entity): System =
 
     velocity.y = -speed.value * directionY * deltaTime;
     velocity.x = -speed.value * directionX * deltaTime;
-  };
-};
-
-const characterVelocityQ = newQuery(Position2);
-
-export const applyGOWorldBoundaries = (game: Game): System => {
-  const query = registerQuery(game.essence, characterVelocityQ);
-
-  return ({ deltaTime }) => {
-    for (let i = 0; i < query.archetypes.length; i++) {
-      const archetype = query.archetypes[i];
-      const positionT = table(archetype, Position2);
-      // const sizeT = table(archetype, Size2);
-      // const pivotT = table(archetype, Pivot2);
-
-      for (let j = 0; j < archetype.entities.length; j++) {
-        // const position = positionT[j];
-        // const size = sizeT[j];
-        // const pivot = pivotT[j];
-        // if (position.x - pivot.x < 0) {
-        //   position.x = pivot.x;
-        // }
-        // if (position.y - pivot.y < 0) {
-        //   position.y = pivot.y;
-        // }
-        // if (position.x + size.width - pivot.x > game.world.size.width) {
-        //   position.x = game.world.size.width - size.width + pivot.x;
-        // }
-        // if (position.y + size.height - pivot.y > game.world.size.height) {
-        //   position.y = game.world.size.height - size.height + pivot.y;
-        // }
-      }
-    }
   };
 };
