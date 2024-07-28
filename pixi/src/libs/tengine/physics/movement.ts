@@ -24,10 +24,6 @@ export const applyRigidBodyAccelerationToVelocity = (game: Game): System => {
 
         velocity.x += acceleration.x * deltaTime;
         velocity.y += acceleration.y * deltaTime;
-
-        // TODO: move it friction
-        velocity.x *= 0.85 * deltaTime;
-        velocity.y *= 0.85 * deltaTime;
       }
     }
   };
@@ -48,6 +44,10 @@ export const applyRigidBodyVelocityToPosition = (game: Game): System => {
       for (let j = 0; j < archetype.entities.length; j++) {
         const position = positionT[j];
         const velocity = velocityT[j];
+
+        // TODO: move add friction system
+        velocity.x *= 0.85 * deltaTime;
+        velocity.y *= 0.85 * deltaTime;
 
         position.x += velocity.x * deltaTime;
         position.y += velocity.y * deltaTime;

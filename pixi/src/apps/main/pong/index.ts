@@ -2,7 +2,7 @@ import { Container } from 'pixi.js';
 import { initGame, newGame } from '../../../libs/tengine/game';
 import { registerSystem, setComponent, spawnEntity } from '../../../libs/tecs';
 import { mapKeyboardInput, mapMouseInput } from '../../../libs/tengine/ecs';
-import { RigidBody } from 'libs/tengine/physics/components';
+import { Dynamic, Kinematic, RigidBody, Static } from 'libs/tengine/physics/components';
 import { Position2, Velocity2, Speed, Acceleration2 } from 'libs/tengine/core';
 import { Ball, Enemy, Player, accelerateByArrows, changeVelocityByArrows } from './ecs';
 import { applyWorldBoundaries } from 'libs/tengine/collision/penetration-resolution';
@@ -17,7 +17,7 @@ import {
 import {
   applyRigidBodyAccelerationToVelocity,
   applyRigidBodyVelocityToPosition,
-  Kinematic,
+  dynamicRigidBodyCollisionResolution,
 } from 'libs/tengine/physics';
 import { drawViews, View, drawDebugLines } from 'libs/tengine/render';
 import { penetrationResolution } from 'libs/tengine/collision/penetration-resolution';
@@ -136,8 +136,8 @@ export async function initPongGame(parentElement: HTMLElement) {
     x: (game.world.size.width / 6) * 5 - characterSize.width / 2,
     y: game.world.size.height / 2 - characterSize.height / 2,
   });
-  setComponent(game.essence, enemyEntity, Impenetrable);
-  setComponent(game.essence, enemyEntity, Immovable);
+  // setComponent(game.essence, enemyEntity, Impenetrable);
+  // setComponent(game.essence, enemyEntity, Immovable);
   setComponent(game.essence, enemyEntity, ColliderSet, {
     list: [
       {
@@ -152,6 +152,9 @@ export async function initPongGame(parentElement: HTMLElement) {
       },
     ],
   });
+  // # Physics
+  setComponent(game.essence, enemyEntity, RigidBody);
+  setComponent(game.essence, enemyEntity, Kinematic);
 
   // # Ball
   const ballEntity = spawnEntity(game.essence);
@@ -168,7 +171,7 @@ export async function initPongGame(parentElement: HTMLElement) {
       },
     },
   });
-  setComponent(game.essence, ballEntity, Speed, { value: 10 });
+  setComponent(game.essence, ballEntity, Speed, { value: 5 });
   setComponent(game.essence, ballEntity, Velocity2, {
     x: 0,
     y: 0,
@@ -177,11 +180,9 @@ export async function initPongGame(parentElement: HTMLElement) {
     x: game.world.size.width / 2 - 10,
     y: game.world.size.height / 2 - 10,
   });
-  // # Physics
-  setComponent(game.essence, ballEntity, RigidBody);
   // # Collisions
   setComponent(game.essence, ballEntity, CollisionsMonitoring);
-  setComponent(game.essence, ballEntity, Impenetrable);
+  // setComponent(game.essence, ballEntity, Impenetrable);
   setComponent(game.essence, ballEntity, ColliderSet, {
     list: [
       {
@@ -195,8 +196,11 @@ export async function initPongGame(parentElement: HTMLElement) {
       },
     ],
   });
+  // # Physics
+  setComponent(game.essence, ballEntity, RigidBody);
+  setComponent(game.essence, ballEntity, Dynamic);
 
-  // # Ball
+  // # Second Ball
   const sBallEntity = spawnEntity(game.essence);
   setComponent(game.essence, sBallEntity, Ball);
   // # View
@@ -212,7 +216,7 @@ export async function initPongGame(parentElement: HTMLElement) {
       },
     },
   });
-  setComponent(game.essence, sBallEntity, Speed, { value: 10 });
+  setComponent(game.essence, sBallEntity, Speed, { value: 5 });
   setComponent(game.essence, sBallEntity, Velocity2, {
     x: 0,
     y: 0,
@@ -224,7 +228,8 @@ export async function initPongGame(parentElement: HTMLElement) {
   // # Physics
   setComponent(game.essence, sBallEntity, RigidBody);
   // # Collisions
-  setComponent(game.essence, sBallEntity, Immovable);
+  // setComponent(game.essence, sBallEntity, Impenetrable);
+  // setComponent(game.essence, sBallEntity, Immovable);
   setComponent(game.essence, sBallEntity, ColliderSet, {
     list: [
       {
@@ -238,8 +243,16 @@ export async function initPongGame(parentElement: HTMLElement) {
       },
     ],
   });
+  // # Physics
+  setComponent(game.essence, sBallEntity, RigidBody);
+  setComponent(game.essence, sBallEntity, Dynamic);
+  // setComponent(game.essence, sBallEntity, Kinematic);
 
   // # Systems
+  // ...
+  // ## Input
+  registerSystem(game.essence, mapKeyboardInput(game));
+  registerSystem(game.essence, mapMouseInput(game, map));
   // ## Basic physics
   registerSystem(game.essence, applyRigidBodyAccelerationToVelocity(game));
   registerSystem(game.essence, applyRigidBodyVelocityToPosition(game));
@@ -247,13 +260,10 @@ export async function initPongGame(parentElement: HTMLElement) {
   // ## Collision
   registerSystem(game.essence, checkNarrowCollisionSimple(game));
   registerSystem(game.essence, penetrationResolution(game));
-  // ...
-  // ## Input
-  registerSystem(game.essence, mapKeyboardInput(game));
-  registerSystem(game.essence, mapMouseInput(game, map));
+  registerSystem(game.essence, dynamicRigidBodyCollisionResolution(game));
   // ## Movement
-  registerSystem(game.essence, accelerateByArrows(game, playerEntity));
-  // registerSystem(game.essence, changeVelocityByArrows(game, ballEntity));
+  // registerSystem(game.essence, accelerateByArrows(game, playerEntity));
+  registerSystem(game.essence, changeVelocityByArrows(game, ballEntity));
   registerSystem(game.essence, applyWorldBoundaries(game));
   // ## Render
   registerSystem(game.essence, drawViews(game, map));

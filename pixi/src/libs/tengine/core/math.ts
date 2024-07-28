@@ -15,26 +15,26 @@ export const Vector2 = newSchema({
   y: number,
 });
 
-export function mulV2(v1: Vector2, v2: Vector2): Vector2 {
+export function multV2(v1: Vector2, v2: Vector2): Vector2 {
   return {
     x: v1.x * v2.x,
     y: v1.y * v2.y,
   };
 }
 
-export function mutMulV2(v1: Vector2, v2: Vector2) {
+export function mutMultV2(v1: Vector2, v2: Vector2) {
   v1.x *= v2.x;
   v1.y *= v2.y;
 }
 
-export function mulScalarV2(v: Vector2, scalar: number): Vector2 {
+export function multScalarV2(v: Vector2, scalar: number): Vector2 {
   return {
     x: v.x * scalar,
     y: v.y * scalar,
   };
 }
 
-export function mutMulScalarV2(v: Vector2, scalar: number) {
+export function mutMultScalarV2(v: Vector2, scalar: number) {
   v.x *= scalar;
   v.y *= scalar;
 }
