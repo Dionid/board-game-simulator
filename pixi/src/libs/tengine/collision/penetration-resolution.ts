@@ -57,7 +57,7 @@ export const penetrationResolution = (game: Game): System => {
       const aColliderShape = aCollider.shape;
       const bColliderShape = b.collider.shape;
 
-      // # Circle Collision Resolution
+      // # Circle Circle Collision Resolution
       if (aColliderShape.type === 'circle' && bColliderShape.type === 'circle') {
         const normDist = normalizeV2({
           x: aPosition.x - bPosition.x,
@@ -82,6 +82,48 @@ export const penetrationResolution = (game: Game): System => {
         continue;
       }
 
+      // # Rectangle Rectangle Collision Resolution
+      if (
+        aColliderShape.type === 'constant_rectangle' &&
+        bColliderShape.type === 'constant_rectangle'
+      ) {
+        // const normDist = normalizeV2({
+        //   x: aPosition.x - bPosition.x,
+        //   y: aPosition.y - bPosition.y,
+        // });
+
+        const comingFromTop =
+          aPosition.y + aColliderShape.height < bPosition.y + bColliderShape.height;
+        const comingFromBottom =
+          aPosition.y + aColliderShape.height > bPosition.y + bColliderShape.height;
+
+        const comingFromLeft = aPosition.x < bPosition.x;
+        const comingFromRight = aPosition.x > bPosition.x;
+
+        const resolutionDirection = {
+          x: comingFromLeft ? -1 : comingFromRight ? 1 : 0,
+          y: comingFromTop ? -1 : comingFromBottom ? 1 : 0,
+        };
+
+        if (aImmovable) {
+          const resolution = mulScalarV2(resolutionDirection, depth);
+
+          mutSubV2(bPosition, resolution);
+        } else if (bImmovable) {
+          const resolution = mulScalarV2(resolutionDirection, depth);
+
+          mutAddV2(aPosition, resolution);
+        } else {
+          const resolution = mulScalarV2(resolutionDirection, depth / 2);
+
+          mutAddV2(aPosition, resolution);
+          mutSubV2(bPosition, resolution);
+        }
+
+        continue;
+      }
+
+      // # Circle Rectangle Collision Resolution
       if (
         (aColliderShape.type === 'circle' && bColliderShape.type === 'constant_rectangle') ||
         (aColliderShape.type === 'constant_rectangle' && bColliderShape.type === 'circle')

@@ -45,7 +45,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   // # Initial Game Objects
   const characterSize = {
     width: 50,
-    height: 200,
+    height: 100,
   };
 
   // # Player
@@ -87,7 +87,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   // # Collisions
   setComponent(game.essence, playerEntity, CollisionsMonitoring);
   setComponent(game.essence, playerEntity, Impenetrable);
-  setComponent(game.essence, playerEntity, Immovable);
+  // setComponent(game.essence, playerEntity, Immovable);
   setComponent(game.essence, playerEntity, ColliderSet, {
     list: [
       {

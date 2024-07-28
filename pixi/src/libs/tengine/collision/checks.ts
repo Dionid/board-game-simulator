@@ -83,6 +83,7 @@ export function circleAndRectangleCollidingDepth(
   if (distance.x <= rectSize.width / 2) {
     return minDistanceY - distance.y;
   }
+
   if (distance.y <= rectSize.height / 2) {
     return minDistanceX - distance.x;
   }
@@ -95,19 +96,66 @@ export function circleAndRectangleCollidingDepth(
 }
 
 // // # Check if two rectangles are colliding using AABB algorithm
-// export const areRectanglesColliding = (
-//   positionA: Position2,
-//   sizeA: Size2,
-//   positionB: Position2,
-//   sizeB: Size2
-// ): boolean => {
-//   return (
-//     positionA.x < positionB.x + sizeB.width &&
-//     positionA.x + sizeA.width > positionB.x &&
-//     positionA.y < positionB.y + sizeB.height &&
-//     positionA.y + sizeA.height > positionB.y
-//   );
-// };
+export const rectanglesCollidingDepth = (
+  positionA: Position2,
+  sizeA: Size2,
+  positionB: Position2,
+  sizeB: Size2
+): number => {
+  const aRectCenter = {
+    x: positionA.x + sizeA.width / 2,
+    y: positionA.y + sizeA.height / 2,
+  };
+
+  const bRectCenter = {
+    x: positionB.x + sizeB.width / 2,
+    y: positionB.y + sizeB.height / 2,
+  };
+
+  const distance = {
+    x: Math.abs(aRectCenter.x - bRectCenter.x),
+    y: Math.abs(aRectCenter.y - bRectCenter.y),
+  };
+
+  const minDistanceX = sizeA.width / 2 + sizeB.width / 2;
+  const minDistanceY = sizeA.height / 2 + sizeB.height / 2;
+
+  if (distance.x > minDistanceX) {
+    return -1;
+  }
+
+  if (distance.y > minDistanceY) {
+    return -1;
+  }
+
+  // debugger;
+
+  if (distance.x <= minDistanceX) {
+    // return minDistanceY - distance.y;
+
+    const xOverlap = minDistanceX - distance.x;
+
+    if (distance.y <= minDistanceY) {
+      const yOverlap = minDistanceY - distance.y;
+
+      return Math.min(xOverlap, yOverlap);
+    }
+
+    return xOverlap;
+  }
+
+  if (distance.y <= minDistanceY) {
+    return minDistanceX - distance.x;
+  }
+
+  // const cornerCollidingMagnitude = Math.sqrt(
+  //   (distance.x - rectSize.width / 2) ** 2 + (distance.y - rectSize.height / 2) ** 2
+  // );
+
+  // return circleRadius - cornerCollidingMagnitude;
+
+  return -1;
+};
 
 export const collidersPenetrationDepth = (
   aCollider: KindToType<typeof Collider>,
@@ -171,13 +219,16 @@ export const collidersPenetrationDepth = (
     );
   }
 
-  // if (colliderA.shape.type === 'constant_rectangle' && colliderB.shape.type === 'constant_rectangle') {
-  //   return areRectanglesColliding(
-  //     colliderA.position,
-  //     colliderA.size,
-  //     colliderB.position,
-  //     colliderB.size
-  //   );
-  // }
+  if (
+    aCollider.shape.type === 'constant_rectangle' &&
+    bCollider.shape.type === 'constant_rectangle'
+  ) {
+    return rectanglesCollidingDepth(
+      aCollider.position,
+      aCollider.shape,
+      bCollider.position,
+      bCollider.shape
+    );
+  }
   return -1;
 };
