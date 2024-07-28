@@ -10,8 +10,8 @@ import {
   applyPositionToCollider,
   checkNarrowCollisionSimple,
   ColliderSet,
-  ForbidSolidPenetration,
-  CantBeAffectedByPenetrationResolution,
+  Impenetrable,
+  Immovable,
 } from 'libs/tengine/collision';
 import {
   applyRigidBodyAccelerationToVelocity,
@@ -174,7 +174,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, ballEntity, RigidBody);
   // # Collisions
   setComponent(game.essence, ballEntity, CollisionsMonitoring);
-  setComponent(game.essence, ballEntity, ForbidSolidPenetration);
+  setComponent(game.essence, ballEntity, Impenetrable);
   setComponent(game.essence, ballEntity, ColliderSet, {
     list: [
       {
@@ -217,7 +217,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   // # Physics
   setComponent(game.essence, sBallEntity, RigidBody);
   // # Collisions
-  setComponent(game.essence, sBallEntity, CantBeAffectedByPenetrationResolution);
+  setComponent(game.essence, sBallEntity, Immovable);
   setComponent(game.essence, sBallEntity, ColliderSet, {
     list: [
       {
@@ -252,9 +252,9 @@ export async function initPongGame(parentElement: HTMLElement) {
   registerSystem(
     game.essence,
     drawDebugLines(game, map, {
-      view: true,
+      view: false,
       xy: true,
-      collision: false,
+      collision: true,
     })
   );
 

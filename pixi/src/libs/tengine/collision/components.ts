@@ -5,9 +5,9 @@ import { Position2 } from '../core/types';
 export const CollisionsMonitoring = newTag();
 
 // # Forbid penetration of solid Colliders
-export const ForbidSolidPenetration = newTag();
+export const Impenetrable = newTag();
 
-export const CantBeAffectedByPenetrationResolution = newTag();
+export const Immovable = newTag();
 
 // # Collider
 

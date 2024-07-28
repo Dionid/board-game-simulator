@@ -2,6 +2,7 @@
 
 
 1. ~~Fix debug~~
+1. Impenetrable + Immovable
 1. SAT + Resolution
 1. Fix applyGOWorldBoundaries
 
