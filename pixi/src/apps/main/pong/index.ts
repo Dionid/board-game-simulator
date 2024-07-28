@@ -92,6 +92,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     list: [
       {
         type: 'solid',
+        mass: 1,
         offset: { x: 0, y: 0 },
         position: { x: 0, y: 0 },
         shape: {
@@ -142,6 +143,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     list: [
       {
         type: 'solid',
+        mass: 1,
         offset: { x: 0, y: 0 },
         position: { x: 0, y: 0 },
         shape: {
@@ -187,6 +189,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     list: [
       {
         type: 'solid',
+        mass: 1,
         offset: { x: 0, y: 0 },
         position: { x: 0, y: 0 },
         shape: {
@@ -228,12 +231,14 @@ export async function initPongGame(parentElement: HTMLElement) {
   // # Physics
   setComponent(game.essence, sBallEntity, RigidBody);
   // # Collisions
+  // setComponent(game.essence, sBallEntity, CollisionsMonitoring);
   // setComponent(game.essence, sBallEntity, Impenetrable);
   // setComponent(game.essence, sBallEntity, Immovable);
   setComponent(game.essence, sBallEntity, ColliderSet, {
     list: [
       {
         type: 'solid',
+        mass: 1,
         offset: { x: 0, y: 0 },
         position: { x: 0, y: 0 },
         shape: {

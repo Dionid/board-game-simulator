@@ -46,8 +46,8 @@ export const applyRigidBodyVelocityToPosition = (game: Game): System => {
         const velocity = velocityT[j];
 
         // TODO: move add friction system
-        velocity.x *= 0.85 * deltaTime;
-        velocity.y *= 0.85 * deltaTime;
+        velocity.x *= 0.9 * deltaTime;
+        velocity.y *= 0.9 * deltaTime;
 
         position.x += velocity.x * deltaTime;
         position.y += velocity.y * deltaTime;

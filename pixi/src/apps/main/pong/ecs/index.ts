@@ -5,8 +5,8 @@ import {
   Speed,
   Velocity2,
   normalizeV2,
-  multScalarV2,
-  mutMultScalarV2,
+  multV2,
+  mutMultV2,
 } from 'libs/tengine/core';
 import { Game } from 'libs/tengine/game';
 
@@ -84,7 +84,7 @@ export const accelerateByArrows = (game: Game, playerEntity: Entity): System => 
       x: speed.value * directionX,
       y: speed.value * directionY,
     });
-    mutMultScalarV2(newAcc, speed.value);
+    mutMultV2(newAcc, speed.value);
 
     acceleration.x = newAcc.x * deltaTime;
     acceleration.y = newAcc.y * deltaTime;
@@ -133,7 +133,7 @@ export const changeVelocityByArrows = (game: Game, charEntity: Entity): System =
       x: speed.value * directionX,
       y: speed.value * directionY,
     });
-    mutMultScalarV2(newVel, speed.value);
+    mutMultV2(newVel, speed.value);
 
     velocity.x = newVel.x * deltaTime;
     velocity.y = newVel.y * deltaTime;

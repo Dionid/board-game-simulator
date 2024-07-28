@@ -1,5 +1,5 @@
 import { KindToType } from 'libs/tecs';
-import { normalizeV2, multScalarV2, mutAddV2, mutSubV2, Position2 } from '../core';
+import { normalizeV2, multV2, mutAddV2, mutSubV2, Position2 } from '../core';
 import { ColliderShape } from './components';
 
 export function resolvePenetration(
@@ -19,15 +19,15 @@ export function resolvePenetration(
     });
 
     if (aImmovable) {
-      const resolution = multScalarV2(normDist, depth);
+      const resolution = multV2(normDist, depth);
 
       mutAddV2(bPosition, resolution);
     } else if (bImmovable) {
-      const resolution = multScalarV2(normDist, depth);
+      const resolution = multV2(normDist, depth);
 
       mutAddV2(aPosition, resolution);
     } else {
-      const resolution = multScalarV2(normDist, depth / 2);
+      const resolution = multV2(normDist, depth / 2);
 
       mutAddV2(aPosition, resolution);
       mutSubV2(bPosition, resolution);
@@ -73,15 +73,15 @@ export function resolvePenetration(
     };
 
     if (aImmovable) {
-      const resolution = multScalarV2(resolutionDirection, depth);
+      const resolution = multV2(resolutionDirection, depth);
 
       mutSubV2(bPosition, resolution);
     } else if (bImmovable) {
-      const resolution = multScalarV2(resolutionDirection, depth);
+      const resolution = multV2(resolutionDirection, depth);
 
       mutAddV2(aPosition, resolution);
     } else {
-      const resolution = multScalarV2(resolutionDirection, depth / 2);
+      const resolution = multV2(resolutionDirection, depth / 2);
 
       mutAddV2(aPosition, resolution);
       mutSubV2(bPosition, resolution);
@@ -141,15 +141,15 @@ export function resolvePenetration(
     };
 
     if (circleImmovable) {
-      const resolution = multScalarV2(resolutionDirection, depth);
+      const resolution = multV2(resolutionDirection, depth);
 
       mutSubV2(rectPosition, resolution);
     } else if (rectImmovable) {
-      const resolution = multScalarV2(resolutionDirection, depth);
+      const resolution = multV2(resolutionDirection, depth);
 
       mutAddV2(circlePosition, resolution);
     } else {
-      const resolution = multScalarV2(resolutionDirection, depth / 2);
+      const resolution = multV2(resolutionDirection, depth / 2);
 
       mutAddV2(circlePosition, resolution);
       mutSubV2(rectPosition, resolution);

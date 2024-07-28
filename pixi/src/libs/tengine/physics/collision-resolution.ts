@@ -1,9 +1,9 @@
 import { componentByEntity, registerTopic, System } from '../../tecs';
 import { Game } from '../game';
 import { Position2 } from '../core/types';
-import { colliding, resolvePenetration } from '../collision';
+import { colliding, Immovable, Impenetrable, resolvePenetration } from '../collision';
 import { Dynamic, Kinematic, Static } from './components';
-import { dotV2, multScalarV2, mutAddV2, normalizeV2, subV2, Velocity2 } from '../core';
+import { dotV2, multV2, mutAddV2, normalizeV2, subV2, Velocity2 } from '../core';
 
 // # Resolve Dynamic bodies Collision
 
@@ -16,6 +16,17 @@ export const dynamicRigidBodyCollisionResolution = (game: Game): System => {
 
       // # Skip physics if both are sensors
       if (a.collider.type === 'sensor' || b.collider.type === 'sensor') {
+        continue;
+      }
+
+      const aImpenetrable = componentByEntity(game.essence, a.entity, Impenetrable);
+      const bImpenetrable = componentByEntity(game.essence, b.entity, Impenetrable);
+
+      const aImmovable = componentByEntity(game.essence, a.entity, Immovable);
+      const bImmovable = componentByEntity(game.essence, b.entity, Immovable);
+
+      // # Collision resolution delegated to collision penetration resolution system
+      if (aImmovable || bImmovable || aImpenetrable || bImpenetrable) {
         continue;
       }
 
@@ -80,18 +91,41 @@ export const dynamicRigidBodyCollisionResolution = (game: Game): System => {
 
       // ## Dynamic vs Dynamic
 
+      // const aElasticity = ;
+
+      const elasticity: number = 1;
+
+      // # Of there is no elasticity, skip
+      if (elasticity === 0) {
+        continue;
+      }
+
+      const aMass = a.collider.mass;
+      const bMass = b.collider.mass;
+
+      // # If both bodies have infinite or zero mass, skip
+      if (aMass === Infinity || aMass === 0 || bMass === Infinity || bMass === 0) {
+        continue;
+      }
+
       if (a.collider.shape.type === 'circle' && b.collider.shape.type === 'circle') {
-        const normalizedPosition = normalizeV2(subV2(aPosition, bPosition));
+        // # Vector direction from a to b
+        const normalizedDirection = normalizeV2(subV2(aPosition, bPosition));
 
-        const relativeVelocity = subV2(aVelocity, bVelocity);
+        // # Projection of velocities on the relative position vector
+        const velocitySeparation = dotV2(subV2(aVelocity, bVelocity), normalizedDirection);
 
-        const velocitySeparation = dotV2(relativeVelocity, normalizedPosition);
+        // # Calculate the separation velocity with elasticity
+        const velocitySeparationWithElasticity = -1 * velocitySeparation * elasticity;
 
-        const newSepVelocity = -velocitySeparation;
-        const separationVelocityVector = multScalarV2(normalizedPosition, newSepVelocity);
+        // # Get the separation velocity vector
+        const separationVelocityVector = multV2(
+          normalizedDirection,
+          velocitySeparationWithElasticity
+        );
 
         mutAddV2(aVelocity, separationVelocityVector);
-        mutAddV2(bVelocity, multScalarV2(separationVelocityVector, -1));
+        mutAddV2(bVelocity, multV2(separationVelocityVector, -1));
 
         continue;
       }

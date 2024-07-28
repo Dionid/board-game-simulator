@@ -29,6 +29,7 @@ export const Collider = newSchema({
   offset: Position2,
   position: Position2, // QUESTION: maybe remove
   shape: ColliderShape,
+  mass: number,
 });
 
 export const ColliderSet = newSchema({
