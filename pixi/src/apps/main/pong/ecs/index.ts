@@ -1,5 +1,13 @@
 import { archetypeByEntity, Entity, newTag, System, tryTable } from 'libs/tecs';
-import { KeyBoardInput, Acceleration2, Speed, Velocity2 } from 'libs/tengine/core';
+import {
+  KeyBoardInput,
+  Acceleration2,
+  Speed,
+  Velocity2,
+  normalizeV2,
+  mulScalarV2,
+  mutMulScalarV2,
+} from 'libs/tengine/core';
 import { Game } from 'libs/tengine/game';
 
 // export const GameObject = newTag();
@@ -12,11 +20,11 @@ export type Directions = 'up' | 'down' | 'left' | 'right';
 
 const getXDirection = (keyboard: KeyBoardInput): number => {
   if (keyboard.keyDown['ArrowRight'] || keyboard.keyDown['d']) {
-    return -1;
+    return 1;
   }
 
   if (keyboard.keyDown['ArrowLeft'] || keyboard.keyDown['a']) {
-    return 1;
+    return -1;
   }
 
   return 0;
@@ -24,11 +32,11 @@ const getXDirection = (keyboard: KeyBoardInput): number => {
 
 const getYDirection = (keyboard: KeyBoardInput): number => {
   if (keyboard.keyDown['ArrowUp'] || keyboard.keyDown['w']) {
-    return 1;
+    return -1;
   }
 
   if (keyboard.keyDown['ArrowDown'] || keyboard.keyDown['s']) {
-    return -1;
+    return 1;
   }
 
   return 0;
@@ -72,8 +80,14 @@ export const accelerateByArrows = (game: Game, playerEntity: Entity): System => 
     const directionY = getYDirection(keyboard);
     const directionX = getXDirection(keyboard);
 
-    acceleration.y = -speed.value * directionY * deltaTime;
-    acceleration.x = -speed.value * directionX * deltaTime;
+    const newAcc = normalizeV2({
+      x: speed.value * directionX,
+      y: speed.value * directionY,
+    });
+    mutMulScalarV2(newAcc, speed.value);
+
+    acceleration.x = newAcc.x * deltaTime;
+    acceleration.y = newAcc.y * deltaTime;
   };
 };
 
@@ -115,7 +129,13 @@ export const changeVelocityByArrows = (game: Game, charEntity: Entity): System =
     const directionY = getYDirection(keyboard);
     const directionX = getXDirection(keyboard);
 
-    velocity.y = -speed.value * directionY * deltaTime;
-    velocity.x = -speed.value * directionX * deltaTime;
+    const newVel = normalizeV2({
+      x: speed.value * directionX,
+      y: speed.value * directionY,
+    });
+    mutMulScalarV2(newVel, speed.value);
+
+    velocity.x = newVel.x * deltaTime;
+    velocity.y = newVel.y * deltaTime;
   };
 };

@@ -2,10 +2,12 @@
 
 1. ~~Add collider~~
 1. ~~Add RigidBody~~
+1. Constant rectangle
 1. SAT
     1. SAT collision detection
     1. Calc MTV
     1. MTV Collision resolution
+1. Capsule
 1. Dedup collision pairs
 1. ...
 1. Preload assets
@@ -42,43 +44,23 @@
     1. World has Container, Maps and size
 1. Game
     1. Game has Canvas, Essence, Camera, Input, App, World
-1. GameObject (GO)
-    1. GO can have
-        1. Position
-        1. Rotation
-        1. (???) Size
-        1. Sprite
-            1. Position
-            1. Texture
-            1. Size
-            1. Rotation
-            1. Scale
-            1. Anchor
-        1. Collider
-            1. Shape
-            1. Size
-            1. Position
-            1. Rotation
-            1. Type (Solid, Sensor)
-        1. RigidBody
-            1. Type (Static, Kinematic, Dynamic)
-            1. Acceleration
-            1. Velocity
-            1. Position
-            1. Rotation
-            1. CollidersList
-    1. As components
-        1. Acceleration
-        1. Velocity
-        1. Position
-        1. Rotation
-        1. Sprite
-        1. CollidersList
 
-# Caution
+# Top level Components
 
-1. It's better not to change Camera size directly, use zoom for this
-1. ...
+Most of other components will depend on these ones
+
+1. **Position** – position in the World
+1. **Velocity** – speed of object (change in position)
+1. **Acceleration** – speed of speed (change in velocity)
+1. **Scale** – size of object
+1. **Rotation** – ...
+1. **Lock Translation** – lock object from changing position in x / y axis
+1. **Lock Rotation** – lock object from rotating in x / y axis
+1. **Lock Scale** – lock object from scaling in x / y axis
+
+# View
+
+...
 
 # Collision
 
@@ -89,61 +71,9 @@
 
 1. ...
 
+# Physics
 
-# Useful links
-
-1. Isometric
-    1. Rendering isometric map (https://melmouk.medium.com/algorithm-to-render-isometric-maps-3d86d1a49713)
-    1. Cartesian to Iso
-        1. https://codepen.io/StefanH/pen/qBgVPaQ
-        1. https://gist.github.com/jordwest/8a12196436ebcf8df98a2745251915b5
-        1. https://www.youtube.com/watch?v=04oQ2jOUjkU
-1. Collision
-    1. https://www.youtube.com/watch?v=eED4bSkYCB8
-    1. https://brm.io/game-physics-for-beginners/
-    1. https://www.toptal.com/game/video-game-physics-part-ii-collision-detection-for-solid-objects
-    1. SAT
-        1. https://github.com/xSnapi/SAT-Collision
-1. Physics
-    1. https://www.youtube.com/watch?v=3lBYVSplAuo
-    1. RigidBody
-        1. https://rapier.rs/docs/user_guides/rust/rigid_bodies
-
-
-# Questions
-
-1. Updates
-    1. How to updates involving minFPS and physics
-1. Acceleration, Velocity, Position, Translation
-    1. ! Are components of RigidBody 
-    1. ! Meaning
-        1. Acceleration is how fast velocity changes
-        1. Velocity is how fast position changes
-        1. Position is where object is
-        1. Translation is change in Position
-    1. Do we need to change acceleration over time
-    1. How to change only velocity
-        1. Maybe acceleration must not be part of engine
-    1. How speed must work (where to apply it)
-    1. linear / angular velocity
-    1. Do Acceleration works with Kinematic
-1. Collision
-    1. ! Types
-        1. Solid – generate Contact and CollisionEvents
-        1. Sensor – generate only CollisionEvents (can pass through)
-1. Scene Queries (https://rapier.rs/docs/user_guides/rust/scene_queries/)
-1. Depth Sorting
-1. Units (https://rapier.rs/docs/user_guides/rust/common_mistakes#why-is-everything-moving-in-slow-motion)
-1. ...
-
-# Notes
-
-!!! RigidBody это про то, чтобы объекты не попадали друг в друга
-!!! Рассчет новой позиции -> Проверка коллизий и корректировка новой позиции -> Применение новой позиции
-
-1. Collision is one process and Collision Reaction must base on type of RigidBody
-    1. Loop must be something like: apply forces -> check for collision -> apply collision reaction
-1. RigidBody
+1. RigidBody Types
     1. Static
         1. Move – false
         1. Affect others – true
@@ -161,10 +91,41 @@
         1. Affect others – true
         1. Affected by others – true
         1. Collision events – all
-1. Collisions
-    1. Attached to RigidBody
-1. We can lock translation or rotation (https://rapier.rs/docs/user_guides/rust/rigid_bodies#locking-translationsrotations)
-1. Sleeping
+
+# Caution
+
+1. It's better not to change Camera size directly, use zoom for this
+1. Colliders and Physics must be calculated before everything else
+1. ...
+
+
+# Useful links
+
+1. Isometric
+    1. Rendering isometric map (https://melmouk.medium.com/algorithm-to-render-isometric-maps-3d86d1a49713)
+    1. Cartesian to Iso
+        1. https://codepen.io/StefanH/pen/qBgVPaQ
+        1. https://gist.github.com/jordwest/8a12196436ebcf8df98a2745251915b5
+        1. https://www.youtube.com/watch?v=04oQ2jOUjkU
+1. Collision
+    1. https://www.youtube.com/playlist?list=PLo6lBZn6hgca1T7cNZXpiq4q395ljbEI_
+    1. https://www.youtube.com/watch?v=eED4bSkYCB8
+    1. https://brm.io/game-physics-for-beginners/
+    1. https://www.toptal.com/game/video-game-physics-part-ii-collision-detection-for-solid-objects
+    1. SAT
+        1. https://github.com/xSnapi/SAT-Collision
+1. Physics
+    1. https://www.youtube.com/watch?v=3lBYVSplAuo
+    1. RigidBody
+        1. https://rapier.rs/docs/user_guides/rust/rigid_bodies
+
+
+# Questions
+
+1. Scene Queries (https://rapier.rs/docs/user_guides/rust/scene_queries/)
+1. Units (https://rapier.rs/docs/user_guides/rust/common_mistakes#why-is-everything-moving-in-slow-motion)
+1. Depth Sorting
+1. ...
 
 
 1. Make so that we firstly calc new position, then check collision, than resolve it
@@ -216,33 +177,6 @@
                     1. ??? move previous body position without changing velocity
                     1. ??? Reset cached impulse if the body has velocity along it OR
                     warm the next iteration (by reducing it)
-
-
-# How Entity must compose
-
-1. Position
-1. Velocity
-1. Acceleration
-1. Scale
-1. ??? Rotation
-1. ??? Mass
-1. View
-    1. Offset
-    1. Scale
-    1. Type
-        1. Sprite
-            1. Texture
-        1. Graphics
-            1. Shape
-1. Collider Set
-    1. Collider
-        1. Type
-        1. Offset
-        1. Shape
-1. RigidBody
-1. RigidBodyStatic
-1. RigidBodyKinematic
-1. RigidBodyDynamic
 
 ## Problems
 

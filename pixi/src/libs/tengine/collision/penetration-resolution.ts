@@ -7,7 +7,7 @@ import {
   table,
 } from 'libs/tecs';
 import { Game } from '../game';
-import { mulV2, mutAddV2, mutSubV2, Position2, unitV2 } from '../core';
+import { mulScalarV2, mulV2, mutAddV2, mutSubV2, Position2, unitV2 } from '../core';
 import { colliding } from './topics';
 import { ColliderSet, Immovable, Impenetrable } from './components';
 import { safeGuard } from 'libs/tecs/switch';
@@ -50,15 +50,15 @@ export const penetrationResolution = (game: Game): System => {
         };
 
         if (aImmovable) {
-          const resolution = mulV2(unitV2(distance), depth);
+          const resolution = mulScalarV2(unitV2(distance), depth);
 
           mutAddV2(bPosition, resolution);
         } else if (bImmovable) {
-          const resolution = mulV2(unitV2(distance), depth);
+          const resolution = mulScalarV2(unitV2(distance), depth);
 
           mutAddV2(aPosition, resolution);
         } else {
-          const resolution = mulV2(unitV2(distance), depth / 2);
+          const resolution = mulScalarV2(unitV2(distance), depth / 2);
 
           mutAddV2(aPosition, resolution);
           mutSubV2(bPosition, resolution);

@@ -1,4 +1,4 @@
-import { Vector2 } from './types';
+import { Vector2 } from './math';
 
 export type KeyBoardInput = {
   keyDown: Record<string, boolean>;

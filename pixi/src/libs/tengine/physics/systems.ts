@@ -10,7 +10,7 @@ import { Game } from '../game';
 import { Position2 } from '../core/types';
 import { colliding } from '../collision';
 import { Dynamic, Kinematic, RigidBody, Static } from './components';
-import { Acceleration2, Velocity2 } from '../core/types';
+import { Acceleration2, Velocity2 } from '../core';
 
 export const accelerationVelocityQuery = newQuery(RigidBody, Acceleration2, Velocity2);
 
@@ -59,11 +59,8 @@ export const applyRigidBodyVelocityToPosition = (game: Game): System => {
         const position = positionT[j];
         const velocity = velocityT[j];
 
-        const newXPosition = position.x + velocity.x * deltaTime;
-        const newYPosition = position.y + velocity.y * deltaTime;
-
-        position.x = newXPosition;
-        position.y = newYPosition;
+        position.x += velocity.x * deltaTime;
+        position.y += velocity.y * deltaTime;
       }
     }
   };

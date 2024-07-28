@@ -1,4 +1,5 @@
-import { MinMax, Size2, Vector2 } from './types';
+import { Vector2 } from './math';
+import { MinMax, Size2 } from './types';
 
 export type CameraScale = Vector2;
 
