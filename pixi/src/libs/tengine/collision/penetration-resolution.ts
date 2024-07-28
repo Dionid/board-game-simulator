@@ -8,7 +8,7 @@ import {
   table,
 } from 'libs/tecs';
 import { Game } from '../game';
-import { mulScalarV2, mutAddV2, mutSubV2, normalizeV2, Position2 } from '../core';
+import { dotV2, mulScalarV2, mutAddV2, mutSubV2, normalizeV2, Position2, unitV2 } from '../core';
 import { colliding } from './topics';
 import { ColliderCircle, ColliderSet, Immovable, Impenetrable } from './components';
 import { safeGuard } from 'libs/tecs/switch';
@@ -35,6 +35,10 @@ export const penetrationResolution = (game: Game): System => {
 
       const aImmovable = componentByEntity(game.essence, a.entity, Immovable);
       const bImmovable = componentByEntity(game.essence, b.entity, Immovable);
+
+      if (aImmovable && bImmovable) {
+        continue;
+      }
 
       const aPosition = componentByEntity(game.essence, a.entity, Position2);
       const bPosition = componentByEntity(game.essence, b.entity, Position2);
@@ -87,18 +91,41 @@ export const penetrationResolution = (game: Game): System => {
         aColliderShape.type === 'constant_rectangle' &&
         bColliderShape.type === 'constant_rectangle'
       ) {
-        // const normDist = normalizeV2({
-        //   x: aPosition.x - bPosition.x,
-        //   y: aPosition.y - bPosition.y,
-        // });
+        const aCenter = {
+          x: aPosition.x + aColliderShape.width / 2,
+          y: aPosition.y + aColliderShape.height / 2,
+        };
 
-        const comingFromTop =
-          aPosition.y + aColliderShape.height < bPosition.y + bColliderShape.height;
+        const bCenter = {
+          x: bPosition.x + bColliderShape.width / 2,
+          y: bPosition.y + bColliderShape.height / 2,
+        };
+
+        const rightLeftEdgeDistance = Math.abs(aPosition.x + aColliderShape.width - bPosition.x);
+        const leftRightEdgeDistance = Math.abs(aPosition.x - (bPosition.x + bColliderShape.width));
+        const topBottomEdgeDistance = Math.abs(aPosition.y + aColliderShape.height - bPosition.y);
+        const bottomTopEdgeDistance = Math.abs(aPosition.y - (bPosition.y + bColliderShape.height));
+
         const comingFromBottom =
-          aPosition.y + aColliderShape.height > bPosition.y + bColliderShape.height;
+          bottomTopEdgeDistance < topBottomEdgeDistance &&
+          bottomTopEdgeDistance < rightLeftEdgeDistance &&
+          bottomTopEdgeDistance < leftRightEdgeDistance;
+        const comingFromTop =
+          topBottomEdgeDistance < bottomTopEdgeDistance &&
+          topBottomEdgeDistance < rightLeftEdgeDistance &&
+          topBottomEdgeDistance < leftRightEdgeDistance;
+        const comingFromLeft =
+          rightLeftEdgeDistance < leftRightEdgeDistance &&
+          rightLeftEdgeDistance < topBottomEdgeDistance &&
+          rightLeftEdgeDistance < bottomTopEdgeDistance;
+        const comingFromRight =
+          leftRightEdgeDistance < rightLeftEdgeDistance &&
+          leftRightEdgeDistance < topBottomEdgeDistance &&
+          leftRightEdgeDistance < bottomTopEdgeDistance;
 
-        const comingFromLeft = aPosition.x < bPosition.x;
-        const comingFromRight = aPosition.x > bPosition.x;
+        if (!comingFromBottom && !comingFromTop && !comingFromLeft && !comingFromRight) {
+          debugger;
+        }
 
         const resolutionDirection = {
           x: comingFromLeft ? -1 : comingFromRight ? 1 : 0,

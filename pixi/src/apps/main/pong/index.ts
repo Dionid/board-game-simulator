@@ -59,7 +59,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     y: game.world.size.height / 2 - characterSize.height / 2,
   });
   // # Acceleration based Movement
-  setComponent(game.essence, playerEntity, Speed, { value: 2 });
+  setComponent(game.essence, playerEntity, Speed, { value: 1 });
   setComponent(game.essence, playerEntity, Acceleration2, {
     x: 0,
     y: 0,
@@ -138,7 +138,6 @@ export async function initPongGame(parentElement: HTMLElement) {
   });
   setComponent(game.essence, enemyEntity, Impenetrable);
   setComponent(game.essence, enemyEntity, Immovable);
-  setComponent(game.essence, enemyEntity, Kinematic);
   setComponent(game.essence, enemyEntity, ColliderSet, {
     list: [
       {

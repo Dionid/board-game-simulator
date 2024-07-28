@@ -128,11 +128,7 @@ export const rectanglesCollidingDepth = (
     return -1;
   }
 
-  // debugger;
-
   if (distance.x <= minDistanceX) {
-    // return minDistanceY - distance.y;
-
     const xOverlap = minDistanceX - distance.x;
 
     if (distance.y <= minDistanceY) {
@@ -145,6 +141,7 @@ export const rectanglesCollidingDepth = (
   }
 
   if (distance.y <= minDistanceY) {
+    debugger;
     return minDistanceX - distance.x;
   }
 
