@@ -70,7 +70,7 @@ export const checkNarrowCollisionSimple = (game: Game): System => {
             for (const colliderB of colliderSetB.list) {
               const depth = collidersPenetrationDepth(colliderA, colliderB);
 
-              if (depth > 0) {
+              if (depth >= 0) {
                 emit(
                   colliding,
                   {

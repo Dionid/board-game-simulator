@@ -141,29 +141,23 @@ export const penetrationResolution = (game: Game): System => {
           continue;
         }
 
-        // const dist = {
-        //   x: Math.abs(circlePosition.x - rectPosition.x),
-        //   y: Math.abs(circlePosition.y - rectPosition.y),
-        // }
+        const comingFromTop = circlePosition.y < rectPosition.y;
+        const comingFromBottom = circlePosition.y > rectPosition.y + rectShape.height;
 
-        // const normDist = normalizeV2(dist);
+        const comingFromLeft = circlePosition.x < rectPosition.x;
+        const comingFromRight = circlePosition.x > rectPosition.x + rectShape.width;
 
-        // if (circleImmovable) {
-        //   const resolution = mulScalarV2(normDist, depth);
+        const resolution = mulScalarV2(
+          {
+            x: comingFromLeft ? -1 : comingFromRight ? 1 : 0,
+            y: comingFromTop ? -1 : comingFromBottom ? 1 : 0,
+          },
+          depth
+        );
 
-        //   mutAddV2(rectPosition, resolution);
-        // } else if (rectImmovable) {
-        //   const resolution = mulScalarV2(normDist, depth);
+        mutAddV2(circlePosition, resolution);
 
-        //   mutAddV2(circlePosition, resolution);
-        // } else {
-        //   const resolution = mulScalarV2(normDist, depth / 2);
-
-        //   mutAddV2(circlePosition, resolution);
-        //   mutSubV2(rectPosition, resolution);
-        // }
-
-        // continue;
+        continue;
       }
     }
   };

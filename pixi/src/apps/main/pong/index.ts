@@ -262,7 +262,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     drawDebugLines(game, map, {
       view: false,
       xy: true,
-      collision: true,
+      collision: false,
     })
   );
 

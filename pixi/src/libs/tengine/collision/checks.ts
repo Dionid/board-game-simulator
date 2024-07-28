@@ -73,11 +73,11 @@ export function circleAndRectangleCollidingDepth(
   const minDistanceY = rectSize.height / 2 + circleRadius;
 
   if (distance.x > minDistanceX) {
-    return 0;
+    return -1;
   }
 
   if (distance.y > minDistanceY) {
-    return 0;
+    return -1;
   }
 
   if (distance.x <= rectSize.width / 2) {
