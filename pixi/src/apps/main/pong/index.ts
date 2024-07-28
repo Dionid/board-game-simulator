@@ -4,7 +4,7 @@ import { registerSystem, setComponent, spawnEntity } from '../../../libs/tecs';
 import { mapKeyboardInput, mapMouseInput } from '../../../libs/tengine/ecs';
 import { RigidBody } from 'libs/tengine/physics/components';
 import { Position2, Velocity2, Speed, Acceleration2 } from 'libs/tengine/core';
-import { Ball, Enemy, Player, changeVelocityByArrows } from './ecs';
+import { Ball, Enemy, Player, accelerateByArrows, changeVelocityByArrows } from './ecs';
 import { applyWorldBoundaries } from 'libs/tengine/collision/penetration-resolution';
 import {
   CollisionsMonitoring,
@@ -85,6 +85,8 @@ export async function initPongGame(parentElement: HTMLElement) {
     },
   });
   // # Collisions
+  setComponent(game.essence, playerEntity, CollisionsMonitoring);
+  setComponent(game.essence, playerEntity, Impenetrable);
   setComponent(game.essence, playerEntity, Immovable);
   setComponent(game.essence, playerEntity, ColliderSet, {
     list: [
@@ -100,6 +102,8 @@ export async function initPongGame(parentElement: HTMLElement) {
       },
     ],
   });
+  // # Physics
+  setComponent(game.essence, playerEntity, RigidBody);
 
   // # Enemy
   const enemyEntity = spawnEntity(game.essence);
@@ -132,6 +136,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     x: (game.world.size.width / 6) * 5 - characterSize.width / 2,
     y: game.world.size.height / 2 - characterSize.height / 2,
   });
+  setComponent(game.essence, enemyEntity, Impenetrable);
   setComponent(game.essence, enemyEntity, Immovable);
   setComponent(game.essence, enemyEntity, Kinematic);
   setComponent(game.essence, enemyEntity, ColliderSet, {
@@ -165,10 +170,6 @@ export async function initPongGame(parentElement: HTMLElement) {
     },
   });
   setComponent(game.essence, ballEntity, Speed, { value: 10 });
-  // setComponent(game.essence, ballEntity, Acceleration2, {
-  //   x: 0,
-  //   y: 0,
-  // });
   setComponent(game.essence, ballEntity, Velocity2, {
     x: 0,
     y: 0,
@@ -252,8 +253,8 @@ export async function initPongGame(parentElement: HTMLElement) {
   registerSystem(game.essence, mapKeyboardInput(game));
   registerSystem(game.essence, mapMouseInput(game, map));
   // ## Movement
-  // registerSystem(game.essence, accelerateByArrows(game, ballEntity));
-  registerSystem(game.essence, changeVelocityByArrows(game, ballEntity));
+  registerSystem(game.essence, accelerateByArrows(game, playerEntity));
+  // registerSystem(game.essence, changeVelocityByArrows(game, ballEntity));
   registerSystem(game.essence, applyWorldBoundaries(game));
   // ## Render
   registerSystem(game.essence, drawViews(game, map));

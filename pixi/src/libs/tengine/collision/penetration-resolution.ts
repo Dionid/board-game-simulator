@@ -137,25 +137,31 @@ export const penetrationResolution = (game: Game): System => {
             ? bImmovable
             : null;
 
-        if (!circleImmovable && !rectImmovable) {
-          continue;
-        }
-
         const comingFromTop = circlePosition.y < rectPosition.y;
         const comingFromBottom = circlePosition.y > rectPosition.y + rectShape.height;
 
         const comingFromLeft = circlePosition.x < rectPosition.x;
         const comingFromRight = circlePosition.x > rectPosition.x + rectShape.width;
 
-        const resolution = mulScalarV2(
-          {
-            x: comingFromLeft ? -1 : comingFromRight ? 1 : 0,
-            y: comingFromTop ? -1 : comingFromBottom ? 1 : 0,
-          },
-          depth
-        );
+        const resolutionDirection = {
+          x: comingFromLeft ? -1 : comingFromRight ? 1 : 0,
+          y: comingFromTop ? -1 : comingFromBottom ? 1 : 0,
+        };
 
-        mutAddV2(circlePosition, resolution);
+        if (circleImmovable) {
+          const resolution = mulScalarV2(resolutionDirection, depth);
+
+          mutSubV2(rectPosition, resolution);
+        } else if (rectImmovable) {
+          const resolution = mulScalarV2(resolutionDirection, depth);
+
+          mutAddV2(circlePosition, resolution);
+        } else {
+          const resolution = mulScalarV2(resolutionDirection, depth / 2);
+
+          mutAddV2(circlePosition, resolution);
+          mutSubV2(rectPosition, resolution);
+        }
 
         continue;
       }
