@@ -1,9 +1,9 @@
 import { componentByEntity, registerTopic, System } from '../../tecs';
 import { Game } from '../game';
 import { Position2 } from '../core/types';
-import { colliding, Immovable, Impenetrable, resolvePenetration } from '../collision';
+import { colliding, Impenetrable, resolvePenetration } from '../collision';
 import { Dynamic, Kinematic, Static } from './components';
-import { dotV2, multV2, mutAddV2, normalizeV2, subV2, Velocity2 } from '../core';
+import { dotV2, multV2, normalizeV2, subV2, Velocity2 } from '../core';
 import { inverseMass } from './math';
 
 // # Resolve Dynamic bodies Collision
@@ -23,11 +23,8 @@ export const dynamicRigidBodyCollisionResolution = (game: Game): System => {
       const aImpenetrable = componentByEntity(game.essence, a.entity, Impenetrable);
       const bImpenetrable = componentByEntity(game.essence, b.entity, Impenetrable);
 
-      const aImmovable = componentByEntity(game.essence, a.entity, Immovable);
-      const bImmovable = componentByEntity(game.essence, b.entity, Immovable);
-
       // # Collision resolution delegated to collision penetration resolution system
-      if (aImmovable || bImmovable || aImpenetrable || bImpenetrable) {
+      if (aImpenetrable || bImpenetrable) {
         continue;
       }
 
@@ -80,10 +77,10 @@ export const dynamicRigidBodyCollisionResolution = (game: Game): System => {
       // # Resolve penetration
       resolvePenetration(
         aPosition,
-        !!aKinematic || !!aStatic || aMass === 0 || aMass === Infinity,
+        aMass,
         a.collider.shape,
         bPosition,
-        !!bKinematic || !!bStatic || bMass === 0 || bMass === Infinity,
+        bMass,
         b.collider.shape,
         depth
       );

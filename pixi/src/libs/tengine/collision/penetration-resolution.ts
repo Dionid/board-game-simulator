@@ -9,9 +9,9 @@ import {
 import { Game } from '../game';
 import { Position2 } from '../core';
 import { colliding } from './topics';
-import { ColliderSet, Immovable, Impenetrable } from './components';
+import { ColliderSet, Impenetrable } from './components';
 import { safeGuard } from 'libs/tecs/switch';
-import { resolvePenetration } from './resolvers';
+import { resolvePenetration } from './penetration-resolvers';
 
 export const penetrationResolution = (game: Game): System => {
   const topic = registerTopic(game.essence, colliding);
@@ -33,13 +33,6 @@ export const penetrationResolution = (game: Game): System => {
         continue;
       }
 
-      const aImmovable = componentByEntity(game.essence, a.entity, Immovable);
-      const bImmovable = componentByEntity(game.essence, b.entity, Immovable);
-
-      if (aImmovable && bImmovable) {
-        continue;
-      }
-
       const aPosition = componentByEntity(game.essence, a.entity, Position2);
       const bPosition = componentByEntity(game.essence, b.entity, Position2);
 
@@ -49,10 +42,10 @@ export const penetrationResolution = (game: Game): System => {
 
       resolvePenetration(
         aPosition,
-        !!aImmovable,
+        a.collider.mass,
         a.collider.shape,
         bPosition,
-        !!bImmovable,
+        b.collider.mass,
         b.collider.shape,
         depth
       );

@@ -4,34 +4,31 @@ import { ColliderShape } from './components';
 
 export function resolvePenetration(
   aPosition: Position2,
-  aImmovable: boolean,
+  aMass: number,
   aColliderShape: KindToType<typeof ColliderShape>,
   bPosition: Position2,
-  bImmovable: boolean,
+  bMass: number,
   bColliderShape: KindToType<typeof ColliderShape>,
   depth: number
-) {
+): void {
+  const aInvertedMass = aMass === 0 ? 0 : 1 / aMass;
+  const bInvertedMass = bMass === 0 ? 0 : 1 / bMass;
+
   // # Circle Circle Collision Resolution
   if (aColliderShape.type === 'circle' && bColliderShape.type === 'circle') {
+    if (aMass + bMass === 0) {
+      return;
+    }
+
     const normDist = normalizeV2({
       x: aPosition.x - bPosition.x,
       y: aPosition.y - bPosition.y,
     });
 
-    if (aImmovable) {
-      const resolution = multV2(normDist, depth);
+    const resolution = multV2(normDist, depth / (aInvertedMass + bInvertedMass));
 
-      mutAddV2(bPosition, resolution);
-    } else if (bImmovable) {
-      const resolution = multV2(normDist, depth);
-
-      mutAddV2(aPosition, resolution);
-    } else {
-      const resolution = multV2(normDist, depth / 2);
-
-      mutAddV2(aPosition, resolution);
-      mutSubV2(bPosition, resolution);
-    }
+    mutAddV2(aPosition, multV2(resolution, aInvertedMass));
+    mutSubV2(bPosition, multV2(resolution, bInvertedMass));
 
     return;
   }
@@ -72,20 +69,25 @@ export function resolvePenetration(
       y: comingFromTop ? -1 : comingFromBottom ? 1 : 0,
     };
 
-    if (aImmovable) {
-      const resolution = multV2(resolutionDirection, depth);
+    const resolution = multV2(resolutionDirection, depth / (aInvertedMass + bInvertedMass));
 
-      mutSubV2(bPosition, resolution);
-    } else if (bImmovable) {
-      const resolution = multV2(resolutionDirection, depth);
+    mutAddV2(aPosition, multV2(resolution, aInvertedMass));
+    mutSubV2(bPosition, multV2(resolution, bInvertedMass));
 
-      mutAddV2(aPosition, resolution);
-    } else {
-      const resolution = multV2(resolutionDirection, depth / 2);
+    // if (aImmovable) {
+    //   const resolution = multV2(resolutionDirection, depth);
 
-      mutAddV2(aPosition, resolution);
-      mutSubV2(bPosition, resolution);
-    }
+    //   mutSubV2(bPosition, resolution);
+    // } else if (bImmovable) {
+    //   const resolution = multV2(resolutionDirection, depth);
+
+    //   mutAddV2(aPosition, resolution);
+    // } else {
+    //   const resolution = multV2(resolutionDirection, depth / 2);
+
+    //   mutAddV2(aPosition, resolution);
+    //   mutSubV2(bPosition, resolution);
+    // }
 
     return;
   }
@@ -115,20 +117,6 @@ export function resolvePenetration(
     const circlePosition = aColliderShape.type === 'circle' ? aPosition : bPosition;
     const rectPosition = bColliderShape.type === 'constant_rectangle' ? bPosition : aPosition;
 
-    const circleImmovable =
-      aColliderShape.type === 'circle'
-        ? aImmovable
-        : bColliderShape.type === 'circle'
-        ? bImmovable
-        : null;
-
-    const rectImmovable =
-      aColliderShape.type === 'constant_rectangle'
-        ? aImmovable
-        : bColliderShape.type === 'constant_rectangle'
-        ? bImmovable
-        : null;
-
     const comingFromTop = circlePosition.y < rectPosition.y;
     const comingFromBottom = circlePosition.y > rectPosition.y + rectShape.height;
 
@@ -140,20 +128,39 @@ export function resolvePenetration(
       y: comingFromTop ? -1 : comingFromBottom ? 1 : 0,
     };
 
-    if (circleImmovable) {
-      const resolution = multV2(resolutionDirection, depth);
+    const resolution = multV2(resolutionDirection, depth / (aInvertedMass + bInvertedMass));
 
-      mutSubV2(rectPosition, resolution);
-    } else if (rectImmovable) {
-      const resolution = multV2(resolutionDirection, depth);
+    mutAddV2(circlePosition, multV2(resolution, aInvertedMass));
+    mutSubV2(rectPosition, multV2(resolution, bInvertedMass));
 
-      mutAddV2(circlePosition, resolution);
-    } else {
-      const resolution = multV2(resolutionDirection, depth / 2);
+    // const circleImmovable =
+    //   aColliderShape.type === 'circle'
+    //     ? aImmovable
+    //     : bColliderShape.type === 'circle'
+    //     ? bImmovable
+    //     : null;
 
-      mutAddV2(circlePosition, resolution);
-      mutSubV2(rectPosition, resolution);
-    }
+    // const rectImmovable =
+    //   aColliderShape.type === 'constant_rectangle'
+    //     ? aImmovable
+    //     : bColliderShape.type === 'constant_rectangle'
+    //     ? bImmovable
+    //     : null;
+
+    // if (circleImmovable) {
+    //   const resolution = multV2(resolutionDirection, depth);
+
+    //   mutSubV2(rectPosition, resolution);
+    // } else if (rectImmovable) {
+    //   const resolution = multV2(resolutionDirection, depth);
+
+    //   mutAddV2(circlePosition, resolution);
+    // } else {
+    //   const resolution = multV2(resolutionDirection, depth / 2);
+
+    //   mutAddV2(circlePosition, resolution);
+    //   mutSubV2(rectPosition, resolution);
+    // }
 
     return;
   }

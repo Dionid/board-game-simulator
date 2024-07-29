@@ -2,9 +2,9 @@ import { Container } from 'pixi.js';
 import { initGame, newGame } from '../../../libs/tengine/game';
 import { registerSystem, setComponent, spawnEntity } from '../../../libs/tecs';
 import { mapKeyboardInput, mapMouseInput } from '../../../libs/tengine/ecs';
-import { Dynamic, Kinematic, RigidBody, Static } from 'libs/tengine/physics/components';
+import { Kinematic, RigidBody } from 'libs/tengine/physics/components';
 import { Position2, Velocity2, Speed, Acceleration2 } from 'libs/tengine/core';
-import { Ball, Enemy, Player, accelerateByArrows, changeVelocityByArrows } from './ecs';
+import { Ball, Enemy, Player, changeVelocityByArrows } from './ecs';
 import { applyWorldBoundaries } from 'libs/tengine/collision/penetration-resolution';
 import {
   CollisionsMonitoring,
@@ -12,7 +12,6 @@ import {
   checkNarrowCollisionSimple,
   ColliderSet,
   Impenetrable,
-  Immovable,
 } from 'libs/tengine/collision';
 import {
   applyRigidBodyAccelerationToVelocity,
@@ -184,12 +183,12 @@ export async function initPongGame(parentElement: HTMLElement) {
   });
   // # Collisions
   setComponent(game.essence, ballEntity, CollisionsMonitoring);
-  // setComponent(game.essence, ballEntity, Impenetrable);
+  setComponent(game.essence, ballEntity, Impenetrable);
   setComponent(game.essence, ballEntity, ColliderSet, {
     list: [
       {
         type: 'solid',
-        mass: 1,
+        mass: 100,
         offset: { x: 0, y: 0 },
         position: { x: 0, y: 0 },
         shape: {
@@ -201,7 +200,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   });
   // # Physics
   setComponent(game.essence, ballEntity, RigidBody);
-  setComponent(game.essence, ballEntity, Dynamic);
+  // setComponent(game.essence, ballEntity, Dynamic);
 
   // # Second Ball
   const sBallEntity = spawnEntity(game.essence);
@@ -232,13 +231,12 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, sBallEntity, RigidBody);
   // # Collisions
   // setComponent(game.essence, sBallEntity, CollisionsMonitoring);
-  // setComponent(game.essence, sBallEntity, Impenetrable);
-  // setComponent(game.essence, sBallEntity, Immovable);
+  setComponent(game.essence, sBallEntity, Impenetrable);
   setComponent(game.essence, sBallEntity, ColliderSet, {
     list: [
       {
         type: 'solid',
-        mass: 0,
+        mass: 1,
         offset: { x: 0, y: 0 },
         position: { x: 0, y: 0 },
         shape: {
@@ -249,8 +247,8 @@ export async function initPongGame(parentElement: HTMLElement) {
     ],
   });
   // # Physics
-  setComponent(game.essence, sBallEntity, RigidBody);
-  setComponent(game.essence, sBallEntity, Dynamic);
+  // setComponent(game.essence, sBallEntity, RigidBody);
+  // setComponent(game.essence, sBallEntity, Dynamic);
   // setComponent(game.essence, sBallEntity, Kinematic);
 
   // # Systems

@@ -7,8 +7,6 @@ export const CollisionsMonitoring = newTag();
 // # Forbid penetration of solid Colliders
 export const Impenetrable = newTag();
 
-export const Immovable = newTag();
-
 // # Collider
 
 export const ColliderRectangle = newSchema({
