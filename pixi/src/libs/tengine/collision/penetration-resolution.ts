@@ -103,6 +103,21 @@ export const applyWorldBoundaries = (game: Game): System => {
                     position.y = game.world.size.height - part.shape.height + pivot.y;
                   }
                   break;
+                // TODO: TEST
+                case 'line':
+                  if (position.x - pivot.x < 0) {
+                    position.x = pivot.x;
+                  }
+                  if (position.y - pivot.y < 0) {
+                    position.y = pivot.y;
+                  }
+                  if (position.x + part.shape.end.x - pivot.x > game.world.size.width) {
+                    position.x = game.world.size.width - part.shape.end.x + pivot.x;
+                  }
+                  if (position.y + part.shape.end.y - pivot.y > game.world.size.height) {
+                    position.y = game.world.size.height - part.shape.end.y + pivot.y;
+                  }
+                  break;
                 default:
                   safeGuard(part.shape);
               }

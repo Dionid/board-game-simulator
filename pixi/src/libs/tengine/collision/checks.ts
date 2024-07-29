@@ -1,3 +1,4 @@
+import { safeGuard } from 'libs/tecs/switch';
 import { KindToType } from '../../tecs';
 import { Position2, Size2 } from '../core';
 import { Collider } from './components';
@@ -158,74 +159,59 @@ export const collidersPenetrationDepth = (
   aCollider: KindToType<typeof Collider>,
   bCollider: KindToType<typeof Collider>
 ): number => {
-  const aColliderShape = aCollider.shape;
-  const bColliderShape = bCollider.shape;
-
-  if (aCollider.shape.type === 'circle' && bCollider.shape.type === 'circle') {
-    return circlesCollisionDepth(
-      aCollider.position,
-      aCollider.shape.radius,
-      bCollider.position,
-      bCollider.shape.radius
-    );
+  switch (aCollider.shape.type) {
+    case 'circle':
+      switch (bCollider.shape.type) {
+        case 'circle':
+          return circlesCollisionDepth(
+            aCollider.position,
+            aCollider.shape.radius,
+            bCollider.position,
+            bCollider.shape.radius
+          );
+        case 'constant_rectangle':
+          return circleAndRectangleCollidingDepth(
+            aCollider.position,
+            aCollider.shape.radius,
+            bCollider.position,
+            bCollider.shape
+          );
+        case 'line':
+          return -1;
+        default:
+          return safeGuard(bCollider.shape);
+      }
+    case 'constant_rectangle':
+      switch (bCollider.shape.type) {
+        case 'circle':
+          return circleAndRectangleCollidingDepth(
+            bCollider.position,
+            bCollider.shape.radius,
+            aCollider.position,
+            aCollider.shape
+          );
+        case 'constant_rectangle':
+          return rectanglesCollidingDepth(
+            aCollider.position,
+            aCollider.shape,
+            bCollider.position,
+            bCollider.shape
+          );
+        case 'line':
+          return -1;
+        default:
+          return safeGuard(bCollider.shape);
+      }
+    case 'line':
+      switch (bCollider.shape.type) {
+        case 'circle':
+        case 'constant_rectangle':
+        case 'line':
+          return -1;
+        default:
+          return safeGuard(bCollider.shape);
+      }
+    default:
+      return safeGuard(aCollider.shape);
   }
-
-  if (
-    (aCollider.shape.type === 'circle' && bCollider.shape.type === 'constant_rectangle') ||
-    (aCollider.shape.type === 'constant_rectangle' && bCollider.shape.type === 'circle')
-  ) {
-    const circleCollider =
-      aColliderShape.type === 'circle'
-        ? aCollider
-        : bColliderShape.type === 'circle'
-        ? bCollider
-        : null;
-    const rectCollider =
-      aColliderShape.type === 'constant_rectangle'
-        ? aCollider
-        : bColliderShape.type === 'constant_rectangle'
-        ? bCollider
-        : null;
-
-    if (!circleCollider || !rectCollider) {
-      throw new Error('Invalid collider');
-    }
-
-    const circleShape =
-      aColliderShape.type === 'circle'
-        ? aColliderShape
-        : bColliderShape.type === 'circle'
-        ? bColliderShape
-        : null;
-    const rectShape =
-      aColliderShape.type === 'constant_rectangle'
-        ? aColliderShape
-        : bColliderShape.type === 'constant_rectangle'
-        ? bColliderShape
-        : null;
-
-    if (!circleShape || !rectShape) {
-      throw new Error('Invalid collider shape');
-    }
-
-    return circleAndRectangleCollidingDepth(
-      circleCollider.position,
-      circleShape.radius,
-      rectCollider.position,
-      rectShape
-    );
-  }
-
-  if (
-    aCollider.shape.type === 'constant_rectangle' &&
-    bCollider.shape.type === 'constant_rectangle'
-  ) {
-    return rectanglesCollidingDepth(
-      aCollider.position,
-      aCollider.shape,
-      bCollider.position,
-      bCollider.shape
-    );
-  }
-  return -1;
 };

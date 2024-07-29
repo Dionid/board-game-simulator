@@ -137,6 +137,8 @@ export function resolvePenetration(
   }
 
   switch (aColliderShape.type) {
+    case 'line':
+      return;
     case 'circle':
       switch (bColliderShape.type) {
         case 'circle':
@@ -159,6 +161,8 @@ export function resolvePenetration(
             bInvertedMass,
             combinedInvertedMass
           );
+        case 'line':
+          return;
         default:
           return safeGuard(bColliderShape);
       }
@@ -186,6 +190,8 @@ export function resolvePenetration(
             bInvertedMass,
             combinedInvertedMass
           );
+        case 'line':
+          return;
         default:
           return safeGuard(bColliderShape);
       }
