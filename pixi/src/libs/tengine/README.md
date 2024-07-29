@@ -1,16 +1,21 @@
 # Roadmap
 
-1. ~~Add collider~~
-1. ~~Add RigidBody~~
-1. Constant rectangle
-1. SAT
-    1. SAT collision detection
-    1. Calc MTV
-    1. MTV Collision resolution
-1. Capsule
-1. Dedup collision pairs
-1. OnComponentAdded
-    1. Check in physics, that there is no RigidBodyType + Impenetrable
+
+1. ECS
+    1. Default topics (ComponentAdded, ComponentRemoved, ComponentChanged, EntitySpawned, EntityKilled)
+1. Collision
+    1. Line
+    1. Capsule
+    1. SAT
+    1. Dedup collision pairs
+    1. Collision Queries
+1. Physics
+    1. Rotation
+    1. OnComponentAdded
+        1. Check in physics, that there is no RigidBodyType + Impenetrable
+    1. Joints
+1. Character movement
+    1. Move and slide
 1. ...
 1. Preload assets
 1. Culling
@@ -18,9 +23,6 @@
 1. Top-down Tilemap
 1. ...
 1. Tweens
-1. ...
-1. ? Fixed update
-1. ? Convert scale from float to int
 
 # Features
 
@@ -47,7 +49,9 @@
 1. Game
     1. Game has Canvas, Essence, Camera, Input, App, World
 
-# Top level Components
+# Components
+
+## Top level Components
 
 Most of other components will depend on these ones
 
@@ -60,20 +64,19 @@ Most of other components will depend on these ones
 1. **Lock Rotation** – lock object from rotating in x / y axis
 1. **Lock Scale** – lock object from scaling in x / y axis
 
-# View
+## View
 
 ...
 
-# Collision
+## Collision
 
 1. Phases
     1. Broad
     1. Narrow
     1. Response
-
 1. ...
 
-# Physics
+## Physics
 
 1. RigidBody Types
     1. Static
@@ -94,7 +97,7 @@ Most of other components will depend on these ones
         1. Affected by others – true
         1. Collision events – all
 
-# Caution
+## Caution
 
 1. It's better not to change Camera size directly, use zoom for this
 1. Colliders and Physics must be calculated before everything else
@@ -127,58 +130,8 @@ Most of other components will depend on these ones
 1. Scene Queries (https://rapier.rs/docs/user_guides/rust/scene_queries/)
 1. Units (https://rapier.rs/docs/user_guides/rust/common_mistakes#why-is-everything-moving-in-slow-motion)
 1. Depth Sorting
+1. Add Scene (world of one of the stages) to Game (like for multiple levels)
 1. ...
-
-
-1. Make so that we firstly calc new position, then check collision, than resolve it
-
-
-# Matter
-
-1. Apply Gravity to Forces
-
-1. Collision Response
-    1. Update Bodies
-        1. Body ->
-                Change Velocity -> Save previous position -> Apply Velocity to Position
-                -> Change AngularVelocity -> Save prev Angle -> Apply AngularVelocity to Angle
-            -> For Parts
-                -> Translate parts vertices -> Apply body velocity tp parts.position
-                -> Rotate Parts
-                -> Update bounds
-    1. Constraints
-        1. PresolveAll ???
-        1. Solve All
-    1. Detect collisions
-    1. Update collision Pairs
-    1. Wake up bodies
-    1. CollisionStartEvent on new Pairs
-    1. (!!!) SolvePosition
-        1. preSolvePosition -> set total contacts
-        1. solvePosition (find impulses required to resolve penetration)
-            1. ```
-                pair.separation =
-                collision.depth +
-                collision.normal.x * (bodyB.positionImpulse.x - bodyA.positionImpulse.x) +
-                collision.normal.y * (bodyB.positionImpulse.y - bodyA.positionImpulse.y);
-                ```
-            1. positionImpulse = pair.separation - pair.slop * slopDampen;
-            1. if body not static and not sleeping apply impulse
-                ```
-                bodyA.positionImpulse.x +=
-                  normal.x * positionImpulse * contactShare;
-                bodyA.positionImpulse.y +=
-                  normal.y * positionImpulse * contactShare;
-                ```
-        1. postSolvePosition (apply impulses to all bodies)
-            1. for bodies
-                1. reset totalContacts
-                1. If there is any positionImpulse
-                    1. verticesTranslate
-                    1. boundsUpdate
-                    1. ??? move previous body position without changing velocity
-                    1. ??? Reset cached impulse if the body has velocity along it OR
-                    warm the next iteration (by reducing it)
 
 ## Problems
 
