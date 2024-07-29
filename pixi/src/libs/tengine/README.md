@@ -9,6 +9,8 @@
     1. MTV Collision resolution
 1. Capsule
 1. Dedup collision pairs
+1. OnComponentAdded
+    1. Check in physics, that there is no RigidBodyType + Impenetrable
 1. ...
 1. Preload assets
 1. Culling

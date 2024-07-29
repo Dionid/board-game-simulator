@@ -13,19 +13,21 @@ export function resolvePenetration(
 ): void {
   const aInvertedMass = aMass === 0 ? 0 : 1 / aMass;
   const bInvertedMass = bMass === 0 ? 0 : 1 / bMass;
+  const combinedInvertedMass = aInvertedMass + bInvertedMass;
+
+  // # If both objects are immovable, skip
+  if (combinedInvertedMass === 0) {
+    return;
+  }
 
   // # Circle Circle Collision Resolution
   if (aColliderShape.type === 'circle' && bColliderShape.type === 'circle') {
-    if (aMass + bMass === 0) {
-      return;
-    }
-
     const normDist = normalizeV2({
       x: aPosition.x - bPosition.x,
       y: aPosition.y - bPosition.y,
     });
 
-    const resolution = multV2(normDist, depth / (aInvertedMass + bInvertedMass));
+    const resolution = multV2(normDist, depth / combinedInvertedMass);
 
     mutAddV2(aPosition, multV2(resolution, aInvertedMass));
     mutSubV2(bPosition, multV2(resolution, bInvertedMass));
@@ -69,25 +71,10 @@ export function resolvePenetration(
       y: comingFromTop ? -1 : comingFromBottom ? 1 : 0,
     };
 
-    const resolution = multV2(resolutionDirection, depth / (aInvertedMass + bInvertedMass));
+    const resolution = multV2(resolutionDirection, depth / combinedInvertedMass);
 
     mutAddV2(aPosition, multV2(resolution, aInvertedMass));
     mutSubV2(bPosition, multV2(resolution, bInvertedMass));
-
-    // if (aImmovable) {
-    //   const resolution = multV2(resolutionDirection, depth);
-
-    //   mutSubV2(bPosition, resolution);
-    // } else if (bImmovable) {
-    //   const resolution = multV2(resolutionDirection, depth);
-
-    //   mutAddV2(aPosition, resolution);
-    // } else {
-    //   const resolution = multV2(resolutionDirection, depth / 2);
-
-    //   mutAddV2(aPosition, resolution);
-    //   mutSubV2(bPosition, resolution);
-    // }
 
     return;
   }
@@ -97,12 +84,6 @@ export function resolvePenetration(
     (aColliderShape.type === 'circle' && bColliderShape.type === 'constant_rectangle') ||
     (aColliderShape.type === 'constant_rectangle' && bColliderShape.type === 'circle')
   ) {
-    const circleShape =
-      aColliderShape.type === 'circle'
-        ? aColliderShape
-        : bColliderShape.type === 'circle'
-        ? bColliderShape
-        : null;
     const rectShape =
       aColliderShape.type === 'constant_rectangle'
         ? aColliderShape
@@ -110,7 +91,7 @@ export function resolvePenetration(
         ? bColliderShape
         : null;
 
-    if (!circleShape || !rectShape) {
+    if (!rectShape) {
       throw new Error('Invalid collider shape');
     }
 
@@ -128,39 +109,14 @@ export function resolvePenetration(
       y: comingFromTop ? -1 : comingFromBottom ? 1 : 0,
     };
 
-    const resolution = multV2(resolutionDirection, depth / (aInvertedMass + bInvertedMass));
+    const circleInvertedMass = aColliderShape.type === 'circle' ? aInvertedMass : bInvertedMass;
+    const rectInvertedMass =
+      aColliderShape.type === 'constant_rectangle' ? aInvertedMass : bInvertedMass;
 
-    mutAddV2(circlePosition, multV2(resolution, aInvertedMass));
-    mutSubV2(rectPosition, multV2(resolution, bInvertedMass));
+    const resolution = multV2(resolutionDirection, depth / combinedInvertedMass);
 
-    // const circleImmovable =
-    //   aColliderShape.type === 'circle'
-    //     ? aImmovable
-    //     : bColliderShape.type === 'circle'
-    //     ? bImmovable
-    //     : null;
-
-    // const rectImmovable =
-    //   aColliderShape.type === 'constant_rectangle'
-    //     ? aImmovable
-    //     : bColliderShape.type === 'constant_rectangle'
-    //     ? bImmovable
-    //     : null;
-
-    // if (circleImmovable) {
-    //   const resolution = multV2(resolutionDirection, depth);
-
-    //   mutSubV2(rectPosition, resolution);
-    // } else if (rectImmovable) {
-    //   const resolution = multV2(resolutionDirection, depth);
-
-    //   mutAddV2(circlePosition, resolution);
-    // } else {
-    //   const resolution = multV2(resolutionDirection, depth / 2);
-
-    //   mutAddV2(circlePosition, resolution);
-    //   mutSubV2(rectPosition, resolution);
-    // }
+    mutAddV2(circlePosition, multV2(resolution, circleInvertedMass));
+    mutSubV2(rectPosition, multV2(resolution, rectInvertedMass));
 
     return;
   }

@@ -4,7 +4,7 @@ import { Position2 } from '../core/types';
 import { colliding, Impenetrable, resolvePenetration } from '../collision';
 import { Dynamic, Kinematic, Static } from './components';
 import { dotV2, multV2, normalizeV2, subV2, Velocity2 } from '../core';
-import { inverseMass } from './math';
+import { inverseMass } from '../collision/math';
 
 // # Resolve Dynamic bodies Collision
 
@@ -111,7 +111,7 @@ export const dynamicRigidBodyCollisionResolution = (game: Game): System => {
 
         const velocitySeparationDiff = velocitySeparationWithElasticity - velocitySeparation;
 
-        const impulse = velocitySeparationDiff / inverseMass(aMass) + inverseMass(bMass);
+        const impulse = velocitySeparationDiff / (inverseMass(aMass) + inverseMass(bMass));
 
         const impulseVector = multV2(normalizedDirection, impulse);
 
