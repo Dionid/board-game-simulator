@@ -90,7 +90,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     list: [
       {
         type: 'solid',
-        mass: 0,
+        mass: 1,
         offset: { x: 0, y: 0 },
         position: { x: 0, y: 0 },
         shape: {
@@ -144,7 +144,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     list: [
       {
         type: 'solid',
-        mass: 0,
+        mass: 1,
         offset: { x: 0, y: 0 },
         position: { x: 0, y: 0 },
         shape: {

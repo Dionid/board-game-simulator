@@ -73,8 +73,8 @@ export const dynamicRigidBodyCollisionResolution = (game: Game): System => {
 
       // # Dynamic bodies collision response
 
-      const aMass = a.collider.mass;
-      const bMass = b.collider.mass;
+      const aMass = aStatic || aKinematic ? 0 : a.collider.mass;
+      const bMass = bStatic || bKinematic ? 0 : b.collider.mass;
 
       // # Resolve penetration
       resolvePenetration(
