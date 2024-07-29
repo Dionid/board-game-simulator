@@ -37,20 +37,33 @@ export function resolveCircleLineCollision(
   elasticity: number,
   circlePosition: Position2,
   circleVelocity: Velocity2,
+  circleInvertedMass: number,
   lineStart: Position2,
   lineEnd: Position2,
-  lineVelocity: Velocity2
+  lineVelocity: Velocity2,
+  lineInvertedMass: number,
+  combinedInvertedMass: number
 ) {
-  const normal = unitV2(
+  const normalizedDirection = unitV2(
     subV2(circlePosition, lineCircleClosestPoint(lineStart, lineEnd, circlePosition))
   );
 
-  const separationVelocity = dotV2(circleVelocity, normal);
+  const separationVelocity = dotV2(subV2(circleVelocity, lineVelocity), normalizedDirection);
 
   const separationVelocityWithElasticity = -1 * separationVelocity * elasticity;
 
-  const separationVelocityDiff = separationVelocity - separationVelocityWithElasticity;
+  const separationVelocityDiff = separationVelocityWithElasticity - separationVelocity;
 
-  circleVelocity.x -= separationVelocityDiff * normal.x;
-  circleVelocity.y -= separationVelocityDiff * normal.y;
+  // circleVelocity.x -= separationVelocityDiff * normal.x;
+  // circleVelocity.y -= separationVelocityDiff * normal.y;
+
+  const impulse = separationVelocityDiff / combinedInvertedMass;
+
+  const impulseVector = multV2(normalizedDirection, impulse);
+
+  circleVelocity.x += impulseVector.x * circleInvertedMass;
+  circleVelocity.y += impulseVector.y * circleInvertedMass;
+
+  lineVelocity.x -= impulseVector.x * lineInvertedMass;
+  lineVelocity.y -= impulseVector.y * lineInvertedMass;
 }

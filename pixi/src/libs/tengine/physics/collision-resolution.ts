@@ -166,12 +166,15 @@ export const dynamicRigidBodyCollisionResolution = (game: Game): System => {
                 elasticity,
                 aPosition,
                 aVelocity,
+                aInvertedMass,
                 bPosition,
                 {
                   x: bPosition.x + b.collider.shape.end.x,
                   y: bPosition.y + b.collider.shape.end.y,
                 },
-                bVelocity
+                bVelocity,
+                bInvertedMass,
+                combinedInvertedMass
               );
               continue;
             default:
@@ -180,35 +183,33 @@ export const dynamicRigidBodyCollisionResolution = (game: Game): System => {
         case 'constant_rectangle':
           continue;
         case 'line':
-          continue;
+          switch (b.collider.shape.type) {
+            case 'circle':
+              resolveCircleLineCollision(
+                elasticity,
+                bPosition,
+                bVelocity,
+                bInvertedMass,
+                aPosition,
+                {
+                  x: aPosition.x + a.collider.shape.end.x,
+                  y: aPosition.y + a.collider.shape.end.y,
+                },
+                aVelocity,
+                aInvertedMass,
+                combinedInvertedMass
+              );
+              continue;
+            case 'constant_rectangle':
+              continue;
+            case 'line':
+              continue;
+            default:
+              return safeGuard(b.collider.shape);
+          }
         default:
           return safeGuard(a.collider.shape);
       }
-
-      // if (a.collider.shape.type === 'circle' && b.collider.shape.type === 'circle') {
-      //   // # Relative direction vector from a to b
-      //   const normalizedDirection = normalizeV2(subV2(aPosition, bPosition));
-
-      //   // # Projection of velocities on the relative vector
-      //   const velocitySeparation = dotV2(subV2(aVelocity, bVelocity), normalizedDirection);
-
-      //   // # Calculate the separation velocity with elasticity
-      //   const velocitySeparationWithElasticity = -1 * velocitySeparation * elasticity;
-
-      //   const velocitySeparationDiff = velocitySeparationWithElasticity - velocitySeparation;
-
-      //   const impulse = velocitySeparationDiff / combinedInvertedMass;
-
-      //   const impulseVector = multV2(normalizedDirection, impulse);
-
-      //   aVelocity.x += impulseVector.x * aInvertedMass;
-      //   aVelocity.y += impulseVector.y * aInvertedMass;
-
-      //   bVelocity.x -= impulseVector.x * bInvertedMass;
-      //   bVelocity.y -= impulseVector.y * bInvertedMass;
-
-      //   continue;
-      // }
     }
   };
 };
