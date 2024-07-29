@@ -345,19 +345,23 @@ export async function initPongGame(parentElement: HTMLElement) {
   // ## Input
   registerSystem(game.essence, mapKeyboardInput(game));
   registerSystem(game.essence, mapMouseInput(game, map));
+
+  // ## Game logic
+  // registerSystem(game.essence, accelerateByArrows(game, playerEntity));
+  registerSystem(game.essence, accelerateByArrows(game, ballEntity));
+  // registerSystem(game.essence, changeVelocityByArrows(game, ballEntity));
+
   // ## Basic physics
   registerSystem(game.essence, applyRigidBodyAccelerationToVelocity(game));
   registerSystem(game.essence, applyRigidBodyVelocityToPosition(game));
   registerSystem(game.essence, applyPositionToCollider(game));
+  registerSystem(game.essence, applyWorldBoundaries(game));
+
   // ## Collision
   registerSystem(game.essence, checkNarrowCollisionSimple(game));
   registerSystem(game.essence, penetrationResolution(game));
   registerSystem(game.essence, dynamicRigidBodyCollisionResolution(game));
-  // ## Movement
-  // registerSystem(game.essence, accelerateByArrows(game, playerEntity));
-  registerSystem(game.essence, accelerateByArrows(game, ballEntity));
-  // registerSystem(game.essence, changeVelocityByArrows(game, ballEntity));
-  registerSystem(game.essence, applyWorldBoundaries(game));
+
   // ## Render
   registerSystem(game.essence, drawViews(game, map));
   registerSystem(
