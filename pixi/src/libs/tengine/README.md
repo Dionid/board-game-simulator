@@ -9,6 +9,8 @@
     1. SAT
     1. Dedup collision pairs
     1. Collision Queries
+    1. Add Offset to `resolvePenetration`
+    1. ? Remove `Collider.position`
 1. Physics
     1. Rotation
     1. OnComponentAdded
