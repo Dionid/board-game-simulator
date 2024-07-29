@@ -4,7 +4,7 @@ import { registerSystem, setComponent, spawnEntity } from '../../../libs/tecs';
 import { mapKeyboardInput, mapMouseInput } from '../../../libs/tengine/ecs';
 import { Dynamic, Kinematic, RigidBody, Static } from 'libs/tengine/physics/components';
 import { Position2, Velocity2, Speed, Acceleration2 } from 'libs/tengine/core';
-import { Ball, Enemy, Player, Wall, changeVelocityByArrows } from './ecs';
+import { Ball, Enemy, Player, Wall, accelerateByArrows, changeVelocityByArrows } from './ecs';
 import { applyWorldBoundaries } from 'libs/tengine/collision/penetration-resolution';
 import {
   CollisionsMonitoring,
@@ -177,7 +177,11 @@ export async function initPongGame(parentElement: HTMLElement) {
       },
     },
   });
-  setComponent(game.essence, ballEntity, Speed, { value: 5 });
+  setComponent(game.essence, ballEntity, Speed, { value: 1 });
+  setComponent(game.essence, ballEntity, Acceleration2, {
+    x: 0,
+    y: 0,
+  });
   setComponent(game.essence, ballEntity, Velocity2, {
     x: 0,
     y: 0,
@@ -310,7 +314,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     elasticity: 1,
     elasticityMode: 'average',
   });
-  setComponent(game.essence, wallEntity, Static);
+  setComponent(game.essence, wallEntity, Dynamic);
 
   // # Systems
   // ...
@@ -327,7 +331,8 @@ export async function initPongGame(parentElement: HTMLElement) {
   registerSystem(game.essence, dynamicRigidBodyCollisionResolution(game));
   // ## Movement
   // registerSystem(game.essence, accelerateByArrows(game, playerEntity));
-  registerSystem(game.essence, changeVelocityByArrows(game, ballEntity));
+  registerSystem(game.essence, accelerateByArrows(game, ballEntity));
+  // registerSystem(game.essence, changeVelocityByArrows(game, ballEntity));
   registerSystem(game.essence, applyWorldBoundaries(game));
   // ## Render
   registerSystem(game.essence, drawViews(game, map));
