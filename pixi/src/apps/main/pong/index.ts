@@ -259,7 +259,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   });
   setComponent(game.essence, sBallEntity, Dynamic);
 
-  // # Second Ball
+  // # Wall
   const wallEntity = spawnEntity(game.essence);
   setComponent(game.essence, wallEntity, Wall);
   // # View
@@ -296,8 +296,11 @@ export async function initPongGame(parentElement: HTMLElement) {
         offset: { x: 0, y: 0 },
         position: { x: 0, y: 0 },
         shape: {
-          type: 'circle',
-          radius: 25,
+          type: 'line',
+          end: {
+            x: 100,
+            y: 100,
+          },
         },
       },
     ],

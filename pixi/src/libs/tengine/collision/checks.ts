@@ -1,21 +1,21 @@
 import { safeGuard } from 'libs/tecs/switch';
 import { KindToType } from '../../tecs';
-import { Position2, Size2 } from '../core';
+import { dotV2, magV2, multV2, Position2, Size2, subV2, unitV2 } from '../core';
 import { Collider } from './components';
 
-export const circlesCollisionDepth = (
+export function circlesCollisionDepth(
   positionA: Position2,
   radiusA: number,
   positionB: Position2,
   radiusB: number
-) => {
+) {
   const dx = positionA.x - positionB.x;
   const dy = positionA.y - positionB.y;
   const distance = Math.sqrt(dx * dx + dy * dy);
   const minDistance = radiusA + radiusB;
 
   return minDistance - distance;
-};
+}
 
 export function areCircleAndRectangleColliding(
   circlePosition: Position2,
@@ -96,13 +96,58 @@ export function circleAndRectangleCollidingDepth(
   return circleRadius - cornerCollidingMagnitude;
 }
 
-// // # Check if two rectangles are colliding using AABB algorithm
-export const rectanglesCollidingDepth = (
+export function lineCircleClosestPoint(
+  lineStart: Position2,
+  lineEnd: Position2,
+  circlePosition: Position2
+) {
+  // # Normalized vector (direction) of the line from start to end
+  const lineDirection = unitV2(subV2(lineEnd, lineStart));
+
+  const circleToLineStartVec = subV2(lineStart, circlePosition);
+  if (dotV2(lineDirection, circleToLineStartVec) > 0) {
+    return lineStart;
+  }
+
+  const lineEndToCircleVec = subV2(circlePosition, lineEnd);
+
+  // # If the dot product is positive, the closest point is the end of the line
+  if (dotV2(lineDirection, lineEndToCircleVec) > 0) {
+    return lineEnd;
+  }
+
+  const closestPointDistance = dotV2(lineDirection, circleToLineStartVec);
+  const closestPointVector = multV2(lineDirection, closestPointDistance);
+
+  return subV2(lineStart, closestPointVector);
+}
+
+export function lineCircleCollidingDepth(
+  lineStart: Position2,
+  lineEnd: Position2,
+  circlePosition: Position2,
+  circleRadius: number
+) {
+  const closestPoint = lineCircleClosestPoint(lineStart, lineEnd, circlePosition);
+
+  const circleToClosesPointVector = subV2(closestPoint, circlePosition);
+
+  const closestPointMagnitude = magV2(circleToClosesPointVector);
+
+  if (closestPointMagnitude <= circleRadius) {
+    // # Collision detected
+    return circleRadius - closestPointMagnitude;
+  }
+
+  return -1;
+}
+
+export function rectanglesCollidingDepth(
   positionA: Position2,
   sizeA: Size2,
   positionB: Position2,
   sizeB: Size2
-): number => {
+): number {
   const aRectCenter = {
     x: positionA.x + sizeA.width / 2,
     y: positionA.y + sizeA.height / 2,
@@ -153,12 +198,12 @@ export const rectanglesCollidingDepth = (
   // return circleRadius - cornerCollidingMagnitude;
 
   return -1;
-};
+}
 
-export const collidersPenetrationDepth = (
+export function collidersPenetrationDepth(
   aCollider: KindToType<typeof Collider>,
   bCollider: KindToType<typeof Collider>
-): number => {
+): number {
   switch (aCollider.shape.type) {
     case 'circle':
       switch (bCollider.shape.type) {
@@ -177,7 +222,15 @@ export const collidersPenetrationDepth = (
             bCollider.shape
           );
         case 'line':
-          return -1;
+          return lineCircleCollidingDepth(
+            bCollider.position,
+            {
+              x: bCollider.shape.end.x + bCollider.position.x,
+              y: bCollider.shape.end.y + bCollider.position.y,
+            },
+            aCollider.position,
+            aCollider.shape.radius
+          );
         default:
           return safeGuard(bCollider.shape);
       }
@@ -205,6 +258,15 @@ export const collidersPenetrationDepth = (
     case 'line':
       switch (bCollider.shape.type) {
         case 'circle':
+          return lineCircleCollidingDepth(
+            aCollider.position,
+            {
+              x: aCollider.shape.end.x + aCollider.position.x,
+              y: aCollider.shape.end.y + aCollider.position.y,
+            },
+            bCollider.position,
+            bCollider.shape.radius
+          );
         case 'constant_rectangle':
         case 'line':
           return -1;
@@ -214,4 +276,4 @@ export const collidersPenetrationDepth = (
     default:
       return safeGuard(aCollider.shape);
   }
-};
+}

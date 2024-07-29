@@ -1,7 +1,18 @@
 import { KindToType } from 'libs/tecs';
-import { normalizeV2, multV2, mutAddV2, mutSubV2, Position2 } from '../core';
+import {
+  normalizeV2,
+  multV2,
+  mutAddV2,
+  mutSubV2,
+  Position2,
+  subV2,
+  addV2,
+  magV2,
+  unitV2,
+} from '../core';
 import { ColliderRectangle, ColliderShape } from './components';
 import { safeGuard } from 'libs/tecs/switch';
+import { lineCircleClosestPoint } from './checks';
 
 export function resolveCircleCirclePenetration(
   aPosition: Position2,
@@ -118,6 +129,21 @@ export function resolveConstantRectangleCirclePenetration(
   return;
 }
 
+export function resolveLineCirclePenetration(
+  circlePosition: Position2,
+  lineStart: Position2,
+  lineEnd: Position2,
+  depth: number
+) {
+  const closestPoint = lineCircleClosestPoint(lineStart, lineEnd, circlePosition);
+
+  const penetrationVector = subV2(circlePosition, closestPoint);
+
+  mutAddV2(circlePosition, multV2(unitV2(penetrationVector), depth));
+
+  // debugger;
+}
+
 export function resolvePenetration(
   aPosition: Position2,
   aMass: number,
@@ -138,7 +164,24 @@ export function resolvePenetration(
 
   switch (aColliderShape.type) {
     case 'line':
-      return;
+      switch (bColliderShape.type) {
+        case 'circle':
+          return resolveLineCirclePenetration(
+            bPosition,
+            aPosition,
+            {
+              x: aPosition.x + aColliderShape.end.x,
+              y: aPosition.y + aColliderShape.end.y,
+            },
+            depth
+          );
+        case 'constant_rectangle':
+          return;
+        case 'line':
+          return;
+        default:
+          return safeGuard(bColliderShape);
+      }
     case 'circle':
       switch (bColliderShape.type) {
         case 'circle':
@@ -162,7 +205,15 @@ export function resolvePenetration(
             combinedInvertedMass
           );
         case 'line':
-          return;
+          return resolveLineCirclePenetration(
+            aPosition,
+            bPosition,
+            {
+              x: bPosition.x + bColliderShape.end.x,
+              y: bPosition.y + bColliderShape.end.y,
+            },
+            depth
+          );
         default:
           return safeGuard(bColliderShape);
       }
