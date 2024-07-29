@@ -258,7 +258,6 @@ export async function initPongGame(parentElement: HTMLElement) {
     elasticityMode: 'average',
   });
   setComponent(game.essence, sBallEntity, Dynamic);
-  // setComponent(game.essence, sBallEntity, Kinematic);
 
   // # Systems
   // ...

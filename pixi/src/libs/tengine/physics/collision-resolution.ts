@@ -134,11 +134,20 @@ export const dynamicRigidBodyCollisionResolution = (game: Game): System => {
         continue;
       }
 
+      const aInvertedMass = inverseMass(aMass);
+      const bInvertedMass = inverseMass(bMass);
+      const combinedInvertedMass = aInvertedMass + bInvertedMass;
+
+      // # If both bodies have infinite mass, skip
+      if (combinedInvertedMass === 0) {
+        continue;
+      }
+
       if (a.collider.shape.type === 'circle' && b.collider.shape.type === 'circle') {
-        // # Vector direction from a to b
+        // # Relative direction vector from a to b
         const normalizedDirection = normalizeV2(subV2(aPosition, bPosition));
 
-        // # Projection of velocities on the relative position vector
+        // # Projection of velocities on the relative vector
         const velocitySeparation = dotV2(subV2(aVelocity, bVelocity), normalizedDirection);
 
         // # Calculate the separation velocity with elasticity
@@ -146,15 +155,15 @@ export const dynamicRigidBodyCollisionResolution = (game: Game): System => {
 
         const velocitySeparationDiff = velocitySeparationWithElasticity - velocitySeparation;
 
-        const impulse = velocitySeparationDiff / (inverseMass(aMass) + inverseMass(bMass));
+        const impulse = velocitySeparationDiff / combinedInvertedMass;
 
         const impulseVector = multV2(normalizedDirection, impulse);
 
-        aVelocity.x += impulseVector.x * inverseMass(aMass);
-        aVelocity.y += impulseVector.y * inverseMass(aMass);
+        aVelocity.x += impulseVector.x * aInvertedMass;
+        aVelocity.y += impulseVector.y * aInvertedMass;
 
-        bVelocity.x -= impulseVector.x * inverseMass(bMass);
-        bVelocity.y -= impulseVector.y * inverseMass(bMass);
+        bVelocity.x -= impulseVector.x * bInvertedMass;
+        bVelocity.y -= impulseVector.y * bInvertedMass;
 
         continue;
       }
