@@ -131,16 +131,23 @@ export function resolveConstantRectangleCirclePenetration(
 
 export function resolveLineCirclePenetration(
   circlePosition: Position2,
+  circleInvertedMass: number,
   lineStart: Position2,
   lineEnd: Position2,
-  depth: number
+  lineInvertedMass: number,
+  depth: number,
+  combinedInvertedMass: number
 ) {
   const closestPoint = lineCircleClosestPoint(lineStart, lineEnd, circlePosition);
 
   const penetrationVector = subV2(circlePosition, closestPoint);
 
-  // TODO: resolve also for line
-  mutAddV2(circlePosition, multV2(unitV2(penetrationVector), depth));
+  const normDist = unitV2(penetrationVector);
+
+  const resolution = multV2(normDist, depth / combinedInvertedMass);
+
+  mutAddV2(circlePosition, multV2(resolution, circleInvertedMass));
+  mutSubV2(lineStart, multV2(resolution, lineInvertedMass));
 }
 
 export function resolvePenetration(
@@ -167,12 +174,15 @@ export function resolvePenetration(
         case 'circle':
           return resolveLineCirclePenetration(
             bPosition,
+            bInvertedMass,
             aPosition,
             {
               x: aPosition.x + aColliderShape.end.x,
               y: aPosition.y + aColliderShape.end.y,
             },
-            depth
+            aInvertedMass,
+            depth,
+            combinedInvertedMass
           );
         case 'constant_rectangle':
           return;
@@ -206,12 +216,15 @@ export function resolvePenetration(
         case 'line':
           return resolveLineCirclePenetration(
             aPosition,
+            aInvertedMass,
             bPosition,
             {
               x: bPosition.x + bColliderShape.end.x,
               y: bPosition.y + bColliderShape.end.y,
             },
-            depth
+            bInvertedMass,
+            depth,
+            combinedInvertedMass
           );
         default:
           return safeGuard(bColliderShape);
