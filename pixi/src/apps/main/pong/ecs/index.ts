@@ -5,7 +5,6 @@ import {
   Speed,
   Velocity2,
   normalizeV2,
-  multV2,
   mutMultV2,
 } from 'libs/tengine/core';
 import { Game } from 'libs/tengine/game';
@@ -15,6 +14,7 @@ import { Game } from 'libs/tengine/game';
 export const Player = newTag();
 export const Enemy = newTag();
 export const Ball = newTag();
+export const Wall = newTag();
 
 export type Directions = 'up' | 'down' | 'left' | 'right';
 

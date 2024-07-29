@@ -45,6 +45,22 @@ export const drawViews = (game: Game, map: Map): System => {
                 );
                 break;
               }
+              case 'line': {
+                globalGraphics.moveTo(position.x + view.offset.x, position.y + view.offset.y);
+                globalGraphics.lineTo(
+                  position.x + view.offset.x + view.model.shape.end.x,
+                  position.y + view.offset.y + view.model.shape.end.y
+                );
+                globalGraphics.stroke({
+                  width: 1,
+                });
+                break;
+              }
+              case 'polygon': {
+                break;
+              }
+              default:
+                return safeGuard(view.model.shape);
             }
 
             globalGraphics.fill(view.model.color);

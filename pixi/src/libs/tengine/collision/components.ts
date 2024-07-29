@@ -20,6 +20,11 @@ export const ColliderCircle = newSchema({
   radius: number,
 });
 
+// export const ColliderLine = newSchema({
+//   type: literal('line'),
+//   radius: number,
+// });
+
 export const ColliderShape = union(ColliderRectangle, ColliderCircle);
 
 export const Collider = newSchema({

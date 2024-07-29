@@ -13,6 +13,11 @@ export const Circle = newSchema({
   radius: number,
 });
 
+export const Line = newSchema({
+  type: literal('line'),
+  end: Vector2,
+});
+
 export const Polygon = newSchema({
   type: literal('polygon'),
   // ...
@@ -20,7 +25,7 @@ export const Polygon = newSchema({
 
 export const Graphics = newSchema({
   type: literal('graphics'),
-  shape: union(Rectangle, Circle, Polygon),
+  shape: union(Rectangle, Circle, Polygon, Line),
   color: string,
 });
 

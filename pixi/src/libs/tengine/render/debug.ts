@@ -135,6 +135,7 @@ export const drawDebugLines = (
                     view.model.shape.size.height
                   );
                   break;
+                case 'line':
                 case 'polygon':
                   break;
                 default:

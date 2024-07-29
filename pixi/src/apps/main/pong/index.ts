@@ -2,9 +2,9 @@ import { Container } from 'pixi.js';
 import { initGame, newGame } from '../../../libs/tengine/game';
 import { registerSystem, setComponent, spawnEntity } from '../../../libs/tecs';
 import { mapKeyboardInput, mapMouseInput } from '../../../libs/tengine/ecs';
-import { Dynamic, Kinematic, RigidBody } from 'libs/tengine/physics/components';
+import { Dynamic, Kinematic, RigidBody, Static } from 'libs/tengine/physics/components';
 import { Position2, Velocity2, Speed, Acceleration2 } from 'libs/tengine/core';
-import { Ball, Enemy, Player, changeVelocityByArrows } from './ecs';
+import { Ball, Enemy, Player, Wall, changeVelocityByArrows } from './ecs';
 import { applyWorldBoundaries } from 'libs/tengine/collision/penetration-resolution';
 import {
   CollisionsMonitoring,
@@ -258,6 +258,56 @@ export async function initPongGame(parentElement: HTMLElement) {
     elasticityMode: 'average',
   });
   setComponent(game.essence, sBallEntity, Dynamic);
+
+  // # Second Ball
+  const wallEntity = spawnEntity(game.essence);
+  setComponent(game.essence, wallEntity, Wall);
+  // # View
+  setComponent(game.essence, wallEntity, View, {
+    offset: { x: 0, y: 0 },
+    scale: { x: 1, y: 1 },
+    model: {
+      type: 'graphics',
+      color: '0xfff',
+      shape: {
+        type: 'line',
+        end: {
+          x: 100,
+          y: 100,
+        },
+      },
+    },
+  });
+  setComponent(game.essence, wallEntity, Speed, { value: 5 });
+  setComponent(game.essence, wallEntity, Velocity2, {
+    x: 0,
+    y: 0,
+  });
+  setComponent(game.essence, wallEntity, Position2, {
+    x: 50,
+    y: 50,
+  });
+  // # Collisions
+  setComponent(game.essence, wallEntity, ColliderSet, {
+    list: [
+      {
+        type: 'solid',
+        mass: 1,
+        offset: { x: 0, y: 0 },
+        position: { x: 0, y: 0 },
+        shape: {
+          type: 'circle',
+          radius: 25,
+        },
+      },
+    ],
+  });
+  // # Physics
+  setComponent(game.essence, wallEntity, RigidBody, {
+    elasticity: 1,
+    elasticityMode: 'average',
+  });
+  setComponent(game.essence, wallEntity, Static);
 
   // # Systems
   // ...
