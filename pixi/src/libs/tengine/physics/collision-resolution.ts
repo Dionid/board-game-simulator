@@ -6,6 +6,7 @@ import { Dynamic, Kinematic, RigidBody, Static } from './components';
 import { dotV2, multV2, normalizeV2, subV2, Velocity2 } from '../core';
 import { inverseMass } from '../collision/math';
 import { safeGuard } from 'libs/tecs/switch';
+import { resolveCircleCircleCollision } from './resolvers';
 
 // # Resolve Dynamic bodies Collision
 
@@ -143,30 +144,58 @@ export const dynamicRigidBodyCollisionResolution = (game: Game): System => {
         continue;
       }
 
-      if (a.collider.shape.type === 'circle' && b.collider.shape.type === 'circle') {
-        // # Relative direction vector from a to b
-        const normalizedDirection = normalizeV2(subV2(aPosition, bPosition));
-
-        // # Projection of velocities on the relative vector
-        const velocitySeparation = dotV2(subV2(aVelocity, bVelocity), normalizedDirection);
-
-        // # Calculate the separation velocity with elasticity
-        const velocitySeparationWithElasticity = -1 * velocitySeparation * elasticity;
-
-        const velocitySeparationDiff = velocitySeparationWithElasticity - velocitySeparation;
-
-        const impulse = velocitySeparationDiff / combinedInvertedMass;
-
-        const impulseVector = multV2(normalizedDirection, impulse);
-
-        aVelocity.x += impulseVector.x * aInvertedMass;
-        aVelocity.y += impulseVector.y * aInvertedMass;
-
-        bVelocity.x -= impulseVector.x * bInvertedMass;
-        bVelocity.y -= impulseVector.y * bInvertedMass;
-
-        continue;
+      switch (a.collider.shape.type) {
+        case 'circle':
+          switch (b.collider.shape.type) {
+            case 'circle':
+              resolveCircleCircleCollision(
+                elasticity,
+                aPosition,
+                aVelocity,
+                aInvertedMass,
+                bPosition,
+                bVelocity,
+                bInvertedMass,
+                combinedInvertedMass
+              );
+              continue;
+            case 'constant_rectangle':
+            case 'line':
+              continue;
+            default:
+              return safeGuard(b.collider.shape);
+          }
+        case 'constant_rectangle':
+        case 'line':
+          continue;
+        default:
+          return safeGuard(a.collider.shape);
       }
+
+      // if (a.collider.shape.type === 'circle' && b.collider.shape.type === 'circle') {
+      //   // # Relative direction vector from a to b
+      //   const normalizedDirection = normalizeV2(subV2(aPosition, bPosition));
+
+      //   // # Projection of velocities on the relative vector
+      //   const velocitySeparation = dotV2(subV2(aVelocity, bVelocity), normalizedDirection);
+
+      //   // # Calculate the separation velocity with elasticity
+      //   const velocitySeparationWithElasticity = -1 * velocitySeparation * elasticity;
+
+      //   const velocitySeparationDiff = velocitySeparationWithElasticity - velocitySeparation;
+
+      //   const impulse = velocitySeparationDiff / combinedInvertedMass;
+
+      //   const impulseVector = multV2(normalizedDirection, impulse);
+
+      //   aVelocity.x += impulseVector.x * aInvertedMass;
+      //   aVelocity.y += impulseVector.y * aInvertedMass;
+
+      //   bVelocity.x -= impulseVector.x * bInvertedMass;
+      //   bVelocity.y -= impulseVector.y * bInvertedMass;
+
+      //   continue;
+      // }
     }
   };
 };

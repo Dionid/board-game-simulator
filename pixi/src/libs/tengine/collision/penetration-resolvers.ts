@@ -139,9 +139,8 @@ export function resolveLineCirclePenetration(
 
   const penetrationVector = subV2(circlePosition, closestPoint);
 
+  // TODO: resolve also for line
   mutAddV2(circlePosition, multV2(unitV2(penetrationVector), depth));
-
-  // debugger;
 }
 
 export function resolvePenetration(
