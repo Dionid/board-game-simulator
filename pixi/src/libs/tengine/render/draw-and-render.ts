@@ -1,6 +1,18 @@
-import { newQuery, registerQuery, System, table } from 'libs/tecs';
-import { Position2 } from '../core/types';
-import { crossV2, dotV2, horizontalVector, Map, subV2, unitV2 } from 'libs/tengine/core';
+import { newQuery, registerQuery, System, table, tryTable } from 'libs/tecs';
+import { Position2, Rotation } from '../core/types';
+import {
+  addV2,
+  crossV2,
+  dotV2,
+  horizontalVector,
+  magV2,
+  Map,
+  multiplyMatrixV2,
+  multV2,
+  rotationMatrix,
+  subV2,
+  unitV2,
+} from 'libs/tengine/core';
 import { Game } from 'libs/tengine/game';
 import { Graphics } from 'pixi.js';
 import { View } from './components';
@@ -20,6 +32,8 @@ export const drawViews = (game: Game, map: Map): System => {
     for (const archetype of query.archetypes) {
       const positionT = table(archetype, Position2);
       const viewT = table(archetype, View);
+
+      const rotationT = tryTable(archetype, Rotation);
 
       for (let i = 0, l = archetype.entities.length; i < l; i++) {
         const position = positionT[i];
@@ -46,11 +60,53 @@ export const drawViews = (game: Game, map: Map): System => {
                 break;
               }
               case 'line': {
-                globalGraphics.moveTo(position.x + view.offset.x, position.y + view.offset.y);
-                globalGraphics.lineTo(
-                  position.x + view.offset.x + view.model.shape.end.x,
-                  position.y + view.offset.y + view.model.shape.end.y
-                );
+                const start = {
+                  x: position.x + view.offset.x,
+                  y: position.y + view.offset.y,
+                };
+
+                const end = {
+                  x: start.x + view.model.shape.end.x,
+                  y: start.y + view.model.shape.end.y,
+                };
+
+                if (rotationT) {
+                  const centerOffset = {
+                    x: 0,
+                    y: 0.5,
+                  };
+
+                  const lineVector = subV2(end, start);
+                  const length = magV2(lineVector);
+                  const center = {
+                    x: start.x + length * centerOffset.x,
+                    y: start.y + length * centerOffset.y,
+                  };
+
+                  globalGraphics.circle(center.x, center.y, 4);
+                  globalGraphics.fill({ color: 'purple' });
+
+                  const refUnit = unitV2(lineVector);
+
+                  const rotMatrix = rotationMatrix(rotationT[i].value);
+
+                  const newDirection = multiplyMatrixV2(rotMatrix, refUnit);
+
+                  // if it is in start
+                  const newStart = addV2(center, multV2(newDirection, -length / 2));
+                  const newEnd = addV2(center, multV2(newDirection, length / 2));
+
+                  // debugger;
+
+                  end.x = newEnd.x;
+                  end.y = newEnd.y;
+
+                  start.x = newStart.x;
+                  start.y = newStart.y;
+                }
+
+                globalGraphics.moveTo(start.x, start.y);
+                globalGraphics.lineTo(end.x, end.y);
                 globalGraphics.stroke({
                   width: 1,
                 });
@@ -58,15 +114,37 @@ export const drawViews = (game: Game, map: Map): System => {
               }
               case 'capsule': {
                 // # Draw capsule
-                const start = position;
-                // const ex = x + view.model.shape.end.x;
-                // const ey = y + view.model.shape.end.y;
+                const start = {
+                  x: position.x + view.offset.x,
+                  y: position.y + view.offset.y,
+                };
                 const end = {
                   x: start.x + view.model.shape.end.x,
                   y: start.y + view.model.shape.end.y,
                 };
 
                 const radius = view.model.shape.radius;
+
+                if (rotationT) {
+                  const lineVector = subV2(end, start);
+                  const length = magV2(lineVector);
+
+                  const refUnit = unitV2(lineVector);
+
+                  const rotMatrix = rotationMatrix(rotationT[i].value);
+
+                  const newDirection = multiplyMatrixV2(rotMatrix, refUnit);
+
+                  // if it is in start
+                  const newStart = addV2(start, multV2(newDirection, -length / 2));
+                  const newEnd = addV2(start, multV2(newDirection, length / 2));
+
+                  end.x = newEnd.x;
+                  end.y = newEnd.y;
+
+                  start.x = newStart.x;
+                  start.y = newStart.y;
+                }
 
                 // # inner
                 globalGraphics.moveTo(start.x, start.y);

@@ -3,7 +3,7 @@ import { initGame, newGame } from '../../../libs/tengine/game';
 import { registerSystem, setComponent, spawnEntity } from '../../../libs/tecs';
 import { mapKeyboardInput, mapMouseInput } from '../../../libs/tengine/ecs';
 import { Dynamic, Kinematic, RigidBody, Static } from 'libs/tengine/physics/components';
-import { Position2, Velocity2, Speed, Acceleration2 } from 'libs/tengine/core';
+import { Position2, Velocity2, Speed, Acceleration2, Rotation } from 'libs/tengine/core';
 import { Ball, Enemy, Player, Wall, accelerateByArrows, changeVelocityByArrows } from './ecs';
 import { applyWorldBoundaries } from 'libs/tengine/collision/penetration-resolution';
 import {
@@ -11,7 +11,6 @@ import {
   applyPositionToCollider,
   checkNarrowCollisionSimple,
   ColliderSet,
-  Impenetrable,
 } from 'libs/tengine/collision';
 import {
   applyRigidBodyAccelerationToVelocity,
@@ -266,6 +265,14 @@ export async function initPongGame(parentElement: HTMLElement) {
   // # Wall
   const wallEntity = spawnEntity(game.essence);
   setComponent(game.essence, wallEntity, Wall);
+  const wallStart = {
+    x: 100,
+    y: 100,
+  };
+  const wallEnd = {
+    x: 0,
+    y: 50,
+  };
   // # View
   setComponent(game.essence, wallEntity, View, {
     offset: { x: 0, y: 0 },
@@ -275,22 +282,17 @@ export async function initPongGame(parentElement: HTMLElement) {
       color: '0xfff',
       shape: {
         type: 'line',
-        end: {
-          x: 100,
-          y: 100,
-        },
+        end: wallEnd,
       },
     },
   });
+  setComponent(game.essence, wallEntity, Rotation, { value: 0 });
   setComponent(game.essence, wallEntity, Speed, { value: 5 });
   setComponent(game.essence, wallEntity, Velocity2, {
     x: 0,
     y: 0,
   });
-  setComponent(game.essence, wallEntity, Position2, {
-    x: 50,
-    y: 50,
-  });
+  setComponent(game.essence, wallEntity, Position2, wallStart);
   // # Collisions
   setComponent(game.essence, wallEntity, ColliderSet, {
     list: [
@@ -301,10 +303,7 @@ export async function initPongGame(parentElement: HTMLElement) {
         position: { x: 0, y: 0 },
         shape: {
           type: 'line',
-          end: {
-            x: 100,
-            y: 100,
-          },
+          end: wallEnd,
         },
       },
     ],
@@ -316,6 +315,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   });
   setComponent(game.essence, wallEntity, Dynamic);
 
+  // # Capsule
   const capsuleEntity = spawnEntity(game.essence);
   setComponent(game.essence, capsuleEntity, Wall);
   // # View
@@ -328,7 +328,7 @@ export async function initPongGame(parentElement: HTMLElement) {
       shape: {
         type: 'capsule',
         end: {
-          x: 100,
+          x: 0,
           y: 100,
         },
         radius: 25,
@@ -339,6 +339,17 @@ export async function initPongGame(parentElement: HTMLElement) {
     x: 400,
     y: 200,
   });
+  setComponent(game.essence, capsuleEntity, Rotation, { value: Math.PI / 2 });
+  setComponent(game.essence, capsuleEntity, Speed, { value: 1 });
+  setComponent(game.essence, capsuleEntity, Acceleration2, {
+    x: 0,
+    y: 0,
+  });
+  setComponent(game.essence, capsuleEntity, Velocity2, {
+    x: 0,
+    y: 0,
+  });
+  setComponent(game.essence, capsuleEntity, RigidBody);
 
   // # Systems
   // ...
@@ -348,7 +359,7 @@ export async function initPongGame(parentElement: HTMLElement) {
 
   // ## Game logic
   // registerSystem(game.essence, accelerateByArrows(game, playerEntity));
-  registerSystem(game.essence, accelerateByArrows(game, ballEntity));
+  registerSystem(game.essence, accelerateByArrows(game, capsuleEntity));
   // registerSystem(game.essence, changeVelocityByArrows(game, ballEntity));
 
   // ## Basic physics

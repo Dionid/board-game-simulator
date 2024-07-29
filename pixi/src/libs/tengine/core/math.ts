@@ -114,6 +114,32 @@ export const horizontalVector = {
   y: 0,
 };
 
+export type Matrix = {
+  row: number;
+  col: number;
+  data: number[][];
+};
+
+export const multiplyMatrixV2 = (m: Matrix, v: Vector2): Vector2 => {
+  return {
+    x: m.data[0][0] * v.x + m.data[0][1] * v.y,
+    y: m.data[1][0] * v.x + m.data[1][1] * v.y,
+  };
+};
+
+export const rotationMatrix = (angle: number): Matrix => {
+  const cos = Math.cos(angle);
+  const sin = Math.sin(angle);
+  return {
+    row: 2,
+    col: 2,
+    data: [
+      [cos, -sin],
+      [sin, cos],
+    ],
+  };
+};
+
 export type Velocity2 = Vector2;
 
 export const Velocity2 = newSchema({

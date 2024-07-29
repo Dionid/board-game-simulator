@@ -54,3 +54,11 @@ export const Scale = newSchema({
   x: number,
   y: number,
 });
+
+export type Rotation = {
+  value: number;
+};
+
+export const Rotation = newSchema({
+  value: number,
+});
