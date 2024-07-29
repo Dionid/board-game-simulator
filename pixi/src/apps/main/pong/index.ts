@@ -316,6 +316,30 @@ export async function initPongGame(parentElement: HTMLElement) {
   });
   setComponent(game.essence, wallEntity, Dynamic);
 
+  const capsuleEntity = spawnEntity(game.essence);
+  setComponent(game.essence, capsuleEntity, Wall);
+  // # View
+  setComponent(game.essence, capsuleEntity, View, {
+    offset: { x: 0, y: 0 },
+    scale: { x: 1, y: 1 },
+    model: {
+      type: 'graphics',
+      color: '0xfff',
+      shape: {
+        type: 'capsule',
+        end: {
+          x: 100,
+          y: 100,
+        },
+        radius: 25,
+      },
+    },
+  });
+  setComponent(game.essence, capsuleEntity, Position2, {
+    x: 400,
+    y: 200,
+  });
+
   // # Systems
   // ...
   // ## Input

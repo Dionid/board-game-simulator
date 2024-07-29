@@ -136,6 +136,7 @@ export const drawDebugLines = (
                   );
                   break;
                 case 'line':
+                case 'capsule':
                 case 'polygon':
                   break;
                 default:

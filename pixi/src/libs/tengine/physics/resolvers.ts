@@ -54,9 +54,6 @@ export function resolveCircleLineCollision(
 
   const separationVelocityDiff = separationVelocityWithElasticity - separationVelocity;
 
-  // circleVelocity.x -= separationVelocityDiff * normal.x;
-  // circleVelocity.y -= separationVelocityDiff * normal.y;
-
   const impulse = separationVelocityDiff / combinedInvertedMass;
 
   const impulseVector = multV2(normalizedDirection, impulse);

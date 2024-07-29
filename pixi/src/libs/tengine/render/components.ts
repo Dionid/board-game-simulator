@@ -18,6 +18,12 @@ export const Line = newSchema({
   end: Vector2,
 });
 
+export const Capsule = newSchema({
+  type: literal('capsule'),
+  end: Vector2,
+  radius: number,
+});
+
 export const Polygon = newSchema({
   type: literal('polygon'),
   // ...
@@ -25,7 +31,7 @@ export const Polygon = newSchema({
 
 export const Graphics = newSchema({
   type: literal('graphics'),
-  shape: union(Rectangle, Circle, Polygon, Line),
+  shape: union(Rectangle, Circle, Polygon, Line, Capsule),
   color: string,
 });
 

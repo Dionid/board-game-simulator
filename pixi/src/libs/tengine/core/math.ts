@@ -59,6 +59,10 @@ export function dotV2(v1: Vector2, v2: Vector2): number {
   return v1.x * v2.x + v1.y * v2.y;
 }
 
+export function crossV2(v1: Vector2, v2: Vector2): number {
+  return v1.x * v2.y - v1.y * v2.x;
+}
+
 export function unitV2(v: Vector2): Vector2 {
   const mag = magV2(v);
   if (mag === 0) {
@@ -103,6 +107,11 @@ export const unitNormalV2 = (v: Vector2): Vector2 => {
 
 export const mutUnitNormalV2 = (v: Vector2): void => {
   mutUnitV2(normalV2(v));
+};
+
+export const horizontalVector = {
+  x: 1,
+  y: 0,
 };
 
 export type Velocity2 = Vector2;
