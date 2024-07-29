@@ -102,7 +102,10 @@ export async function initPongGame(parentElement: HTMLElement) {
     ],
   });
   // # Physics
-  setComponent(game.essence, playerEntity, RigidBody);
+  setComponent(game.essence, playerEntity, RigidBody, {
+    elasticity: 1,
+    elasticityMode: 'average',
+  });
   setComponent(game.essence, playerEntity, Kinematic);
 
   // # Enemy
@@ -153,7 +156,10 @@ export async function initPongGame(parentElement: HTMLElement) {
     ],
   });
   // # Physics
-  setComponent(game.essence, enemyEntity, RigidBody);
+  setComponent(game.essence, enemyEntity, RigidBody, {
+    elasticity: 1,
+    elasticityMode: 'average',
+  });
   setComponent(game.essence, enemyEntity, Kinematic);
 
   // # Ball
@@ -198,7 +204,10 @@ export async function initPongGame(parentElement: HTMLElement) {
     ],
   });
   // # Physics
-  setComponent(game.essence, ballEntity, RigidBody);
+  setComponent(game.essence, ballEntity, RigidBody, {
+    elasticity: 1,
+    elasticityMode: 'average',
+  });
   setComponent(game.essence, ballEntity, Dynamic);
 
   // # Second Ball
@@ -244,7 +253,10 @@ export async function initPongGame(parentElement: HTMLElement) {
     ],
   });
   // # Physics
-  setComponent(game.essence, sBallEntity, RigidBody);
+  setComponent(game.essence, sBallEntity, RigidBody, {
+    elasticity: 1,
+    elasticityMode: 'average',
+  });
   setComponent(game.essence, sBallEntity, Dynamic);
   // setComponent(game.essence, sBallEntity, Kinematic);
 

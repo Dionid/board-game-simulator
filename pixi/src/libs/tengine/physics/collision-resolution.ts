@@ -2,9 +2,10 @@ import { componentByEntity, registerTopic, System } from '../../tecs';
 import { Game } from '../game';
 import { Position2 } from '../core/types';
 import { colliding, Impenetrable, resolvePenetration } from '../collision';
-import { Dynamic, Kinematic, Static } from './components';
+import { Dynamic, Kinematic, RigidBody, Static } from './components';
 import { dotV2, multV2, normalizeV2, subV2, Velocity2 } from '../core';
 import { inverseMass } from '../collision/math';
+import { safeGuard } from 'libs/tecs/switch';
 
 // # Resolve Dynamic bodies Collision
 
@@ -17,6 +18,14 @@ export const dynamicRigidBodyCollisionResolution = (game: Game): System => {
 
       // # Skip physics if both are sensors
       if (a.collider.type === 'sensor' || b.collider.type === 'sensor') {
+        continue;
+      }
+
+      const aRigidBody = componentByEntity(game.essence, a.entity, RigidBody);
+      const bRigidBody = componentByEntity(game.essence, b.entity, RigidBody);
+
+      // # Skip if no rigid body
+      if (!aRigidBody || !bRigidBody) {
         continue;
       }
 
@@ -62,13 +71,6 @@ export const dynamicRigidBodyCollisionResolution = (game: Game): System => {
         continue;
       }
 
-      const aVelocity = componentByEntity(game.essence, a.entity, Velocity2);
-      const bVelocity = componentByEntity(game.essence, b.entity, Velocity2);
-
-      if (!aVelocity || !bVelocity) {
-        continue;
-      }
-
       // # Dynamic bodies collision response
 
       const aMass = a.collider.mass;
@@ -90,9 +92,42 @@ export const dynamicRigidBodyCollisionResolution = (game: Game): System => {
         continue;
       }
 
+      const aVelocity = componentByEntity(game.essence, a.entity, Velocity2);
+      const bVelocity = componentByEntity(game.essence, b.entity, Velocity2);
+
+      if (!aVelocity || !bVelocity) {
+        continue;
+      }
+
       // ## Dynamic vs Dynamic
 
-      const elasticity: number = 1;
+      const elasticityMode =
+        aRigidBody.elasticityMode === 'max' || bRigidBody.elasticityMode === 'max'
+          ? 'max'
+          : aRigidBody.elasticityMode === 'multiply' || bRigidBody.elasticityMode === 'multiply'
+          ? 'multiply'
+          : aRigidBody.elasticityMode === 'min' || bRigidBody.elasticityMode === 'min'
+          ? 'min'
+          : 'average';
+
+      let elasticity;
+
+      switch (elasticityMode) {
+        case 'max':
+          elasticity = Math.max(aRigidBody.elasticity, bRigidBody.elasticity);
+          break;
+        case 'min':
+          elasticity = Math.min(aRigidBody.elasticity, bRigidBody.elasticity);
+          break;
+        case 'multiply':
+          elasticity = aRigidBody.elasticity * bRigidBody.elasticity;
+          break;
+        case 'average':
+          elasticity = (aRigidBody.elasticity + bRigidBody.elasticity) / 2;
+          break;
+        default:
+          return safeGuard(elasticityMode);
+      }
 
       // # If there is no elasticity, skip
       if (elasticity === 0) {

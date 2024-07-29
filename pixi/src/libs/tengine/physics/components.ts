@@ -1,6 +1,9 @@
-import { boolean, newSchema, newTag } from '../../tecs';
+import { boolean, literal, newSchema, newTag, number, union } from '../../tecs';
 
-export const RigidBody = newTag();
+export const RigidBody = newSchema({
+  elasticity: number,
+  elasticityMode: union(literal('average'), literal('min'), literal('multiply'), literal('max')),
+});
 
 export const Static = newTag();
 export const Kinematic = newTag();
