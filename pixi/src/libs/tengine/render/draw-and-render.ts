@@ -61,18 +61,6 @@ export const drawViews = (game: Game, map: Map): System => {
                 break;
               }
               case 'circle': {
-                // globalGraphics.circle(
-                //   position.x +
-                //     view.offset.x +
-                //     view.model.shape.radius -
-                //     view.model.shape.radius * 2 * view.model.shape.anchor.x,
-                //   position.y +
-                //     view.offset.y +
-                //     view.model.shape.radius -
-                //     view.model.shape.radius * 2 * view.model.shape.anchor.y,
-                //   view.model.shape.radius
-                // );
-
                 const circle = drawCircle(view, position);
 
                 if (!circle) {
