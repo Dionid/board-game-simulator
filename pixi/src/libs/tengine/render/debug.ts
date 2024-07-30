@@ -6,6 +6,7 @@ import { Map, Vector2 } from '../core';
 import { ColliderSet } from '../collision';
 import { View } from './components';
 import { safeGuard } from 'libs/tecs/switch';
+import { drawRectangle } from './draw';
 
 const drawLineFromCenter = (
   globalGraphics: Graphics,
@@ -128,12 +129,16 @@ export const drawDebugLines = (
                   globalGraphics.stroke({ width: strokeWidth, color: 'purple' });
                   break;
                 case 'rectangle':
-                  globalGraphics.rect(
-                    position.x + view.offset.x,
-                    position.y + view.offset.y,
-                    view.model.shape.size.width,
-                    view.model.shape.size.height
-                  );
+                  const result = drawRectangle(view, position);
+
+                  if (!result) {
+                    break;
+                  }
+
+                  globalGraphics.addChild(result.rectContainer);
+
+                  result.rect.stroke({ width: strokeWidth, color: 'purple' });
+
                   break;
                 case 'line':
                 case 'capsule':

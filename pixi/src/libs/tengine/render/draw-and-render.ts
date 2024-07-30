@@ -14,20 +14,25 @@ import {
   unitV2,
 } from 'libs/tengine/core';
 import { Game } from 'libs/tengine/game';
-import { Graphics } from 'pixi.js';
+import { Container, Graphics, Rectangle } from 'pixi.js';
 import { View } from './components';
 import { safeGuard } from 'libs/tecs/switch';
+import { drawCircle, drawRectangle } from './draw';
 
 export const drawQuery = newQuery(View, Position2);
 
 export const drawViews = (game: Game, map: Map): System => {
   const query = registerQuery(game.essence, drawQuery);
 
+  const globalGraphicsContainer = new Container();
+  map.container.addChild(globalGraphicsContainer);
+
   const globalGraphics = new Graphics();
-  map.container.addChild(globalGraphics);
+  globalGraphicsContainer.addChild(globalGraphics);
 
   return () => {
     globalGraphics.clear();
+    globalGraphics.removeChildren();
 
     for (const archetype of query.archetypes) {
       const positionT = table(archetype, Position2);
@@ -43,30 +48,41 @@ export const drawViews = (game: Game, map: Map): System => {
           case 'graphics': {
             switch (view.model.shape.type) {
               case 'rectangle': {
-                const anchor = view.model.shape.anchor;
-                globalGraphics.rect(
-                  // position will be in the center of the shape
-                  position.x + view.offset.x - view.model.shape.size.width * anchor.x,
-                  position.y + view.offset.y - view.model.shape.size.height * anchor.y,
-                  view.model.shape.size.width,
-                  view.model.shape.size.height
-                );
+                const result = drawRectangle(view, position);
+
+                if (!result) {
+                  break;
+                }
+
+                globalGraphics.addChild(result.rectContainer);
+
+                result.rect.fill(view.model.color);
+
                 break;
               }
               case 'circle': {
-                const anchor = view.model.shape.anchor;
+                // globalGraphics.circle(
+                //   position.x +
+                //     view.offset.x +
+                //     view.model.shape.radius -
+                //     view.model.shape.radius * 2 * view.model.shape.anchor.x,
+                //   position.y +
+                //     view.offset.y +
+                //     view.model.shape.radius -
+                //     view.model.shape.radius * 2 * view.model.shape.anchor.y,
+                //   view.model.shape.radius
+                // );
 
-                globalGraphics.circle(
-                  position.x +
-                    view.offset.x +
-                    view.model.shape.radius -
-                    view.model.shape.radius * 2 * anchor.x,
-                  position.y +
-                    view.offset.y +
-                    view.model.shape.radius -
-                    view.model.shape.radius * 2 * anchor.y,
-                  view.model.shape.radius
-                );
+                const circle = drawCircle(view, position);
+
+                if (!circle) {
+                  break;
+                }
+
+                circle.fill(view.model.color);
+
+                globalGraphics.addChild(circle);
+
                 break;
               }
               case 'line': {

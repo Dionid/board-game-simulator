@@ -45,6 +45,7 @@ export const Sprite = newSchema({
 export const View = newSchema({
   offset: Vector2,
   scale: Vector2,
+  rotation: number,
   model: union(Graphics, Sprite),
 });
 

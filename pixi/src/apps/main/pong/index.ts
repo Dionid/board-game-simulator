@@ -70,6 +70,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, playerEntity, View, {
     offset: { x: 0, y: 0 },
     scale: { x: 1, y: 1 },
+    rotation: Math.PI / 2,
     model: {
       type: 'graphics',
       color: 'blue',
@@ -117,6 +118,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, enemyEntity, View, {
     offset: { x: 0, y: 0 },
     scale: { x: 1, y: 1 },
+    rotation: 0,
     model: {
       type: 'graphics',
       color: '0xff0000',
@@ -175,6 +177,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, ballEntity, View, {
     offset: { x: 0, y: 0 },
     scale: { x: 1, y: 1 },
+    rotation: 0,
     model: {
       type: 'graphics',
       color: '0xfff',
@@ -232,6 +235,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, sBallEntity, View, {
     offset: { x: 0, y: 0 },
     scale: { x: 1, y: 1 },
+    rotation: 0,
     model: {
       type: 'graphics',
       color: '0xfff',
@@ -293,6 +297,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, wallEntity, View, {
     offset: { x: 0, y: 0 },
     scale: { x: 1, y: 1 },
+    rotation: 0,
     model: {
       type: 'graphics',
       color: '0xfff',
@@ -339,6 +344,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, capsuleEntity, View, {
     offset: { x: 0, y: 0 },
     scale: { x: 1, y: 1 },
+    rotation: 0,
     model: {
       type: 'graphics',
       color: '0xfff',
