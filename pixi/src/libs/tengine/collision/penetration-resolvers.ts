@@ -177,8 +177,8 @@ export function resolvePenetration(
             bInvertedMass,
             aPosition,
             {
-              x: aPosition.x + aColliderShape.end.x,
-              y: aPosition.y + aColliderShape.end.y,
+              x: aPosition.x,
+              y: aPosition.y + aColliderShape.length,
             },
             aInvertedMass,
             depth,
@@ -219,8 +219,8 @@ export function resolvePenetration(
             aInvertedMass,
             bPosition,
             {
-              x: bPosition.x + bColliderShape.end.x,
-              y: bPosition.y + bColliderShape.end.y,
+              x: bPosition.x,
+              y: bPosition.y + bColliderShape.length,
             },
             bInvertedMass,
             depth,

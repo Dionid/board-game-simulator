@@ -169,8 +169,8 @@ export const dynamicRigidBodyCollisionResolution = (game: Game): System => {
                 aInvertedMass,
                 bPosition,
                 {
-                  x: bPosition.x + b.collider.shape.end.x,
-                  y: bPosition.y + b.collider.shape.end.y,
+                  x: bPosition.x,
+                  y: bPosition.y + b.collider.shape.length,
                 },
                 bVelocity,
                 bInvertedMass,
@@ -192,8 +192,8 @@ export const dynamicRigidBodyCollisionResolution = (game: Game): System => {
                 bInvertedMass,
                 aPosition,
                 {
-                  x: aPosition.x + a.collider.shape.end.x,
-                  y: aPosition.y + a.collider.shape.end.y,
+                  x: aPosition.x,
+                  y: aPosition.y + a.collider.shape.length,
                 },
                 aVelocity,
                 aInvertedMass,

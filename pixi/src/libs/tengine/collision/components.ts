@@ -22,7 +22,7 @@ export const ColliderCircle = newSchema({
 
 export const ColliderLine = newSchema({
   type: literal('line'),
-  end: Position2,
+  length: number,
 });
 
 export const ColliderShape = union(ColliderRectangle, ColliderCircle, ColliderLine);
@@ -30,7 +30,7 @@ export const ColliderShape = union(ColliderRectangle, ColliderCircle, ColliderLi
 export const Collider = newSchema({
   type: union(literal('solid'), literal('sensor')),
   offset: Position2,
-  position: Position2, // QUESTION: maybe remove
+  position: Position2,
   shape: ColliderShape,
   mass: number,
 });

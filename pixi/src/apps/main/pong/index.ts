@@ -300,7 +300,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     rotation: 0,
     model: {
       type: 'graphics',
-      color: '0xfff',
+      color: '#fff',
       shape: {
         anchor: 0.5,
         type: 'line',
@@ -325,7 +325,7 @@ export async function initPongGame(parentElement: HTMLElement) {
         position: { x: 0, y: 0 },
         shape: {
           type: 'line',
-          end: wallEnd,
+          length: 50,
         },
       },
     ],

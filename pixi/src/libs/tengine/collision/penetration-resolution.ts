@@ -111,11 +111,11 @@ export const applyWorldBoundaries = (game: Game): System => {
                   if (position.y - pivot.y < 0) {
                     position.y = pivot.y;
                   }
-                  if (position.x + part.shape.end.x - pivot.x > game.world.size.width) {
-                    position.x = game.world.size.width - part.shape.end.x + pivot.x;
+                  if (position.x - pivot.x > game.world.size.width) {
+                    position.x = game.world.size.width + pivot.x;
                   }
-                  if (position.y + part.shape.end.y - pivot.y > game.world.size.height) {
-                    position.y = game.world.size.height - part.shape.end.y + pivot.y;
+                  if (position.y + part.shape.length - pivot.y > game.world.size.height) {
+                    position.y = game.world.size.height - part.shape.length + pivot.y;
                   }
                   break;
                 default:

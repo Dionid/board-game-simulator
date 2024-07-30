@@ -77,17 +77,42 @@ export const drawDebugLines = (
             const colliderSet = colliderSetT[j];
             for (const collider of colliderSet.list) {
               switch (collider.shape.type) {
+                case 'line':
+                  const anchor = 0.5;
+
+                  const length = collider.shape.length;
+
+                  const start = {
+                    x: position.x + collider.offset.x,
+                    y: position.y + collider.offset.y - length * anchor,
+                  };
+
+                  const end = {
+                    x: start.x,
+                    y: start.y + length,
+                  };
+
+                  globalGraphics.moveTo(start.x, start.y);
+                  globalGraphics.lineTo(end.x, end.y);
+                  globalGraphics.stroke({
+                    width: 1,
+                  });
+                  break;
                 case 'constant_rectangle':
                   globalGraphics.rect(
-                    position.x,
-                    position.y,
+                    collider.position.x,
+                    collider.position.y,
                     collider.shape.width,
                     collider.shape.height
                   );
                   globalGraphics.stroke({ width: strokeWidth, color: 'gray' });
                   break;
                 case 'circle':
-                  globalGraphics.circle(position.x, position.y, collider.shape.radius);
+                  globalGraphics.circle(
+                    collider.position.x,
+                    collider.position.y,
+                    collider.shape.radius
+                  );
                   globalGraphics.stroke({ width: strokeWidth, color: 'gray' });
                   break;
               }
@@ -96,10 +121,6 @@ export const drawDebugLines = (
         }
 
         if (options.acceleration || options.velocity) {
-          // const center = {
-          //   x: position.x + rectangle.offset.x + rectangle.size.width / 2,
-          //   y: position.y + rectangle.offset.y + rectangle.size.height / 2,
-          // };
           const center = {
             x: position.x,
             y: position.y,
@@ -145,6 +166,26 @@ export const drawDebugLines = (
 
                   break;
                 case 'line':
+                  const anchor = view.model.shape.anchor;
+
+                  const length = view.model.shape.length;
+
+                  const start = {
+                    x: position.x + view.offset.x,
+                    y: position.y + view.offset.y - length * anchor,
+                  };
+
+                  const end = {
+                    x: start.x,
+                    y: start.y + length,
+                  };
+
+                  globalGraphics.moveTo(start.x, start.y);
+                  globalGraphics.lineTo(end.x, end.y);
+                  globalGraphics.stroke({
+                    width: 1,
+                  });
+                  break;
                 case 'capsule':
                 case 'polygon':
                   break;

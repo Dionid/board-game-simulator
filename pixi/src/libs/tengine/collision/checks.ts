@@ -225,8 +225,8 @@ export function collidersPenetrationDepth(
           return lineCircleCollidingDepth(
             bCollider.position,
             {
-              x: bCollider.shape.end.x + bCollider.position.x,
-              y: bCollider.shape.end.y + bCollider.position.y,
+              x: bCollider.position.x,
+              y: bCollider.shape.length + bCollider.position.y,
             },
             aCollider.position,
             aCollider.shape.radius
@@ -261,8 +261,8 @@ export function collidersPenetrationDepth(
           return lineCircleCollidingDepth(
             aCollider.position,
             {
-              x: aCollider.shape.end.x + aCollider.position.x,
-              y: aCollider.shape.end.y + aCollider.position.y,
+              x: aCollider.position.x,
+              y: aCollider.position.y + aCollider.shape.length,
             },
             bCollider.position,
             bCollider.shape.radius
