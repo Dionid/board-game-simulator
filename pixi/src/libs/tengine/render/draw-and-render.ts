@@ -134,21 +134,23 @@ export const drawViews = (game: Game, map: Map): System => {
               }
               case 'capsule': {
                 // # Draw capsule
-                const anchor = 0.5;
+                const anchor = {
+                  x: 0.5,
+                  y: 0.5,
+                };
 
                 const length = view.model.shape.length;
+                const radius = view.model.shape.radius;
 
                 const start = {
-                  x: position.x + view.offset.x,
-                  y: position.y + view.offset.y - length * anchor,
+                  x: position.x + view.offset.x + radius - radius * 2 * anchor.x,
+                  y: position.y + view.offset.y - length * anchor.y,
                 };
 
                 const end = {
                   x: start.x,
                   y: start.y + length,
                 };
-
-                const radius = view.model.shape.radius;
 
                 if (rotationT) {
                   const lineVector = subV2(end, start);
