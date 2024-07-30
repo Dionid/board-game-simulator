@@ -75,7 +75,7 @@ export const drawDebugLines = (
         };
 
         // globalGraphics.lineStyle(0.5, c, 1);
-        globalGraphics.stroke({ width: 1, color: '#fff', alpha: 1 });
+        globalGraphics.stroke({ width: 2, color: '#fff', alpha: 1 });
         globalGraphics.moveTo(start.x, start.y);
         globalGraphics.lineTo(end.x, end.y);
         globalGraphics.closePath();

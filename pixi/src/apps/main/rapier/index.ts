@@ -25,12 +25,18 @@ export async function initRapierPongGame(parentElement: HTMLElement) {
   // physicsWorld.createCollider(groundColliderDesc);
 
   // Create a dynamic rigid-body.
-  let rigidBodyDesc = RAPIER.RigidBodyDesc.dynamic().setTranslation(200, 200);
+  let rigidBodyDesc = RAPIER.RigidBodyDesc.dynamic()
+    .setTranslation(100, 100)
+    .setRotation(Math.PI / 4);
+  // .setCen(new RAPIER.Vector2(0.0, 0.0));
   let rigidBody = physicsWorld.createRigidBody(rigidBodyDesc);
 
   // Create a cuboid collider attached to the dynamic rigidBody.
-  let colliderDesc = RAPIER.ColliderDesc.cuboid(50, 50).setRotation(Math.PI / 4);
+  let colliderDesc = RAPIER.ColliderDesc.cuboid(50, 50).setTranslation(0.0, 0.0).setRotation(0);
   let collider = physicsWorld.createCollider(colliderDesc, rigidBody);
+
+  // let colliderDesc2 = RAPIER.ColliderDesc.cuboid(50, 50).setTranslation(50.0, 50.0);
+  // let collider2 = physicsWorld.createCollider(colliderDesc2, rigidBody);
 
   await initGame(game, {
     backgroundColor: 0x000000,
@@ -84,6 +90,17 @@ export async function initRapierPongGame(parentElement: HTMLElement) {
   // ## Collision & Physics
   registerSystem(game.essence, (world) => {
     physicsWorld.step();
+
+    let position = rigidBody.translation();
+    console.log('Rigid-body position: ', position.x, position.y);
+
+    let colliderPosition = collider.translation();
+    console.log('Collider position: ', colliderPosition.x, colliderPosition.y);
+
+    debugger;
+
+    // let colliderPosition2 = collider2.translation();
+    // console.log('Collider 2 position: ', colliderPosition2.x, colliderPosition2.y);
   });
 
   // ## Render
