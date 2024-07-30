@@ -4,14 +4,33 @@ import { registerSystem, setComponent, spawnEntity } from '../../../libs/tecs';
 import { mapKeyboardInput, mapMouseInput } from '../../../libs/tengine/ecs';
 import { Player } from './ecs';
 import { drawViews, View, drawDebugLines } from 'libs/tengine/render';
+// import RAPIER from '@dimforge/rapier2d';
 
-export async function initPongGame(parentElement: HTMLElement) {
+export async function initRapierPongGame(parentElement: HTMLElement) {
   const game = newGame({
     canvas: {
       parentElement,
       resizeTo: window,
     },
   });
+
+  const RAPIER = await import('@dimforge/rapier2d-compat');
+
+  await RAPIER.init();
+
+  const physicsWorld = new RAPIER.World(new RAPIER.Vector2(0.0, 0.0));
+
+  // Create the ground
+  // let groundColliderDesc = RAPIER.ColliderDesc.cuboid(10.0, 0.1);
+  // physicsWorld.createCollider(groundColliderDesc);
+
+  // Create a dynamic rigid-body.
+  let rigidBodyDesc = RAPIER.RigidBodyDesc.dynamic().setTranslation(200, 200);
+  let rigidBody = physicsWorld.createRigidBody(rigidBodyDesc);
+
+  // Create a cuboid collider attached to the dynamic rigidBody.
+  let colliderDesc = RAPIER.ColliderDesc.cuboid(50, 50).setRotation(Math.PI / 4);
+  let collider = physicsWorld.createCollider(colliderDesc, rigidBody);
 
   await initGame(game, {
     backgroundColor: 0x000000,
@@ -36,21 +55,6 @@ export async function initPongGame(parentElement: HTMLElement) {
 
   // # Game Object
   setComponent(game.essence, playerEntity, Player);
-  // # Position
-  // setComponent(game.essence, playerEntity, Position2, {
-  //   x: game.world.size.width / 6 - characterSize.width / 2,
-  //   y: game.world.size.height / 2 - characterSize.height / 2,
-  // });
-  // # Acceleration based Movement
-  // setComponent(game.essence, playerEntity, Speed, { value: 1 });
-  // setComponent(game.essence, playerEntity, Acceleration2, {
-  //   x: 0,
-  //   y: 0,
-  // });
-  // setComponent(game.essence, playerEntity, Velocity2, {
-  //   x: 0,
-  //   y: 0,
-  // });
   // # Visuals
   setComponent(game.essence, playerEntity, View, {
     offset: { x: 0, y: 0 },
@@ -77,15 +81,25 @@ export async function initPongGame(parentElement: HTMLElement) {
   // ## Game logic
   // registerSystem(game.essence, accelerateByArrows(game, playerEntity));
 
+  // ## Collision & Physics
+  registerSystem(game.essence, (world) => {
+    physicsWorld.step();
+  });
+
   // ## Render
   registerSystem(game.essence, drawViews(game, map));
   registerSystem(
     game.essence,
-    drawDebugLines(game, map, {
-      view: false,
-      xy: true,
-      collision: false,
-    })
+    drawDebugLines(
+      game,
+      map,
+      {
+        // view: false,
+        // xy: true,
+        // collision: false,
+      },
+      physicsWorld
+    )
   );
 
   return game;
