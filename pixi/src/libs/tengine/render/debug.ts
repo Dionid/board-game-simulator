@@ -1,4 +1,4 @@
-import { Color, Graphics } from 'pixi.js';
+import { Graphics } from 'pixi.js';
 import { newQuery, registerQuery, System, table, tryTable } from '../../tecs';
 import { Game } from '../game';
 import { Acceleration2, Position2, Velocity2 } from '../core';
@@ -6,7 +6,6 @@ import { Map, Vector2 } from '../core';
 import { ColliderSet } from '../collision';
 import { View } from './components';
 import { safeGuard } from 'libs/tecs/switch';
-import RAPIER from '@dimforge/rapier2d-compat';
 
 const drawLineFromCenter = (
   globalGraphics: Graphics,
@@ -31,8 +30,7 @@ export const drawDebugLines = (
     collision?: boolean;
     velocity?: boolean;
     acceleration?: boolean;
-  } = {},
-  physicsWorld?: RAPIER.World
+  } = {}
 ): System => {
   options = {
     view: true,
@@ -52,41 +50,6 @@ export const drawDebugLines = (
 
   return () => {
     globalGraphics.clear();
-
-    if (physicsWorld) {
-      const { vertices, colors } = physicsWorld.debugRender();
-
-      for (let i = 0; i < vertices.length / 4; i += 1) {
-        const c = new Color({
-          r: colors[i * 4] * 255,
-          g: colors[i * 4 + 1] * 255,
-          b: colors[i * 4 + 2] * 255,
-          a: colors[i * 4 + 3] * 255,
-        });
-
-        const start = {
-          x: vertices[i * 4],
-          y: vertices[i * 4 + 1],
-        };
-
-        const end = {
-          x: vertices[i * 4 + 2],
-          y: vertices[i * 4 + 3],
-        };
-
-        // globalGraphics.lineStyle(0.5, c, 1);
-        globalGraphics.stroke({ width: 2, color: '#fff', alpha: 1 });
-        globalGraphics.moveTo(start.x, start.y);
-        globalGraphics.lineTo(end.x, end.y);
-        globalGraphics.closePath();
-
-        // console.log('start', start, end);
-
-        // debugger;
-      }
-
-      // globalGraphics.closePath();
-    }
 
     for (let i = 0; i < query.archetypes.length; i++) {
       const archetype = query.archetypes[i];

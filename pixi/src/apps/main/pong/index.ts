@@ -375,9 +375,9 @@ export async function initPongGame(parentElement: HTMLElement) {
   registerSystem(
     game.essence,
     drawDebugLines(game, map, {
-      view: false,
+      view: true,
       xy: true,
-      collision: false,
+      collision: true,
     })
   );
 

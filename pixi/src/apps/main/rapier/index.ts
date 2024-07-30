@@ -4,6 +4,7 @@ import { registerSystem, setComponent, spawnEntity } from '../../../libs/tecs';
 import { mapKeyboardInput, mapMouseInput } from '../../../libs/tengine/ecs';
 import { Player } from './ecs';
 import { drawViews, View, drawDebugLines } from 'libs/tengine/render';
+import { rapierDrawDebugLines } from 'libs/tengine/rapier/debug';
 // import RAPIER from '@dimforge/rapier2d';
 
 export async function initRapierPongGame(parentElement: HTMLElement) {
@@ -105,19 +106,7 @@ export async function initRapierPongGame(parentElement: HTMLElement) {
 
   // ## Render
   registerSystem(game.essence, drawViews(game, map));
-  registerSystem(
-    game.essence,
-    drawDebugLines(
-      game,
-      map,
-      {
-        // view: false,
-        // xy: true,
-        // collision: false,
-      },
-      physicsWorld
-    )
-  );
+  registerSystem(game.essence, rapierDrawDebugLines(map, physicsWorld));
 
   return game;
 }
