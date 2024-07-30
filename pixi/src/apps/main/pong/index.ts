@@ -285,14 +285,6 @@ export async function initPongGame(parentElement: HTMLElement) {
   // # Wall
   const wallEntity = spawnEntity(game.essence);
   setComponent(game.essence, wallEntity, Wall);
-  const wallStart = {
-    x: 100,
-    y: 100,
-  };
-  const wallEnd = {
-    x: 0,
-    y: 50,
-  };
   // # View
   setComponent(game.essence, wallEntity, View, {
     offset: { x: 0, y: 0 },
@@ -314,7 +306,10 @@ export async function initPongGame(parentElement: HTMLElement) {
     x: 0,
     y: 0,
   });
-  setComponent(game.essence, wallEntity, Position2, wallStart);
+  setComponent(game.essence, wallEntity, Position2, {
+    x: 100,
+    y: 100,
+  });
   // # Collisions
   setComponent(game.essence, wallEntity, ColliderSet, {
     list: [

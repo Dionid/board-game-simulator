@@ -6,7 +6,7 @@ import { Map, Vector2 } from '../core';
 import { ColliderSet } from '../collision';
 import { View } from './components';
 import { safeGuard } from 'libs/tecs/switch';
-import { drawCapsule, drawCircle, drawRectangle } from './draw-shapes';
+import { drawCapsule, drawCircle, drawLine, drawRectangle } from './draw-shapes';
 
 const drawLineFromCenter = (
   globalGraphics: Graphics,
@@ -78,26 +78,7 @@ export const drawDebugLines = (
             for (const collider of colliderSet.list) {
               switch (collider.shape.type) {
                 case 'line':
-                  const anchor = 0.5;
-
-                  const length = collider.shape.length;
-
-                  const start = {
-                    x: position.x + collider.offset.x,
-                    y: position.y + collider.offset.y - length * anchor,
-                  };
-
-                  const end = {
-                    x: start.x,
-                    y: start.y + length,
-                  };
-
-                  globalGraphics.moveTo(start.x, start.y);
-                  globalGraphics.lineTo(end.x, end.y);
-                  globalGraphics.stroke({
-                    width: 1,
-                  });
-                  break;
+                  continue;
                 case 'constant_rectangle':
                   globalGraphics.rect(
                     collider._position.x,
@@ -106,7 +87,7 @@ export const drawDebugLines = (
                     collider.shape.height
                   );
                   globalGraphics.stroke({ width: strokeWidth, color: 'gray' });
-                  break;
+                  continue;
                 case 'circle':
                   globalGraphics.circle(
                     collider._position.x,
@@ -114,7 +95,7 @@ export const drawDebugLines = (
                     collider.shape.radius
                   );
                   globalGraphics.stroke({ width: strokeWidth, color: 'gray' });
-                  break;
+                  continue;
               }
             }
           }
@@ -166,25 +147,15 @@ export const drawDebugLines = (
 
                   break;
                 case 'line':
-                  const anchor = view.model.shape.anchor;
+                  const line = drawLine(view, position);
 
-                  const length = view.model.shape.length;
+                  if (!line) {
+                    break;
+                  }
 
-                  const start = {
-                    x: position.x + view.offset.x,
-                    y: position.y + view.offset.y - length * anchor,
-                  };
+                  line.strokeStyle.color = 0x00ff00;
 
-                  const end = {
-                    x: start.x,
-                    y: start.y + length,
-                  };
-
-                  globalGraphics.moveTo(start.x, start.y);
-                  globalGraphics.lineTo(end.x, end.y);
-                  globalGraphics.stroke({
-                    width: 1,
-                  });
+                  globalGraphics.addChild(line);
                   break;
                 case 'capsule':
                   const capsule = drawCapsule(view, position);

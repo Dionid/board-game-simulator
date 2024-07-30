@@ -97,3 +97,35 @@ export function drawCapsule(view: KindToType<typeof View>, position: Position2) 
 
   return graphics;
 }
+
+export function drawLine(view: KindToType<typeof View>, position: Position2) {
+  if (view.model.type !== 'graphics' || view.model.shape.type !== 'line') {
+    return;
+  }
+
+  // # Draw capsule
+  const anchor = view.model.shape.anchor;
+
+  const length = view.model.shape.length;
+
+  const start = {
+    x: position.x + view.offset.x,
+    y: position.y + view.offset.y - length * anchor,
+  };
+
+  const end = {
+    x: start.x,
+    y: start.y + length,
+  };
+
+  const graphics = new Graphics();
+
+  graphics.moveTo(start.x, start.y);
+  graphics.lineTo(end.x, end.y);
+  graphics.stroke({
+    width: 1,
+    color: view.model.color,
+  });
+
+  return graphics;
+}
