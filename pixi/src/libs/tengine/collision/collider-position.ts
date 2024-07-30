@@ -45,8 +45,8 @@ export const applyPositionToCollider = (game: Game): System => {
               safeGuard(collider.shape);
           }
 
-          collider.position.x = nX;
-          collider.position.y = nY;
+          collider._position.x = nX;
+          collider._position.y = nY;
         }
       }
     }

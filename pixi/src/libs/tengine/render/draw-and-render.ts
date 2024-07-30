@@ -14,10 +14,10 @@ import {
   unitV2,
 } from 'libs/tengine/core';
 import { Game } from 'libs/tengine/game';
-import { Container, Graphics, Rectangle } from 'pixi.js';
+import { Container, Graphics } from 'pixi.js';
 import { View } from './components';
 import { safeGuard } from 'libs/tecs/switch';
-import { drawCircle, drawRectangle } from './draw';
+import { drawCapsule, drawCircle, drawRectangle } from './draw-shapes';
 
 export const drawQuery = newQuery(View, Position2);
 
@@ -64,7 +64,7 @@ export const drawViews = (game: Game, map: Map): System => {
                 const circle = drawCircle(view, position);
 
                 if (!circle) {
-                  break;
+                  continue;
                 }
 
                 circle.fill(view.model.color);
@@ -128,86 +128,20 @@ export const drawViews = (game: Game, map: Map): System => {
                 globalGraphics.stroke({
                   width: 1,
                 });
+
+                globalGraphics.fill(view.model.color);
                 break;
               }
               case 'capsule': {
-                // # Draw capsule
-                const anchor = view.model.shape.anchor;
+                const capsule = drawCapsule(view, position);
 
-                const length = view.model.shape.length;
-                const radius = view.model.shape.radius;
-
-                const start = {
-                  x: position.x + view.offset.x + radius - radius * 2 * anchor.x,
-                  y: position.y + view.offset.y - length * anchor.y,
-                };
-
-                const end = {
-                  x: start.x,
-                  y: start.y + length,
-                };
-
-                if (rotationT) {
-                  const lineVector = subV2(end, start);
-                  const length = magV2(lineVector);
-
-                  const refUnit = unitV2(lineVector);
-
-                  const rotMatrix = rotationMatrix(rotationT[i].value);
-
-                  const newDirection = multiplyMatrixV2(rotMatrix, refUnit);
-
-                  // if it is in start
-                  const newStart = addV2(start, multV2(newDirection, -length / 2));
-                  const newEnd = addV2(start, multV2(newDirection, length / 2));
-
-                  end.x = newEnd.x;
-                  end.y = newEnd.y;
-
-                  start.x = newStart.x;
-                  start.y = newStart.y;
+                if (!capsule) {
+                  break;
                 }
 
-                // # Inner
-                globalGraphics.moveTo(start.x, start.y);
-                globalGraphics.lineTo(end.x, end.y);
+                capsule.fill(view.model.color);
 
-                globalGraphics.stroke({
-                  width: 1,
-                  color: 'red',
-                });
-
-                // # Outer
-                // ## Calculate arcs angel to horizontal line
-                const refDirection = unitV2(subV2(end, start));
-                let refAngle = Math.acos(dotV2(refDirection, horizontalVector));
-
-                if (crossV2(refDirection, horizontalVector) > 0) {
-                  refAngle = -refAngle;
-                }
-
-                globalGraphics.beginPath();
-
-                globalGraphics.arc(
-                  start.x,
-                  start.y,
-                  radius,
-                  refAngle + Math.PI / 2,
-                  refAngle + (3 * Math.PI) / 2
-                );
-                globalGraphics.arc(
-                  end.x,
-                  end.y,
-                  radius,
-                  refAngle - Math.PI / 2,
-                  refAngle + Math.PI / 2
-                );
-
-                globalGraphics.closePath();
-
-                globalGraphics.stroke({
-                  width: 1,
-                });
+                globalGraphics.addChild(capsule);
 
                 break;
               }
@@ -217,8 +151,6 @@ export const drawViews = (game: Game, map: Map): System => {
               default:
                 return safeGuard(view.model.shape);
             }
-
-            globalGraphics.fill(view.model.color);
             break;
           }
           case 'sprite': {

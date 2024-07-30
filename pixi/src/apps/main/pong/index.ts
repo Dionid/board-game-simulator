@@ -96,7 +96,7 @@ export async function initPongGame(parentElement: HTMLElement) {
         type: 'solid',
         mass: 1,
         offset: { x: 0, y: 0 },
-        position: { x: 0, y: 0 },
+        _position: { x: 0, y: 0 },
         shape: {
           type: 'constant_rectangle',
           width: characterSize.width,
@@ -118,7 +118,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, enemyEntity, View, {
     offset: { x: 0, y: 0 },
     scale: { x: 1, y: 1 },
-    rotation: 0,
+    rotation: Math.PI / 2,
     model: {
       type: 'graphics',
       color: '0xff0000',
@@ -155,7 +155,7 @@ export async function initPongGame(parentElement: HTMLElement) {
         type: 'solid',
         mass: 1,
         offset: { x: 0, y: 0 },
-        position: { x: 0, y: 0 },
+        _position: { x: 0, y: 0 },
         shape: {
           type: 'constant_rectangle',
           width: characterSize.width,
@@ -213,7 +213,7 @@ export async function initPongGame(parentElement: HTMLElement) {
         type: 'solid',
         mass: 1,
         offset: { x: 0, y: 0 },
-        position: { x: 0, y: 0 },
+        _position: { x: 0, y: 0 },
         shape: {
           type: 'circle',
           radius: 25,
@@ -267,7 +267,7 @@ export async function initPongGame(parentElement: HTMLElement) {
         type: 'solid',
         mass: 1,
         offset: { x: 0, y: 0 },
-        position: { x: 0, y: 0 },
+        _position: { x: 0, y: 0 },
         shape: {
           type: 'circle',
           radius: 25,
@@ -322,8 +322,9 @@ export async function initPongGame(parentElement: HTMLElement) {
         type: 'solid',
         mass: 1,
         offset: { x: 0, y: 0 },
-        position: { x: 0, y: 0 },
+        _position: { x: 0, y: 0 },
         shape: {
+          rotation: 0,
           type: 'line',
           length: 50,
         },

@@ -6,7 +6,7 @@ import { Map, Vector2 } from '../core';
 import { ColliderSet } from '../collision';
 import { View } from './components';
 import { safeGuard } from 'libs/tecs/switch';
-import { drawCircle, drawRectangle } from './draw';
+import { drawCapsule, drawCircle, drawRectangle } from './draw-shapes';
 
 const drawLineFromCenter = (
   globalGraphics: Graphics,
@@ -100,8 +100,8 @@ export const drawDebugLines = (
                   break;
                 case 'constant_rectangle':
                   globalGraphics.rect(
-                    collider.position.x,
-                    collider.position.y,
+                    collider._position.x,
+                    collider._position.y,
                     collider.shape.width,
                     collider.shape.height
                   );
@@ -109,8 +109,8 @@ export const drawDebugLines = (
                   break;
                 case 'circle':
                   globalGraphics.circle(
-                    collider.position.x,
-                    collider.position.y,
+                    collider._position.x,
+                    collider._position.y,
                     collider.shape.radius
                   );
                   globalGraphics.stroke({ width: strokeWidth, color: 'gray' });
@@ -187,6 +187,17 @@ export const drawDebugLines = (
                   });
                   break;
                 case 'capsule':
+                  const capsule = drawCapsule(view, position);
+
+                  if (!capsule) {
+                    break;
+                  }
+
+                  globalGraphics.addChild(capsule);
+
+                  capsule.stroke({ width: strokeWidth, color: 'purple' });
+
+                  break;
                 case 'polygon':
                   break;
                 default:

@@ -45,8 +45,6 @@ export const Sprite = newSchema({
 
 export const View = newSchema({
   offset: Vector2,
-  // position: Vector2, // TODO: add position in the future
-  // vertices: Vector2[], // TODO: maybe add vertices in the future
   scale: Vector2,
   rotation: number,
   model: union(Graphics, Sprite),

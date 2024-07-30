@@ -209,26 +209,26 @@ export function collidersPenetrationDepth(
       switch (bCollider.shape.type) {
         case 'circle':
           return circlesCollisionDepth(
-            aCollider.position,
+            aCollider._position,
             aCollider.shape.radius,
-            bCollider.position,
+            bCollider._position,
             bCollider.shape.radius
           );
         case 'constant_rectangle':
           return circleAndRectangleCollidingDepth(
-            aCollider.position,
+            aCollider._position,
             aCollider.shape.radius,
-            bCollider.position,
+            bCollider._position,
             bCollider.shape
           );
         case 'line':
           return lineCircleCollidingDepth(
-            bCollider.position,
+            bCollider._position,
             {
-              x: bCollider.position.x,
-              y: bCollider.shape.length + bCollider.position.y,
+              x: bCollider._position.x,
+              y: bCollider.shape.length + bCollider._position.y,
             },
-            aCollider.position,
+            aCollider._position,
             aCollider.shape.radius
           );
         default:
@@ -238,16 +238,16 @@ export function collidersPenetrationDepth(
       switch (bCollider.shape.type) {
         case 'circle':
           return circleAndRectangleCollidingDepth(
-            bCollider.position,
+            bCollider._position,
             bCollider.shape.radius,
-            aCollider.position,
+            aCollider._position,
             aCollider.shape
           );
         case 'constant_rectangle':
           return rectanglesCollidingDepth(
-            aCollider.position,
+            aCollider._position,
             aCollider.shape,
-            bCollider.position,
+            bCollider._position,
             bCollider.shape
           );
         case 'line':
@@ -259,12 +259,12 @@ export function collidersPenetrationDepth(
       switch (bCollider.shape.type) {
         case 'circle':
           return lineCircleCollidingDepth(
-            aCollider.position,
+            aCollider._position,
             {
-              x: aCollider.position.x,
-              y: aCollider.position.y + aCollider.shape.length,
+              x: aCollider._position.x,
+              y: aCollider._position.y + aCollider.shape.length,
             },
-            bCollider.position,
+            bCollider._position,
             bCollider.shape.radius
           );
         case 'constant_rectangle':
