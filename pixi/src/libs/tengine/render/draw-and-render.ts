@@ -43,10 +43,7 @@ export const drawViews = (game: Game, map: Map): System => {
           case 'graphics': {
             switch (view.model.shape.type) {
               case 'rectangle': {
-                const anchor = {
-                  x: 0.5,
-                  y: 0.5,
-                };
+                const anchor = view.model.shape.anchor;
                 globalGraphics.rect(
                   // position will be in the center of the shape
                   position.x + view.offset.x - view.model.shape.size.width * anchor.x,
@@ -57,10 +54,7 @@ export const drawViews = (game: Game, map: Map): System => {
                 break;
               }
               case 'circle': {
-                const anchor = {
-                  x: 0.5,
-                  y: 0.5,
-                };
+                const anchor = view.model.shape.anchor;
 
                 globalGraphics.circle(
                   position.x +
@@ -76,7 +70,7 @@ export const drawViews = (game: Game, map: Map): System => {
                 break;
               }
               case 'line': {
-                const anchor = 0.5;
+                const anchor = view.model.shape.anchor;
 
                 const length = view.model.shape.length;
 
@@ -134,10 +128,7 @@ export const drawViews = (game: Game, map: Map): System => {
               }
               case 'capsule': {
                 // # Draw capsule
-                const anchor = {
-                  x: 0.5,
-                  y: 0.5,
-                };
+                const anchor = view.model.shape.anchor;
 
                 const length = view.model.shape.length;
                 const radius = view.model.shape.radius;

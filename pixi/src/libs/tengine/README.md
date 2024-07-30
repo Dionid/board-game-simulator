@@ -1,6 +1,8 @@
 # Roadmap
 
-
+1. View
+    1. Rotation
+    1. Scale
 1. ECS
     1. Default topics (ComponentAdded, ComponentRemoved, ComponentChanged, EntitySpawned, EntityKilled)
 1. Collision

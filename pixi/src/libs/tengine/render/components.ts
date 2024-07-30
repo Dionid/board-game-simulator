@@ -1,27 +1,29 @@
 import { literal, newSchema, number, string, union } from 'libs/tecs';
 import { Size2, Vector2 } from '../core';
 
-// export const View = newTag();
-
 export const Rectangle = newSchema({
   type: literal('rectangle'),
   size: Size2,
+  anchor: Vector2,
 });
 
 export const Circle = newSchema({
   type: literal('circle'),
   radius: number,
+  anchor: Vector2,
 });
 
 export const Line = newSchema({
   type: literal('line'),
   length: number,
+  anchor: number,
 });
 
 export const Capsule = newSchema({
   type: literal('capsule'),
   length: number,
   radius: number,
+  anchor: Vector2,
 });
 
 export const Polygon = newSchema({

@@ -74,6 +74,10 @@ export async function initPongGame(parentElement: HTMLElement) {
       type: 'graphics',
       color: 'blue',
       shape: {
+        anchor: {
+          x: 0.5,
+          y: 0.5,
+        },
         type: 'rectangle',
         size: {
           width: characterSize.width,
@@ -117,6 +121,10 @@ export async function initPongGame(parentElement: HTMLElement) {
       type: 'graphics',
       color: '0xff0000',
       shape: {
+        anchor: {
+          x: 0.5,
+          y: 0.5,
+        },
         type: 'rectangle',
         size: {
           width: characterSize.width,
@@ -171,6 +179,10 @@ export async function initPongGame(parentElement: HTMLElement) {
       type: 'graphics',
       color: '0xfff',
       shape: {
+        anchor: {
+          x: 0.5,
+          y: 0.5,
+        },
         type: 'circle',
         radius: 25,
       },
@@ -224,6 +236,10 @@ export async function initPongGame(parentElement: HTMLElement) {
       type: 'graphics',
       color: '0xfff',
       shape: {
+        anchor: {
+          x: 0.5,
+          y: 0.5,
+        },
         type: 'circle',
         radius: 25,
       },
@@ -281,6 +297,7 @@ export async function initPongGame(parentElement: HTMLElement) {
       type: 'graphics',
       color: '0xfff',
       shape: {
+        anchor: 0.5,
         type: 'line',
         length: 50,
       },
@@ -326,6 +343,10 @@ export async function initPongGame(parentElement: HTMLElement) {
       type: 'graphics',
       color: '0xfff',
       shape: {
+        anchor: {
+          x: 0.5,
+          y: 0.5,
+        },
         type: 'capsule',
         length: 100,
         radius: 25,

@@ -71,6 +71,7 @@ export async function initRapierPongGame(parentElement: HTMLElement) {
       color: 'blue',
       shape: {
         type: 'rectangle',
+        anchor: { x: 0.5, y: 0.5 },
         size: {
           width: characterSize.width,
           height: characterSize.height,
