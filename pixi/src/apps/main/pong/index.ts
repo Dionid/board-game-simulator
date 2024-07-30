@@ -282,11 +282,11 @@ export async function initPongGame(parentElement: HTMLElement) {
       color: '0xfff',
       shape: {
         type: 'line',
-        end: wallEnd,
+        length: 50,
       },
     },
   });
-  setComponent(game.essence, wallEntity, Rotation, { value: 0 });
+  // setComponent(game.essence, wallEntity, Rotation, { value: 0 });
   setComponent(game.essence, wallEntity, Speed, { value: 5 });
   setComponent(game.essence, wallEntity, Velocity2, {
     x: 0,
@@ -327,10 +327,7 @@ export async function initPongGame(parentElement: HTMLElement) {
       color: '0xfff',
       shape: {
         type: 'capsule',
-        end: {
-          x: 0,
-          y: 100,
-        },
+        length: 100,
         radius: 25,
       },
     },
@@ -339,7 +336,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     x: 400,
     y: 200,
   });
-  setComponent(game.essence, capsuleEntity, Rotation, { value: Math.PI / 2 });
+  // setComponent(game.essence, capsuleEntity, Rotation, { value: Math.PI / 2 });
   setComponent(game.essence, capsuleEntity, Speed, { value: 1 });
   setComponent(game.essence, capsuleEntity, Acceleration2, {
     x: 0,

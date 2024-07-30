@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import './App.css';
 import { run } from '../../libs/tengine/game';
 import { initRapierPongGame } from './rapier';
+import { initPongGame } from './pong';
 
 function App() {
   useEffect(() => {
@@ -17,14 +18,14 @@ function App() {
     // })
 
     // # Pong
-    // initPongGame(gameHolder).then((game) => {
-    //   run(game)
-    // })
-
-    // # Rapier Pong
-    initRapierPongGame(gameHolder).then((game) => {
+    initPongGame(gameHolder).then((game) => {
       run(game)
     })
+
+    // # Rapier Pong
+    // initRapierPongGame(gameHolder).then((game) => {
+    //   run(game)
+    // })
   }, [])
 
   return (

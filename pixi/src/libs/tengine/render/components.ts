@@ -15,12 +15,12 @@ export const Circle = newSchema({
 
 export const Line = newSchema({
   type: literal('line'),
-  end: Vector2,
+  length: number,
 });
 
 export const Capsule = newSchema({
   type: literal('capsule'),
-  end: Vector2,
+  length: number,
   radius: number,
 });
 

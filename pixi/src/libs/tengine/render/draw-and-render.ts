@@ -43,31 +43,51 @@ export const drawViews = (game: Game, map: Map): System => {
           case 'graphics': {
             switch (view.model.shape.type) {
               case 'rectangle': {
+                const anchor = {
+                  x: 0.5,
+                  y: 0.5,
+                };
                 globalGraphics.rect(
-                  position.x + view.offset.x,
-                  position.y + view.offset.y,
+                  // position will be in the center of the shape
+                  position.x + view.offset.x - view.model.shape.size.width * anchor.x,
+                  position.y + view.offset.y - view.model.shape.size.height * anchor.y,
                   view.model.shape.size.width,
                   view.model.shape.size.height
                 );
                 break;
               }
               case 'circle': {
+                const anchor = {
+                  x: 0.5,
+                  y: 0.5,
+                };
+
                 globalGraphics.circle(
-                  position.x + view.offset.x,
-                  position.y + view.offset.y,
+                  position.x +
+                    view.offset.x +
+                    view.model.shape.radius -
+                    view.model.shape.radius * 2 * anchor.x,
+                  position.y +
+                    view.offset.y +
+                    view.model.shape.radius -
+                    view.model.shape.radius * 2 * anchor.y,
                   view.model.shape.radius
                 );
                 break;
               }
               case 'line': {
+                const anchor = 0.5;
+
+                const length = view.model.shape.length;
+
                 const start = {
                   x: position.x + view.offset.x,
-                  y: position.y + view.offset.y,
+                  y: position.y + view.offset.y - length * anchor,
                 };
 
                 const end = {
-                  x: start.x + view.model.shape.end.x,
-                  y: start.y + view.model.shape.end.y,
+                  x: start.x,
+                  y: start.y + length,
                 };
 
                 if (rotationT) {
@@ -76,8 +96,6 @@ export const drawViews = (game: Game, map: Map): System => {
                     y: 0.5,
                   };
 
-                  const lineVector = subV2(end, start);
-                  const length = magV2(lineVector);
                   const center = {
                     x: start.x + length * centerOffset.x,
                     y: start.y + length * centerOffset.y,
@@ -85,6 +103,8 @@ export const drawViews = (game: Game, map: Map): System => {
 
                   globalGraphics.circle(center.x, center.y, 4);
                   globalGraphics.fill({ color: 'purple' });
+
+                  const lineVector = subV2(end, start);
 
                   const refUnit = unitV2(lineVector);
 
@@ -114,13 +134,18 @@ export const drawViews = (game: Game, map: Map): System => {
               }
               case 'capsule': {
                 // # Draw capsule
+                const anchor = 0.5;
+
+                const length = view.model.shape.length;
+
                 const start = {
                   x: position.x + view.offset.x,
-                  y: position.y + view.offset.y,
+                  y: position.y + view.offset.y - length * anchor,
                 };
+
                 const end = {
-                  x: start.x + view.model.shape.end.x,
-                  y: start.y + view.model.shape.end.y,
+                  x: start.x,
+                  y: start.y + length,
                 };
 
                 const radius = view.model.shape.radius;
@@ -146,15 +171,17 @@ export const drawViews = (game: Game, map: Map): System => {
                   start.y = newStart.y;
                 }
 
-                // # inner
+                // # Inner
                 globalGraphics.moveTo(start.x, start.y);
                 globalGraphics.lineTo(end.x, end.y);
 
                 globalGraphics.stroke({
                   width: 1,
+                  color: 'red',
                 });
 
-                // # outer
+                // # Outer
+                // ## Calculate arcs angel to horizontal line
                 const refDirection = unitV2(subV2(end, start));
                 let refAngle = Math.acos(dotV2(refDirection, horizontalVector));
 
