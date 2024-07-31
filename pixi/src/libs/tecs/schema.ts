@@ -247,7 +247,7 @@ export const $tag = Symbol('tag');
 export type SchemaKind = typeof $aos | typeof $soa | typeof $tag;
 
 export type Schema = {
-  [key: string]: PrimitiveKind | ComplexKind | Schema;
+  [key: string]: PrimitiveKind | ComplexKind | Schema | KindSt;
   [$kind]: SchemaKind;
   [$defaultFn]: () => unknown;
 };
@@ -266,6 +266,8 @@ export function isSchema(value: unknown): value is Schema {
 export type SchemaToType<T> = T extends Schema
   ? { [K in keyof T as K extends symbol ? never : K]: KindToType<T[K]> }
   : never;
+
+export type Component<S extends Schema> = SchemaToType<S>;
 
 export function defaultFromSchema<S extends Omit<Schema, typeof $defaultFn>>(
   schema: S
@@ -292,7 +294,7 @@ export function defaultFromSchema<S extends Omit<Schema, typeof $defaultFn>>(
   }
 }
 
-export function newSchema<S extends Record<string, PrimitiveKind | ComplexKind | Schema>>(
+export function newSchema<S extends Record<string, KindSt | PrimitiveKind | ComplexKind | Schema>>(
   schema: S,
   kind?: SchemaKind,
   defaultFn?: () => KindToType<S>

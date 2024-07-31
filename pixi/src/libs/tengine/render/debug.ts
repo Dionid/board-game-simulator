@@ -130,9 +130,9 @@ export const drawDebugLines = (
                     break;
                   }
 
-                  globalGraphics.addChild(circle);
+                  globalGraphics.addChild(circle.container);
 
-                  circle.stroke({ width: strokeWidth, color: 'purple' });
+                  circle.graphics.stroke({ width: strokeWidth, color: 'purple' });
 
                   break;
                 case 'rectangle':
@@ -142,9 +142,9 @@ export const drawDebugLines = (
                     break;
                   }
 
-                  globalGraphics.addChild(result.rectContainer);
+                  globalGraphics.addChild(result.container);
 
-                  result.rect.stroke({ width: strokeWidth, color: 'purple' });
+                  result.graphics.stroke({ width: strokeWidth, color: 'purple' });
 
                   break;
                 case 'line':

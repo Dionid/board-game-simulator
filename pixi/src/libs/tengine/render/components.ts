@@ -1,4 +1,5 @@
-import { literal, newSchema, number, string, union } from 'libs/tecs';
+import { Container, Graphics as pG } from 'pixi.js';
+import { $defaultFn, $kind, literal, newSchema, number, string, union } from 'libs/tecs';
 import { Size2, Vector2 } from '../core';
 
 export const Rectangle = newSchema({
@@ -52,16 +53,23 @@ export const View = newSchema({
 
 // # pixi specific
 
-// ## pixi.Graphics component
+export const $graphics = Symbol('graphics');
 
-// export const $graphics = Symbol('graphics');
+export const graphics = {
+  [$kind]: $graphics,
+  byteLength: 8,
+  [$defaultFn]: () => new pG(),
+} as const;
 
-// export const graphics = {
-//   [$kind]: $graphics,
-//   byteLength: 8,
-//   [$defaultFn]: () => new pGraphics(),
-// } as const;
+export const $container = Symbol('container');
 
-// export const Graphics = newSchema({
-//   value: graphics,
-// });
+export const container = {
+  [$kind]: $container,
+  byteLength: 8,
+  [$defaultFn]: () => new Container(),
+} as const;
+
+export const pView = newSchema({
+  graphics: graphics,
+  container: container,
+});

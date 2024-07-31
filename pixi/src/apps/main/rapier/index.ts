@@ -107,7 +107,7 @@ export async function initRapierPongGame(parentElement: HTMLElement) {
   });
 
   // ## Render
-  registerSystem(game.essence, drawViews(game, map));
+  registerSystem(game.essence, drawViews(game));
   registerSystem(game.essence, rapierDrawDebugLines(map, physicsWorld));
 
   return game;

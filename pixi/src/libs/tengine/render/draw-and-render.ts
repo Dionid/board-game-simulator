@@ -1,34 +1,42 @@
-import { newQuery, registerQuery, System, table } from 'libs/tecs';
+import {
+  Component,
+  newQuery,
+  registerQuery,
+  setComponent,
+  System,
+  table,
+  tryTable,
+} from 'libs/tecs';
 import { Position2 } from '../core/types';
-import { Map } from 'libs/tengine/core';
 import { Game } from 'libs/tengine/game';
-import { Container, Graphics } from 'pixi.js';
-import { View } from './components';
+import { Container } from 'pixi.js';
+import { pView, View } from './components';
 import { safeGuard } from 'libs/tecs/switch';
 import { drawCapsule, drawCircle, drawLine, drawRectangle } from './draw-shapes';
 
-export const drawQuery = newQuery(View, Position2);
+// TODO: Refactor to use filter `not`
+export const newViewQuery = newQuery(View, Position2);
 
-export const drawViews = (game: Game, map: Map): System => {
-  const query = registerQuery(game.essence, drawQuery);
-
-  const globalGraphicsContainer = new Container();
-  map.container.addChild(globalGraphicsContainer);
-
-  const globalGraphics = new Graphics();
-  globalGraphicsContainer.addChild(globalGraphics);
+export const addNewViews = (game: Game, viewsContainer: Container): System => {
+  const query = registerQuery(game.essence, newViewQuery);
 
   return () => {
-    globalGraphics.clear();
-    globalGraphics.removeChildren();
-
     for (const archetype of query.archetypes) {
-      const positionT = table(archetype, Position2);
+      const pViewT = tryTable(archetype, pView);
+
+      // # If pView already exists, skip
+      if (pViewT) {
+        continue;
+      }
+
       const viewT = table(archetype, View);
+      const positionT = table(archetype, Position2);
 
       for (let i = 0, l = archetype.entities.length; i < l; i++) {
-        const position = positionT[i];
         const view = viewT[i];
+        const position = positionT[i];
+
+        let pViewComponent: Component<typeof pView>;
 
         switch (view.model.type) {
           case 'graphics': {
@@ -40,22 +48,26 @@ export const drawViews = (game: Game, map: Map): System => {
                   break;
                 }
 
-                globalGraphics.addChild(result.rectContainer);
+                result.graphics.fill(view.model.color);
 
-                result.rect.fill(view.model.color);
+                viewsContainer.addChild(result.container);
+
+                pViewComponent = result;
 
                 break;
               }
               case 'circle': {
-                const circle = drawCircle(view, position);
+                const result = drawCircle(view, position);
 
-                if (!circle) {
+                if (!result) {
                   continue;
                 }
 
-                circle.fill(view.model.color);
+                result.graphics.fill(view.model.color);
 
-                globalGraphics.addChild(circle);
+                viewsContainer.addChild(result.container);
+
+                pViewComponent = result;
 
                 break;
               }
@@ -68,7 +80,7 @@ export const drawViews = (game: Game, map: Map): System => {
 
                 line.fill(view.model.color);
 
-                globalGraphics.addChild(line);
+                viewsContainer.addChild(line);
 
                 break;
               }
@@ -81,7 +93,7 @@ export const drawViews = (game: Game, map: Map): System => {
 
                 capsule.fill(view.model.color);
 
-                globalGraphics.addChild(capsule);
+                viewsContainer.addChild(capsule);
 
                 break;
               }
@@ -98,6 +110,39 @@ export const drawViews = (game: Game, map: Map): System => {
           }
           default:
             safeGuard(view.model);
+        }
+
+        setComponent(game.essence, archetype.entities[i], pView, pViewComponent!);
+      }
+    }
+  };
+};
+
+// # Apply changes
+
+export const drawQuery = newQuery(View, pView, Position2);
+
+export const drawViews = (game: Game): System => {
+  const query = registerQuery(game.essence, drawQuery);
+
+  return () => {
+    for (const archetype of query.archetypes) {
+      const positionT = table(archetype, Position2);
+      const pViewT = table(archetype, pView);
+      const viewT = table(archetype, View);
+
+      for (let i = 0, l = archetype.entities.length; i < l; i++) {
+        const position = positionT[i];
+        const pView = pViewT[i];
+        const view = viewT[i];
+
+        if (pView.container.rotation !== view.rotation) {
+          pView.container.rotation = view.rotation;
+        }
+
+        if (position.x !== pView.container.x || position.y !== pView.container.y) {
+          pView.container.x = position.x;
+          pView.container.y = position.y;
         }
       }
     }

@@ -1,9 +1,9 @@
 import { Container, Graphics } from 'pixi.js';
 import { crossV2, dotV2, horizontalVector, Position2, subV2, unitV2 } from '../core';
-import { KindToType } from 'libs/tecs';
+import { Component, KindToType } from 'libs/tecs';
 import { View } from './components';
 
-export function drawRectangle(view: KindToType<typeof View>, position: Position2) {
+export function drawRectangle(view: Component<typeof View>, position: Position2) {
   if (view.model.type !== 'graphics' || view.model.shape.type !== 'rectangle') {
     return;
   }
@@ -15,7 +15,6 @@ export function drawRectangle(view: KindToType<typeof View>, position: Position2
     y: position.y + view.offset.y,
   };
 
-  // # Somehow pivot and rotation works only if it is in its own container
   const rectContainer = new Container({
     x: start.x,
     y: start.y,
@@ -33,8 +32,8 @@ export function drawRectangle(view: KindToType<typeof View>, position: Position2
   rectContainer.addChild(rect);
 
   return {
-    rectContainer,
-    rect,
+    container: rectContainer,
+    graphics: rect,
   };
 }
 
@@ -43,17 +42,24 @@ export function drawCircle(view: KindToType<typeof View>, position: Position2) {
     return;
   }
 
-  return new Graphics().circle(
-    position.x +
-      view.offset.x +
-      view.model.shape.radius -
-      view.model.shape.radius * 2 * view.model.shape.anchor.x,
-    position.y +
-      view.offset.y +
-      view.model.shape.radius -
-      view.model.shape.radius * 2 * view.model.shape.anchor.y,
-    view.model.shape.radius
-  );
+  const container = new Container({
+    x: position.x + view.offset.x,
+    y: position.y + view.offset.y,
+    rotation: view.rotation,
+    pivot: {
+      x: 2 * view.model.shape.radius * view.model.shape.anchor.x - view.model.shape.radius,
+      y: 2 * view.model.shape.radius * view.model.shape.anchor.y - view.model.shape.radius,
+    },
+  });
+
+  const graphics = new Graphics().circle(0, 0, view.model.shape.radius);
+
+  container.addChild(graphics);
+
+  return {
+    graphics,
+    container,
+  };
 }
 
 export function drawCapsule(view: KindToType<typeof View>, position: Position2) {

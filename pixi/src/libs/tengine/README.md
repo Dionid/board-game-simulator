@@ -16,6 +16,8 @@
     1. Rotation
     1. Scale
     1. Change to ViewSet
+    1. Add pixi Container as Component and update it values instead of creating new ones
+    1. On entity kill destroy pView
 1. ECS
     1. Default topics (ComponentAdded, ComponentRemoved, ComponentChanged, EntitySpawned, EntityKilled)
 1. Collision
@@ -26,6 +28,7 @@
     1. Collision Queries
     1. Raw Vertices
     1. Separate concave to convex
+    1. Chamfer
 1. Physics
     1. Rotation
     1. OnComponentAdded
@@ -146,7 +149,6 @@ Most of other components will depend on these ones
 
 # Questions
 
-1. Scene Queries (https://rapier.rs/docs/user_guides/rust/scene_queries/)
 1. Units (https://rapier.rs/docs/user_guides/rust/common_mistakes#why-is-everything-moving-in-slow-motion)
 1. Depth Sorting
 1. Add Scene (world of one of the stages) to Game (like for multiple levels)
@@ -154,5 +156,6 @@ Most of other components will depend on these ones
 
 ## Problems
 
-1. What if I want to create cloud, that will be moving, using tweens, but I don't won't to 
-    apply physics to it
+1. Optimization
+    1. Если мне приходится каждый раз перерасчитывать все с 0, то я буду тратить
+    кучу ресурсов на это.
