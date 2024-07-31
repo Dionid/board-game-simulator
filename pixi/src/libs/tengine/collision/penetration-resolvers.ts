@@ -1,18 +1,9 @@
 import { KindToType } from 'libs/tecs';
-import {
-  normalizeV2,
-  multV2,
-  mutAddV2,
-  mutSubV2,
-  Position2,
-  subV2,
-  addV2,
-  magV2,
-  unitV2,
-} from '../core';
+import { normalizeV2, multV2, mutAddV2, mutSubV2, Position2, subV2, unitV2 } from '../core';
 import { ColliderRectangle, ColliderShape } from './components';
 import { safeGuard } from 'libs/tecs/switch';
 import { lineCircleClosestPoint } from './checks';
+import { inverseMass } from './math';
 
 export function resolveCircleCirclePenetration(
   aPosition: Position2,
@@ -22,12 +13,12 @@ export function resolveCircleCirclePenetration(
   bInvertedMass: number,
   combinedInvertedMass: number
 ) {
-  const normDist = normalizeV2({
+  const unitDist = normalizeV2({
     x: aPosition.x - bPosition.x,
     y: aPosition.y - bPosition.y,
   });
 
-  const resolution = multV2(normDist, depth / combinedInvertedMass);
+  const resolution = multV2(unitDist, depth / combinedInvertedMass);
 
   mutAddV2(aPosition, multV2(resolution, aInvertedMass));
   mutSubV2(bPosition, multV2(resolution, bInvertedMass));
@@ -93,9 +84,9 @@ export function resolveConstantRectangleCirclePenetration(
   combinedInvertedMass: number
 ) {
   const rectShape =
-    aColliderShape.type === 'constant_rectangle'
+    aColliderShape.type === 'rectangle'
       ? aColliderShape
-      : bColliderShape.type === 'constant_rectangle'
+      : bColliderShape.type === 'rectangle'
       ? bColliderShape
       : null;
 
@@ -104,7 +95,7 @@ export function resolveConstantRectangleCirclePenetration(
   }
 
   const circlePosition = aColliderShape.type === 'circle' ? aPosition : bPosition;
-  const rectPosition = bColliderShape.type === 'constant_rectangle' ? bPosition : aPosition;
+  const rectPosition = bColliderShape.type === 'rectangle' ? bPosition : aPosition;
 
   const comingFromTop = circlePosition.y < rectPosition.y;
   const comingFromBottom = circlePosition.y > rectPosition.y + rectShape.height;
@@ -118,8 +109,7 @@ export function resolveConstantRectangleCirclePenetration(
   };
 
   const circleInvertedMass = aColliderShape.type === 'circle' ? aInvertedMass : bInvertedMass;
-  const rectInvertedMass =
-    aColliderShape.type === 'constant_rectangle' ? aInvertedMass : bInvertedMass;
+  const rectInvertedMass = aColliderShape.type === 'rectangle' ? aInvertedMass : bInvertedMass;
 
   const resolution = multV2(resolutionDirection, depth / combinedInvertedMass);
 
@@ -159,8 +149,8 @@ export function resolvePenetration(
   bColliderShape: KindToType<typeof ColliderShape>,
   depth: number
 ): void {
-  const aInvertedMass = aMass === 0 ? 0 : 1 / aMass;
-  const bInvertedMass = bMass === 0 ? 0 : 1 / bMass;
+  const aInvertedMass = inverseMass(aMass);
+  const bInvertedMass = inverseMass(bMass);
   const combinedInvertedMass = aInvertedMass + bInvertedMass;
 
   // # If both objects are immovable, skip
@@ -184,7 +174,7 @@ export function resolvePenetration(
             depth,
             combinedInvertedMass
           );
-        case 'constant_rectangle':
+        case 'rectangle':
           return;
         case 'line':
           return;
@@ -202,7 +192,7 @@ export function resolvePenetration(
             bInvertedMass,
             combinedInvertedMass
           );
-        case 'constant_rectangle':
+        case 'rectangle':
           return resolveConstantRectangleCirclePenetration(
             aPosition,
             aColliderShape,
@@ -229,7 +219,7 @@ export function resolvePenetration(
         default:
           return safeGuard(bColliderShape);
       }
-    case 'constant_rectangle':
+    case 'rectangle':
       switch (bColliderShape.type) {
         case 'circle':
           return resolveConstantRectangleCirclePenetration(
@@ -242,7 +232,7 @@ export function resolvePenetration(
             bInvertedMass,
             combinedInvertedMass
           );
-        case 'constant_rectangle':
+        case 'rectangle':
           return resolveConstantRectangleConstantRectanglePenetration(
             aPosition,
             aColliderShape,

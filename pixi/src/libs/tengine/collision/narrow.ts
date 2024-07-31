@@ -1,8 +1,9 @@
 import { newQuery, registerQuery, Entity, KindToType, System, table, emit } from '../../tecs';
+import { Vector2 } from '../core';
 import { Position2 } from '../core/types';
 import { Game } from '../game';
-import { collidersPenetrationDepth } from './checks';
 import { ColliderSet, CollisionsMonitoring } from './components';
+import { normalAxes, sat } from './sat';
 import { colliding } from './topics';
 
 // 1. Get all entities that have CollisionSource + ColliderSet + Position (+ Awaken)
@@ -68,28 +69,107 @@ export const checkNarrowCollisionSimple = (game: Game): System => {
 
           for (const colliderA of colliderSetA.list) {
             for (const colliderB of colliderSetB.list) {
-              const depth = collidersPenetrationDepth(colliderA, colliderB);
-
-              if (depth >= 0) {
-                emit(
-                  colliding,
+              if (colliderA.shape.type === 'rectangle' && colliderB.shape.type === 'rectangle') {
+                const aVertices: Vector2[] = [
                   {
-                    name: 'colliding',
-                    depth,
-                    a: {
-                      entity: entityA,
-                      colliderSet: colliderSetA,
-                      collider: colliderA,
-                    },
-                    b: {
-                      entity: entityB,
-                      colliderSet: colliderSetB,
-                      collider: colliderB,
-                    },
+                    x: colliderA._position.x,
+                    y: colliderA._position.y,
                   },
-                  true
+                  {
+                    x: colliderA._position.x + colliderA.shape.width,
+                    y: colliderA._position.y,
+                  },
+                  {
+                    x: colliderA._position.x + colliderA.shape.width,
+                    y: colliderA._position.y + colliderA.shape.height,
+                  },
+                  {
+                    x: colliderA._position.x,
+                    y: colliderA._position.y + colliderA.shape.height,
+                  },
+                ];
+
+                const aAxes = normalAxes(aVertices);
+
+                const bVertices: Vector2[] = [
+                  {
+                    x: colliderB._position.x,
+                    y: colliderB._position.y,
+                  },
+                  {
+                    x: colliderB._position.x + colliderB.shape.width,
+                    y: colliderB._position.y,
+                  },
+                  {
+                    x: colliderB._position.x + colliderB.shape.width,
+                    y: colliderB._position.y + colliderB.shape.height,
+                  },
+                  {
+                    x: colliderB._position.x,
+                    y: colliderB._position.y + colliderB.shape.height,
+                  },
+                ];
+
+                const bAxes = normalAxes(bVertices);
+
+                const result = sat(
+                  {
+                    vertices: aVertices,
+                    axes: aAxes,
+                  },
+                  {
+                    vertices: bVertices,
+                    axes: bAxes,
+                  }
                 );
+
+                if (!result) {
+                  continue;
+                }
+
+                if (result.overlap >= 0) {
+                  emit(
+                    colliding,
+                    {
+                      name: 'colliding',
+                      depth: result.overlap,
+                      a: {
+                        entity: entityA,
+                        colliderSet: colliderSetA,
+                        collider: colliderA,
+                      },
+                      b: {
+                        entity: entityB,
+                        colliderSet: colliderSetB,
+                        collider: colliderB,
+                      },
+                    },
+                    true
+                  );
+                }
               }
+
+              // const depth = collidersPenetrationDepth(colliderA, colliderB);
+              // if (depth >= 0) {
+              //   emit(
+              //     colliding,
+              //     {
+              //       name: 'colliding',
+              //       depth,
+              //       a: {
+              //         entity: entityA,
+              //         colliderSet: colliderSetA,
+              //         collider: colliderA,
+              //       },
+              //       b: {
+              //         entity: entityB,
+              //         colliderSet: colliderSetB,
+              //         collider: colliderB,
+              //       },
+              //     },
+              //     true
+              //   );
+              // }
             }
           }
         }

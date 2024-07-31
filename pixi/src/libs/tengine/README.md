@@ -1,6 +1,18 @@
+# TODO
+
+1. What is Anchor?
+    1. Shape offset to Position in percentage of width / height
+    1. Point of rotation
+1. Leave rectangle and circle colliders
+1. Add vertices to Collider
+1. Rotate Collider with different pivots
+1. Add Rotation to Colliders rotation (changing position and vertices)
+
 # Roadmap
 
 1. View
+    1. Capsule
+    1. Polygon
     1. Rotation
     1. Scale
     1. Change to ViewSet
@@ -10,10 +22,10 @@
     1. Line
     1. Capsule
     1. SAT
-    1. Dedup collision pairs
+    1. Pairs + Dedup
     1. Collision Queries
-    1. Add Offset to `resolvePenetration`
-    1. ? Remove `Collider.position`
+    1. Raw Vertices
+    1. Separate concave to convex
 1. Physics
     1. Rotation
     1. OnComponentAdded

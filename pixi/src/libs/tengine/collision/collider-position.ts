@@ -24,23 +24,24 @@ export const applyPositionToCollider = (game: Game): System => {
           let nX = position.x + collider.offset.x;
           let nY = position.y + collider.offset.y;
 
-          const anchor = {
-            x: 0.5,
-            y: 0.5,
-          };
-
           switch (collider.shape.type) {
-            case 'circle':
+            case 'circle': {
+              const anchor = collider.shape.anchor;
               nX = nX + collider.shape.radius - collider.shape.radius * 2 * anchor.x;
               nY = nY + collider.shape.radius - collider.shape.radius * 2 * anchor.y;
               break;
-            case 'constant_rectangle':
+            }
+            case 'rectangle': {
+              const anchor = collider.shape.anchor;
               nX = nX - collider.shape.width * anchor.x;
               nY = nY - collider.shape.height * anchor.y;
               break;
-            case 'line':
-              nY = nY - collider.shape.length * anchor.y;
+            }
+            case 'line': {
+              const anchor = collider.shape.anchor;
+              nY = nY - collider.shape.length * anchor;
               break;
+            }
             default:
               safeGuard(collider.shape);
           }

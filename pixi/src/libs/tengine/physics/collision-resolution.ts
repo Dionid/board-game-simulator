@@ -159,7 +159,7 @@ export const dynamicRigidBodyCollisionResolution = (game: Game): System => {
                 combinedInvertedMass
               );
               continue;
-            case 'constant_rectangle':
+            case 'rectangle':
               continue;
             case 'line':
               resolveCircleLineCollision(
@@ -180,7 +180,7 @@ export const dynamicRigidBodyCollisionResolution = (game: Game): System => {
             default:
               return safeGuard(b.collider.shape);
           }
-        case 'constant_rectangle':
+        case 'rectangle':
           continue;
         case 'line':
           switch (b.collider.shape.type) {
@@ -200,7 +200,7 @@ export const dynamicRigidBodyCollisionResolution = (game: Game): System => {
                 combinedInvertedMass
               );
               continue;
-            case 'constant_rectangle':
+            case 'rectangle':
               continue;
             case 'line':
               continue;

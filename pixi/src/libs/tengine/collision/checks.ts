@@ -23,14 +23,9 @@ export function areCircleAndRectangleColliding(
   rectPosition: Position2,
   rectSize: Size2
 ): boolean {
-  const rectCenter = {
-    x: rectPosition.x + rectSize.width / 2,
-    y: rectPosition.y + rectSize.height / 2,
-  };
-
   const distance = {
-    x: Math.abs(circlePosition.x - rectCenter.x),
-    y: Math.abs(circlePosition.y - rectCenter.y),
+    x: Math.abs(circlePosition.x - rectPosition.x),
+    y: Math.abs(circlePosition.y - rectPosition.y),
   };
 
   if (distance.x > rectSize.width / 2 + circleRadius) {
@@ -48,10 +43,10 @@ export function areCircleAndRectangleColliding(
     return true;
   }
 
-  const cornerDistance_sq =
+  const cornerDistance =
     (distance.x - rectSize.width / 2) ** 2 + (distance.y - rectSize.height / 2) ** 2;
 
-  return cornerDistance_sq <= circleRadius ** 2;
+  return cornerDistance <= circleRadius ** 2;
 }
 
 export function circleAndRectangleCollidingDepth(
@@ -60,14 +55,9 @@ export function circleAndRectangleCollidingDepth(
   rectPosition: Position2,
   rectSize: Size2
 ): number {
-  const rectCenter = {
-    x: rectPosition.x + rectSize.width / 2,
-    y: rectPosition.y + rectSize.height / 2,
-  };
-
   const distance = {
-    x: Math.abs(circlePosition.x - rectCenter.x),
-    y: Math.abs(circlePosition.y - rectCenter.y),
+    x: Math.abs(circlePosition.x - rectPosition.x),
+    y: Math.abs(circlePosition.y - rectPosition.y),
   };
 
   const minDistanceX = rectSize.width / 2 + circleRadius;
@@ -191,12 +181,6 @@ export function rectanglesCollidingDepth(
     return minDistanceX - distance.x;
   }
 
-  // const cornerCollidingMagnitude = Math.sqrt(
-  //   (distance.x - rectSize.width / 2) ** 2 + (distance.y - rectSize.height / 2) ** 2
-  // );
-
-  // return circleRadius - cornerCollidingMagnitude;
-
   return -1;
 }
 
@@ -214,7 +198,7 @@ export function collidersPenetrationDepth(
             bCollider._position,
             bCollider.shape.radius
           );
-        case 'constant_rectangle':
+        case 'rectangle':
           return circleAndRectangleCollidingDepth(
             aCollider._position,
             aCollider.shape.radius,
@@ -234,7 +218,7 @@ export function collidersPenetrationDepth(
         default:
           return safeGuard(bCollider.shape);
       }
-    case 'constant_rectangle':
+    case 'rectangle':
       switch (bCollider.shape.type) {
         case 'circle':
           return circleAndRectangleCollidingDepth(
@@ -243,7 +227,7 @@ export function collidersPenetrationDepth(
             aCollider._position,
             aCollider.shape
           );
-        case 'constant_rectangle':
+        case 'rectangle':
           return rectanglesCollidingDepth(
             aCollider._position,
             aCollider.shape,
@@ -267,7 +251,7 @@ export function collidersPenetrationDepth(
             bCollider._position,
             bCollider.shape.radius
           );
-        case 'constant_rectangle':
+        case 'rectangle':
         case 'line':
           return -1;
         default:

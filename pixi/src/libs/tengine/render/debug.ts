@@ -51,6 +51,7 @@ export const drawDebugLines = (
 
   return () => {
     globalGraphics.clear();
+    globalGraphics.removeChildren();
 
     for (let i = 0; i < query.archetypes.length; i++) {
       const archetype = query.archetypes[i];
@@ -79,7 +80,7 @@ export const drawDebugLines = (
               switch (collider.shape.type) {
                 case 'line':
                   continue;
-                case 'constant_rectangle':
+                case 'rectangle':
                   globalGraphics.rect(
                     collider._position.x,
                     collider._position.y,

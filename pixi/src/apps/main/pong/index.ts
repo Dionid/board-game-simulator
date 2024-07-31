@@ -2,9 +2,9 @@ import { Container } from 'pixi.js';
 import { initGame, newGame } from '../../../libs/tengine/game';
 import { registerSystem, setComponent, spawnEntity } from '../../../libs/tecs';
 import { mapKeyboardInput, mapMouseInput } from '../../../libs/tengine/ecs';
-import { Dynamic, Kinematic, RigidBody, Static } from 'libs/tengine/physics/components';
-import { Position2, Velocity2, Speed, Acceleration2, Rotation } from 'libs/tengine/core';
-import { Ball, Enemy, Player, Wall, accelerateByArrows, changeVelocityByArrows } from './ecs';
+import { Dynamic, Kinematic, RigidBody } from 'libs/tengine/physics/components';
+import { Position2, Velocity2, Speed, Acceleration2 } from 'libs/tengine/core';
+import { Ball, Enemy, Player, accelerateByArrows } from './ecs';
 import { applyWorldBoundaries } from 'libs/tengine/collision/penetration-resolution';
 import {
   CollisionsMonitoring,
@@ -88,7 +88,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     },
   });
   // # Collisions
-  // setComponent(game.essence, playerEntity, CollisionsMonitoring);
+  setComponent(game.essence, playerEntity, CollisionsMonitoring);
   // setComponent(game.essence, playerEntity, Impenetrable);
   setComponent(game.essence, playerEntity, ColliderSet, {
     list: [
@@ -97,8 +97,13 @@ export async function initPongGame(parentElement: HTMLElement) {
         mass: 1,
         offset: { x: 0, y: 0 },
         _position: { x: 0, y: 0 },
+        rotation: 0,
         shape: {
-          type: 'constant_rectangle',
+          type: 'rectangle',
+          anchor: {
+            x: 0.5,
+            y: 0.5,
+          },
           width: characterSize.width,
           height: characterSize.height,
         },
@@ -156,8 +161,13 @@ export async function initPongGame(parentElement: HTMLElement) {
         mass: 1,
         offset: { x: 0, y: 0 },
         _position: { x: 0, y: 0 },
+        rotation: 0,
         shape: {
-          type: 'constant_rectangle',
+          anchor: {
+            x: 0.5,
+            y: 0.5,
+          },
+          type: 'rectangle',
           width: characterSize.width,
           height: characterSize.height,
         },
@@ -214,7 +224,12 @@ export async function initPongGame(parentElement: HTMLElement) {
         mass: 1,
         offset: { x: 0, y: 0 },
         _position: { x: 0, y: 0 },
+        rotation: 0,
         shape: {
+          anchor: {
+            x: 0.5,
+            y: 0.5,
+          },
           type: 'circle',
           radius: 25,
         },
@@ -268,7 +283,12 @@ export async function initPongGame(parentElement: HTMLElement) {
         mass: 1,
         offset: { x: 0, y: 0 },
         _position: { x: 0, y: 0 },
+        rotation: 0,
         shape: {
+          anchor: {
+            x: 0.5,
+            y: 0.5,
+          },
           type: 'circle',
           radius: 25,
         },
@@ -282,94 +302,94 @@ export async function initPongGame(parentElement: HTMLElement) {
   });
   setComponent(game.essence, sBallEntity, Dynamic);
 
-  // # Wall
-  const wallEntity = spawnEntity(game.essence);
-  setComponent(game.essence, wallEntity, Wall);
-  // # View
-  setComponent(game.essence, wallEntity, View, {
-    offset: { x: 0, y: 0 },
-    scale: { x: 1, y: 1 },
-    rotation: 0,
-    model: {
-      type: 'graphics',
-      color: '#fff',
-      shape: {
-        anchor: 0.5,
-        type: 'line',
-        length: 50,
-      },
-    },
-  });
-  // setComponent(game.essence, wallEntity, Rotation, { value: 0 });
-  setComponent(game.essence, wallEntity, Speed, { value: 5 });
-  setComponent(game.essence, wallEntity, Velocity2, {
-    x: 0,
-    y: 0,
-  });
-  setComponent(game.essence, wallEntity, Position2, {
-    x: 100,
-    y: 100,
-  });
-  // # Collisions
-  setComponent(game.essence, wallEntity, ColliderSet, {
-    list: [
-      {
-        type: 'solid',
-        mass: 1,
-        offset: { x: 0, y: 0 },
-        _position: { x: 0, y: 0 },
-        shape: {
-          rotation: 0,
-          type: 'line',
-          length: 50,
-        },
-      },
-    ],
-  });
-  // # Physics
-  setComponent(game.essence, wallEntity, RigidBody, {
-    elasticity: 1,
-    elasticityMode: 'average',
-  });
-  setComponent(game.essence, wallEntity, Dynamic);
+  // // # Wall
+  // const wallEntity = spawnEntity(game.essence);
+  // setComponent(game.essence, wallEntity, Wall);
+  // // # View
+  // setComponent(game.essence, wallEntity, View, {
+  //   offset: { x: 0, y: 0 },
+  //   scale: { x: 1, y: 1 },
+  //   rotation: 0,
+  //   model: {
+  //     type: 'graphics',
+  //     color: '#fff',
+  //     shape: {
+  //       anchor: 0.5,
+  //       type: 'line',
+  //       length: 50,
+  //     },
+  //   },
+  // });
+  // // setComponent(game.essence, wallEntity, Rotation, { value: 0 });
+  // setComponent(game.essence, wallEntity, Speed, { value: 5 });
+  // setComponent(game.essence, wallEntity, Velocity2, {
+  //   x: 0,
+  //   y: 0,
+  // });
+  // setComponent(game.essence, wallEntity, Position2, {
+  //   x: 100,
+  //   y: 100,
+  // });
+  // // # Collisions
+  // setComponent(game.essence, wallEntity, ColliderSet, {
+  //   list: [
+  //     {
+  //       type: 'solid',
+  //       mass: 1,
+  //       offset: { x: 0, y: 0 },
+  //       _position: { x: 0, y: 0 },
+  //       shape: {
+  //         rotation: 0,
+  //         type: 'line',
+  //         length: 50,
+  //       },
+  //     },
+  //   ],
+  // });
+  // // # Physics
+  // setComponent(game.essence, wallEntity, RigidBody, {
+  //   elasticity: 1,
+  //   elasticityMode: 'average',
+  // });
+  // setComponent(game.essence, wallEntity, Dynamic);
 
-  // # Capsule
-  const capsuleEntity = spawnEntity(game.essence);
-  setComponent(game.essence, capsuleEntity, Wall);
-  // # View
-  setComponent(game.essence, capsuleEntity, View, {
-    offset: { x: 0, y: 0 },
-    scale: { x: 1, y: 1 },
-    rotation: 0,
-    model: {
-      type: 'graphics',
-      color: '0xfff',
-      shape: {
-        anchor: {
-          x: 0.5,
-          y: 0.5,
-        },
-        type: 'capsule',
-        length: 100,
-        radius: 25,
-      },
-    },
-  });
-  setComponent(game.essence, capsuleEntity, Position2, {
-    x: 400,
-    y: 200,
-  });
-  // setComponent(game.essence, capsuleEntity, Rotation, { value: Math.PI / 2 });
-  setComponent(game.essence, capsuleEntity, Speed, { value: 1 });
-  setComponent(game.essence, capsuleEntity, Acceleration2, {
-    x: 0,
-    y: 0,
-  });
-  setComponent(game.essence, capsuleEntity, Velocity2, {
-    x: 0,
-    y: 0,
-  });
-  setComponent(game.essence, capsuleEntity, RigidBody);
+  // // # Capsule
+  // const capsuleEntity = spawnEntity(game.essence);
+  // setComponent(game.essence, capsuleEntity, Wall);
+  // // # View
+  // setComponent(game.essence, capsuleEntity, View, {
+  //   offset: { x: 0, y: 0 },
+  //   scale: { x: 1, y: 1 },
+  //   rotation: 0,
+  //   model: {
+  //     type: 'graphics',
+  //     color: '0xfff',
+  //     shape: {
+  //       anchor: {
+  //         x: 0.5,
+  //         y: 0.5,
+  //       },
+  //       type: 'capsule',
+  //       length: 100,
+  //       radius: 25,
+  //     },
+  //   },
+  // });
+  // setComponent(game.essence, capsuleEntity, Position2, {
+  //   x: 400,
+  //   y: 200,
+  // });
+  // // setComponent(game.essence, capsuleEntity, Rotation, { value: Math.PI / 2 });
+  // setComponent(game.essence, capsuleEntity, Speed, { value: 1 });
+  // setComponent(game.essence, capsuleEntity, Acceleration2, {
+  //   x: 0,
+  //   y: 0,
+  // });
+  // setComponent(game.essence, capsuleEntity, Velocity2, {
+  //   x: 0,
+  //   y: 0,
+  // });
+  // setComponent(game.essence, capsuleEntity, RigidBody);
 
   // # Systems
   // ...
@@ -378,8 +398,8 @@ export async function initPongGame(parentElement: HTMLElement) {
   registerSystem(game.essence, mapMouseInput(game, map));
 
   // ## Game logic
-  // registerSystem(game.essence, accelerateByArrows(game, playerEntity));
-  registerSystem(game.essence, accelerateByArrows(game, capsuleEntity));
+  registerSystem(game.essence, accelerateByArrows(game, playerEntity));
+  // registerSystem(game.essence, accelerateByArrows(game, capsuleEntity));
   // registerSystem(game.essence, changeVelocityByArrows(game, ballEntity));
 
   // ## Basic physics
