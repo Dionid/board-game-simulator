@@ -33,8 +33,8 @@ export const ColliderShape = union(ColliderRectangle, ColliderCircle, ColliderLi
 
 export const Collider = newSchema({
   type: union(literal('solid'), literal('sensor')),
-  offset: Position2,
-  _position: Position2,
+  offset: Vector2,
+  _position: Vector2,
   rotation: number,
   shape: ColliderShape,
   mass: number,

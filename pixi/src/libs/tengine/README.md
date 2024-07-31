@@ -1,5 +1,7 @@
 # TODO
 
+1. ~~Change render logic to pView~~
+1. Change debug to pView
 1. What is Anchor?
     1. Shape offset to Position in percentage of width / height
     1. Point of rotation
@@ -13,11 +15,11 @@
 1. View
     1. Capsule
     1. Polygon
-    1. Rotation
-    1. Scale
+    1. ~~Rotation~~ -> Change View to ViewSet with own container
     1. Change to ViewSet
     1. Add pixi Container as Component and update it values instead of creating new ones
     1. On entity kill destroy pView
+    1. Scale
 1. ECS
     1. Default topics (ComponentAdded, ComponentRemoved, ComponentChanged, EntitySpawned, EntityKilled)
 1. Collision

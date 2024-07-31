@@ -12,7 +12,7 @@ import { Game } from 'libs/tengine/game';
 import { Container } from 'pixi.js';
 import { pView, View } from './components';
 import { safeGuard } from 'libs/tecs/switch';
-import { drawCapsule, drawCircle, drawLine, drawRectangle } from './draw-shapes';
+import { drawCircle, drawRectangle } from './draw-shapes';
 
 // TODO: Refactor to use filter `not`
 export const newViewQuery = newQuery(View, Position2);
@@ -71,35 +71,35 @@ export const addNewViews = (game: Game, viewsContainer: Container): System => {
 
                 break;
               }
-              case 'line': {
-                const line = drawLine(view, position);
+              // case 'line': {
+              //   const line = drawLine(view, position);
 
-                if (!line) {
-                  break;
-                }
+              //   if (!line) {
+              //     break;
+              //   }
 
-                line.fill(view.model.color);
+              //   line.fill(view.model.color);
 
-                viewsContainer.addChild(line);
+              //   viewsContainer.addChild(line);
 
-                break;
-              }
-              case 'capsule': {
-                const capsule = drawCapsule(view, position);
+              //   break;
+              // }
+              // case 'capsule': {
+              //   const capsule = drawCapsule(view, position);
 
-                if (!capsule) {
-                  break;
-                }
+              //   if (!capsule) {
+              //     break;
+              //   }
 
-                capsule.fill(view.model.color);
+              //   capsule.fill(view.model.color);
 
-                viewsContainer.addChild(capsule);
+              //   viewsContainer.addChild(capsule);
 
-                break;
-              }
-              case 'polygon': {
-                break;
-              }
+              //   break;
+              // }
+              // case 'polygon': {
+              //   break;
+              // }
               default:
                 return safeGuard(view.model.shape);
             }
@@ -140,9 +140,10 @@ export const drawViews = (game: Game): System => {
           pView.container.rotation = view.rotation;
         }
 
-        if (position.x !== pView.container.x || position.y !== pView.container.y) {
-          pView.container.x = position.x;
-          pView.container.y = position.y;
+        // BUG: Problem is that position must be calculated based on the anchor point
+        if (position.x !== position._prev.x || position.y !== position._prev.y) {
+          pView.container.x = position.x + view.offset.x;
+          pView.container.y = position.y + view.offset.y;
         }
       }
     }

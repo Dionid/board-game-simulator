@@ -51,6 +51,14 @@ export const applyRigidBodyVelocityToPosition = (game: Game): System => {
 
         position.x += velocity.x * deltaTime;
         position.y += velocity.y * deltaTime;
+
+        if (velocity.x < 0.01 && velocity.x > -0.01) {
+          velocity.x = 0;
+        }
+
+        if (velocity.y < 0.01 && velocity.y > -0.01) {
+          velocity.y = 0;
+        }
       }
     }
   };

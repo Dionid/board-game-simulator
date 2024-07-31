@@ -19,6 +19,7 @@ import {
 } from 'libs/tengine/physics';
 import { drawViews, View, drawDebugLines, addNewViews } from 'libs/tengine/render';
 import { penetrationResolution } from 'libs/tengine/collision/penetration-resolution';
+import { updatePreviousPosition } from 'libs/tengine/core/update-previous';
 
 export async function initPongGame(parentElement: HTMLElement) {
   const game = newGame({
@@ -56,6 +57,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   const playerPosition = {
     x: game.world.size.width / 6 - characterSize.width / 2,
     y: game.world.size.height / 2 - characterSize.height / 2,
+    _prev: { x: 0, y: 0 },
   };
   setComponent(game.essence, playerEntity, Position2, playerPosition);
 
@@ -217,6 +219,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, ballEntity, Position2, {
     x: game.world.size.width / 2 - 10,
     y: game.world.size.height / 2 - 10,
+    _prev: { x: 0, y: 0 },
   });
   // // # Collisions
   // setComponent(game.essence, ballEntity, CollisionsMonitoring);
@@ -396,7 +399,9 @@ export async function initPongGame(parentElement: HTMLElement) {
   // setComponent(game.essence, capsuleEntity, RigidBody);
 
   // # Systems
-  // ...
+  // ## Caches invalidation
+  registerSystem(game.essence, updatePreviousPosition(game));
+
   // ## Input
   registerSystem(game.essence, mapKeyboardInput(game));
   registerSystem(game.essence, mapMouseInput(game, map));

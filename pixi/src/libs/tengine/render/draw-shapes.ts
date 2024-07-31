@@ -1,5 +1,5 @@
 import { Container, Graphics } from 'pixi.js';
-import { crossV2, dotV2, horizontalVector, Position2, subV2, unitV2 } from '../core';
+import { Position2 } from '../core';
 import { Component, KindToType } from 'libs/tecs';
 import { View } from './components';
 
@@ -62,76 +62,76 @@ export function drawCircle(view: KindToType<typeof View>, position: Position2) {
   };
 }
 
-export function drawCapsule(view: KindToType<typeof View>, position: Position2) {
-  if (view.model.type !== 'graphics' || view.model.shape.type !== 'capsule') {
-    return;
-  }
+// export function drawCapsule(view: KindToType<typeof View>, position: Position2) {
+//   if (view.model.type !== 'graphics' || view.model.shape.type !== 'capsule') {
+//     return;
+//   }
 
-  // # Draw capsule
-  const anchor = view.model.shape.anchor;
+//   // # Draw capsule
+//   const anchor = view.model.shape.anchor;
 
-  const length = view.model.shape.length;
-  const radius = view.model.shape.radius;
+//   const length = view.model.shape.length;
+//   const radius = view.model.shape.radius;
 
-  const start = {
-    x: position.x + view.offset.x + radius - radius * 2 * anchor.x,
-    y: position.y + view.offset.y - length * anchor.y,
-  };
+//   const start = {
+//     x: position.x + view.offset.x + radius - radius * 2 * anchor.x,
+//     y: position.y + view.offset.y - length * anchor.y,
+//   };
 
-  const end = {
-    x: start.x,
-    y: start.y + length,
-  };
+//   const end = {
+//     x: start.x,
+//     y: start.y + length,
+//   };
 
-  const graphics = new Graphics();
+//   const graphics = new Graphics();
 
-  // # Outer
-  // ## Calculate arcs angel to horizontal line
-  const refDirection = unitV2(subV2(end, start));
-  let refAngle = Math.acos(dotV2(refDirection, horizontalVector));
+//   // # Outer
+//   // ## Calculate arcs angel to horizontal line
+//   const refDirection = unitV2(subV2(end, start));
+//   let refAngle = Math.acos(dotV2(refDirection, horizontalVector));
 
-  if (crossV2(refDirection, horizontalVector) > 0) {
-    refAngle = -refAngle;
-  }
+//   if (crossV2(refDirection, horizontalVector) > 0) {
+//     refAngle = -refAngle;
+//   }
 
-  graphics.beginPath();
+//   graphics.beginPath();
 
-  graphics.arc(start.x, start.y, radius, refAngle + Math.PI / 2, refAngle + (3 * Math.PI) / 2);
-  graphics.arc(end.x, end.y, radius, refAngle - Math.PI / 2, refAngle + Math.PI / 2);
+//   graphics.arc(start.x, start.y, radius, refAngle + Math.PI / 2, refAngle + (3 * Math.PI) / 2);
+//   graphics.arc(end.x, end.y, radius, refAngle - Math.PI / 2, refAngle + Math.PI / 2);
 
-  graphics.closePath();
+//   graphics.closePath();
 
-  return graphics;
-}
+//   return graphics;
+// }
 
-export function drawLine(view: KindToType<typeof View>, position: Position2) {
-  if (view.model.type !== 'graphics' || view.model.shape.type !== 'line') {
-    return;
-  }
+// export function drawLine(view: KindToType<typeof View>, position: Position2) {
+//   if (view.model.type !== 'graphics' || view.model.shape.type !== 'line') {
+//     return;
+//   }
 
-  // # Draw capsule
-  const anchor = view.model.shape.anchor;
+//   // # Draw capsule
+//   const anchor = view.model.shape.anchor;
 
-  const length = view.model.shape.length;
+//   const length = view.model.shape.length;
 
-  const start = {
-    x: position.x + view.offset.x,
-    y: position.y + view.offset.y - length * anchor,
-  };
+//   const start = {
+//     x: position.x + view.offset.x,
+//     y: position.y + view.offset.y - length * anchor,
+//   };
 
-  const end = {
-    x: start.x,
-    y: start.y + length,
-  };
+//   const end = {
+//     x: start.x,
+//     y: start.y + length,
+//   };
 
-  const graphics = new Graphics();
+//   const graphics = new Graphics();
 
-  graphics.moveTo(start.x, start.y);
-  graphics.lineTo(end.x, end.y);
-  graphics.stroke({
-    width: 1,
-    color: view.model.color,
-  });
+//   graphics.moveTo(start.x, start.y);
+//   graphics.lineTo(end.x, end.y);
+//   graphics.stroke({
+//     width: 1,
+//     color: view.model.color,
+//   });
 
-  return graphics;
-}
+//   return graphics;
+// }

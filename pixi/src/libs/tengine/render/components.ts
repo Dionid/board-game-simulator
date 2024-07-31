@@ -14,28 +14,28 @@ export const Circle = newSchema({
   anchor: Vector2,
 });
 
-export const Line = newSchema({
-  type: literal('line'),
-  length: number,
-  anchor: number,
-});
+// export const Line = newSchema({
+//   type: literal('line'),
+//   length: number,
+//   anchor: number,
+// });
 
-export const Capsule = newSchema({
-  type: literal('capsule'),
-  length: number,
-  radius: number,
-  anchor: Vector2,
-});
+// export const Capsule = newSchema({
+//   type: literal('capsule'),
+//   length: number,
+//   radius: number,
+//   anchor: Vector2,
+// });
 
-export const Polygon = newSchema({
-  type: literal('polygon'),
-  anchor: Vector2,
-  // ...
-});
+// export const Polygon = newSchema({
+//   type: literal('polygon'),
+//   anchor: Vector2,
+//   // ...
+// });
 
 export const Graphics = newSchema({
   type: literal('graphics'),
-  shape: union(Rectangle, Circle, Polygon, Line, Capsule),
+  shape: union(Rectangle, Circle),
   color: string,
 });
 

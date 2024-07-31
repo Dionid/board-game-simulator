@@ -12,6 +12,7 @@ export type Position2 = Vector2;
 export const Position2 = newSchema({
   x: number,
   y: number,
+  _prev: Vector2,
 });
 
 export type Size2 = {
