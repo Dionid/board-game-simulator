@@ -77,14 +77,14 @@ export async function initPongGame(parentElement: HTMLElement) {
     offset: { x: 0, y: 0 },
     scale: { x: 1, y: 1 },
     rotation: Math.PI / 2,
+    anchor: {
+      x: 0.5,
+      y: 0.5,
+    },
     model: {
       type: 'graphics',
       color: 'blue',
       shape: {
-        anchor: {
-          x: 0.5,
-          y: 0.5,
-        },
         type: 'rectangle',
         size: {
           width: characterSize.width,
@@ -194,14 +194,14 @@ export async function initPongGame(parentElement: HTMLElement) {
     offset: { x: 0, y: 0 },
     scale: { x: 1, y: 1 },
     rotation: 0,
+    anchor: {
+      x: 0.5,
+      y: 0.5,
+    },
     model: {
       type: 'graphics',
       color: '0xfff',
       shape: {
-        anchor: {
-          x: 0.5,
-          y: 0.5,
-        },
         type: 'circle',
         radius: 25,
       },

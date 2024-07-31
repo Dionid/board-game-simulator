@@ -67,12 +67,12 @@ export async function initRapierPongGame(parentElement: HTMLElement) {
     offset: { x: 0, y: 0 },
     scale: { x: 1, y: 1 },
     rotation: 0,
+    anchor: { x: 0.5, y: 0.5 },
     model: {
       type: 'graphics',
       color: 'blue',
       shape: {
         type: 'rectangle',
-        anchor: { x: 0.5, y: 0.5 },
         size: {
           width: characterSize.width,
           height: characterSize.height,

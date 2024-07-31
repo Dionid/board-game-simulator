@@ -1,14 +1,21 @@
 import { Container, Graphics } from 'pixi.js';
-import { Position2 } from '../core';
+import { Position2, Size2, Vector2 } from '../core';
 import { Component, KindToType } from 'libs/tecs';
 import { View } from './components';
 
-export function drawRectangle(view: Component<typeof View>, position: Position2) {
+export function rectangleViewPivot(size: Size2, anchor: Vector2) {
+  return {
+    x: size.width * anchor.x,
+    y: size.height * anchor.y,
+  };
+}
+
+export function rectangleView(view: Component<typeof View>, position: Position2) {
   if (view.model.type !== 'graphics' || view.model.shape.type !== 'rectangle') {
     return;
   }
 
-  const anchor = view.model.shape.anchor;
+  const anchor = view.anchor;
 
   const start = {
     x: position.x + view.offset.x,
@@ -21,10 +28,7 @@ export function drawRectangle(view: Component<typeof View>, position: Position2)
     rotation: view.rotation,
     width: view.model.shape.size.width,
     height: view.model.shape.size.height,
-    pivot: {
-      x: view.model.shape.size.width * anchor.x,
-      y: view.model.shape.size.height * anchor.y,
-    },
+    pivot: rectangleViewPivot(view.model.shape.size, anchor),
   });
 
   const rect = new Graphics().rect(0, 0, view.model.shape.size.width, view.model.shape.size.height);
@@ -37,7 +41,14 @@ export function drawRectangle(view: Component<typeof View>, position: Position2)
   };
 }
 
-export function drawCircle(view: KindToType<typeof View>, position: Position2) {
+export function circleViewPivot(radius: number, anchor: Vector2) {
+  return {
+    x: 2 * radius * anchor.x - radius,
+    y: 2 * radius * anchor.y - radius,
+  };
+}
+
+export function circleView(view: KindToType<typeof View>, position: Position2) {
   if (view.model.type !== 'graphics' || view.model.shape.type !== 'circle') {
     return;
   }
@@ -46,10 +57,7 @@ export function drawCircle(view: KindToType<typeof View>, position: Position2) {
     x: position.x + view.offset.x,
     y: position.y + view.offset.y,
     rotation: view.rotation,
-    pivot: {
-      x: 2 * view.model.shape.radius * view.model.shape.anchor.x - view.model.shape.radius,
-      y: 2 * view.model.shape.radius * view.model.shape.anchor.y - view.model.shape.radius,
-    },
+    pivot: circleViewPivot(view.model.shape.radius, view.anchor),
   });
 
   const graphics = new Graphics().circle(0, 0, view.model.shape.radius);

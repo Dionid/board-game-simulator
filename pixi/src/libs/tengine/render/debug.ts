@@ -6,7 +6,7 @@ import { Map, Vector2 } from '../core';
 import { ColliderSet } from '../collision';
 import { View } from './components';
 import { safeGuard } from 'libs/tecs/switch';
-import { drawCircle, drawRectangle } from './draw-shapes';
+import { circleView, rectangleView } from './draw-shapes';
 
 const drawLineFromCenter = (
   globalGraphics: Graphics,
@@ -124,7 +124,7 @@ export const drawDebugLines = (
             case 'graphics':
               switch (view.model.shape.type) {
                 case 'circle':
-                  const circle = drawCircle(view, position);
+                  const circle = circleView(view, position);
 
                   if (!circle) {
                     break;
@@ -136,7 +136,7 @@ export const drawDebugLines = (
 
                   break;
                 case 'rectangle':
-                  const result = drawRectangle(view, position);
+                  const result = rectangleView(view, position);
 
                   if (!result) {
                     break;

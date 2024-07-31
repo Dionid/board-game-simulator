@@ -12,7 +12,7 @@ import { Game } from 'libs/tengine/game';
 import { Container } from 'pixi.js';
 import { pView, View } from './components';
 import { safeGuard } from 'libs/tecs/switch';
-import { drawCircle, drawRectangle } from './draw-shapes';
+import { circleView, circleViewPivot, rectangleView, rectangleViewPivot } from './draw-shapes';
 
 // TODO: Refactor to use filter `not`
 export const newViewQuery = newQuery(View, Position2);
@@ -42,7 +42,7 @@ export const addNewViews = (game: Game, viewsContainer: Container): System => {
           case 'graphics': {
             switch (view.model.shape.type) {
               case 'rectangle': {
-                const result = drawRectangle(view, position);
+                const result = rectangleView(view, position);
 
                 if (!result) {
                   break;
@@ -57,7 +57,7 @@ export const addNewViews = (game: Game, viewsContainer: Container): System => {
                 break;
               }
               case 'circle': {
-                const result = drawCircle(view, position);
+                const result = circleView(view, position);
 
                 if (!result) {
                   continue;
@@ -125,6 +125,10 @@ export const drawQuery = newQuery(View, pView, Position2);
 export const drawViews = (game: Game): System => {
   const query = registerQuery(game.essence, drawQuery);
 
+  const cache: {
+    anchor: { x: number; y: number };
+  }[] = [];
+
   return () => {
     for (const archetype of query.archetypes) {
       const positionT = table(archetype, Position2);
@@ -132,18 +136,68 @@ export const drawViews = (game: Game): System => {
       const viewT = table(archetype, View);
 
       for (let i = 0, l = archetype.entities.length; i < l; i++) {
+        const entity = archetype.entities[i];
         const position = positionT[i];
         const pView = pViewT[i];
         const view = viewT[i];
 
-        if (pView.container.rotation !== view.rotation) {
+        let cached = cache[entity];
+
+        if (!cached) {
+          cached = {
+            anchor: {
+              x: view.anchor.x,
+              y: view.anchor.y,
+            },
+          };
+        }
+
+        // # Rotation changed
+        if (view.rotation !== pView.container.rotation) {
           pView.container.rotation = view.rotation;
         }
 
-        // BUG: Problem is that position must be calculated based on the anchor point
+        // # Scale changed
+        if (view.scale.x !== pView.container.scale.x || view.scale.y !== pView.container.scale.y) {
+          pView.container.scale.set(view.scale.x, view.scale.y);
+        }
+
+        // # Position changed
         if (position.x !== position._prev.x || position.y !== position._prev.y) {
           pView.container.x = position.x + view.offset.x;
           pView.container.y = position.y + view.offset.y;
+        }
+
+        // # Anchor changed
+        if (cached.anchor.x !== view.anchor.x || cached.anchor.y !== view.anchor.y) {
+          switch (view.model.type) {
+            case 'graphics': {
+              switch (view.model.shape.type) {
+                case 'circle': {
+                  const pivot = circleViewPivot(view.model.shape.radius, view.anchor);
+
+                  pView.container.pivot.set(pivot.x, pivot.y);
+
+                  break;
+                }
+                case 'rectangle': {
+                  const pivot = rectangleViewPivot(view.model.shape.size, view.anchor);
+
+                  pView.container.pivot.set(pivot.x, pivot.y);
+
+                  break;
+                }
+                default:
+                  safeGuard(view.model.shape);
+              }
+              break;
+            }
+            case 'sprite': {
+              break;
+            }
+            default:
+              safeGuard(view.model);
+          }
         }
       }
     }
