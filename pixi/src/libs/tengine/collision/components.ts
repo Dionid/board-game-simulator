@@ -46,23 +46,23 @@ export const Collider = newSchema({
   }),
 });
 
-export function rectangleColliderComponent(
-  parentPosition: Vector2, // TODO: remove this
-  parentAngle: number, // TODO: remove this
-  type: 'solid' | 'sensor',
-  mass: number,
-  offset: Vector2,
-  angle: number,
-  anchor: Vector2,
-  size: { width: number; height: number }
-): Component<typeof Collider> {
+export function rectangleColliderComponent(opts: {
+  parentPosition: Vector2; // TODO: remove this
+  parentAngle: number; // TODO: remove this
+  type: 'solid' | 'sensor';
+  mass: number;
+  offset: Vector2;
+  angle: number;
+  anchor: Vector2;
+  size: { width: number; height: number };
+}): Component<typeof Collider> {
   const origin = {
-    x: parentPosition.x + offset.x,
-    y: parentPosition.y + offset.y,
+    x: opts.parentPosition.x + opts.offset.x,
+    y: opts.parentPosition.y + opts.offset.y,
   };
   const colliderPosition = {
-    x: origin.x - size.width * anchor.x,
-    y: origin.y - size.height * anchor.y,
+    x: origin.x - opts.size.width * opts.anchor.x,
+    y: origin.y - opts.size.height * opts.anchor.y,
   };
   const colliderVertices = [
     {
@@ -70,44 +70,90 @@ export function rectangleColliderComponent(
       y: colliderPosition.y,
     },
     {
-      x: colliderPosition.x + size.width,
+      x: colliderPosition.x + opts.size.width,
       y: colliderPosition.y,
     },
     {
-      x: colliderPosition.x + size.width,
-      y: colliderPosition.y + size.height,
+      x: colliderPosition.x + opts.size.width,
+      y: colliderPosition.y + opts.size.height,
     },
     {
       x: colliderPosition.x,
-      y: colliderPosition.y + size.height,
+      y: colliderPosition.y + opts.size.height,
     },
   ];
 
-  mutRotateVertices2Around(colliderVertices, angle, origin);
-  mutRotateVertices2Around(colliderVertices, parentAngle, parentPosition);
+  mutRotateVertices2Around(colliderVertices, opts.angle, origin);
+  mutRotateVertices2Around(colliderVertices, opts.parentAngle, opts.parentPosition);
 
   const normalAxes = normalAxes2(colliderVertices);
 
   return {
-    type,
-    mass,
-    offset,
-    angle,
+    type: opts.type,
+    mass: opts.mass,
+    offset: opts.offset,
+    angle: opts.angle,
     shape: {
       type: 'rectangle' as const,
-      anchor: anchor,
-      width: size.width,
-      height: size.height,
+      anchor: opts.anchor,
+      width: opts.size.width,
+      height: opts.size.height,
     },
     _position: colliderPosition,
     _origin: origin,
     _vertices: colliderVertices,
     _normalAxes: normalAxes,
     _prev: {
-      angle: angle,
+      angle: opts.angle,
       offset: {
-        x: offset.x,
-        y: offset.y,
+        x: opts.offset.x,
+        y: opts.offset.y,
+      },
+    },
+  };
+}
+
+export function circleColliderComponent(opts: {
+  parentPosition: Vector2; // TODO: remove this
+  parentAngle: number; // TODO: remove this
+  type: 'solid' | 'sensor';
+  mass: number;
+  offset: Vector2;
+  angle: number;
+  anchor: Vector2;
+  radius: number;
+}): Component<typeof Collider> {
+  const origin = {
+    x: opts.parentPosition.x + opts.offset.x,
+    y: opts.parentPosition.y + opts.offset.y,
+  };
+  const colliderPosition = {
+    x: origin.x - opts.radius + 2 * opts.radius * opts.anchor.x,
+    y: origin.y - opts.radius + 2 * opts.radius * opts.anchor.y,
+  };
+  const colliderVertices: Axes2 = [];
+
+  const normalAxes = normalAxes2(colliderVertices);
+
+  return {
+    type: opts.type,
+    mass: opts.mass,
+    offset: opts.offset,
+    angle: opts.angle,
+    shape: {
+      type: 'circle' as const,
+      anchor: opts.anchor,
+      radius: opts.radius,
+    },
+    _position: colliderPosition,
+    _origin: origin,
+    _vertices: colliderVertices,
+    _normalAxes: normalAxes,
+    _prev: {
+      angle: opts.angle,
+      offset: {
+        x: opts.offset.x,
+        y: opts.offset.y,
       },
     },
   };

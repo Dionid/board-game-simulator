@@ -7,11 +7,9 @@ import {
   table,
 } from 'libs/tecs';
 import { Game } from '../game';
-import { multV2, mutAddV2, mutSubV2, Position2 } from '../core';
+import { Position2 } from '../core';
 import { unfilteredColliding } from './topics';
 import { ColliderSet, Impenetrable } from './components';
-import { inverseMass } from './math';
-import { translateCollider } from './collider-transform';
 import { resolvePenetration } from './resolvers';
 
 export const penetrationResolution = (game: Game): System => {

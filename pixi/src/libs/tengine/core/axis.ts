@@ -66,3 +66,8 @@ export function mutRotateAxes2(axes: Axes2, angle: number): void {
     axis.x = px;
   }
 }
+
+export const constantRectangleNormalAxes2: Axes2 = [
+  { x: 1, y: 0 },
+  { x: 0, y: 1 },
+];

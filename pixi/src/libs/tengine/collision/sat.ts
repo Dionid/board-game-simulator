@@ -20,6 +20,13 @@ export function overlapAxes(
     };
   }
 
+  if (axes.length === 0 || verticesA.length === 0 || verticesB.length === 0) {
+    return {
+      overlap: 0,
+      axis: { x: 0, y: 0 },
+    };
+  }
+
   const verticesAX = verticesA[0].x;
   const verticesAY = verticesA[0].y;
 

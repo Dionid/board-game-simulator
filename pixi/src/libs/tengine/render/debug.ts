@@ -77,6 +77,19 @@ export const drawDebugLines = (
           const collisionSet = collisionSetT[j];
 
           for (const collider of collisionSet.list) {
+            if (collider.shape.type === 'circle') {
+              globalGraphics.circle(
+                collider._position.x,
+                collider._position.y,
+                collider.shape.radius
+              );
+              globalGraphics.stroke({ width: strokeWidth, color: 'gray' });
+            }
+
+            if (collider._vertices.length === 0) {
+              continue;
+            }
+
             globalGraphics.beginPath();
             globalGraphics.moveTo(collider._vertices[0].x, collider._vertices[0].y);
             for (let i = 1; i < collider._vertices.length; i++) {

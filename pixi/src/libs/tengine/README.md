@@ -6,8 +6,11 @@
 1. ~~Add vertices to Collider~~
 1. ~~Rotate Collider with different pivots~~
 1. ~~Add Rotation to Colliders rotation (changing position and vertices)~~
-1. Add Normal Axes to Collider
+1. ~~Add Normal Axes to Collider~~
 1. ? Will I add vertices to Circle
+1. World bounds
+1. Line
+1. Fix first time Velocity boom
 
 # Roadmap
 
