@@ -115,7 +115,68 @@ export function rectangleColliderComponent(opts: {
     },
   };
 
-  console.log('rectangle', component);
+  return component;
+}
+
+export function lineColliderComponent(opts: {
+  parentPosition: Vector2; // TODO: remove this
+  parentAngle: number; // TODO: remove this
+  type: 'solid' | 'sensor';
+  mass: number;
+  offset: Vector2;
+  angle: number;
+  anchor: number;
+  length: number;
+}): Component<typeof Collider> {
+  const origin = {
+    x: opts.parentPosition.x + opts.offset.x,
+    y: opts.parentPosition.y + opts.offset.y,
+  };
+  const colliderPosition = {
+    x: origin.x,
+    y: origin.y - opts.length * opts.anchor,
+  };
+  const colliderVertices = [
+    {
+      x: colliderPosition.x,
+      y: colliderPosition.y,
+    },
+    {
+      x: colliderPosition.x,
+      y: colliderPosition.y + opts.length,
+    },
+  ];
+
+  mutRotateVertices2Around(colliderVertices, opts.angle, origin);
+  mutRotateVertices2Around(colliderVertices, opts.parentAngle, opts.parentPosition);
+
+  // # Rectangle can have only 2 normal axes
+  const normalAxes = [normalV2(unitV2(subV2(colliderVertices[1], colliderVertices[0])))];
+
+  const component = {
+    type: opts.type,
+    mass: opts.mass,
+    offset: opts.offset,
+    angle: opts.angle,
+    shape: {
+      type: 'vertices' as const,
+      anchor: {
+        x: 0,
+        y: opts.anchor,
+      },
+    },
+    _position: colliderPosition,
+    _origin: origin,
+    _vertices: colliderVertices,
+    _normalAxes: normalAxes,
+    _prev: {
+      angle: opts.angle,
+      offset: {
+        x: opts.offset.x,
+        y: opts.offset.y,
+      },
+    },
+  };
 
   return component;
 }
@@ -196,8 +257,6 @@ export function verticesColliderComponent(opts: {
       },
     },
   };
-
-  console.log('vertices', component);
 
   return component;
 }

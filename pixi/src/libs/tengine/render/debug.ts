@@ -19,6 +19,7 @@ const drawLine = (
 };
 
 const debugViewQuery = newQuery(View, Position2);
+const debugPositionQuery = newQuery(Position2);
 const debugPViewQuery = newQuery(pView);
 const debugCollisionSetQuery = newQuery(ColliderSet, Position2);
 
@@ -47,6 +48,7 @@ export const drawDebugLines = (
   const query = registerQuery(game.essence, debugViewQuery);
   const pQuery = registerQuery(game.essence, debugPViewQuery);
   const collisionQuery = registerQuery(game.essence, debugCollisionSetQuery);
+  const positionQuery = registerQuery(game.essence, debugPositionQuery);
 
   const globalDebugGraphics = new Graphics();
   map.container.addChild(globalDebugGraphics);
@@ -110,6 +112,21 @@ export const drawDebugLines = (
       }
     }
 
+    // # X Y position (anchor)
+    if (options.xy) {
+      for (let i = 0; i < positionQuery.archetypes.length; i++) {
+        const archetype = positionQuery.archetypes[i];
+        const positionT = table(archetype, Position2);
+
+        for (let j = 0; j < archetype.entities.length; j++) {
+          const position = positionT[j];
+
+          globalDebugGraphics.circle(position.x, position.y, 4);
+          globalDebugGraphics.fill({ color: 'red' });
+        }
+      }
+    }
+
     for (let i = 0; i < query.archetypes.length; i++) {
       const archetype = query.archetypes[i];
       const positionT = table(archetype, Position2);
@@ -119,12 +136,6 @@ export const drawDebugLines = (
 
       for (let j = 0; j < archetype.entities.length; j++) {
         const position = positionT[j];
-
-        // # X Y position (anchor)
-        if (options.xy) {
-          globalDebugGraphics.circle(position.x, position.y, 4);
-          globalDebugGraphics.fill({ color: 'red' });
-        }
 
         // # Velocity and Acceleration
         if (options.acceleration || options.velocity) {

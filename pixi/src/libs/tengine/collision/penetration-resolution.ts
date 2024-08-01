@@ -48,7 +48,7 @@ export const penetrationResolution = (game: Game): System => {
 
       resolvePenetration(axis, overlap, a.collider, aPosition, b.collider, bPosition);
 
-      return;
+      continue;
     }
   };
 };

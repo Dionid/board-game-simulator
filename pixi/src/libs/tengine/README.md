@@ -8,7 +8,6 @@
 1. ~~Add Rotation to Colliders rotation (changing position and vertices)~~
 1. ~~Add Normal Axes to Collider~~
 1. World bounds
-1. Collider Vertices
 1. Line on Collider Vertices
 
 # Roadmap
@@ -23,13 +22,14 @@
     1. Default topics (ComponentAdded, ComponentRemoved, ComponentChanged, EntitySpawned, EntityKilled)
 1. Collision
     1. ~~SAT~~
-    1. Raw Vertices
+    1. ~~Raw Vertices~~
     1. Compound / Composite
     1. Capsule on Compound
     1. Pairs + Dedup
     1. Collision Queries
     1. Separate concave to convex
     1. Chamfer
+    1. Awaken / Asleep
 1. Physics
     1. Rotation
     1. OnComponentAdded

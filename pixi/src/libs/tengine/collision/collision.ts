@@ -32,7 +32,14 @@ export function collision(
             colliderB
           );
 
-          return sat(circleVertices, circleAxes, colliderB._vertices, colliderB._normalAxes);
+          return sat(
+            colliderA._position,
+            circleVertices,
+            circleAxes,
+            colliderB._position,
+            colliderB._vertices,
+            colliderB._normalAxes
+          );
         }
         default: {
           return safeGuard(colliderB.shape);
@@ -48,12 +55,21 @@ export function collision(
             colliderA
           );
 
-          return sat(colliderA._vertices, colliderA._normalAxes, circleVertices, circleAxes);
+          return sat(
+            colliderA._position,
+            colliderA._vertices,
+            colliderA._normalAxes,
+            colliderB._position,
+            circleVertices,
+            circleAxes
+          );
         }
         case 'vertices':
           return sat(
+            colliderA._position,
             colliderA._vertices,
             colliderA._normalAxes,
+            colliderB._position,
             colliderB._vertices,
             colliderB._normalAxes
           );

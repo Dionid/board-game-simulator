@@ -5,7 +5,6 @@ import { mapKeyboardInput, mapMouseInput } from '../../../libs/tengine/ecs';
 import { Kinematic, RigidBody } from 'libs/tengine/physics/components';
 import { Position2, Velocity2, Speed, Acceleration2, Angle } from 'libs/tengine/core';
 import { Ball, Enemy, Player, accelerateByArrows } from './ecs';
-import { applyWorldBoundaries } from 'libs/tengine/collision/penetration-resolution';
 import {
   CollisionsMonitoring,
   transformCollider,
@@ -15,11 +14,11 @@ import {
   Impenetrable,
   circleColliderComponent,
   verticesColliderComponent,
+  lineColliderComponent,
 } from 'libs/tengine/collision';
 import {
   applyRigidBodyAccelerationToVelocity,
   applyRigidBodyVelocityToPosition,
-  dynamicRigidBodyCollisionResolution,
 } from 'libs/tengine/physics';
 import { drawViews, View, drawDebugLines, addNewViews } from 'libs/tengine/render';
 import { penetrationResolution } from 'libs/tengine/collision/penetration-resolution';
@@ -173,23 +172,6 @@ export async function initPongGame(parentElement: HTMLElement) {
   // # Collisions
   // setComponent(game.essence, enemyEntity, CollisionsMonitoring);
   setComponent(game.essence, enemyEntity, Impenetrable);
-  // setComponent(game.essence, enemyEntity, ColliderSet, {
-  //   list: [
-  //     rectangleColliderComponent({
-  //       parentPosition: enemyPosition,
-  //       parentAngle: enemyAngle,
-  //       type: 'solid',
-  //       mass: 1,
-  //       offset: { x: 0, y: 0 },
-  //       angle: 0,
-  //       anchor: {
-  //         x: 0.5,
-  //         y: 0.5,
-  //       },
-  //       size: characterSize,
-  //     }),
-  //   ],
-  // });
   setComponent(game.essence, enemyEntity, ColliderSet, {
     list: [
       verticesColliderComponent({
@@ -218,6 +200,49 @@ export async function initPongGame(parentElement: HTMLElement) {
     elasticityMode: 'average',
   });
   setComponent(game.essence, enemyEntity, Kinematic);
+
+  const wallEntity = spawnEntity(game.essence);
+  const wallPosition = {
+    x: game.world.size.width / 2 + 100,
+    y: game.world.size.height / 2 - 100,
+    _prev: { x: 0, y: 0 },
+  };
+  setComponent(game.essence, wallEntity, Position2, wallPosition);
+  // # Collisions
+  // setComponent(game.essence, wallEntity, ColliderSet, {
+  //   list: [
+  //     verticesColliderComponent({
+  //       parentPosition: wallPosition,
+  //       parentAngle: 0,
+  //       type: 'solid',
+  //       mass: 1,
+  //       offset: { x: 0, y: 0 },
+  //       angle: 0,
+  //       anchor: {
+  //         x: 0.5,
+  //         y: 0.5,
+  //       },
+  //       vertices: [
+  //         { x: 0, y: 0 },
+  //         { x: 150, y: 150 },
+  //       ],
+  //     }),
+  //   ],
+  // });
+  setComponent(game.essence, wallEntity, ColliderSet, {
+    list: [
+      lineColliderComponent({
+        parentPosition: wallPosition,
+        parentAngle: 0,
+        type: 'solid',
+        mass: 1,
+        offset: { x: 0, y: 0 },
+        angle: Math.PI / 4,
+        anchor: 0.5,
+        length: 150,
+      }),
+    ],
+  });
 
   // # Ball
   const ballEntity = spawnEntity(game.essence);

@@ -88,7 +88,9 @@ export function overlapAxes(
   const verticesBY = verticesB[0].y;
 
   let overlapMin: number = Number.MAX_VALUE;
-  let overlapAxis: Vector2 = axes[0];
+  let overlapAxisX = axes[0].x;
+  let overlapAxisY = axes[0].y;
+
   let aOverlapMin = 0;
   let aOverlapMax = 0;
   let bOverlapMin = 0;
@@ -128,7 +130,8 @@ export function overlapAxes(
 
     if (overlap < overlapMin) {
       overlapMin = overlap;
-      overlapAxis = axis;
+      overlapAxisX = axis.x;
+      overlapAxisY = axis.y;
 
       aOverlapMin = aMin;
       aOverlapMax = aMax;
@@ -157,15 +160,12 @@ export function overlapAxes(
     }
   }
 
-  // # Reverse axis
-  // if (aOverlapMax > bOverlapMax) {
-  //   overlapAxis.x *= -1;
-  //   overlapAxis.y *= -1;
-  // }
-
   return {
     overlap: overlapMin,
-    axis: overlapAxis,
+    axis: {
+      x: overlapAxisX,
+      y: overlapAxisY,
+    },
   };
 }
 
@@ -175,8 +175,10 @@ export type SATResult = {
 };
 
 export function sat(
+  aPosition: Position2,
   aVertices: Vertices2,
   aAxes: Axes2,
+  bPosition: Position2,
   bVertices: Vertices2,
   bAxes: Axes2
 ): null | SATResult {
@@ -194,9 +196,8 @@ export function sat(
 
   const minOverlap = overlapAB.overlap < overlapBA.overlap ? overlapAB : overlapBA;
 
-  // QUESTION: maybe incorrect, than need to use center position
   // # Ensure minOverlap is pointing from A to B
-  const centerAToCenterB = subV2(bVertices[0], aVertices[0]);
+  const centerAToCenterB = subV2(bPosition, aPosition);
   const dot = dotV2(centerAToCenterB, minOverlap.axis);
 
   if (dot > 0) {
