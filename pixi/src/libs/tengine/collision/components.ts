@@ -46,7 +46,8 @@ export const Collider = newSchema({
 });
 
 export function rectangleColliderComponent(
-  position: Vector2, // TODO: remove this
+  parentPosition: Vector2, // TODO: remove this
+  parentAngle: number, // TODO: remove this
   type: 'solid' | 'sensor',
   mass: number,
   offset: Vector2,
@@ -54,9 +55,13 @@ export function rectangleColliderComponent(
   anchor: Vector2,
   size: { width: number; height: number }
 ): Component<typeof Collider> {
+  const origin = {
+    x: parentPosition.x + offset.x,
+    y: parentPosition.y + offset.y,
+  };
   const colliderPosition = {
-    x: position.x + offset.x - size.width * anchor.x,
-    y: position.y + offset.y - size.height * anchor.y,
+    x: origin.x - size.width * anchor.x,
+    y: origin.y - size.height * anchor.y,
   };
   const colliderVertices = [
     {
@@ -76,7 +81,9 @@ export function rectangleColliderComponent(
       y: colliderPosition.y + size.height,
     },
   ];
-  mutRotateVertices2Around(colliderVertices, angle, position);
+
+  mutRotateVertices2Around(colliderVertices, angle, origin);
+  mutRotateVertices2Around(colliderVertices, parentAngle, parentPosition);
 
   return {
     type,
@@ -90,10 +97,7 @@ export function rectangleColliderComponent(
       height: size.height,
     },
     _position: colliderPosition,
-    _origin: {
-      x: position.x,
-      y: position.y,
-    },
+    _origin: origin,
     _vertices: colliderVertices,
     _prev: {
       angle: angle,

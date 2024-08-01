@@ -5,7 +5,7 @@ import { ColliderSet } from './components';
 
 export const positionColliderSetQuery = newQuery(ColliderSet, Position2);
 
-export const applyPositionToCollider = (game: Game): System => {
+export const transformCollider = (game: Game): System => {
   const query = registerQuery(game.essence, positionColliderSetQuery);
 
   return () => {

@@ -17,7 +17,7 @@ import { Ball, Player, accelerateByArrows } from './ecs';
 import { applyWorldBoundaries } from 'libs/tengine/collision/penetration-resolution';
 import {
   CollisionsMonitoring,
-  applyPositionToCollider,
+  transformCollider,
   checkNarrowCollisionSimple,
   ColliderSet,
   rectangleColliderComponent,
@@ -70,7 +70,8 @@ export async function initPongGame(parentElement: HTMLElement) {
   };
   setComponent(game.essence, playerEntity, Position2, playerPosition);
   // ## Angle
-  setComponent(game.essence, playerEntity, Angle, { value: 0, _prev: 0 });
+  const playerAngle = Math.PI / 4;
+  setComponent(game.essence, playerEntity, Angle, { value: playerAngle, _prev: playerAngle });
   // ## Acceleration based Movement
   setComponent(game.essence, playerEntity, Speed, { value: 1 });
   setComponent(game.essence, playerEntity, Acceleration2, {
@@ -109,10 +110,11 @@ export async function initPongGame(parentElement: HTMLElement) {
     list: [
       rectangleColliderComponent(
         playerPosition,
+        playerAngle,
         'solid',
         1,
         { x: 0, y: 0 },
-        Math.PI / 8,
+        0,
         {
           x: 0.5,
           y: 0.5,
@@ -419,7 +421,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   // ## Basic physics
   registerSystem(game.essence, applyRigidBodyAccelerationToVelocity(game));
   registerSystem(game.essence, applyRigidBodyVelocityToPosition(game));
-  registerSystem(game.essence, applyPositionToCollider(game));
+  registerSystem(game.essence, transformCollider(game));
   // registerSystem(game.essence, applyWorldBoundaries(game));
 
   // ## Collision
