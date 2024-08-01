@@ -7,7 +7,7 @@ import {
   table,
   tryTable,
 } from 'libs/tecs';
-import { Position2 } from '../core/types';
+import { Angle, Position2 } from '../core/types';
 import { Game } from 'libs/tengine/game';
 import { Container } from 'pixi.js';
 import { pView, View } from './components';
@@ -136,6 +136,8 @@ export const drawViews = (game: Game): System => {
       const pViewT = table(archetype, pView);
       const viewT = table(archetype, View);
 
+      const angleT = tryTable(archetype, Angle);
+
       for (let i = 0, l = archetype.entities.length; i < l; i++) {
         const entity = archetype.entities[i];
         const position = positionT[i];
@@ -153,9 +155,11 @@ export const drawViews = (game: Game): System => {
           };
         }
 
+        const parentAngle = angleT ? angleT[i].value : 0;
+
         // # Rotation changed
-        if (view.rotation !== pView.container.rotation) {
-          pView.container.rotation = view.rotation;
+        if (view.rotation !== pView.container.rotation + parentAngle) {
+          pView.container.rotation = view.rotation + parentAngle;
         }
 
         // # Scale changed
