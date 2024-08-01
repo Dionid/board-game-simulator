@@ -107,7 +107,7 @@ export async function initPongGame(parentElement: HTMLElement) {
         type: 'solid',
         mass: 1,
         offset: { x: 0, y: 0 },
-        angle: 0,
+        angle: Math.PI / 4,
         anchor: {
           x: 0.5,
           y: 0.5,
@@ -233,8 +233,8 @@ export async function initPongGame(parentElement: HTMLElement) {
 
   setComponent(game.essence, ballEntity, Position2, ballPosition);
   // // # Collisions
-  setComponent(game.essence, ballEntity, CollisionsMonitoring);
-  setComponent(game.essence, ballEntity, Impenetrable);
+  // setComponent(game.essence, ballEntity, CollisionsMonitoring);
+  // setComponent(game.essence, ballEntity, Impenetrable);
   setComponent(game.essence, ballEntity, ColliderSet, {
     list: [
       circleColliderComponent({
@@ -260,77 +260,65 @@ export async function initPongGame(parentElement: HTMLElement) {
   // setComponent(game.essence, ballEntity, Dynamic);
 
   // # Second Ball
-  const sBallEntity = spawnEntity(game.essence);
-  setComponent(game.essence, sBallEntity, Ball);
-  setComponent(game.essence, sBallEntity, View, {
-    offset: { x: 0, y: 0 },
-    scale: { x: 1, y: 1 },
-    rotation: 0,
-    anchor: {
-      x: 0.5,
-      y: 0.5,
-    },
-    model: {
-      type: 'graphics',
-      color: '0xfff',
-      shape: {
-        type: 'circle',
-        radius: 25,
-      },
-    },
-  });
-  setComponent(game.essence, sBallEntity, Speed, { value: 1 });
-  setComponent(game.essence, sBallEntity, Acceleration2, {
-    x: 0,
-    y: 0,
-  });
-  setComponent(game.essence, sBallEntity, Velocity2, {
-    x: 0,
-    y: 0,
-  });
-  const sBallPosition = {
-    x: game.world.size.width / 2 + 100,
-    y: game.world.size.height / 2 - 10,
-    _prev: { x: 0, y: 0 },
-  };
-  setComponent(game.essence, sBallEntity, Position2, sBallPosition);
-  // // # Collisions
-  setComponent(game.essence, sBallEntity, CollisionsMonitoring);
-  setComponent(game.essence, sBallEntity, Impenetrable);
-  setComponent(game.essence, sBallEntity, ColliderSet, {
-    list: [
-      {
-        type: 'solid',
-        mass: 0,
-        offset: { x: 0, y: 0 },
-        _position: { x: sBallPosition.x, y: sBallPosition.y },
-        angle: 0,
-        shape: {
-          anchor: {
-            x: 0.5,
-            y: 0.5,
-          },
-          type: 'circle',
-          radius: 25,
-        },
-        _normalAxes: [],
-        _origin: { x: 0, y: 0 },
-        _vertices: [],
-        _prev: {
-          angle: 0,
-          offset: {
-            x: 0,
-            y: 0,
-          },
-        },
-      },
-    ],
-  });
-  // # Physics
-  setComponent(game.essence, sBallEntity, RigidBody, {
-    elasticity: 1,
-    elasticityMode: 'average',
-  });
+  // const sBallEntity = spawnEntity(game.essence);
+  // setComponent(game.essence, sBallEntity, Ball);
+  // setComponent(game.essence, sBallEntity, View, {
+  //   offset: { x: 0, y: 0 },
+  //   scale: { x: 1, y: 1 },
+  //   rotation: 0,
+  //   anchor: {
+  //     x: 0.5,
+  //     y: 0.5,
+  //   },
+  //   model: {
+  //     type: 'graphics',
+  //     color: '0xfff',
+  //     shape: {
+  //       type: 'circle',
+  //       radius: 25,
+  //     },
+  //   },
+  // });
+  // setComponent(game.essence, sBallEntity, Speed, { value: 1 });
+  // setComponent(game.essence, sBallEntity, Acceleration2, {
+  //   x: 0,
+  //   y: 0,
+  // });
+  // setComponent(game.essence, sBallEntity, Velocity2, {
+  //   x: 0,
+  //   y: 0,
+  // });
+  // const sBallPosition = {
+  //   x: game.world.size.width / 2 + 100,
+  //   y: game.world.size.height / 2 - 10,
+  //   _prev: { x: 0, y: 0 },
+  // };
+  // setComponent(game.essence, sBallEntity, Position2, sBallPosition);
+  // // // # Collisions
+  // setComponent(game.essence, sBallEntity, CollisionsMonitoring);
+  // setComponent(game.essence, sBallEntity, Impenetrable);
+  // setComponent(game.essence, sBallEntity, ColliderSet, {
+  //   list: [
+  //     circleColliderComponent({
+  //       parentPosition: sBallPosition,
+  //       parentAngle: 0,
+  //       type: 'solid',
+  //       mass: 1,
+  //       offset: { x: 0, y: 0 },
+  //       angle: 0,
+  //       anchor: {
+  //         x: 0.5,
+  //         y: 0.5,
+  //       },
+  //       radius: 25,
+  //     }),
+  //   ],
+  // });
+  // // # Physics
+  // setComponent(game.essence, sBallEntity, RigidBody, {
+  //   elasticity: 1,
+  //   elasticityMode: 'average',
+  // });
   // setComponent(game.essence, ballEntity, Dynamic);
 
   // // # Wall
@@ -431,8 +419,8 @@ export async function initPongGame(parentElement: HTMLElement) {
   registerSystem(game.essence, mapMouseInput(game, map));
 
   // ## Game logic
-  // registerSystem(game.essence, accelerateByArrows(game, playerEntity));
-  registerSystem(game.essence, accelerateByArrows(game, ballEntity));
+  registerSystem(game.essence, accelerateByArrows(game, playerEntity));
+  // registerSystem(game.essence, accelerateByArrows(game, ballEntity));
   // registerSystem(game.essence, changeVelocityByArrows(game, ballEntity));
 
   // ## Basic physics

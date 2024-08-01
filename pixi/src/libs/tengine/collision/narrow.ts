@@ -71,7 +71,7 @@ export const checkNarrowCollisionSimple = (game: Game): System => {
               let result = collision(colliderA, colliderB);
 
               if (result && result.overlap >= 0) {
-                // debugger;
+                // console.log('colliding', result.axis);
                 emit(
                   unfilteredColliding,
                   {

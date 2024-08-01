@@ -1,5 +1,16 @@
 import { Component } from 'libs/tecs';
-import { addV2, Axes2, magV2, multV2, Position2, subV2, unitV2, Vector2, Vertices2 } from '../core';
+import {
+  addV2,
+  Axes2,
+  dotV2,
+  magV2,
+  multV2,
+  Position2,
+  subV2,
+  unitV2,
+  Vector2,
+  Vertices2,
+} from '../core';
 import { Collider } from './components';
 
 export type SATShape = {
@@ -32,7 +43,7 @@ export function getCircleAxesAndVertices(
     }
   }
 
-  // # Use unit vector of closest point as circle axes
+  // # Direction from circle center to closest vertex
   const circleAxis = unitV2(subV2(closesVertex, circleCenter));
 
   // # Circle Vertices based on circle and rectangle axes
@@ -86,46 +97,43 @@ export function overlapAxes(
   for (let i = 0; i < axes.length; i++) {
     const axis = axes[i];
 
-    const axisX = axis.x;
-    const axisY = axis.y;
-
-    let minA = verticesAX * axisX + verticesAY * axisY;
-    let maxA = minA;
-    let minB = verticesBX * axisX + verticesBY * axisY;
-    let maxB = minB;
+    let aMin = verticesAX * axis.x + verticesAY * axis.y;
+    let aMax = aMin;
+    let bMin = verticesBX * axis.x + verticesBY * axis.y;
+    let bMax = bMin;
 
     for (let j = 1; j < verticesA.length; j += 1) {
-      const dot = verticesA[j].x * axisX + verticesA[j].y * axisY;
+      const dot = dotV2(verticesA[j], axis);
 
-      if (dot > maxA) {
-        maxA = dot;
-      } else if (dot < minA) {
-        minA = dot;
+      if (dot > aMax) {
+        aMax = dot;
+      } else if (dot < aMin) {
+        aMin = dot;
       }
     }
 
     for (let j = 1; j < verticesB.length; j += 1) {
-      const dot = verticesB[j].x * axisX + verticesB[j].y * axisY;
+      const dot = dotV2(verticesB[j], axis);
 
-      if (dot > maxB) {
-        maxB = dot;
-      } else if (dot < minB) {
-        minB = dot;
+      if (dot > bMax) {
+        bMax = dot;
+      } else if (dot < bMin) {
+        bMin = dot;
       }
     }
 
-    const overlapAB = maxA - minB;
-    const overlapBA = maxB - minA;
+    const overlapAB = aMax - bMin;
+    const overlapBA = bMax - aMin;
     const overlap = overlapAB < overlapBA ? overlapAB : overlapBA;
 
     if (overlap < overlapMin) {
       overlapMin = overlap;
       overlapAxis = axis;
 
-      aOverlapMin = minA;
-      aOverlapMax = maxA;
-      bOverlapMin = minB;
-      bOverlapMax = maxB;
+      aOverlapMin = aMin;
+      aOverlapMax = aMax;
+      bOverlapMin = bMin;
+      bOverlapMax = bMax;
 
       if (overlap <= 0) {
         // can not be intersecting
@@ -146,16 +154,14 @@ export function overlapAxes(
       overlapMin += mins;
     } else {
       overlapMin += maxes;
-      overlapAxis.x = -overlapAxis.x;
-      overlapAxis.y = -overlapAxis.y;
     }
   }
 
   // # Reverse axis
-  if (aOverlapMax > bOverlapMax) {
-    overlapAxis.x = -overlapAxis.x;
-    overlapAxis.y = -overlapAxis.y;
-  }
+  // if (aOverlapMax > bOverlapMax) {
+  //   overlapAxis.x *= -1;
+  //   overlapAxis.y *= -1;
+  // }
 
   return {
     overlap: overlapMin,
@@ -187,6 +193,16 @@ export function sat(
   }
 
   const minOverlap = overlapAB.overlap < overlapBA.overlap ? overlapAB : overlapBA;
+
+  // QUESTION: maybe incorrect, than need to use center position
+  // # Ensure minOverlap is pointing from A to B
+  const centerAToCenterB = subV2(bVertices[0], aVertices[0]);
+  const dot = dotV2(centerAToCenterB, minOverlap.axis);
+
+  if (dot > 0) {
+    minOverlap.axis.x *= -1;
+    minOverlap.axis.y *= -1;
+  }
 
   return {
     overlap: minOverlap.overlap,

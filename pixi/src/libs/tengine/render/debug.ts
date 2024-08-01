@@ -22,6 +22,8 @@ const debugViewQuery = newQuery(View, Position2);
 const debugPViewQuery = newQuery(pView);
 const debugCollisionSetQuery = newQuery(ColliderSet, Position2);
 
+export const globalDebugGraphicsDeferred: ((g: Graphics) => void)[] = [];
+
 export const drawDebugLines = (
   game: Game,
   map: Map,
@@ -46,14 +48,19 @@ export const drawDebugLines = (
   const pQuery = registerQuery(game.essence, debugPViewQuery);
   const collisionQuery = registerQuery(game.essence, debugCollisionSetQuery);
 
-  const globalGraphics = new Graphics();
-  map.container.addChild(globalGraphics);
+  const globalDebugGraphics = new Graphics();
+  map.container.addChild(globalDebugGraphics);
 
   const strokeWidth = 2;
 
   return () => {
-    globalGraphics.clear();
-    globalGraphics.removeChildren();
+    globalDebugGraphics.clear();
+    globalDebugGraphics.removeChildren();
+
+    while (globalDebugGraphicsDeferred.length > 0) {
+      const deferred = globalDebugGraphicsDeferred.pop()!;
+      deferred(globalDebugGraphics);
+    }
 
     if (options.view) {
       for (let i = 0; i < pQuery.archetypes.length; i++) {
@@ -78,26 +85,26 @@ export const drawDebugLines = (
 
           for (const collider of collisionSet.list) {
             if (collider.shape.type === 'circle') {
-              globalGraphics.circle(
+              globalDebugGraphics.circle(
                 collider._position.x,
                 collider._position.y,
                 collider.shape.radius
               );
-              globalGraphics.stroke({ width: strokeWidth, color: 'gray' });
+              globalDebugGraphics.stroke({ width: strokeWidth, color: 'gray' });
             }
 
             if (collider._vertices.length === 0) {
               continue;
             }
 
-            globalGraphics.beginPath();
-            globalGraphics.moveTo(collider._vertices[0].x, collider._vertices[0].y);
+            globalDebugGraphics.beginPath();
+            globalDebugGraphics.moveTo(collider._vertices[0].x, collider._vertices[0].y);
             for (let i = 1; i < collider._vertices.length; i++) {
-              globalGraphics.lineTo(collider._vertices[i].x, collider._vertices[i].y);
+              globalDebugGraphics.lineTo(collider._vertices[i].x, collider._vertices[i].y);
             }
-            globalGraphics.lineTo(collider._vertices[0].x, collider._vertices[0].y);
-            globalGraphics.stroke({ width: strokeWidth, color: 'gray' });
-            globalGraphics.closePath();
+            globalDebugGraphics.lineTo(collider._vertices[0].x, collider._vertices[0].y);
+            globalDebugGraphics.stroke({ width: strokeWidth, color: 'gray' });
+            globalDebugGraphics.closePath();
           }
         }
       }
@@ -115,17 +122,23 @@ export const drawDebugLines = (
 
         // # X Y position (anchor)
         if (options.xy) {
-          globalGraphics.circle(position.x, position.y, 4);
-          globalGraphics.fill({ color: 'red' });
+          globalDebugGraphics.circle(position.x, position.y, 4);
+          globalDebugGraphics.fill({ color: 'red' });
         }
 
         // # Velocity and Acceleration
         if (options.acceleration || options.velocity) {
           if (options.acceleration && acceleration2T) {
-            drawLine(globalGraphics, position, multV2(acceleration2T[j], 2), strokeWidth, 'yellow');
+            drawLine(
+              globalDebugGraphics,
+              position,
+              multV2(acceleration2T[j], 2),
+              strokeWidth,
+              'yellow'
+            );
           }
           if (options.velocity && velocity2T) {
-            drawLine(globalGraphics, position, velocity2T[j], strokeWidth, 'green');
+            drawLine(globalDebugGraphics, position, velocity2T[j], strokeWidth, 'green');
           }
         }
       }
