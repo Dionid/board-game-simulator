@@ -107,7 +107,7 @@ export async function initPongGame(parentElement: HTMLElement) {
         type: 'solid',
         mass: 1,
         offset: { x: 0, y: 0 },
-        angle: 0,
+        angle: -Math.PI / 4,
         anchor: {
           x: 0.5,
           y: 0.5,
@@ -180,7 +180,7 @@ export async function initPongGame(parentElement: HTMLElement) {
         type: 'solid',
         mass: 1,
         offset: { x: 0, y: 0 },
-        angle: 0,
+        angle: Math.PI / 2,
         anchor: {
           x: 0.5,
           y: 0.5,
@@ -207,28 +207,9 @@ export async function initPongGame(parentElement: HTMLElement) {
     y: game.world.size.height / 2 - 100,
     _prev: { x: 0, y: 0 },
   };
+  setComponent(game.essence, wallEntity, Impenetrable);
   setComponent(game.essence, wallEntity, Position2, wallPosition);
   // # Collisions
-  // setComponent(game.essence, wallEntity, ColliderSet, {
-  //   list: [
-  //     verticesColliderComponent({
-  //       parentPosition: wallPosition,
-  //       parentAngle: 0,
-  //       type: 'solid',
-  //       mass: 1,
-  //       offset: { x: 0, y: 0 },
-  //       angle: 0,
-  //       anchor: {
-  //         x: 0.5,
-  //         y: 0.5,
-  //       },
-  //       vertices: [
-  //         { x: 0, y: 0 },
-  //         { x: 150, y: 150 },
-  //       ],
-  //     }),
-  //   ],
-  // });
   setComponent(game.essence, wallEntity, ColliderSet, {
     list: [
       lineColliderComponent({
@@ -238,7 +219,10 @@ export async function initPongGame(parentElement: HTMLElement) {
         mass: 1,
         offset: { x: 0, y: 0 },
         angle: Math.PI / 4,
-        anchor: 0.5,
+        anchor: {
+          x: 0,
+          y: 0.5,
+        },
         length: 150,
       }),
     ],
@@ -278,10 +262,10 @@ export async function initPongGame(parentElement: HTMLElement) {
     y: game.world.size.height / 2 - 10,
     _prev: { x: 0, y: 0 },
   };
-
   setComponent(game.essence, ballEntity, Position2, ballPosition);
   // # Collisions
-  // setComponent(game.essence, ballEntity, CollisionsMonitoring);
+  setComponent(game.essence, ballEntity, CollisionsMonitoring);
+  // setComponent(game.essence, ballEntity, Impenetrable);
   setComponent(game.essence, ballEntity, ColliderSet, {
     list: [
       circleColliderComponent({
@@ -306,120 +290,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   });
   // setComponent(game.essence, ballEntity, Dynamic);
 
-  // # Second Ball
-  // const sBallEntity = spawnEntity(game.essence);
-  // setComponent(game.essence, sBallEntity, Ball);
-  // setComponent(game.essence, sBallEntity, View, {
-  //   offset: { x: 0, y: 0 },
-  //   scale: { x: 1, y: 1 },
-  //   rotation: 0,
-  //   anchor: {
-  //     x: 0.5,
-  //     y: 0.5,
-  //   },
-  //   model: {
-  //     type: 'graphics',
-  //     color: '0xfff',
-  //     shape: {
-  //       type: 'circle',
-  //       radius: 25,
-  //     },
-  //   },
-  // });
-  // setComponent(game.essence, sBallEntity, Speed, { value: 1 });
-  // setComponent(game.essence, sBallEntity, Acceleration2, {
-  //   x: 0,
-  //   y: 0,
-  // });
-  // setComponent(game.essence, sBallEntity, Velocity2, {
-  //   x: 0,
-  //   y: 0,
-  // });
-  // const sBallPosition = {
-  //   x: game.world.size.width / 2 + 100,
-  //   y: game.world.size.height / 2 - 10,
-  //   _prev: { x: 0, y: 0 },
-  // };
-  // setComponent(game.essence, sBallEntity, Position2, sBallPosition);
-  // // // # Collisions
-  // setComponent(game.essence, sBallEntity, CollisionsMonitoring);
-  // setComponent(game.essence, sBallEntity, Impenetrable);
-  // setComponent(game.essence, sBallEntity, ColliderSet, {
-  //   list: [
-  //     circleColliderComponent({
-  //       parentPosition: sBallPosition,
-  //       parentAngle: 0,
-  //       type: 'solid',
-  //       mass: 1,
-  //       offset: { x: 0, y: 0 },
-  //       angle: 0,
-  //       anchor: {
-  //         x: 0.5,
-  //         y: 0.5,
-  //       },
-  //       radius: 25,
-  //     }),
-  //   ],
-  // });
-  // // # Physics
-  // setComponent(game.essence, sBallEntity, RigidBody, {
-  //   elasticity: 1,
-  //   elasticityMode: 'average',
-  // });
-  // setComponent(game.essence, ballEntity, Dynamic);
-
-  // // # Wall
-  // const wallEntity = spawnEntity(game.essence);
-  // setComponent(game.essence, wallEntity, Wall);
-  // // # View
-  // setComponent(game.essence, wallEntity, View, {
-  //   offset: { x: 0, y: 0 },
-  //   scale: { x: 1, y: 1 },
-  //   rotation: 0,
-  //   model: {
-  //     type: 'graphics',
-  //     color: '#fff',
-  //     shape: {
-  //       anchor: 0.5,
-  //       type: 'line',
-  //       length: 50,
-  //     },
-  //   },
-  // });
-  // // setComponent(game.essence, wallEntity, Rotation, { value: 0 });
-  // setComponent(game.essence, wallEntity, Speed, { value: 5 });
-  // setComponent(game.essence, wallEntity, Velocity2, {
-  //   x: 0,
-  //   y: 0,
-  // });
-  // setComponent(game.essence, wallEntity, Position2, {
-  //   x: 100,
-  //   y: 100,
-  // });
-  // // # Collisions
-  // setComponent(game.essence, wallEntity, ColliderSet, {
-  //   list: [
-  //     {
-  //       type: 'solid',
-  //       mass: 1,
-  //       offset: { x: 0, y: 0 },
-  //       _position: { x: 0, y: 0 },
-  //       shape: {
-  //         rotation: 0,
-  //         type: 'line',
-  //         length: 50,
-  //       },
-  //     },
-  //   ],
-  // });
-  // // # Physics
-  // setComponent(game.essence, wallEntity, RigidBody, {
-  //   elasticity: 1,
-  //   elasticityMode: 'average',
-  // });
-  // setComponent(game.essence, wallEntity, Dynamic);
-
-  // // # Capsule
+  // # Capsule
   // const capsuleEntity = spawnEntity(game.essence);
   // setComponent(game.essence, capsuleEntity, Wall);
   // // # View

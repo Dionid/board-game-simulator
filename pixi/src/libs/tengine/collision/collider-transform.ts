@@ -14,9 +14,6 @@ export function translateCollider(collider: Component<typeof Collider>, position
   collider._position.x += positionDelta.x;
   collider._position.y += positionDelta.y;
 
-  collider._origin.x += positionDelta.x;
-  collider._origin.y += positionDelta.y;
-
   if (positionDelta.x !== 0 || positionDelta.y !== 0) {
     mutTranslateVertices2(collider._vertices, positionDelta.x, positionDelta.y);
   }
@@ -61,7 +58,7 @@ export const transformCollider = (game: Game): System => {
           translateCollider(collider, positionDelta);
 
           if (angleDelta !== 0) {
-            mutRotateVertices2Around(collider._vertices, angleDelta, collider._origin);
+            mutRotateVertices2Around(collider._vertices, angleDelta, collider._position);
             mutRotateAxes2(collider._normalAxes, angleDelta);
           }
           if (parentAngleDelta !== 0) {

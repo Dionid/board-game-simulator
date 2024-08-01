@@ -37,8 +37,7 @@ export const Collider = newSchema({
   angle: number,
   shape: ColliderShape,
   mass: number,
-  _position: Vector2,
-  _origin: Vector2,
+  _position: Vector2, // position of colliders center
   _vertices: Vertices2,
   _normalAxes: Axes2,
   _prev: newSchema({
@@ -65,6 +64,7 @@ export function rectangleColliderComponent(opts: {
     x: origin.x - opts.size.width * opts.anchor.x,
     y: origin.y - opts.size.height * opts.anchor.y,
   };
+
   const colliderVertices = [
     {
       x: colliderPosition.x,
@@ -102,8 +102,7 @@ export function rectangleColliderComponent(opts: {
       type: 'vertices' as const,
       anchor: opts.anchor,
     },
-    _position: colliderPosition,
-    _origin: origin,
+    _position: origin,
     _vertices: colliderVertices,
     _normalAxes: normalAxes,
     _prev: {
@@ -125,17 +124,22 @@ export function lineColliderComponent(opts: {
   mass: number;
   offset: Vector2;
   angle: number;
-  anchor: number;
+  anchor: Vector2;
   length: number;
 }): Component<typeof Collider> {
   const origin = {
     x: opts.parentPosition.x + opts.offset.x,
     y: opts.parentPosition.y + opts.offset.y,
   };
+
+  // PROBLEM IS THAT ANGLE DOESN'T APPLY HERE
   const colliderPosition = {
-    x: origin.x,
-    y: origin.y - opts.length * opts.anchor,
+    x: origin.x - opts.length * opts.anchor.x,
+    y: origin.y - opts.length * opts.anchor.y,
   };
+
+  console.log(colliderPosition);
+
   const colliderVertices = [
     {
       x: colliderPosition.x,
@@ -160,13 +164,9 @@ export function lineColliderComponent(opts: {
     angle: opts.angle,
     shape: {
       type: 'vertices' as const,
-      anchor: {
-        x: 0,
-        y: opts.anchor,
-      },
+      anchor: opts.anchor,
     },
-    _position: colliderPosition,
-    _origin: origin,
+    _position: origin,
     _vertices: colliderVertices,
     _normalAxes: normalAxes,
     _prev: {
@@ -245,8 +245,7 @@ export function verticesColliderComponent(opts: {
       type: 'vertices' as const,
       anchor: opts.anchor,
     },
-    _position: colliderPosition,
-    _origin: origin,
+    _position: origin,
     _vertices: opts.vertices,
     _normalAxes: normalAxes,
     _prev: {
@@ -275,10 +274,6 @@ export function circleColliderComponent(opts: {
     x: opts.parentPosition.x + opts.offset.x,
     y: opts.parentPosition.y + opts.offset.y,
   };
-  const colliderPosition = {
-    x: origin.x - opts.radius + 2 * opts.radius * opts.anchor.x,
-    y: origin.y - opts.radius + 2 * opts.radius * opts.anchor.y,
-  };
   const colliderVertices: Axes2 = [];
 
   const normalAxes = normalAxes2(colliderVertices);
@@ -293,8 +288,7 @@ export function circleColliderComponent(opts: {
       anchor: opts.anchor,
       radius: opts.radius,
     },
-    _position: colliderPosition,
-    _origin: origin,
+    _position: origin,
     _vertices: colliderVertices,
     _normalAxes: normalAxes,
     _prev: {

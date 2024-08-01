@@ -27,10 +27,12 @@ export function collision(
         }
         case 'vertices': {
           const { axes: circleAxes, vertices: circleVertices } = getCircleAxesAndVertices(
-            colliderA._origin,
+            colliderA._position,
             colliderA.shape.radius,
             colliderB
           );
+
+          // console.log(colliderB._origin);
 
           return sat(
             colliderA._position,
@@ -50,7 +52,7 @@ export function collision(
       switch (colliderB.shape.type) {
         case 'circle': {
           const { axes: circleAxes, vertices: circleVertices } = getCircleAxesAndVertices(
-            colliderB._origin,
+            colliderB._position,
             colliderB.shape.radius,
             colliderA
           );
