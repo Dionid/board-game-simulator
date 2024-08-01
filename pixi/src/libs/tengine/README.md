@@ -1,14 +1,11 @@
 # TODO
 
 1. ~~Change render logic to pView~~
-1. Change debug to pView
-1. What is Anchor?
-    1. Shape offset to Position in percentage of width / height
-    1. Point of rotation
-1. Leave rectangle and circle colliders
-1. Add vertices to Collider
-1. Rotate Collider with different pivots
-1. Add Rotation to Colliders rotation (changing position and vertices)
+1. ~~Change debug to pView~~
+1. ~~Leave rectangle and circle colliders~~
+1. ~~Add vertices to Collider~~
+1. ~~Rotate Collider with different pivots~~
+1. ~~Add Rotation to Colliders rotation (changing position and vertices)~~
 
 # Roadmap
 

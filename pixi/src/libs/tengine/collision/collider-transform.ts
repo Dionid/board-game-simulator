@@ -45,13 +45,13 @@ export const transformCollider = (game: Game): System => {
           collider._origin.x += positionDelta.x;
           collider._origin.y += positionDelta.y;
 
-          if (positionDelta.x > 0 || positionDelta.y > 0) {
+          if (positionDelta.x !== 0 || positionDelta.y !== 0) {
             mutTranslateVertices2(collider._vertices, positionDelta.x, positionDelta.y);
           }
-          if (angleDelta > 0) {
+          if (angleDelta !== 0) {
             mutRotateVertices2Around(collider._vertices, angleDelta, collider._origin);
           }
-          if (parentAngleDelta > 0) {
+          if (parentAngleDelta !== 0) {
             mutRotateVertices2Around(collider._vertices, parentAngleDelta, position);
           }
         }

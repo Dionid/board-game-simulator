@@ -70,55 +70,16 @@ export const checkNarrowCollisionSimple = (game: Game): System => {
           for (const colliderA of colliderSetA.list) {
             for (const colliderB of colliderSetB.list) {
               if (colliderA.shape.type === 'rectangle' && colliderB.shape.type === 'rectangle') {
-                const aVertices: Vector2[] = [
-                  {
-                    x: colliderA._position.x,
-                    y: colliderA._position.y,
-                  },
-                  {
-                    x: colliderA._position.x + colliderA.shape.width,
-                    y: colliderA._position.y,
-                  },
-                  {
-                    x: colliderA._position.x + colliderA.shape.width,
-                    y: colliderA._position.y + colliderA.shape.height,
-                  },
-                  {
-                    x: colliderA._position.x,
-                    y: colliderA._position.y + colliderA.shape.height,
-                  },
-                ];
-
-                const aAxes = normalAxes(aVertices);
-
-                const bVertices: Vector2[] = [
-                  {
-                    x: colliderB._position.x,
-                    y: colliderB._position.y,
-                  },
-                  {
-                    x: colliderB._position.x + colliderB.shape.width,
-                    y: colliderB._position.y,
-                  },
-                  {
-                    x: colliderB._position.x + colliderB.shape.width,
-                    y: colliderB._position.y + colliderB.shape.height,
-                  },
-                  {
-                    x: colliderB._position.x,
-                    y: colliderB._position.y + colliderB.shape.height,
-                  },
-                ];
-
-                const bAxes = normalAxes(bVertices);
+                const aAxes = normalAxes(colliderA._vertices);
+                const bAxes = normalAxes(colliderB._vertices);
 
                 const result = sat(
                   {
-                    vertices: aVertices,
+                    vertices: colliderA._vertices,
                     axes: aAxes,
                   },
                   {
-                    vertices: bVertices,
+                    vertices: colliderB._vertices,
                     axes: bAxes,
                   }
                 );
