@@ -14,6 +14,7 @@ import {
   rectangleColliderComponent,
   Impenetrable,
   circleColliderComponent,
+  verticesColliderComponent,
 } from 'libs/tengine/collision';
 import {
   applyRigidBodyAccelerationToVelocity,
@@ -107,7 +108,7 @@ export async function initPongGame(parentElement: HTMLElement) {
         type: 'solid',
         mass: 1,
         offset: { x: 0, y: 0 },
-        angle: Math.PI / 4,
+        angle: 0,
         anchor: {
           x: 0.5,
           y: 0.5,
@@ -172,9 +173,26 @@ export async function initPongGame(parentElement: HTMLElement) {
   // # Collisions
   // setComponent(game.essence, enemyEntity, CollisionsMonitoring);
   setComponent(game.essence, enemyEntity, Impenetrable);
+  // setComponent(game.essence, enemyEntity, ColliderSet, {
+  //   list: [
+  //     rectangleColliderComponent({
+  //       parentPosition: enemyPosition,
+  //       parentAngle: enemyAngle,
+  //       type: 'solid',
+  //       mass: 1,
+  //       offset: { x: 0, y: 0 },
+  //       angle: 0,
+  //       anchor: {
+  //         x: 0.5,
+  //         y: 0.5,
+  //       },
+  //       size: characterSize,
+  //     }),
+  //   ],
+  // });
   setComponent(game.essence, enemyEntity, ColliderSet, {
     list: [
-      rectangleColliderComponent({
+      verticesColliderComponent({
         parentPosition: enemyPosition,
         parentAngle: enemyAngle,
         type: 'solid',
@@ -185,7 +203,12 @@ export async function initPongGame(parentElement: HTMLElement) {
           x: 0.5,
           y: 0.5,
         },
-        size: characterSize,
+        vertices: [
+          { x: 0, y: 0 },
+          { x: characterSize.width, y: 0 },
+          { x: characterSize.width, y: characterSize.height },
+          { x: 0, y: characterSize.height },
+        ],
       }),
     ],
   });
@@ -232,9 +255,8 @@ export async function initPongGame(parentElement: HTMLElement) {
   };
 
   setComponent(game.essence, ballEntity, Position2, ballPosition);
-  // // # Collisions
+  // # Collisions
   // setComponent(game.essence, ballEntity, CollisionsMonitoring);
-  // setComponent(game.essence, ballEntity, Impenetrable);
   setComponent(game.essence, ballEntity, ColliderSet, {
     list: [
       circleColliderComponent({
@@ -419,8 +441,8 @@ export async function initPongGame(parentElement: HTMLElement) {
   registerSystem(game.essence, mapMouseInput(game, map));
 
   // ## Game logic
-  registerSystem(game.essence, accelerateByArrows(game, playerEntity));
-  // registerSystem(game.essence, accelerateByArrows(game, ballEntity));
+  // registerSystem(game.essence, accelerateByArrows(game, playerEntity));
+  registerSystem(game.essence, accelerateByArrows(game, ballEntity));
   // registerSystem(game.essence, changeVelocityByArrows(game, ballEntity));
 
   // ## Basic physics

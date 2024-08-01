@@ -31,7 +31,12 @@ export const ColliderRectangle = newSchema({
   anchor: Vector2,
 });
 
-export const ColliderShape = union(ColliderRectangle, ColliderCircle);
+export const ColliderVertices = newSchema({
+  type: literal('vertices'),
+  anchor: Vector2,
+});
+
+export const ColliderShape = union(ColliderRectangle, ColliderCircle, ColliderVertices);
 
 export const Collider = newSchema({
   type: union(literal('solid'), literal('sensor')),
@@ -95,7 +100,7 @@ export function rectangleColliderComponent(opts: {
     normalV2(unitV2(subV2(colliderVertices[2], colliderVertices[1]))),
   ];
 
-  return {
+  const component = {
     type: opts.type,
     mass: opts.mass,
     offset: opts.offset,
@@ -118,6 +123,92 @@ export function rectangleColliderComponent(opts: {
       },
     },
   };
+
+  console.log('rectangle', component);
+
+  return component;
+}
+
+export function verticesColliderComponent(opts: {
+  parentPosition: Vector2; // TODO: remove this
+  parentAngle: number; // TODO: remove this
+  type: 'solid' | 'sensor';
+  mass: number;
+  offset: Vector2;
+  angle: number;
+  anchor: Vector2;
+  vertices: Vertices2;
+}): Component<typeof Collider> {
+  const origin = {
+    x: opts.parentPosition.x + opts.offset.x,
+    y: opts.parentPosition.y + opts.offset.y,
+  };
+
+  // Get min and max x and y values of vertices
+  let minX = opts.vertices[0].x;
+  let minY = opts.vertices[0].x;
+  let maxX = minX;
+  let maxY = minY;
+
+  for (let i = 1; i < opts.vertices.length; i++) {
+    const vertex = opts.vertices[i];
+    if (vertex.x < minX) {
+      minX = vertex.x;
+    } else if (vertex.x > maxX) {
+      maxX = vertex.x;
+    }
+
+    if (vertex.y < minY) {
+      minY = vertex.y;
+    } else if (vertex.y > maxY) {
+      maxY = vertex.y;
+    }
+  }
+
+  const width = maxX - minX;
+  const height = maxY - minY;
+
+  const colliderPosition = {
+    x: origin.x - width * opts.anchor.x,
+    y: origin.y - height * opts.anchor.y,
+  };
+
+  // # Apply colliderPosition to vertices
+  for (let i = 0; i < opts.vertices.length; i++) {
+    opts.vertices[i].x += colliderPosition.x;
+    opts.vertices[i].y += colliderPosition.y;
+  }
+
+  mutRotateVertices2Around(opts.vertices, opts.angle, origin);
+  mutRotateVertices2Around(opts.vertices, opts.parentAngle, opts.parentPosition);
+
+  const normalAxes = normalAxes2(opts.vertices);
+
+  const component = {
+    type: opts.type,
+    mass: opts.mass,
+    offset: opts.offset,
+    angle: opts.angle,
+    shape: {
+      type: 'vertices' as const,
+      anchor: opts.anchor,
+    },
+    _position: colliderPosition,
+    _origin: origin,
+    _vertices: opts.vertices,
+    _normalAxes: normalAxes,
+    _prev: {
+      angle: opts.angle,
+      offset: {
+        x: opts.offset.x,
+        y: opts.offset.y,
+      },
+    },
+  };
+
+  console.log('vertices', component);
+
+  return component;
 }
 
 export function circleColliderComponent(opts: {

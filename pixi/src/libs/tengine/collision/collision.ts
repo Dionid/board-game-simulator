@@ -25,7 +25,8 @@ export function collision(
             colliderB.shape.radius
           );
         }
-        case 'rectangle': {
+        case 'rectangle':
+        case 'vertices': {
           const { axes: circleAxes, vertices: circleVertices } = getCircleAxesAndVertices(
             colliderA._origin,
             colliderA.shape.radius,
@@ -50,14 +51,38 @@ export function collision(
 
           return sat(colliderA._vertices, colliderA._normalAxes, circleVertices, circleAxes);
         }
-        case 'rectangle': {
+        case 'rectangle':
+        case 'vertices':
           return sat(
             colliderA._vertices,
             colliderA._normalAxes,
             colliderB._vertices,
             colliderB._normalAxes
           );
+        default: {
+          return safeGuard(colliderB.shape);
         }
+      }
+    }
+    case 'vertices': {
+      switch (colliderB.shape.type) {
+        case 'circle': {
+          const { axes: circleAxes, vertices: circleVertices } = getCircleAxesAndVertices(
+            colliderB._origin,
+            colliderB.shape.radius,
+            colliderA
+          );
+
+          return sat(colliderA._vertices, colliderA._normalAxes, circleVertices, circleAxes);
+        }
+        case 'rectangle':
+        case 'vertices':
+          return sat(
+            colliderA._vertices,
+            colliderA._normalAxes,
+            colliderB._vertices,
+            colliderB._normalAxes
+          );
         default: {
           return safeGuard(colliderB.shape);
         }

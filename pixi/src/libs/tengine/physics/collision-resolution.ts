@@ -153,10 +153,14 @@ export const dynamicRigidBodyCollisionResolution = (game: Game): System => {
               continue;
             case 'rectangle':
               continue;
+            case 'vertices':
+              continue;
             default:
               return safeGuard(b.collider.shape);
           }
         case 'rectangle':
+          continue;
+        case 'vertices':
           continue;
         default:
           return safeGuard(a.collider.shape);

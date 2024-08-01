@@ -24,11 +24,10 @@
 1. Collision
     1. ~~SAT~~
     1. Raw Vertices
-    1. Line
-    1. Capsule
+    1. Compound / Composite
+    1. Capsule on Compound
     1. Pairs + Dedup
     1. Collision Queries
-    1. Compound / Composite
     1. Separate concave to convex
     1. Chamfer
 1. Physics
