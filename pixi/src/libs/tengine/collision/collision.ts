@@ -2,8 +2,8 @@ import { Component } from 'libs/tecs';
 import { circlesCollision } from './checks';
 import { Collider } from './components';
 import { safeGuard } from 'libs/tecs/switch';
-import { sat } from './sat';
-import { Axis2 } from '../core';
+import { getCircleAxesAndVertices, sat } from './sat';
+import { addV2, Axis2, magV2, multV2, subV2, unitV2, Vertices2 } from '../core';
 
 export type CollisionResult = {
   overlap: number;
@@ -26,7 +26,13 @@ export function collision(
           );
         }
         case 'rectangle': {
-          return null;
+          const { axes: circleAxes, vertices: circleVertices } = getCircleAxesAndVertices(
+            colliderA._origin,
+            colliderA.shape.radius,
+            colliderB
+          );
+
+          return sat(circleVertices, circleAxes, colliderB._vertices, colliderB._normalAxes);
         }
         case 'line': {
           return null;
@@ -39,7 +45,13 @@ export function collision(
     case 'rectangle': {
       switch (colliderB.shape.type) {
         case 'circle': {
-          return null;
+          const { axes: circleAxes, vertices: circleVertices } = getCircleAxesAndVertices(
+            colliderB._origin,
+            colliderB.shape.radius,
+            colliderA
+          );
+
+          return sat(circleVertices, circleAxes, colliderA._vertices, colliderA._normalAxes);
         }
         case 'rectangle': {
           return sat(

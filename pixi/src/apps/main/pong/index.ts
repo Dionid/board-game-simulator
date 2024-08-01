@@ -230,6 +230,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     y: game.world.size.height / 2 - 10,
     _prev: { x: 0, y: 0 },
   };
+
   setComponent(game.essence, ballEntity, Position2, ballPosition);
   // // # Collisions
   setComponent(game.essence, ballEntity, CollisionsMonitoring);

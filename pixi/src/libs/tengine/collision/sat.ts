@@ -1,9 +1,59 @@
-import { Axes2, Vector2, Vertices2 } from '../core';
+import { Component } from 'libs/tecs';
+import { addV2, Axes2, magV2, multV2, Position2, subV2, unitV2, Vector2, Vertices2 } from '../core';
+import { Collider } from './components';
 
 export type SATShape = {
   vertices: Vector2[];
   axes: Vector2[];
 };
+
+export function getCircleAxesAndVertices(
+  circleCenter: Position2,
+  radius: number,
+  colliderB: Component<typeof Collider>
+) {
+  if (colliderB._vertices.length === 0) {
+    return {
+      axes: [],
+      vertices: [],
+    };
+  }
+
+  // # Find rectangle closest vertex
+  let closesVertex = colliderB._vertices[0];
+  let closestDistance = magV2(subV2(circleCenter, closesVertex));
+
+  for (let i = 1; i < colliderB._vertices.length; i++) {
+    const vertex = colliderB._vertices[i];
+    const vertexDistance = magV2(subV2(circleCenter, vertex));
+    if (vertexDistance < closestDistance) {
+      closesVertex = vertex;
+      closestDistance = vertexDistance;
+    }
+  }
+
+  // # Use unit vector of closest point as circle axes
+  const circleAxis = unitV2(subV2(closesVertex, circleCenter));
+
+  // # Circle Vertices based on circle and rectangle axes
+  const circleVertices: Vertices2 = [
+    addV2(circleCenter, multV2(circleAxis, -radius)),
+    addV2(circleCenter, multV2(circleAxis, radius)),
+  ];
+
+  for (let i = 0; i < colliderB._normalAxes.length; i++) {
+    const axis = colliderB._normalAxes[i];
+    const vertex1 = addV2(circleCenter, multV2(axis, -radius));
+    const vertex2 = addV2(circleCenter, multV2(axis, radius));
+    circleVertices.push(vertex1);
+    circleVertices.push(vertex2);
+  }
+
+  return {
+    axes: [circleAxis],
+    vertices: circleVertices,
+  };
+}
 
 export function overlapAxes(
   verticesA: Vector2[],
@@ -13,13 +63,6 @@ export function overlapAxes(
   overlap: number;
   axis: Vector2;
 } {
-  if (verticesA.length === 0 || verticesB.length === 0) {
-    return {
-      overlap: 0,
-      axis: { x: 0, y: 0 },
-    };
-  }
-
   if (axes.length === 0 || verticesA.length === 0 || verticesB.length === 0) {
     return {
       overlap: 0,
@@ -91,6 +134,7 @@ export function overlapAxes(
     }
   }
 
+  // # Check for containment
   if (
     (aOverlapMax > bOverlapMax && aOverlapMin < bOverlapMin) ||
     (bOverlapMax > aOverlapMax && bOverlapMin < aOverlapMin)
@@ -107,25 +151,11 @@ export function overlapAxes(
     }
   }
 
+  // # Reverse axis
   if (aOverlapMax > bOverlapMax) {
-    // debugger;
     overlapAxis.x = -overlapAxis.x;
     overlapAxis.y = -overlapAxis.y;
   }
-
-  // // # Check containment
-  // if ((maxA > maxB && minA < minB) || (maxB > maxA && minB < minA)) {
-  //   const mins = Math.abs(minA - minB);
-  //   const maxes = Math.abs(maxA - maxB);
-
-  //   if (mins < maxes) {
-  //     overlapMin += mins;
-  //   } else {
-  //     overlapMin += maxes;
-  //     overlapAxis.x = -overlapAxis.x;
-  //     overlapAxis.y = -overlapAxis.y;
-  //   }
-  // }
 
   return {
     overlap: overlapMin,
