@@ -1,9 +1,9 @@
 import { registerTopic, System } from '../../tecs';
 import { Game } from '../game';
-import { colliding } from './topics';
+import { unfilteredColliding } from './topics';
 
 export const resolveCollisionPairs = (game: Game): System => {
-  const topic = registerTopic(game.essence, colliding);
+  const topic = registerTopic(game.essence, unfilteredColliding);
 
   return () => {
     for (const event of topic) {

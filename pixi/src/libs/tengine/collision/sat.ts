@@ -82,6 +82,11 @@ export function overlapAxes(
   };
 }
 
+export type SATResult = {
+  overlap: number;
+  axis: Vector2;
+};
+
 export function sat(
   aVertices: Vertices2,
   aAxes: Axes2,

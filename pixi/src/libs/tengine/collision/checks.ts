@@ -3,7 +3,7 @@ import { KindToType } from '../../tecs';
 import { dotV2, magV2, multV2, Position2, Size2, subV2, unitV2 } from '../core';
 import { Collider } from './components';
 
-export function circlesCollisionDepth(
+export function circlesCollision(
   positionA: Position2,
   radiusA: number,
   positionB: Position2,
@@ -14,7 +14,10 @@ export function circlesCollisionDepth(
   const distance = Math.sqrt(dx * dx + dy * dy);
   const minDistance = radiusA + radiusB;
 
-  return minDistance - distance;
+  return {
+    overlap: minDistance - distance,
+    axis: unitV2({ x: dx, y: dy }),
+  };
 }
 
 export function areCircleAndRectangleColliding(
@@ -187,12 +190,12 @@ export function rectanglesCollidingDepth(
 export function collidersPenetrationDepth(
   aCollider: KindToType<typeof Collider>,
   bCollider: KindToType<typeof Collider>
-): number {
+) {
   switch (aCollider.shape.type) {
     case 'circle':
       switch (bCollider.shape.type) {
         case 'circle':
-          return circlesCollisionDepth(
+          return circlesCollision(
             aCollider._position,
             aCollider.shape.radius,
             bCollider._position,

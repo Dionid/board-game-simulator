@@ -8,17 +8,17 @@ import {
 } from 'libs/tecs';
 import { Game } from '../game';
 import { Position2 } from '../core';
-import { colliding } from './topics';
+import { unfilteredColliding } from './topics';
 import { ColliderSet, Impenetrable } from './components';
 import { safeGuard } from 'libs/tecs/switch';
 import { resolvePenetration } from './penetration-resolvers';
 
 export const penetrationResolution = (game: Game): System => {
-  const topic = registerTopic(game.essence, colliding);
+  const topic = registerTopic(game.essence, unfilteredColliding);
 
   return () => {
     for (const event of topic) {
-      const { a, b, depth } = event;
+      const { a, b, overlap: depth } = event;
 
       // # We only resolve penetration between solid objects
       if (a.collider.type !== 'solid' && b.collider.type !== 'solid') {

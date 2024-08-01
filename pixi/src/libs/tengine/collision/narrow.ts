@@ -1,9 +1,11 @@
+import { safeGuard } from 'libs/tecs/switch';
 import { newQuery, registerQuery, Entity, KindToType, System, table, emit } from '../../tecs';
 import { Position2 } from '../core/types';
 import { Game } from '../game';
 import { ColliderSet, CollisionsMonitoring } from './components';
 import { sat } from './sat';
-import { colliding } from './topics';
+import { unfilteredColliding } from './topics';
+import { circlesCollision } from './checks';
 
 // 1. Get all entities that have CollisionSource + ColliderSet + Position (+ Awaken)
 // 1. Calculate the next position based on the current position + velocity
@@ -68,38 +70,94 @@ export const checkNarrowCollisionSimple = (game: Game): System => {
 
           for (const colliderA of colliderSetA.list) {
             for (const colliderB of colliderSetB.list) {
-              if (colliderA.shape.type === 'rectangle' && colliderB.shape.type === 'rectangle') {
-                const result = sat(
-                  colliderA._vertices,
-                  colliderA._normalAxes,
-                  colliderB._vertices,
-                  colliderB._normalAxes
-                );
+              let result: {
+                overlap: number;
+                axis: { x: number; y: number };
+              } | null = null;
 
-                if (!result) {
-                  continue;
+              switch (colliderA.shape.type) {
+                case 'circle': {
+                  switch (colliderB.shape.type) {
+                    case 'circle': {
+                      result = circlesCollision(
+                        colliderA._position,
+                        colliderA.shape.radius,
+                        colliderB._position,
+                        colliderB.shape.radius
+                      );
+
+                      break;
+                    }
+                    case 'rectangle': {
+                      result = sat(
+                        colliderA._vertices,
+                        colliderA._normalAxes,
+                        colliderB._vertices,
+                        colliderB._normalAxes
+                      );
+                      break;
+                    }
+                    case 'line': {
+                      break;
+                    }
+                    default: {
+                      return safeGuard(colliderB.shape);
+                    }
+                  }
+                  break;
                 }
+                case 'rectangle': {
+                  switch (colliderB.shape.type) {
+                    case 'circle': {
+                      break;
+                    }
+                    case 'rectangle': {
+                      result = sat(
+                        colliderA._vertices,
+                        colliderA._normalAxes,
+                        colliderB._vertices,
+                        colliderB._normalAxes
+                      );
 
-                if (result.overlap >= 0) {
-                  emit(
-                    colliding,
-                    {
-                      name: 'colliding',
-                      depth: result.overlap,
-                      a: {
-                        entity: entityA,
-                        colliderSet: colliderSetA,
-                        collider: colliderA,
-                      },
-                      b: {
-                        entity: entityB,
-                        colliderSet: colliderSetB,
-                        collider: colliderB,
-                      },
+                      break;
+                    }
+                    case 'line': {
+                      break;
+                    }
+                    default: {
+                      return safeGuard(colliderB.shape);
+                    }
+                  }
+                  break;
+                }
+                case 'line': {
+                  break;
+                }
+                default: {
+                  return safeGuard(colliderA.shape);
+                }
+              }
+
+              if (result && result.overlap >= 0) {
+                emit(
+                  unfilteredColliding,
+                  {
+                    name: 'colliding',
+                    overlap: result.overlap,
+                    axis: result.axis,
+                    a: {
+                      entity: entityA,
+                      colliderSet: colliderSetA,
+                      collider: colliderA,
                     },
-                    true
-                  );
-                }
+                    b: {
+                      entity: entityB,
+                      colliderSet: colliderSetB,
+                      collider: colliderB,
+                    },
+                  },
+                  true
+                );
               }
 
               // const depth = collidersPenetrationDepth(colliderA, colliderB);

@@ -1,4 +1,5 @@
 import { Entity, KindToType, newTopic } from '../../tecs';
+import { Vector2 } from '../core';
 import { Collider, ColliderSet } from './components';
 
 export type CollisionStartedEvent = {
@@ -17,7 +18,8 @@ export type CollisionStartedEvent = {
 
 export type CollidingEvent = {
   name: 'colliding';
-  depth: number;
+  overlap: number;
+  axis: Vector2;
   a: {
     entity: Entity;
     colliderSet: KindToType<typeof ColliderSet>;
@@ -31,4 +33,4 @@ export type CollidingEvent = {
 };
 
 export const collideStartedTopic = newTopic<CollisionStartedEvent>();
-export const colliding = newTopic<CollidingEvent>();
+export const unfilteredColliding = newTopic<CollidingEvent>();

@@ -1,7 +1,7 @@
 import { componentByEntity, registerTopic, System } from '../../tecs';
 import { Game } from '../game';
 import { Position2 } from '../core/types';
-import { colliding, Impenetrable, resolvePenetration } from '../collision';
+import { unfilteredColliding, Impenetrable, resolvePenetration } from '../collision';
 import { Dynamic, Kinematic, RigidBody, Static } from './components';
 import { dotV2, multV2, normalizeV2, subV2, Velocity2 } from '../core';
 import { inverseMass } from '../collision/math';
@@ -11,11 +11,11 @@ import { resolveCircleCircleCollision, resolveCircleLineCollision } from './reso
 // # Resolve Dynamic bodies Collision
 
 export const dynamicRigidBodyCollisionResolution = (game: Game): System => {
-  const topic = registerTopic(game.essence, colliding);
+  const topic = registerTopic(game.essence, unfilteredColliding);
 
   return () => {
     for (const event of topic) {
-      const { a, b, depth } = event;
+      const { a, b, overlap: depth } = event;
 
       // # Skip physics if both are sensors
       if (a.collider.type === 'sensor' || b.collider.type === 'sensor') {
