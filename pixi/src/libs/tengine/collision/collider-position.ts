@@ -1,5 +1,5 @@
-import { newQuery, System, registerQuery, table } from 'libs/tecs';
-import { mutRotateVertices2Around, mutTranslateVertices2, Position2, subV2 } from '../core';
+import { newQuery, System, registerQuery, table, tryTable } from 'libs/tecs';
+import { Angle, mutRotateVertices2Around, mutTranslateVertices2, Position2, subV2 } from '../core';
 import { Game } from '../game';
 import { ColliderSet } from './components';
 
@@ -15,9 +15,13 @@ export const applyPositionToCollider = (game: Game): System => {
       const colliderSetT = table(archetype, ColliderSet);
       const positionT = table(archetype, Position2);
 
+      const angleT = tryTable(archetype, Angle);
+
       for (let j = 0; j < archetype.entities.length; j++) {
         const colliderSet = colliderSetT[j];
         const position = positionT[j];
+
+        const parentAngleDelta = angleT ? angleT[j].value - angleT[j]._prev : 0;
 
         const positionDelta = {
           x: position.x - position._prev.x,
@@ -41,8 +45,15 @@ export const applyPositionToCollider = (game: Game): System => {
           collider._origin.x += positionDelta.x;
           collider._origin.y += positionDelta.y;
 
-          mutTranslateVertices2(collider._vertices, positionDelta.x, positionDelta.y);
-          mutRotateVertices2Around(collider._vertices, angleDelta, collider._origin);
+          if (positionDelta.x > 0 || positionDelta.y > 0) {
+            mutTranslateVertices2(collider._vertices, positionDelta.x, positionDelta.y);
+          }
+          if (angleDelta > 0) {
+            mutRotateVertices2Around(collider._vertices, angleDelta, collider._origin);
+          }
+          if (parentAngleDelta > 0) {
+            mutRotateVertices2Around(collider._vertices, parentAngleDelta, position);
+          }
         }
       }
     }

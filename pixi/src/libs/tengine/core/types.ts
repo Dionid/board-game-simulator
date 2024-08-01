@@ -56,10 +56,9 @@ export const Scale = newSchema({
   y: number,
 });
 
-export type Rotation = {
-  value: number;
-};
+export type Angle = number;
 
-export const Rotation = newSchema({
+export const Angle = newSchema({
   value: number,
+  _prev: number,
 });

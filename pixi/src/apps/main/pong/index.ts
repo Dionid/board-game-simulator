@@ -11,6 +11,7 @@ import {
   Vector2,
   mutRotateVertices2,
   mutRotateVertices2Around,
+  Angle,
 } from 'libs/tengine/core';
 import { Ball, Player, accelerateByArrows } from './ecs';
 import { applyWorldBoundaries } from 'libs/tengine/collision/penetration-resolution';
@@ -68,6 +69,8 @@ export async function initPongGame(parentElement: HTMLElement) {
     _prev: { x: 0, y: 0 },
   };
   setComponent(game.essence, playerEntity, Position2, playerPosition);
+  // ## Angle
+  setComponent(game.essence, playerEntity, Angle, { value: 0, _prev: 0 });
   // ## Acceleration based Movement
   setComponent(game.essence, playerEntity, Speed, { value: 1 });
   setComponent(game.essence, playerEntity, Acceleration2, {
