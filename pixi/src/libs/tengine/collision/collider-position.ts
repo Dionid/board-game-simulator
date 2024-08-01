@@ -1,8 +1,7 @@
 import { newQuery, System, registerQuery, table } from 'libs/tecs';
-import { mutTranslateVertices2, Position2 } from '../core';
+import { mutRotateVertices2Around, mutTranslateVertices2, Position2, subV2 } from '../core';
 import { Game } from '../game';
 import { ColliderSet } from './components';
-import { safeGuard } from 'libs/tecs/switch';
 
 export const positionColliderSetQuery = newQuery(ColliderSet, Position2);
 
@@ -20,16 +19,30 @@ export const applyPositionToCollider = (game: Game): System => {
         const colliderSet = colliderSetT[j];
         const position = positionT[j];
 
-        const delta = {
+        const positionDelta = {
           x: position.x - position._prev.x,
           y: position.y - position._prev.y,
         };
 
         for (const collider of colliderSet.list) {
-          collider._position.x += delta.x;
-          collider._position.y += delta.y;
+          const angleDelta = collider.angle - collider._prev.angle;
+          collider._prev.angle = collider.angle;
 
-          mutTranslateVertices2(collider._vertices, delta.x, delta.y);
+          const offsetDelta = subV2(collider.offset, collider._prev.offset);
+          collider._prev.offset.x = collider.offset.x;
+          collider._prev.offset.y = collider.offset.y;
+
+          positionDelta.x += offsetDelta.x;
+          positionDelta.y += offsetDelta.y;
+
+          collider._position.x += positionDelta.x;
+          collider._position.y += positionDelta.y;
+
+          collider._origin.x += positionDelta.x;
+          collider._origin.y += positionDelta.y;
+
+          mutTranslateVertices2(collider._vertices, positionDelta.x, positionDelta.y);
+          mutRotateVertices2Around(collider._vertices, angleDelta, collider._origin);
         }
       }
     }

@@ -3,7 +3,15 @@ import { initGame, newGame } from '../../../libs/tengine/game';
 import { arrayOf, registerSystem, setComponent, spawnEntity } from '../../../libs/tecs';
 import { mapKeyboardInput, mapMouseInput } from '../../../libs/tengine/ecs';
 import { Kinematic, RigidBody } from 'libs/tengine/physics/components';
-import { Position2, Velocity2, Speed, Acceleration2, Vector2 } from 'libs/tengine/core';
+import {
+  Position2,
+  Velocity2,
+  Speed,
+  Acceleration2,
+  Vector2,
+  mutRotateVertices2,
+  mutRotateVertices2Around,
+} from 'libs/tengine/core';
 import { Ball, Player, accelerateByArrows } from './ecs';
 import { applyWorldBoundaries } from 'libs/tengine/collision/penetration-resolution';
 import {
@@ -11,6 +19,7 @@ import {
   applyPositionToCollider,
   checkNarrowCollisionSimple,
   ColliderSet,
+  rectangleColliderComponent,
 } from 'libs/tengine/collision';
 import {
   applyRigidBodyAccelerationToVelocity,
@@ -93,45 +102,20 @@ export async function initPongGame(parentElement: HTMLElement) {
   // # Collisions
   setComponent(game.essence, playerEntity, CollisionsMonitoring);
   // setComponent(game.essence, playerEntity, Impenetrable);
-  const playerColliderAnchor = { x: 0.5, y: 0.5 };
-  const playerColliderPosition = {
-    x: playerPosition.x - characterSize.width * playerColliderAnchor.x,
-    y: playerPosition.y - characterSize.height * playerColliderAnchor.y,
-  };
   setComponent(game.essence, playerEntity, ColliderSet, {
     list: [
-      {
-        type: 'solid',
-        mass: 1,
-        offset: { x: 0, y: 0 },
-        rotation: 0,
-        shape: {
-          type: 'rectangle',
-          anchor: playerColliderAnchor,
-          width: characterSize.width,
-          height: characterSize.height,
+      rectangleColliderComponent(
+        playerPosition,
+        'solid',
+        1,
+        { x: 0, y: 0 },
+        Math.PI / 8,
+        {
+          x: 0.5,
+          y: 0.5,
         },
-        // # Must be calculated by constructor
-        _position: playerColliderPosition,
-        _vertices: [
-          {
-            x: playerColliderPosition.x,
-            y: playerColliderPosition.y,
-          },
-          {
-            x: playerColliderPosition.x + characterSize.width,
-            y: playerColliderPosition.y,
-          },
-          {
-            x: playerColliderPosition.x + characterSize.width,
-            y: playerColliderPosition.y + characterSize.height,
-          },
-          {
-            x: playerColliderPosition.x,
-            y: playerColliderPosition.y + characterSize.height,
-          },
-        ],
-      },
+        characterSize
+      ),
     ],
   });
   // # Physics
@@ -433,7 +417,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   registerSystem(game.essence, applyRigidBodyAccelerationToVelocity(game));
   registerSystem(game.essence, applyRigidBodyVelocityToPosition(game));
   registerSystem(game.essence, applyPositionToCollider(game));
-  registerSystem(game.essence, applyWorldBoundaries(game));
+  // registerSystem(game.essence, applyWorldBoundaries(game));
 
   // ## Collision
   registerSystem(game.essence, checkNarrowCollisionSimple(game));

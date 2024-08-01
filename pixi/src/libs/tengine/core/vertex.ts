@@ -1,5 +1,6 @@
-import { arrayOf, newSchema, number } from 'libs/tecs';
+import { newSchema, number } from 'libs/tecs';
 import { Vector2 } from './math';
+import { Position2 } from './types';
 
 export type Vertex2 = Vector2;
 
@@ -8,34 +9,43 @@ export const Vertex2 = newSchema({
   y: number,
 });
 
-export const translateVrx2 = (vertex: Vertex2, x: number, y: number): Vertex2 => {
+export function translateVrx2(vertex: Vertex2, x: number, y: number): Vertex2 {
   return {
     x: vertex.x + x,
     y: vertex.y + y,
   };
-};
+}
 
-export const mutTranslateVrx2 = (vertex: Vertex2, x: number, y: number): void => {
+export function mutTranslateVrx2(vertex: Vertex2, x: number, y: number): void {
   vertex.x += x;
   vertex.y += y;
-};
+}
 
-export type Vertices = Vertex2[];
+export function rotateVrx2(vertex: Vertex2, angle: number): Vertex2 {
+  return {
+    x: vertex.x * Math.cos(angle) - vertex.y * Math.sin(angle),
+    y: vertex.x * Math.sin(angle) + vertex.y * Math.cos(angle),
+  };
+}
 
-export const Vertices = arrayOf(Vertex2);
+export function mutRotateVrx2(vertex: Vertex2, angle: number): void {
+  const x = vertex.x;
+  vertex.x = x * Math.cos(angle) - vertex.y * Math.sin(angle);
+  vertex.y = x * Math.sin(angle) + vertex.y * Math.cos(angle);
+}
 
-export const translateVertices2 = (vertices: Vertices, x: number, y: number): Vertices => {
-  const result = [];
+export function rotateVrx2Around(vertex: Vertex2, angle: number, center: Position2): Vertex2 {
+  const x = vertex.x - center.x;
+  const y = vertex.y - center.y;
+  return {
+    x: x * Math.cos(angle) - y * Math.sin(angle) + center.x,
+    y: x * Math.sin(angle) + y * Math.cos(angle) + center.y,
+  };
+}
 
-  for (const vertex of vertices) {
-    result.push(translateVrx2(vertex, x, y));
-  }
-
-  return result;
-};
-
-export const mutTranslateVertices2 = (vertices: Vertices, x: number, y: number): void => {
-  for (const vertex of vertices) {
-    mutTranslateVrx2(vertex, x, y);
-  }
-};
+export function mutRotateVrx2Around(vertex: Vertex2, angle: number, center: Position2): void {
+  const x = vertex.x - center.x;
+  const y = vertex.y - center.y;
+  vertex.x = x * Math.cos(angle) - y * Math.sin(angle) + center.x;
+  vertex.y = x * Math.sin(angle) + y * Math.cos(angle) + center.y;
+}

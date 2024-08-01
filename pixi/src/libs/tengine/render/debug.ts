@@ -21,8 +21,6 @@ const drawLine = (
 const debugViewQuery = newQuery(View, Position2);
 const debugPViewQuery = newQuery(pView);
 const debugCollisionSetQuery = newQuery(ColliderSet, Position2);
-const velocityQuery = newQuery(Velocity2, Position2);
-const accelerationQuery = newQuery(Acceleration2, Position2);
 
 export const drawDebugLines = (
   game: Game,
