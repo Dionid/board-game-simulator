@@ -441,8 +441,8 @@ export async function initPongGame(parentElement: HTMLElement) {
   registerSystem(game.essence, mapMouseInput(game, map));
 
   // ## Game logic
-  // registerSystem(game.essence, accelerateByArrows(game, playerEntity));
-  registerSystem(game.essence, accelerateByArrows(game, ballEntity));
+  registerSystem(game.essence, accelerateByArrows(game, playerEntity));
+  // registerSystem(game.essence, accelerateByArrows(game, ballEntity));
   // registerSystem(game.essence, changeVelocityByArrows(game, ballEntity));
 
   // ## Basic physics

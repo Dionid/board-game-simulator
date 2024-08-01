@@ -24,19 +24,12 @@ export const ColliderCircle = newSchema({
   anchor: Vector2,
 });
 
-export const ColliderRectangle = newSchema({
-  type: literal('rectangle'),
-  width: number,
-  height: number,
-  anchor: Vector2,
-});
-
 export const ColliderVertices = newSchema({
   type: literal('vertices'),
   anchor: Vector2,
 });
 
-export const ColliderShape = union(ColliderRectangle, ColliderCircle, ColliderVertices);
+export const ColliderShape = union(ColliderCircle, ColliderVertices);
 
 export const Collider = newSchema({
   type: union(literal('solid'), literal('sensor')),
@@ -106,10 +99,8 @@ export function rectangleColliderComponent(opts: {
     offset: opts.offset,
     angle: opts.angle,
     shape: {
-      type: 'rectangle' as const,
+      type: 'vertices' as const,
       anchor: opts.anchor,
-      width: opts.size.width,
-      height: opts.size.height,
     },
     _position: colliderPosition,
     _origin: origin,

@@ -151,15 +151,11 @@ export const dynamicRigidBodyCollisionResolution = (game: Game): System => {
                 combinedInvertedMass
               );
               continue;
-            case 'rectangle':
-              continue;
             case 'vertices':
               continue;
             default:
               return safeGuard(b.collider.shape);
           }
-        case 'rectangle':
-          continue;
         case 'vertices':
           continue;
         default:
