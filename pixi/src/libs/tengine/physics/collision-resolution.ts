@@ -3,7 +3,7 @@ import { Game } from '../game';
 import { Position2 } from '../core/types';
 import { unfilteredColliding, Impenetrable, resolvePenetration } from '../collision';
 import { Dynamic, Kinematic, RigidBody, Static } from './components';
-import { dotV2, multV2, normalizeV2, subV2, Velocity2 } from '../core';
+import { Velocity2 } from '../core';
 import { inverseMass } from '../collision/math';
 import { safeGuard } from 'libs/tecs/switch';
 import { resolveCircleCircleCollision, resolveCircleLineCollision } from './resolvers';
@@ -15,7 +15,7 @@ export const dynamicRigidBodyCollisionResolution = (game: Game): System => {
 
   return () => {
     for (const event of topic) {
-      const { a, b, overlap: depth } = event;
+      const { a, b, overlap, axis } = event;
 
       // # Skip physics if both are sensors
       if (a.collider.type === 'sensor' || b.collider.type === 'sensor') {
@@ -78,15 +78,7 @@ export const dynamicRigidBodyCollisionResolution = (game: Game): System => {
       const bMass = bStatic || bKinematic ? 0 : b.collider.mass;
 
       // # Resolve penetration
-      resolvePenetration(
-        aPosition,
-        aMass,
-        a.collider.shape,
-        bPosition,
-        bMass,
-        b.collider.shape,
-        depth
-      );
+      resolvePenetration(axis, overlap, a.collider, aPosition, b.collider, bPosition);
 
       // ## Dynamic vs Static or Kinematic
       if ((aDynamic && (bStatic || bKinematic)) || (bDynamic && (aStatic || aKinematic))) {

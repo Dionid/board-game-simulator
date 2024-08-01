@@ -7,10 +7,12 @@ import {
   table,
 } from 'libs/tecs';
 import { Game } from '../game';
-import { multV2, mutAddV2, mutSubV2, mutTranslateVertices2, Position2 } from '../core';
+import { multV2, mutAddV2, mutSubV2, Position2 } from '../core';
 import { unfilteredColliding } from './topics';
 import { ColliderSet, Impenetrable } from './components';
 import { inverseMass } from './math';
+import { translateCollider } from './collider-transform';
+import { resolvePenetration } from './resolvers';
 
 export const penetrationResolution = (game: Game): System => {
   const topic = registerTopic(game.essence, unfilteredColliding);
@@ -46,51 +48,7 @@ export const penetrationResolution = (game: Game): System => {
         continue;
       }
 
-      const aInvertedMass = inverseMass(a.collider.mass);
-      const bInvertedMass = inverseMass(a.collider.mass);
-      const combinedInvertedMass = aInvertedMass + bInvertedMass;
-
-      const resolution = multV2(axis, overlap / combinedInvertedMass);
-
-      const aPrevPosition = {
-        x: aPosition.x,
-        y: aPosition.y,
-      };
-      const bPrevPosition = {
-        x: bPosition.x,
-        y: bPosition.y,
-      };
-
-      mutAddV2(aPosition, multV2(resolution, aInvertedMass));
-      mutSubV2(bPosition, multV2(resolution, bInvertedMass));
-
-      const aPositionDelta = {
-        x: aPosition.x - aPrevPosition.x,
-        y: aPosition.y - aPrevPosition.y,
-      };
-
-      const bPositionDelta = {
-        x: bPosition.x - bPrevPosition.x,
-        y: bPosition.y - bPrevPosition.y,
-      };
-
-      a.collider._position.x += aPositionDelta.x;
-      a.collider._position.y += aPositionDelta.y;
-      a.collider._origin.x += aPositionDelta.x;
-      a.collider._origin.y += aPositionDelta.y;
-
-      b.collider._position.x += bPositionDelta.x;
-      b.collider._position.y += bPositionDelta.y;
-      b.collider._origin.x += bPositionDelta.x;
-      b.collider._origin.y += bPositionDelta.y;
-
-      if (aPositionDelta.x !== 0 || aPositionDelta.y !== 0) {
-        mutTranslateVertices2(a.collider._vertices, aPositionDelta.x, aPositionDelta.y);
-      }
-
-      if (bPositionDelta.x !== 0 || bPositionDelta.y !== 0) {
-        mutTranslateVertices2(b.collider._vertices, bPositionDelta.x, bPositionDelta.y);
-      }
+      resolvePenetration(axis, overlap, a.collider, aPosition, b.collider, bPosition);
 
       return;
     }

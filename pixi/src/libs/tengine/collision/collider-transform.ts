@@ -1,4 +1,4 @@
-import { newQuery, System, registerQuery, table, tryTable } from 'libs/tecs';
+import { newQuery, System, registerQuery, table, tryTable, Component } from 'libs/tecs';
 import {
   Angle,
   mutRotateAxes2,
@@ -8,7 +8,19 @@ import {
   subV2,
 } from '../core';
 import { Game } from '../game';
-import { ColliderSet } from './components';
+import { Collider, ColliderSet } from './components';
+
+export function translateCollider(collider: Component<typeof Collider>, positionDelta: Position2) {
+  collider._position.x += positionDelta.x;
+  collider._position.y += positionDelta.y;
+
+  collider._origin.x += positionDelta.x;
+  collider._origin.y += positionDelta.y;
+
+  if (positionDelta.x !== 0 || positionDelta.y !== 0) {
+    mutTranslateVertices2(collider._vertices, positionDelta.x, positionDelta.y);
+  }
+}
 
 export const positionColliderSetQuery = newQuery(ColliderSet, Position2);
 
@@ -46,15 +58,8 @@ export const transformCollider = (game: Game): System => {
           positionDelta.x += offsetDelta.x;
           positionDelta.y += offsetDelta.y;
 
-          collider._position.x += positionDelta.x;
-          collider._position.y += positionDelta.y;
+          translateCollider(collider, positionDelta);
 
-          collider._origin.x += positionDelta.x;
-          collider._origin.y += positionDelta.y;
-
-          if (positionDelta.x !== 0 || positionDelta.y !== 0) {
-            mutTranslateVertices2(collider._vertices, positionDelta.x, positionDelta.y);
-          }
           if (angleDelta !== 0) {
             mutRotateVertices2Around(collider._vertices, angleDelta, collider._origin);
             mutRotateAxes2(collider._normalAxes, angleDelta);

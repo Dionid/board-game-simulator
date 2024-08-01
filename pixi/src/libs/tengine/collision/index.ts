@@ -5,4 +5,4 @@ export * from './narrow';
 export * from './collider-transform';
 export * from './pairs';
 export * from './penetration-resolution';
-export * from './penetration-resolvers';
+export * from './resolvers';

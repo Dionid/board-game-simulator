@@ -129,7 +129,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     elasticity: 1,
     elasticityMode: 'average',
   });
-  // setComponent(game.essence, playerEntity, Kinematic);
+  setComponent(game.essence, playerEntity, Kinematic);
 
   // # Enemy
   const enemyEntity = spawnEntity(game.essence);
@@ -186,7 +186,7 @@ export async function initPongGame(parentElement: HTMLElement) {
         enemyPosition,
         enemyAngle,
         'solid',
-        1,
+        0,
         { x: 0, y: 0 },
         0,
         {
@@ -202,9 +202,9 @@ export async function initPongGame(parentElement: HTMLElement) {
     elasticity: 1,
     elasticityMode: 'average',
   });
-  // setComponent(game.essence, enemyEntity, Kinematic);
+  setComponent(game.essence, enemyEntity, Kinematic);
 
-  // // # Ball
+  // # Ball
   const ballEntity = spawnEntity(game.essence);
   setComponent(game.essence, ballEntity, Ball);
   setComponent(game.essence, ballEntity, View, {
@@ -224,15 +224,15 @@ export async function initPongGame(parentElement: HTMLElement) {
       },
     },
   });
-  // setComponent(game.essence, ballEntity, Speed, { value: 1 });
-  // setComponent(game.essence, ballEntity, Acceleration2, {
-  //   x: 0,
-  //   y: 0,
-  // });
-  // setComponent(game.essence, ballEntity, Velocity2, {
-  //   x: 0,
-  //   y: 0,
-  // });
+  setComponent(game.essence, ballEntity, Speed, { value: 1 });
+  setComponent(game.essence, ballEntity, Acceleration2, {
+    x: 0,
+    y: 0,
+  });
+  setComponent(game.essence, ballEntity, Velocity2, {
+    x: 0,
+    y: 0,
+  });
   setComponent(game.essence, ballEntity, Position2, {
     x: game.world.size.width / 2 - 10,
     y: game.world.size.height / 2 - 10,
@@ -414,14 +414,6 @@ export async function initPongGame(parentElement: HTMLElement) {
   //   y: 0,
   // });
   // setComponent(game.essence, capsuleEntity, RigidBody);
-
-  // Update previous values
-  // -> Game logic
-  // -> ! Apply Velocity to Position (for collision checks) and AngularVelocity to Angle
-  // -> ! Transform Colliders
-  // -> ! Check collisions
-  // -> ! Resolve penetration
-  // -> ! Transform Colliders based on penetration resolution
 
   // # Systems
   // ## Caches invalidation
