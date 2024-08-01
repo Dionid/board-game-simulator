@@ -28,6 +28,10 @@ export function overlapAxes(
 
   let overlapMin: number = Number.MAX_VALUE;
   let overlapAxis: Vector2 = axes[0];
+  let aOverlapMin = 0;
+  let aOverlapMax = 0;
+  let bOverlapMin = 0;
+  let bOverlapMax = 0;
 
   for (let i = 0; i < axes.length; i++) {
     const axis = axes[i];
@@ -37,7 +41,6 @@ export function overlapAxes(
 
     let minA = verticesAX * axisX + verticesAY * axisY;
     let maxA = minA;
-
     let minB = verticesBX * axisX + verticesBY * axisY;
     let maxB = minB;
 
@@ -69,12 +72,53 @@ export function overlapAxes(
       overlapMin = overlap;
       overlapAxis = axis;
 
+      aOverlapMin = minA;
+      aOverlapMax = maxA;
+      bOverlapMin = minB;
+      bOverlapMax = maxB;
+
       if (overlap <= 0) {
         // can not be intersecting
         break;
       }
     }
   }
+
+  if (
+    (aOverlapMax > bOverlapMax && aOverlapMin < bOverlapMin) ||
+    (bOverlapMax > aOverlapMax && bOverlapMin < aOverlapMin)
+  ) {
+    const mins = Math.abs(aOverlapMin - bOverlapMin);
+    const maxes = Math.abs(aOverlapMax - bOverlapMax);
+
+    if (mins < maxes) {
+      overlapMin += mins;
+    } else {
+      overlapMin += maxes;
+      overlapAxis.x = -overlapAxis.x;
+      overlapAxis.y = -overlapAxis.y;
+    }
+  }
+
+  if (aOverlapMax > bOverlapMax) {
+    // debugger;
+    overlapAxis.x = -overlapAxis.x;
+    overlapAxis.y = -overlapAxis.y;
+  }
+
+  // // # Check containment
+  // if ((maxA > maxB && minA < minB) || (maxB > maxA && minB < minA)) {
+  //   const mins = Math.abs(minA - minB);
+  //   const maxes = Math.abs(maxA - maxB);
+
+  //   if (mins < maxes) {
+  //     overlapMin += mins;
+  //   } else {
+  //     overlapMin += maxes;
+  //     overlapAxis.x = -overlapAxis.x;
+  //     overlapAxis.y = -overlapAxis.y;
+  //   }
+  // }
 
   return {
     overlap: overlapMin,
@@ -92,10 +136,7 @@ export function sat(
   aAxes: Axes2,
   bVertices: Vertices2,
   bAxes: Axes2
-): null | {
-  overlap: number;
-  axis: Vector2;
-} {
+): null | SATResult {
   const overlapAB = overlapAxes(aVertices, bVertices, aAxes);
 
   if (overlapAB.overlap <= 0) {

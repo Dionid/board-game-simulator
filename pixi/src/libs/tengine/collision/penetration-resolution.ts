@@ -7,18 +7,17 @@ import {
   table,
 } from 'libs/tecs';
 import { Game } from '../game';
-import { Position2 } from '../core';
+import { multV2, mutAddV2, mutSubV2, mutTranslateVertices2, Position2 } from '../core';
 import { unfilteredColliding } from './topics';
 import { ColliderSet, Impenetrable } from './components';
-import { safeGuard } from 'libs/tecs/switch';
-import { resolvePenetration } from './penetration-resolvers';
+import { inverseMass } from './math';
 
 export const penetrationResolution = (game: Game): System => {
   const topic = registerTopic(game.essence, unfilteredColliding);
 
   return () => {
     for (const event of topic) {
-      const { a, b, overlap: depth } = event;
+      const { a, b, overlap, axis } = event;
 
       // # We only resolve penetration between solid objects
       if (a.collider.type !== 'solid' && b.collider.type !== 'solid') {
@@ -40,20 +39,65 @@ export const penetrationResolution = (game: Game): System => {
         continue;
       }
 
-      resolvePenetration(
-        aPosition,
-        a.collider.mass,
-        a.collider.shape,
-        bPosition,
-        b.collider.mass,
-        b.collider.shape,
-        depth
-      );
+      const aColliderSet = componentByEntity(game.essence, a.entity, ColliderSet);
+      const bColliderSet = componentByEntity(game.essence, b.entity, ColliderSet);
+
+      if (!aColliderSet || !bColliderSet) {
+        continue;
+      }
+
+      const aInvertedMass = inverseMass(a.collider.mass);
+      const bInvertedMass = inverseMass(a.collider.mass);
+      const combinedInvertedMass = aInvertedMass + bInvertedMass;
+
+      const resolution = multV2(axis, overlap / combinedInvertedMass);
+
+      const aPrevPosition = {
+        x: aPosition.x,
+        y: aPosition.y,
+      };
+      const bPrevPosition = {
+        x: bPosition.x,
+        y: bPosition.y,
+      };
+
+      mutAddV2(aPosition, multV2(resolution, aInvertedMass));
+      mutSubV2(bPosition, multV2(resolution, bInvertedMass));
+
+      const aPositionDelta = {
+        x: aPosition.x - aPrevPosition.x,
+        y: aPosition.y - aPrevPosition.y,
+      };
+
+      const bPositionDelta = {
+        x: bPosition.x - bPrevPosition.x,
+        y: bPosition.y - bPrevPosition.y,
+      };
+
+      a.collider._position.x += aPositionDelta.x;
+      a.collider._position.y += aPositionDelta.y;
+      a.collider._origin.x += aPositionDelta.x;
+      a.collider._origin.y += aPositionDelta.y;
+
+      b.collider._position.x += bPositionDelta.x;
+      b.collider._position.y += bPositionDelta.y;
+      b.collider._origin.x += bPositionDelta.x;
+      b.collider._origin.y += bPositionDelta.y;
+
+      if (aPositionDelta.x !== 0 || aPositionDelta.y !== 0) {
+        mutTranslateVertices2(a.collider._vertices, aPositionDelta.x, aPositionDelta.y);
+      }
+
+      if (bPositionDelta.x !== 0 || bPositionDelta.y !== 0) {
+        mutTranslateVertices2(b.collider._vertices, bPositionDelta.x, bPositionDelta.y);
+      }
 
       return;
     }
   };
 };
+
+// # World boundaries
 
 const characterPositionColliderQ = newQuery(Position2, ColliderSet);
 
@@ -70,64 +114,9 @@ export const applyWorldBoundaries = (game: Game): System => {
         const position = positionT[j];
         const colliderSet = colliderSetT[j];
 
-        for (const part of colliderSet.list) {
-          const pivot = part.offset;
-          switch (part.type) {
-            case 'solid': {
-              switch (part.shape.type) {
-                case 'circle':
-                  if (position.x - pivot.x - part.shape.radius < 0) {
-                    position.x = pivot.x + part.shape.radius;
-                  }
-                  if (position.y - pivot.y - part.shape.radius < 0) {
-                    position.y = pivot.y + part.shape.radius;
-                  }
-                  if (position.x + part.shape.radius - pivot.x > game.world.size.width) {
-                    position.x = game.world.size.width - part.shape.radius + pivot.x;
-                  }
-                  if (position.y + part.shape.radius - pivot.y > game.world.size.height) {
-                    position.y = game.world.size.height - part.shape.radius + pivot.y;
-                  }
-                  break;
-                case 'rectangle':
-                  if (position.x - pivot.x < 0) {
-                    position.x = pivot.x;
-                  }
-                  if (position.y - pivot.y < 0) {
-                    position.y = pivot.y;
-                  }
-                  if (position.x + part.shape.width - pivot.x > game.world.size.width) {
-                    position.x = game.world.size.width - part.shape.width + pivot.x;
-                  }
-                  if (position.y + part.shape.height - pivot.y > game.world.size.height) {
-                    position.y = game.world.size.height - part.shape.height + pivot.y;
-                  }
-                  break;
-                // TODO: TEST
-                case 'line':
-                  if (position.x - pivot.x < 0) {
-                    position.x = pivot.x;
-                  }
-                  if (position.y - pivot.y < 0) {
-                    position.y = pivot.y;
-                  }
-                  if (position.x - pivot.x > game.world.size.width) {
-                    position.x = game.world.size.width + pivot.x;
-                  }
-                  if (position.y + part.shape.length - pivot.y > game.world.size.height) {
-                    position.y = game.world.size.height - part.shape.length + pivot.y;
-                  }
-                  break;
-                default:
-                  safeGuard(part.shape);
-              }
-              break;
-            }
-            case 'sensor':
-              break;
-            default:
-              safeGuard(part.type);
-          }
+        for (const collider of colliderSet.list) {
+          // Add SAT
+          // ...
         }
       }
     }

@@ -21,6 +21,7 @@ import {
   checkNarrowCollisionSimple,
   ColliderSet,
   rectangleColliderComponent,
+  Impenetrable,
 } from 'libs/tengine/collision';
 import {
   applyRigidBodyAccelerationToVelocity,
@@ -29,7 +30,7 @@ import {
 } from 'libs/tengine/physics';
 import { drawViews, View, drawDebugLines, addNewViews } from 'libs/tengine/render';
 import { penetrationResolution } from 'libs/tengine/collision/penetration-resolution';
-import { updatePreviousPosition } from 'libs/tengine/core/update-previous';
+import { updatePrevious } from 'libs/tengine/core/update-previous';
 
 export async function initPongGame(parentElement: HTMLElement) {
   const game = newGame({
@@ -70,7 +71,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   };
   setComponent(game.essence, playerEntity, Position2, playerPosition);
   // ## Angle
-  const playerAngle = Math.PI / 4;
+  const playerAngle = 0;
   setComponent(game.essence, playerEntity, Angle, { value: playerAngle, _prev: playerAngle });
   // ## Acceleration based Movement
   setComponent(game.essence, playerEntity, Speed, { value: 1 });
@@ -105,7 +106,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   });
   // # Collisions
   setComponent(game.essence, playerEntity, CollisionsMonitoring);
-  // setComponent(game.essence, playerEntity, Impenetrable);
+  setComponent(game.essence, playerEntity, Impenetrable);
   setComponent(game.essence, playerEntity, ColliderSet, {
     list: [
       rectangleColliderComponent(
@@ -128,9 +129,9 @@ export async function initPongGame(parentElement: HTMLElement) {
     elasticity: 1,
     elasticityMode: 'average',
   });
-  setComponent(game.essence, playerEntity, Kinematic);
+  // setComponent(game.essence, playerEntity, Kinematic);
 
-  // # Player
+  // # Enemy
   const enemyEntity = spawnEntity(game.essence);
 
   // ## Game Object
@@ -143,7 +144,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   };
   setComponent(game.essence, enemyEntity, Position2, enemyPosition);
   // ## Angle
-  const enemyAngle = Math.PI / 4;
+  const enemyAngle = 0;
   setComponent(game.essence, enemyEntity, Angle, { value: enemyAngle, _prev: enemyAngle });
   // ## Acceleration based Movement
   setComponent(game.essence, enemyEntity, Speed, { value: 1 });
@@ -177,8 +178,8 @@ export async function initPongGame(parentElement: HTMLElement) {
     },
   });
   // # Collisions
-  setComponent(game.essence, enemyEntity, CollisionsMonitoring);
-  // setComponent(game.essence, enemyEntity, Impenetrable);
+  // setComponent(game.essence, enemyEntity, CollisionsMonitoring);
+  setComponent(game.essence, enemyEntity, Impenetrable);
   setComponent(game.essence, enemyEntity, ColliderSet, {
     list: [
       rectangleColliderComponent(
@@ -201,7 +202,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     elasticity: 1,
     elasticityMode: 'average',
   });
-  setComponent(game.essence, enemyEntity, Kinematic);
+  // setComponent(game.essence, enemyEntity, Kinematic);
 
   // // # Ball
   const ballEntity = spawnEntity(game.essence);
@@ -414,9 +415,17 @@ export async function initPongGame(parentElement: HTMLElement) {
   // });
   // setComponent(game.essence, capsuleEntity, RigidBody);
 
+  // Update previous values
+  // -> Game logic
+  // -> ! Apply Velocity to Position (for collision checks) and AngularVelocity to Angle
+  // -> ! Transform Colliders
+  // -> ! Check collisions
+  // -> ! Resolve penetration
+  // -> ! Transform Colliders based on penetration resolution
+
   // # Systems
   // ## Caches invalidation
-  registerSystem(game.essence, updatePreviousPosition(game));
+  registerSystem(game.essence, updatePrevious(game));
 
   // ## Input
   registerSystem(game.essence, mapKeyboardInput(game));
@@ -430,13 +439,14 @@ export async function initPongGame(parentElement: HTMLElement) {
   // ## Basic physics
   registerSystem(game.essence, applyRigidBodyAccelerationToVelocity(game));
   registerSystem(game.essence, applyRigidBodyVelocityToPosition(game));
+
+  // ## Transform
   registerSystem(game.essence, transformCollider(game));
-  // registerSystem(game.essence, applyWorldBoundaries(game));
 
   // ## Collision
   registerSystem(game.essence, checkNarrowCollisionSimple(game));
   registerSystem(game.essence, penetrationResolution(game));
-  registerSystem(game.essence, dynamicRigidBodyCollisionResolution(game));
+  // registerSystem(game.essence, dynamicRigidBodyCollisionResolution(game));
 
   // ## Render
   const viewContainer = new Container();

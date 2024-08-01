@@ -4,7 +4,7 @@ import { Angle, Position2 } from './types';
 
 export const positionQ = newQuery(Position2);
 
-export const updatePreviousPosition = (game: Game): System => {
+export const updatePrevious = (game: Game): System => {
   const { essence } = game;
 
   const query = registerQuery(essence, positionQ);

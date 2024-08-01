@@ -89,12 +89,6 @@ export const checkNarrowCollisionSimple = (game: Game): System => {
                       break;
                     }
                     case 'rectangle': {
-                      result = sat(
-                        colliderA._vertices,
-                        colliderA._normalAxes,
-                        colliderB._vertices,
-                        colliderB._normalAxes
-                      );
                       break;
                     }
                     case 'line': {
@@ -159,28 +153,6 @@ export const checkNarrowCollisionSimple = (game: Game): System => {
                   true
                 );
               }
-
-              // const depth = collidersPenetrationDepth(colliderA, colliderB);
-              // if (depth >= 0) {
-              //   emit(
-              //     colliding,
-              //     {
-              //       name: 'colliding',
-              //       depth,
-              //       a: {
-              //         entity: entityA,
-              //         colliderSet: colliderSetA,
-              //         collider: colliderA,
-              //       },
-              //       b: {
-              //         entity: entityB,
-              //         colliderSet: colliderSetB,
-              //         collider: colliderB,
-              //       },
-              //     },
-              //     true
-              //   );
-              // }
             }
           }
         }
