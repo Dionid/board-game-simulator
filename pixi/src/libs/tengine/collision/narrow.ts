@@ -1,11 +1,9 @@
-import { safeGuard } from 'libs/tecs/switch';
 import { newQuery, registerQuery, Entity, KindToType, System, table, emit } from '../../tecs';
 import { Position2 } from '../core/types';
 import { Game } from '../game';
 import { ColliderSet, CollisionsMonitoring } from './components';
-import { sat } from './sat';
 import { unfilteredColliding } from './topics';
-import { circlesCollision } from './checks';
+import { collision } from './collision';
 
 // 1. Get all entities that have CollisionSource + ColliderSet + Position (+ Awaken)
 // 1. Calculate the next position based on the current position + velocity
@@ -70,67 +68,7 @@ export const checkNarrowCollisionSimple = (game: Game): System => {
 
           for (const colliderA of colliderSetA.list) {
             for (const colliderB of colliderSetB.list) {
-              let result: {
-                overlap: number;
-                axis: { x: number; y: number };
-              } | null = null;
-
-              switch (colliderA.shape.type) {
-                case 'circle': {
-                  switch (colliderB.shape.type) {
-                    case 'circle': {
-                      result = circlesCollision(
-                        colliderA._position,
-                        colliderA.shape.radius,
-                        colliderB._position,
-                        colliderB.shape.radius
-                      );
-
-                      break;
-                    }
-                    case 'rectangle': {
-                      break;
-                    }
-                    case 'line': {
-                      break;
-                    }
-                    default: {
-                      return safeGuard(colliderB.shape);
-                    }
-                  }
-                  break;
-                }
-                case 'rectangle': {
-                  switch (colliderB.shape.type) {
-                    case 'circle': {
-                      break;
-                    }
-                    case 'rectangle': {
-                      result = sat(
-                        colliderA._vertices,
-                        colliderA._normalAxes,
-                        colliderB._vertices,
-                        colliderB._normalAxes
-                      );
-
-                      break;
-                    }
-                    case 'line': {
-                      break;
-                    }
-                    default: {
-                      return safeGuard(colliderB.shape);
-                    }
-                  }
-                  break;
-                }
-                case 'line': {
-                  break;
-                }
-                default: {
-                  return safeGuard(colliderA.shape);
-                }
-              }
+              let result = collision(colliderA, colliderB);
 
               if (result && result.overlap >= 0) {
                 emit(
