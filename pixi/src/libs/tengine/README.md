@@ -36,6 +36,7 @@
     1. OnComponentAdded
         1. Check in physics, that there is no RigidBodyType + Impenetrable
     1. Joints
+1. Previous state component
 1. Character movement
     1. Move and slide
 1. ...

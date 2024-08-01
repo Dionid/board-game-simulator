@@ -1,5 +1,5 @@
 import { newQuery, System, registerQuery, table } from 'libs/tecs';
-import { Position2 } from '../core';
+import { mutTranslateVertices2, Position2 } from '../core';
 import { Game } from '../game';
 import { ColliderSet } from './components';
 import { safeGuard } from 'libs/tecs/switch';
@@ -20,34 +20,16 @@ export const applyPositionToCollider = (game: Game): System => {
         const colliderSet = colliderSetT[j];
         const position = positionT[j];
 
+        const delta = {
+          x: position.x - position._prev.x,
+          y: position.y - position._prev.y,
+        };
+
         for (const collider of colliderSet.list) {
-          let nX = position.x + collider.offset.x;
-          let nY = position.y + collider.offset.y;
+          collider._position.x += delta.x;
+          collider._position.y += delta.y;
 
-          switch (collider.shape.type) {
-            case 'circle': {
-              const anchor = collider.shape.anchor;
-              nX = nX + collider.shape.radius - collider.shape.radius * 2 * anchor.x;
-              nY = nY + collider.shape.radius - collider.shape.radius * 2 * anchor.y;
-              break;
-            }
-            case 'rectangle': {
-              const anchor = collider.shape.anchor;
-              nX = nX - collider.shape.width * anchor.x;
-              nY = nY - collider.shape.height * anchor.y;
-              break;
-            }
-            case 'line': {
-              const anchor = collider.shape.anchor;
-              nY = nY - collider.shape.length * anchor;
-              break;
-            }
-            default:
-              safeGuard(collider.shape);
-          }
-
-          collider._position.x = nX;
-          collider._position.y = nY;
+          mutTranslateVertices2(collider._vertices, delta.x, delta.y);
         }
       }
     }

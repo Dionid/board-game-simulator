@@ -1,5 +1,5 @@
 import { newSchema, arrayOf, union, literal, number, newTag } from '../../tecs';
-import { Vector2 } from '../core';
+import { Vector2, Vertices } from '../core';
 import { Position2 } from '../core/types';
 
 // # Check this object for collisions with any other Colliders
@@ -35,6 +35,7 @@ export const Collider = newSchema({
   type: union(literal('solid'), literal('sensor')),
   offset: Vector2,
   _position: Vector2,
+  _vertices: Vertices,
   rotation: number,
   shape: ColliderShape,
   mass: number,

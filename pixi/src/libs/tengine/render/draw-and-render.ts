@@ -125,6 +125,7 @@ export const drawQuery = newQuery(View, pView, Position2);
 export const drawViews = (game: Game): System => {
   const query = registerQuery(game.essence, drawQuery);
 
+  // TODO: change to previous state component
   const cache: {
     anchor: { x: number; y: number };
   }[] = [];

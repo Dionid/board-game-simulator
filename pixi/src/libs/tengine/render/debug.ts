@@ -1,14 +1,12 @@
 import { Graphics } from 'pixi.js';
 import { newQuery, registerQuery, System, table, tryTable } from '../../tecs';
 import { Game } from '../game';
-import { Acceleration2, Position2, Velocity2 } from '../core';
+import { Acceleration2, multV2, Position2, Velocity2 } from '../core';
 import { Map, Vector2 } from '../core';
 import { ColliderSet } from '../collision';
-import { View } from './components';
-import { safeGuard } from 'libs/tecs/switch';
-import { circleView, rectangleView } from './draw-shapes';
+import { pView, View } from './components';
 
-const drawLineFromCenter = (
+const drawLine = (
   globalGraphics: Graphics,
   center: Vector2,
   target: Vector2,
@@ -20,7 +18,11 @@ const drawLineFromCenter = (
   globalGraphics.stroke({ width: strokeWidth, color });
 };
 
-const drawQuery = newQuery(View, Position2);
+const debugViewQuery = newQuery(View, Position2);
+const debugPViewQuery = newQuery(pView);
+const debugCollisionSetQuery = newQuery(ColliderSet, Position2);
+const velocityQuery = newQuery(Velocity2, Position2);
+const accelerationQuery = newQuery(Acceleration2, Position2);
 
 export const drawDebugLines = (
   game: Game,
@@ -42,7 +44,9 @@ export const drawDebugLines = (
     ...options,
   };
 
-  const query = registerQuery(game.essence, drawQuery);
+  const query = registerQuery(game.essence, debugViewQuery);
+  const pQuery = registerQuery(game.essence, debugPViewQuery);
+  const collisionQuery = registerQuery(game.essence, debugCollisionSetQuery);
 
   const globalGraphics = new Graphics();
   map.container.addChild(globalGraphics);
@@ -53,12 +57,44 @@ export const drawDebugLines = (
     globalGraphics.clear();
     globalGraphics.removeChildren();
 
+    if (options.view) {
+      for (let i = 0; i < pQuery.archetypes.length; i++) {
+        const archetype = pQuery.archetypes[i];
+        const pViewT = table(archetype, pView);
+
+        for (let j = 0; j < archetype.entities.length; j++) {
+          const pView = pViewT[j];
+
+          pView.graphics.stroke({ width: strokeWidth, color: 'purple' });
+        }
+      }
+    }
+
+    if (options.collision) {
+      for (let i = 0; i < collisionQuery.archetypes.length; i++) {
+        const archetype = collisionQuery.archetypes[i];
+        const collisionSetT = table(archetype, ColliderSet);
+
+        for (let j = 0; j < archetype.entities.length; j++) {
+          const collisionSet = collisionSetT[j];
+
+          for (const collider of collisionSet.list) {
+            globalGraphics.beginPath();
+            globalGraphics.moveTo(collider._vertices[0].x, collider._vertices[0].y);
+            for (let i = 1; i < collider._vertices.length; i++) {
+              globalGraphics.lineTo(collider._vertices[i].x, collider._vertices[i].y);
+            }
+            globalGraphics.lineTo(collider._vertices[0].x, collider._vertices[0].y);
+            globalGraphics.stroke({ width: strokeWidth, color: 'gray' });
+            globalGraphics.closePath();
+          }
+        }
+      }
+    }
+
     for (let i = 0; i < query.archetypes.length; i++) {
       const archetype = query.archetypes[i];
       const positionT = table(archetype, Position2);
-
-      const colliderSetT = tryTable(archetype, ColliderSet);
-      const viewT = tryTable(archetype, View);
 
       const velocity2T = tryTable(archetype, Velocity2);
       const acceleration2T = tryTable(archetype, Acceleration2);
@@ -72,115 +108,13 @@ export const drawDebugLines = (
           globalGraphics.fill({ color: 'red' });
         }
 
-        // # Collision
-        if (options.collision) {
-          if (colliderSetT) {
-            const colliderSet = colliderSetT[j];
-            for (const collider of colliderSet.list) {
-              switch (collider.shape.type) {
-                case 'line':
-                  continue;
-                case 'rectangle':
-                  globalGraphics.rect(
-                    collider._position.x,
-                    collider._position.y,
-                    collider.shape.width,
-                    collider.shape.height
-                  );
-                  globalGraphics.stroke({ width: strokeWidth, color: 'gray' });
-                  continue;
-                case 'circle':
-                  globalGraphics.circle(
-                    collider._position.x,
-                    collider._position.y,
-                    collider.shape.radius
-                  );
-                  globalGraphics.stroke({ width: strokeWidth, color: 'gray' });
-                  continue;
-              }
-            }
-          }
-        }
-
+        // # Velocity and Acceleration
         if (options.acceleration || options.velocity) {
-          const center = {
-            x: position.x,
-            y: position.y,
-          };
-
           if (options.acceleration && acceleration2T) {
-            drawLineFromCenter(globalGraphics, center, acceleration2T[j], strokeWidth, 'blue');
+            drawLine(globalGraphics, position, multV2(acceleration2T[j], 2), strokeWidth, 'yellow');
           }
           if (options.velocity && velocity2T) {
-            drawLineFromCenter(globalGraphics, center, velocity2T[j], strokeWidth, 'green');
-          }
-        }
-
-        // # Graphics
-        if (options.view && viewT) {
-          const view = viewT[j];
-
-          switch (view.model.type) {
-            case 'graphics':
-              switch (view.model.shape.type) {
-                case 'circle':
-                  const circle = circleView(view, position);
-
-                  if (!circle) {
-                    break;
-                  }
-
-                  globalGraphics.addChild(circle.container);
-
-                  circle.graphics.stroke({ width: strokeWidth, color: 'purple' });
-
-                  break;
-                case 'rectangle':
-                  const result = rectangleView(view, position);
-
-                  if (!result) {
-                    break;
-                  }
-
-                  globalGraphics.addChild(result.container);
-
-                  result.graphics.stroke({ width: strokeWidth, color: 'purple' });
-
-                  break;
-                // case 'line':
-                //   const line = drawLine(view, position);
-
-                //   if (!line) {
-                //     break;
-                //   }
-
-                //   line.strokeStyle.color = 0x00ff00;
-
-                //   globalGraphics.addChild(line);
-                //   break;
-                // case 'capsule':
-                //   const capsule = drawCapsule(view, position);
-
-                //   if (!capsule) {
-                //     break;
-                //   }
-
-                //   globalGraphics.addChild(capsule);
-
-                //   capsule.stroke({ width: strokeWidth, color: 'purple' });
-
-                //   break;
-                // case 'polygon':
-                //   break;
-                default:
-                  safeGuard(view.model.shape);
-              }
-              globalGraphics.stroke({ width: strokeWidth, color: 'purple' });
-              break;
-            case 'sprite':
-              break;
-            default:
-              safeGuard(view.model);
+            drawLine(globalGraphics, position, velocity2T[j], strokeWidth, 'green');
           }
         }
       }

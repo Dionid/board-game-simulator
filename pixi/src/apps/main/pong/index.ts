@@ -1,10 +1,10 @@
-import { Container, Graphics } from 'pixi.js';
+import { Container } from 'pixi.js';
 import { initGame, newGame } from '../../../libs/tengine/game';
-import { registerSystem, setComponent, spawnEntity } from '../../../libs/tecs';
+import { arrayOf, registerSystem, setComponent, spawnEntity } from '../../../libs/tecs';
 import { mapKeyboardInput, mapMouseInput } from '../../../libs/tengine/ecs';
-import { Dynamic, Kinematic, RigidBody } from 'libs/tengine/physics/components';
-import { Position2, Velocity2, Speed, Acceleration2 } from 'libs/tengine/core';
-import { Ball, Enemy, Player, accelerateByArrows } from './ecs';
+import { Kinematic, RigidBody } from 'libs/tengine/physics/components';
+import { Position2, Velocity2, Speed, Acceleration2, Vector2 } from 'libs/tengine/core';
+import { Ball, Player, accelerateByArrows } from './ecs';
 import { applyWorldBoundaries } from 'libs/tengine/collision/penetration-resolution';
 import {
   CollisionsMonitoring,
@@ -50,18 +50,16 @@ export async function initPongGame(parentElement: HTMLElement) {
   // # Player
   const playerEntity = spawnEntity(game.essence);
 
-  // # Game Object
+  // ## Game Object
   setComponent(game.essence, playerEntity, Player);
-
-  // # Position
+  // ## Position
   const playerPosition = {
     x: game.world.size.width / 6 - characterSize.width / 2,
     y: game.world.size.height / 2 - characterSize.height / 2,
     _prev: { x: 0, y: 0 },
   };
   setComponent(game.essence, playerEntity, Position2, playerPosition);
-
-  // # Acceleration based Movement
+  // ## Acceleration based Movement
   setComponent(game.essence, playerEntity, Speed, { value: 1 });
   setComponent(game.essence, playerEntity, Acceleration2, {
     x: 0,
@@ -71,7 +69,6 @@ export async function initPongGame(parentElement: HTMLElement) {
     x: 0,
     y: 0,
   });
-
   // # Visuals
   setComponent(game.essence, playerEntity, View, {
     offset: { x: 0, y: 0 },
@@ -96,23 +93,44 @@ export async function initPongGame(parentElement: HTMLElement) {
   // # Collisions
   setComponent(game.essence, playerEntity, CollisionsMonitoring);
   // setComponent(game.essence, playerEntity, Impenetrable);
+  const playerColliderAnchor = { x: 0.5, y: 0.5 };
+  const playerColliderPosition = {
+    x: playerPosition.x - characterSize.width * playerColliderAnchor.x,
+    y: playerPosition.y - characterSize.height * playerColliderAnchor.y,
+  };
   setComponent(game.essence, playerEntity, ColliderSet, {
     list: [
       {
         type: 'solid',
         mass: 1,
         offset: { x: 0, y: 0 },
-        _position: { x: 0, y: 0 },
         rotation: 0,
         shape: {
           type: 'rectangle',
-          anchor: {
-            x: 0.5,
-            y: 0.5,
-          },
+          anchor: playerColliderAnchor,
           width: characterSize.width,
           height: characterSize.height,
         },
+        // # Must be calculated by constructor
+        _position: playerColliderPosition,
+        _vertices: [
+          {
+            x: playerColliderPosition.x,
+            y: playerColliderPosition.y,
+          },
+          {
+            x: playerColliderPosition.x + characterSize.width,
+            y: playerColliderPosition.y,
+          },
+          {
+            x: playerColliderPosition.x + characterSize.width,
+            y: playerColliderPosition.y + characterSize.height,
+          },
+          {
+            x: playerColliderPosition.x,
+            y: playerColliderPosition.y + characterSize.height,
+          },
+        ],
       },
     ],
   });
@@ -431,11 +449,11 @@ export async function initPongGame(parentElement: HTMLElement) {
   registerSystem(
     game.essence,
     drawDebugLines(game, map, {
-      view: false,
+      view: true,
       xy: true,
-      collision: false,
-      velocity: false,
-      acceleration: false,
+      collision: true,
+      velocity: true,
+      acceleration: true,
     })
   );
 
