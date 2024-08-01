@@ -34,9 +34,6 @@ export function collision(
 
           return sat(circleVertices, circleAxes, colliderB._vertices, colliderB._normalAxes);
         }
-        case 'line': {
-          return null;
-        }
         default: {
           return safeGuard(colliderB.shape);
         }
@@ -61,16 +58,10 @@ export function collision(
             colliderB._normalAxes
           );
         }
-        case 'line': {
-          return null;
-        }
         default: {
           return safeGuard(colliderB.shape);
         }
       }
-    }
-    case 'line': {
-      return null;
     }
     default: {
       return safeGuard(colliderA.shape);

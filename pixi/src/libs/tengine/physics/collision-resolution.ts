@@ -6,7 +6,7 @@ import { Dynamic, Kinematic, RigidBody, Static } from './components';
 import { Velocity2 } from '../core';
 import { inverseMass } from '../collision/math';
 import { safeGuard } from 'libs/tecs/switch';
-import { resolveCircleCircleCollision, resolveCircleLineCollision } from './resolvers';
+import { resolveCircleCircleCollision } from './resolvers';
 
 // # Resolve Dynamic bodies Collision
 
@@ -153,52 +153,11 @@ export const dynamicRigidBodyCollisionResolution = (game: Game): System => {
               continue;
             case 'rectangle':
               continue;
-            case 'line':
-              resolveCircleLineCollision(
-                elasticity,
-                aPosition,
-                aVelocity,
-                aInvertedMass,
-                bPosition,
-                {
-                  x: bPosition.x,
-                  y: bPosition.y + b.collider.shape.length,
-                },
-                bVelocity,
-                bInvertedMass,
-                combinedInvertedMass
-              );
-              continue;
             default:
               return safeGuard(b.collider.shape);
           }
         case 'rectangle':
           continue;
-        case 'line':
-          switch (b.collider.shape.type) {
-            case 'circle':
-              resolveCircleLineCollision(
-                elasticity,
-                bPosition,
-                bVelocity,
-                bInvertedMass,
-                aPosition,
-                {
-                  x: aPosition.x,
-                  y: aPosition.y + a.collider.shape.length,
-                },
-                aVelocity,
-                aInvertedMass,
-                combinedInvertedMass
-              );
-              continue;
-            case 'rectangle':
-              continue;
-            case 'line':
-              continue;
-            default:
-              return safeGuard(b.collider.shape);
-          }
         default:
           return safeGuard(a.collider.shape);
       }

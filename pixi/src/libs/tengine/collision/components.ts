@@ -31,13 +31,7 @@ export const ColliderRectangle = newSchema({
   anchor: Vector2,
 });
 
-export const ColliderLine = newSchema({
-  type: literal('line'),
-  length: number,
-  anchor: number,
-});
-
-export const ColliderShape = union(ColliderRectangle, ColliderCircle, ColliderLine);
+export const ColliderShape = union(ColliderRectangle, ColliderCircle);
 
 export const Collider = newSchema({
   type: union(literal('solid'), literal('sensor')),
