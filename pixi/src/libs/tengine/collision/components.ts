@@ -1,5 +1,5 @@
 import { newSchema, arrayOf, union, literal, number, newTag, Component } from '../../tecs';
-import { mutRotateVertices2Around, Vector2, Vertices } from '../core';
+import { Axes2, mutRotateVertices2Around, normalAxes2, Vector2, Vertices2 } from '../core';
 
 // # Check this object for collisions with any other Colliders
 export const CollisionsMonitoring = newTag();
@@ -38,7 +38,8 @@ export const Collider = newSchema({
   mass: number,
   _position: Vector2,
   _origin: Vector2,
-  _vertices: Vertices,
+  _vertices: Vertices2,
+  _normalAxes: Axes2,
   _prev: newSchema({
     angle: number,
     offset: Vector2,
@@ -85,6 +86,8 @@ export function rectangleColliderComponent(
   mutRotateVertices2Around(colliderVertices, angle, origin);
   mutRotateVertices2Around(colliderVertices, parentAngle, parentPosition);
 
+  const normalAxes = normalAxes2(colliderVertices);
+
   return {
     type,
     mass,
@@ -99,6 +102,7 @@ export function rectangleColliderComponent(
     _position: colliderPosition,
     _origin: origin,
     _vertices: colliderVertices,
+    _normalAxes: normalAxes,
     _prev: {
       angle: angle,
       offset: {

@@ -1,5 +1,12 @@
 import { newQuery, System, registerQuery, table, tryTable } from 'libs/tecs';
-import { Angle, mutRotateVertices2Around, mutTranslateVertices2, Position2, subV2 } from '../core';
+import {
+  Angle,
+  mutRotateAxes2,
+  mutRotateVertices2Around,
+  mutTranslateVertices2,
+  Position2,
+  subV2,
+} from '../core';
 import { Game } from '../game';
 import { ColliderSet } from './components';
 
@@ -50,9 +57,11 @@ export const transformCollider = (game: Game): System => {
           }
           if (angleDelta !== 0) {
             mutRotateVertices2Around(collider._vertices, angleDelta, collider._origin);
+            mutRotateAxes2(collider._normalAxes, angleDelta);
           }
           if (parentAngleDelta !== 0) {
             mutRotateVertices2Around(collider._vertices, parentAngleDelta, position);
+            mutRotateAxes2(collider._normalAxes, parentAngleDelta);
           }
         }
       }

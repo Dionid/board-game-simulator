@@ -13,7 +13,7 @@ import {
   mutRotateVertices2Around,
   Angle,
 } from 'libs/tengine/core';
-import { Ball, Player, accelerateByArrows } from './ecs';
+import { Ball, Enemy, Player, accelerateByArrows } from './ecs';
 import { applyWorldBoundaries } from 'libs/tengine/collision/penetration-resolution';
 import {
   CollisionsMonitoring,
@@ -130,69 +130,78 @@ export async function initPongGame(parentElement: HTMLElement) {
   });
   setComponent(game.essence, playerEntity, Kinematic);
 
-  // // # Enemy
-  // const enemyEntity = spawnEntity(game.essence);
-  // setComponent(game.essence, enemyEntity, Enemy);
-  // setComponent(game.essence, enemyEntity, View, {
-  //   offset: { x: 0, y: 0 },
-  //   scale: { x: 1, y: 1 },
-  //   rotation: Math.PI / 2,
-  //   model: {
-  //     type: 'graphics',
-  //     color: '0xff0000',
-  //     shape: {
-  //       anchor: {
-  //         x: 0.5,
-  //         y: 0.5,
-  //       },
-  //       type: 'rectangle',
-  //       size: {
-  //         width: characterSize.width,
-  //         height: characterSize.height,
-  //       },
-  //     },
-  //   },
-  // });
-  // setComponent(game.essence, enemyEntity, Speed, { value: 1 });
-  // setComponent(game.essence, enemyEntity, Acceleration2, {
-  //   x: 0,
-  //   y: 0,
-  // });
-  // setComponent(game.essence, enemyEntity, Velocity2, {
-  //   x: 0,
-  //   y: 0,
-  // });
-  // setComponent(game.essence, enemyEntity, Position2, {
-  //   x: (game.world.size.width / 6) * 5 - characterSize.width / 2,
-  //   y: game.world.size.height / 2 - characterSize.height / 2,
-  // });
-  // // setComponent(game.essence, enemyEntity, Impenetrable);
-  // setComponent(game.essence, enemyEntity, ColliderSet, {
-  //   list: [
-  //     {
-  //       type: 'solid',
-  //       mass: 1,
-  //       offset: { x: 0, y: 0 },
-  //       _position: { x: 0, y: 0 },
-  //       rotation: 0,
-  //       shape: {
-  //         anchor: {
-  //           x: 0.5,
-  //           y: 0.5,
-  //         },
-  //         type: 'rectangle',
-  //         width: characterSize.width,
-  //         height: characterSize.height,
-  //       },
-  //     },
-  //   ],
-  // });
-  // // # Physics
-  // setComponent(game.essence, enemyEntity, RigidBody, {
-  //   elasticity: 1,
-  //   elasticityMode: 'average',
-  // });
-  // setComponent(game.essence, enemyEntity, Kinematic);
+  // # Player
+  const enemyEntity = spawnEntity(game.essence);
+
+  // ## Game Object
+  setComponent(game.essence, enemyEntity, Enemy);
+  // ## Position
+  const enemyPosition = {
+    x: game.world.size.width - characterSize.width - game.world.size.width / 6,
+    y: game.world.size.height / 2 - characterSize.height / 2,
+    _prev: { x: 0, y: 0 },
+  };
+  setComponent(game.essence, enemyEntity, Position2, enemyPosition);
+  // ## Angle
+  const enemyAngle = Math.PI / 4;
+  setComponent(game.essence, enemyEntity, Angle, { value: enemyAngle, _prev: enemyAngle });
+  // ## Acceleration based Movement
+  setComponent(game.essence, enemyEntity, Speed, { value: 1 });
+  setComponent(game.essence, enemyEntity, Acceleration2, {
+    x: 0,
+    y: 0,
+  });
+  setComponent(game.essence, enemyEntity, Velocity2, {
+    x: 0,
+    y: 0,
+  });
+  // # Visuals
+  setComponent(game.essence, enemyEntity, View, {
+    offset: { x: 0, y: 0 },
+    scale: { x: 1, y: 1 },
+    rotation: Math.PI / 2,
+    anchor: {
+      x: 0.5,
+      y: 0.5,
+    },
+    model: {
+      type: 'graphics',
+      color: 'red',
+      shape: {
+        type: 'rectangle',
+        size: {
+          width: characterSize.width,
+          height: characterSize.height,
+        },
+      },
+    },
+  });
+  // # Collisions
+  setComponent(game.essence, enemyEntity, CollisionsMonitoring);
+  // setComponent(game.essence, enemyEntity, Impenetrable);
+  setComponent(game.essence, enemyEntity, ColliderSet, {
+    list: [
+      rectangleColliderComponent(
+        enemyPosition,
+        enemyAngle,
+        'solid',
+        1,
+        { x: 0, y: 0 },
+        0,
+        {
+          x: 0.5,
+          y: 0.5,
+        },
+        characterSize
+      ),
+    ],
+  });
+  // # Physics
+  setComponent(game.essence, enemyEntity, RigidBody, {
+    elasticity: 1,
+    elasticityMode: 'average',
+  });
+  setComponent(game.essence, enemyEntity, Kinematic);
 
   // // # Ball
   const ballEntity = spawnEntity(game.essence);

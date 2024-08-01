@@ -1,24 +1,9 @@
-import { normalV2, subV2, unitV2, Vector2 } from '../core';
+import { Axes2, Vector2, Vertices2 } from '../core';
 
 export type SATShape = {
   vertices: Vector2[];
   axes: Vector2[];
 };
-
-export function normalAxes(vertices: Vector2[]): Vector2[] {
-  const axes: Vector2[] = [];
-
-  for (let i = 0; i < vertices.length; i += 1) {
-    const j = i + 1 === vertices.length ? 0 : i + 1;
-    const p1 = vertices[i];
-    const p2 = vertices[j];
-
-    const edge = subV2(p1, p2);
-    axes.push(normalV2(unitV2(edge)));
-  }
-
-  return axes;
-}
 
 export function overlapAxes(
   verticesA: Vector2[],
@@ -98,19 +83,21 @@ export function overlapAxes(
 }
 
 export function sat(
-  a: SATShape,
-  b: SATShape
+  aVertices: Vertices2,
+  aAxes: Axes2,
+  bVertices: Vertices2,
+  bAxes: Axes2
 ): null | {
   overlap: number;
   axis: Vector2;
 } {
-  const overlapAB = overlapAxes(a.vertices, b.vertices, a.axes);
+  const overlapAB = overlapAxes(aVertices, bVertices, aAxes);
 
   if (overlapAB.overlap <= 0) {
     return null;
   }
 
-  const overlapBA = overlapAxes(b.vertices, a.vertices, b.axes);
+  const overlapBA = overlapAxes(bVertices, aVertices, bAxes);
 
   if (overlapBA.overlap <= 0) {
     return null;

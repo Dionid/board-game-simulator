@@ -6,25 +6,26 @@
 1. ~~Add vertices to Collider~~
 1. ~~Rotate Collider with different pivots~~
 1. ~~Add Rotation to Colliders rotation (changing position and vertices)~~
+1. Add Normal Axes to Collider
+1. ? Will I add vertices to Circle
 
 # Roadmap
 
 1. View
     1. Capsule
     1. Polygon
-    1. ~~Rotation~~ -> Change View to ViewSet with own container
     1. Change to ViewSet
-    1. Add pixi Container as Component and update it values instead of creating new ones
     1. On entity kill destroy pView
     1. Scale
 1. ECS
     1. Default topics (ComponentAdded, ComponentRemoved, ComponentChanged, EntitySpawned, EntityKilled)
 1. Collision
+    1. SAT
     1. Line
     1. Capsule
-    1. SAT
     1. Pairs + Dedup
     1. Collision Queries
+    1. Compound / Composite
     1. Raw Vertices
     1. Separate concave to convex
     1. Chamfer

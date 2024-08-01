@@ -1,9 +1,8 @@
 import { newQuery, registerQuery, Entity, KindToType, System, table, emit } from '../../tecs';
-import { Vector2 } from '../core';
 import { Position2 } from '../core/types';
 import { Game } from '../game';
 import { ColliderSet, CollisionsMonitoring } from './components';
-import { normalAxes, sat } from './sat';
+import { sat } from './sat';
 import { colliding } from './topics';
 
 // 1. Get all entities that have CollisionSource + ColliderSet + Position (+ Awaken)
@@ -70,18 +69,11 @@ export const checkNarrowCollisionSimple = (game: Game): System => {
           for (const colliderA of colliderSetA.list) {
             for (const colliderB of colliderSetB.list) {
               if (colliderA.shape.type === 'rectangle' && colliderB.shape.type === 'rectangle') {
-                const aAxes = normalAxes(colliderA._vertices);
-                const bAxes = normalAxes(colliderB._vertices);
-
                 const result = sat(
-                  {
-                    vertices: colliderA._vertices,
-                    axes: aAxes,
-                  },
-                  {
-                    vertices: colliderB._vertices,
-                    axes: bAxes,
-                  }
+                  colliderA._vertices,
+                  colliderA._normalAxes,
+                  colliderB._vertices,
+                  colliderB._normalAxes
                 );
 
                 if (!result) {
