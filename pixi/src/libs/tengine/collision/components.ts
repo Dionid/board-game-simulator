@@ -538,12 +538,15 @@ export function capsuleColliderComponent(opts: {
     size: rectangleSize,
   });
 
+  // # to make circles go a little deeper into rectangle
+  const circleThreshold = 0.5;
+
   const firstCircle = circleColliderComponent({
     parentPosition: opts.parentPosition,
     type: opts.type,
     parentAngle: opts.parentAngle,
     mass,
-    offset: { x: opts.offset.x, y: opts.offset.y - rectangleSize.height / 2 },
+    offset: { x: opts.offset.x, y: opts.offset.y - rectangleSize.height / 2 + circleThreshold },
     anchor: {
       x: 0.5,
       y: 0.5,
@@ -556,7 +559,7 @@ export function capsuleColliderComponent(opts: {
     type: opts.type,
     parentAngle: opts.parentAngle,
     mass,
-    offset: { x: opts.offset.x, y: opts.offset.y + rectangleSize.height / 2 },
+    offset: { x: opts.offset.x, y: opts.offset.y + rectangleSize.height / 2 - circleThreshold },
     anchor: {
       x: 0.5,
       y: 0.5,
