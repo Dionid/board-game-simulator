@@ -26,7 +26,7 @@
     1. ~~Raw Vertices~~
     1. ~~Compound / Composite~~
     1. ~~Capsule on Compound~~
-    1. Pairs + Dedup
+    1. ~~Pairs + Dedup~~
     1. Awaken / Asleep
     1. Collision Queries
     1. Separate concave to convex

@@ -26,6 +26,7 @@ import {
 import { drawViews, View, drawDebugLines, addNewViews } from 'libs/tengine/render';
 import { penetrationResolution } from 'libs/tengine/collision/penetration-resolution';
 import { updatePrevious } from 'libs/tengine/core/update-previous';
+import { awakening } from 'libs/tengine/collision/awakening';
 
 export async function initPongGame(parentElement: HTMLElement) {
   const game = newGame({
@@ -385,6 +386,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   registerSystem(game.essence, transformCollider(game));
 
   // ## Collision
+  registerSystem(game.essence, awakening(game));
   registerSystem(game.essence, checkNarrowCollisionSimple(game));
   registerSystem(game.essence, filterCollisionEvents(game));
   registerSystem(game.essence, penetrationResolution(game));

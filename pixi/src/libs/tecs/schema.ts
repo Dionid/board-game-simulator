@@ -1,5 +1,5 @@
 // # Types
-import { $defaultFn, $kind, Id } from './core';
+import { $defaultFn, $kind, $name, Id } from './core';
 import { safeGuard } from './switch';
 
 export type KindSt = {
@@ -250,6 +250,7 @@ export type Schema = {
   [key: string]: PrimitiveKind | ComplexKind | Schema | KindSt;
   [$kind]: SchemaKind;
   [$defaultFn]: () => unknown;
+  [$name]?: string;
 };
 
 export type SchemaId = Id;
@@ -329,10 +330,11 @@ export const Schema = {
 
 // # Tag
 
-export const newTag = (): Schema & { [$kind]: typeof $tag } => {
+export const newTag = (name?: string): Schema & { [$kind]: typeof $tag } => {
   return {
     [$kind]: $tag,
     [$defaultFn]: () => {},
+    [$name]: name || '',
   };
 };
 

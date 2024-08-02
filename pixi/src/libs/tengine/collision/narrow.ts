@@ -1,7 +1,7 @@
 import { newQuery, registerQuery, Entity, KindToType, System, table, emit } from '../../tecs';
 import { Position2 } from '../core/types';
 import { Game } from '../game';
-import { ColliderBody, CollisionsMonitoring } from './components';
+import { Awaken, ColliderBody, CollisionsMonitoring } from './components';
 import { unfilteredColliding } from './topics';
 import { collision } from './collision';
 
@@ -10,7 +10,7 @@ import { collision } from './collision';
 // 1. Check if the next position collides with any other ColliderSet
 // 1. If collides create event
 
-export const checkCollisionsQuery = newQuery(CollisionsMonitoring, ColliderBody, Position2);
+export const checkCollisionsQuery = newQuery(CollisionsMonitoring, Awaken, ColliderBody, Position2);
 export const collidersQuery = newQuery(ColliderBody, Position2);
 
 export const checkNarrowCollisionSimple = (game: Game): System => {

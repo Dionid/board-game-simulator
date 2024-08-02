@@ -277,6 +277,9 @@ export const removeComponent = <S extends Schema>(
     ...archetype.type.filter((c) => c !== schema)
   );
 
+  // # Index archetype by entity
+  essence.archetypeByEntity[entity] = newArchetype;
+
   // # Move entity to new archetype
   Archetype.moveEntity(archetype, newArchetype, entity);
 

@@ -17,8 +17,10 @@ export const CollisionsMonitoring = newTag();
 // # Forbid penetration of solid Colliders
 export const Impenetrable = newTag();
 
-// # Collider
+// # Awaken
+export const Awaken = newTag('Awaken');
 
+// # Collider
 export const ColliderCircle = newSchema({
   type: literal('circle'),
   radius: number,
