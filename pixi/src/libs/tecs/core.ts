@@ -2,6 +2,7 @@
 
 export const $kind = Symbol('kind');
 export const $defaultFn = Symbol('defaultFn');
+export const $name = Symbol('name');
 
 // # Entity
 

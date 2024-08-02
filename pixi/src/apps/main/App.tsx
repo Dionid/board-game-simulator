@@ -1,28 +1,36 @@
 import { useEffect } from 'react';
 import './App.css';
-import { Application, Assets, Container, Sprite, Texture } from 'pixi.js';
-import { initWorld } from './game';
-import { step } from '../../libs/tecs';
+import { run } from '../../libs/tengine/game';
+import { initRapierPongGame } from './rapier';
+import { initPongGame } from './pong';
 
 function App() {
   useEffect(() => {
-    const canvas = document.getElementById('canvas') as HTMLCanvasElement;
-    const app = new Application();
-    (globalThis as any).__PIXI_APP__ = app;
-    app.init({ resizeTo: window, backgroundColor: 'white', autoStart: false }).then(async () => {
-      canvas.appendChild(app.canvas);
-      const world = await initWorld(app)
-      const animation = () => {
-        step(world)
-        requestAnimationFrame(animation);
-      }
-      animation()
+    const gameHolder = document.getElementById('gameHolder') as HTMLCanvasElement;
+    
+    // # PsyOps
+    // const app = new Application();
+    // (globalThis as any).__PIXI_APP__ = app;
+    // app.init({ resizeTo: window, backgroundColor: 'white' }).then(async () => {
+    //   gameHolder.appendChild(app.canvas);
+    //   const world = await initWorld(app)
+    //   run(world)
+    // })
+
+    // # Pong
+    initPongGame(gameHolder).then((game) => {
+      run(game)
     })
+
+    // # Rapier Pong
+    // initRapierPongGame(gameHolder).then((game) => {
+    //   run(game)
+    // })
   }, [])
 
   return (
     <div className="App">
-      <div id="canvas"></div>
+      <div id="gameHolder"></div>
     </div>
   );
 }

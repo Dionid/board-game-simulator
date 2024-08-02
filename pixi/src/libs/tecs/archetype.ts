@@ -1,11 +1,11 @@
 import { Entity, $kind } from './core';
 import { SparseSet } from './sparse-set';
-import { Schema, SchemaType, SchemaId, $tag, $aos, $soa } from './schema';
+import { Schema, KindToType, SchemaId, $tag, $aos, $soa } from './schema';
 import { Internals } from './internals';
 import { ArrayContains } from './ts-types';
 import { safeGuard } from './switch';
 
-export type ArchetypeTableRow<S extends Schema> = SchemaType<S>[];
+export type ArchetypeTableRow<S extends Schema> = KindToType<S>[];
 
 export type ArchetypeTable<SL extends ReadonlyArray<Schema>> = {
   [K in keyof SL]: ArchetypeTableRow<SL[K]>;
@@ -135,7 +135,11 @@ export function removeEntity<CL extends Schema[]>(arch: Archetype<CL>, entity: E
 }
 
 // OK
-export function moveEntity<CL extends Schema[]>(from: Archetype<CL>, to: Archetype<CL>, entity: Entity) {
+export function moveEntity<CL extends Schema[]>(
+  from: Archetype<CL>,
+  to: Archetype<CL>,
+  entity: Entity
+) {
   // # Check if entity is in `to` or not in `from`
   if (
     to.entitiesSS.dense[to.entitiesSS.sparse[entity]] === entity ||
@@ -189,10 +193,12 @@ export function setArchetypeComponent<S extends Schema>(
   arch: Archetype<any>,
   entity: Entity,
   schemaOrId: SchemaId | Schema,
-  component?: SchemaType<S>
+  component?: KindToType<S>
 ): boolean {
   const schemaId = typeof schemaOrId === 'number' ? schemaOrId : Internals.getSchemaId(schemaOrId);
-  const schema = (typeof schemaOrId === 'number' ? Internals.getSchemaById(schemaOrId) : schemaOrId) as S | undefined;
+  const schema = (
+    typeof schemaOrId === 'number' ? Internals.getSchemaById(schemaOrId) : schemaOrId
+  ) as S | undefined;
 
   if (!schema) {
     throw new Error(`Can't find schema ${schemaId}`);
@@ -255,14 +261,18 @@ export function setArchetypeComponent<S extends Schema>(
 export function componentsList<SL extends ReadonlyArray<Schema>, A extends Archetype<any>>(
   archetype: A,
   entity: Entity,
-  ...schemas: A extends Archetype<infer iCL> ? (ArrayContains<iCL, SL> extends true ? SL : never) : never
+  ...schemas: A extends Archetype<infer iCL>
+    ? ArrayContains<iCL, SL> extends true
+      ? SL
+      : never
+    : never
 ) {
   return schemas.map((schema) => {
     const schemaId = Internals.getSchemaId(schema);
     const componentIndex = archetype.entitiesSS.sparse[entity];
     return archetype.table[schemaId][componentIndex];
   }) as {
-    [K in keyof SL]: SchemaType<SL[K]>;
+    [K in keyof SL]: KindToType<SL[K]>;
   };
 }
 
@@ -277,7 +287,7 @@ export function component<S extends Schema, A extends Archetype<ReadonlyArray<Sc
       ? S
       : never
     : never
-): SchemaType<S> {
+): KindToType<S> {
   const componentId = Internals.getSchemaId(schema);
   const componentIndex = archetype.entitiesSS.sparse[entity];
   const componentTable = archetype.table[componentId];
@@ -285,19 +295,23 @@ export function component<S extends Schema, A extends Archetype<ReadonlyArray<Sc
     throw new Error(`Can't find component ${componentId} on this archetype ${archetype.id}`);
   }
   if (schema[$kind] === $tag) {
-    return {} as SchemaType<S>;
+    return {} as KindToType<S>;
   }
   const component = componentTable[componentIndex];
   if (!component) {
     throw new Error(`Can't find component ${componentId} on this archetype ${archetype.id}`);
   }
-  return component as SchemaType<S>;
+  return component as KindToType<S>;
 }
 
 // OK
 export const table = <S extends Schema, A extends Archetype<any>>(
   archetype: A,
-  schema: A extends Archetype<infer iCL> ? (ArrayContains<iCL, [S]> extends true ? S : never) : never
+  schema: A extends Archetype<infer iCL>
+    ? ArrayContains<iCL, [S]> extends true
+      ? S
+      : never
+    : never
 ) => {
   const componentId = Internals.getSchemaId(schema);
   const table = archetype.table[componentId];
@@ -308,7 +322,10 @@ export const table = <S extends Schema, A extends Archetype<any>>(
 };
 
 // OK
-export const tryTable = <S extends Schema>(archetype: Archetype<any>, schema: S): ArchetypeTableRow<S> | undefined => {
+export const tryTable = <S extends Schema>(
+  archetype: Archetype<any>,
+  schema: S
+): ArchetypeTableRow<S> | undefined => {
   const componentId = Internals.getSchemaId(schema);
   return archetype.table[componentId] as ArchetypeTableRow<S> | undefined;
 };
@@ -316,23 +333,30 @@ export const tryTable = <S extends Schema>(archetype: Archetype<any>, schema: S)
 // OK
 export const tablesList = <SL extends ReadonlyArray<Schema>, A extends Archetype<any>>(
   archetype: A,
-  ...components: A extends Archetype<infer iCL> ? (ArrayContains<iCL, SL> extends true ? SL : never) : never
+  ...components: A extends Archetype<infer iCL>
+    ? ArrayContains<iCL, SL> extends true
+      ? SL
+      : never
+    : never
 ) => {
   return components.map((component) => {
     const componentId = Internals.getSchemaId(component);
     return archetype.table[componentId];
   }) as {
-    [K in keyof SL]: SchemaType<SL[K]>[];
+    [K in keyof SL]: KindToType<SL[K]>[];
   };
 };
 
 // OK
-export const tryTablesList = <SL extends ReadonlyArray<Schema>>(archetype: Archetype<any>, ...components: SL) => {
+export const tryTablesList = <SL extends ReadonlyArray<Schema>>(
+  archetype: Archetype<any>,
+  ...components: SL
+) => {
   return components.map((component) => {
     const componentId = Internals.getSchemaId(component);
     return archetype.table[componentId];
   }) as {
-    [K in keyof SL]: SchemaType<SL[K]>[] | undefined;
+    [K in keyof SL]: KindToType<SL[K]>[] | undefined;
   };
 };
 

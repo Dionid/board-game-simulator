@@ -6,8 +6,13 @@
 1. Component – instance of Schema
 1. Archetype – identified by Components and contains dense Entities and Components
 1. Query – described by Component filters, returns Archetype pointers containing
-1. World – contains Entities, Archetypes, Queries and indexes
+1. Essence – contains Entities, Archetypes, Queries and indexes
 1. Internals – contains registered Schemas
+
+# Features
+
+1. Schema -> string, number, boolean, array, typed, union, literal
+1. ...
 
 # Decision
 
@@ -25,8 +30,9 @@
 1. ~~Query~~
 1. ~~Tags~~
 1. ~~Types: Boolean, Array ~~
-1. ~~Defer add and remove entities and components on the same World.step or deferred~~
+1. ~~Defer add and remove entities and components on the same Essence.step or deferred~~
 1. ~~Topics~~
+1. Debug
 1. ...
 1. Complex queries
 1. Singleton Component
@@ -36,7 +42,7 @@
 1. ...
 1. Register System before / after other System
 1. SoA components
-1. World size
+1. Essence size
 1. BitMask
 1. Custom Errors
 1. ...

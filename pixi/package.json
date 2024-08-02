@@ -2,7 +2,12 @@
   "name": "pixi",
   "version": "0.1.0",
   "private": true,
+  "sideEffects": [
+    "./node_modules/@dimforge/rapier2d/*.js"
+  ],
   "dependencies": {
+    "@dimforge/rapier2d": "^0.14.0",
+    "@dimforge/rapier2d-compat": "^0.14.0",
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^13.0.0",
     "@testing-library/user-event": "^13.2.1",
@@ -10,6 +15,7 @@
     "@types/node": "^16.7.13",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
+    "matter-js": "^0.20.0",
     "pixi.js": "^8.2.5",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -18,9 +24,9 @@
     "web-vitals": "^2.1.0"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
+    "start": "craco start --verbose",
+    "build": "craco build",
+    "test": "craco test",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -40,5 +46,10 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@craco/craco": "^7.1.0",
+    "@types/matter-js": "^0.19.7",
+    "wasm-loader": "^1.3.0"
   }
 }

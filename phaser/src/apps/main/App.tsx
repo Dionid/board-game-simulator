@@ -11,10 +11,8 @@ function App() {
 
     var config: Phaser.Types.Core.GameConfig = {
       type: Phaser.AUTO,
-      width: "100%",
-      height: "100%",
-      // width: window.innerWidth,
-      // height: window.innerHeight,
+      width: 500,
+      height: 500,
       parent: canvas,
       scene: MainScene,
       plugins: {
@@ -39,27 +37,15 @@ function App() {
       },
       scale: {
         mode: Phaser.Scale.NONE,
-        width: window.innerWidth / 0.5,
-        height: window.innerHeight / 0.5,
+        // width: window.innerWidth / 0.5,
+        // height: window.innerHeight / 0.5,
         zoom: 0.5,
-        // zoom: 0.3,
-        // mode: Phaser.Scale.ScaleModes.FIT,
       },
     };  
   
     const game = new Phaser.Game(config);
 
     (globalThis as any).__PHASER_GAME__ = game;
-    // const app = new Application();
-    // app.init({ resizeTo: window, backgroundColor: 'white', autoStart: false }).then(() => {
-    //   canvas.appendChild(app.canvas);
-    //   const world = initWorld(app)
-    //   const animation = () => {
-    //     step(world)
-    //     requestAnimationFrame(animation);
-    //   }
-    //   animation()
-    // })
   }, [])
 
   return (

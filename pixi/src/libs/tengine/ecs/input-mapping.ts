@@ -1,12 +1,15 @@
-import { Container } from 'pixi.js';
-import { System } from '../../../../libs/tecs';
-import { WorldScene } from '../engine';
+import { System } from '../../tecs';
+import { Game } from '../game';
+import { Map } from '../core';
+import { mutableEmpty } from '../../tecs/array';
 
-export function mapMouseInput(worldScene: WorldScene, mapContainer: Container): System {
-  const input = worldScene.input;
+export function mapMouseInput(game: Game, map: Map): System {
+  const mapContainer = map.container;
+
+  const input = game.input;
   const mouse = input.mouse;
-  const canvas = worldScene.app.canvas;
-  const camera = worldScene.cameras.main;
+  const canvas = game.app.canvas;
+  const camera = game.camera.main;
 
   let mouseUp = false;
   let mouseDown = false;
@@ -60,8 +63,8 @@ export function mapMouseInput(worldScene: WorldScene, mapContainer: Container): 
       mouse.delta.clientPosition.x = mouseMoveEvent.x - mouse.previous.clientPosition.x;
       mouse.delta.clientPosition.y = mouseMoveEvent.y - mouse.previous.clientPosition.y;
 
-      mouse.scenePosition.x = Math.floor(mouseMoveEvent.x / camera.scale + camera.scaled.position.x);
-      mouse.scenePosition.y = Math.floor(mouseMoveEvent.y / camera.scale + camera.scaled.position.y);
+      mouse.scenePosition.x = Math.floor(mouseMoveEvent.x / camera.scale.x + camera.scaled.position.x);
+      mouse.scenePosition.y = Math.floor(mouseMoveEvent.y / camera.scale.y + camera.scaled.position.y);
 
       mouse.delta.scenePosition.x = mouse.scenePosition.x - mouse.previous.scenePosition.x;
       mouse.delta.scenePosition.y = mouse.scenePosition.y - mouse.previous.scenePosition.y;
@@ -70,6 +73,43 @@ export function mapMouseInput(worldScene: WorldScene, mapContainer: Container): 
       mouse.mapPosition.y = mouse.scenePosition.y - mapContainer.y + mapContainer.pivot.y;
 
       mouseMoveEvent = null;
+    }
+  };
+}
+
+export function mapKeyboardInput(game: Game): System {
+  const input = game.input;
+  const keyboard = input.keyboard;
+
+  let keyDownEventsList: KeyboardEvent[] = [];
+  let keyUpEventsList: KeyboardEvent[] = [];
+
+  window.addEventListener('keydown', (e) => {
+    keyDownEventsList.push(e);
+  });
+
+  window.addEventListener('keyup', (e) => {
+    keyUpEventsList.push(e);
+  });
+
+  return () => {
+    mutableEmpty(keyboard.keyUp);
+
+    if (keyDownEventsList.length) {
+      for (const event of keyDownEventsList) {
+        keyboard.keyDown[event.key] = true;
+      }
+
+      keyDownEventsList = [];
+    }
+
+    if (keyUpEventsList.length) {
+      for (const event of keyUpEventsList) {
+        keyboard.keyDown[event.key] = false;
+        keyboard.keyUp.push(event.key);
+      }
+
+      keyUpEventsList = [];
     }
   };
 }

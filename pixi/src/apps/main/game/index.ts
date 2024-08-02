@@ -1,32 +1,22 @@
-import { newWorld, registerSystem } from '../../../libs/tecs';
-import {
-  AnimatedSprite,
-  Application,
-  Assets,
-  Container,
-  Graphics,
-  Sprite,
-  Spritesheet,
-  Texture,
-  TilingSprite,
-} from 'pixi.js';
+import { registerSystem } from '../../../libs/tecs';
+import { Application, Assets, Container, Sprite, Spritesheet, Texture } from 'pixi.js';
 import firstMapData from './assets/FirstMap.json';
-import { createWorldScene, setCameraPosition, Vector2, WorldScene } from './engine';
+import { newGame, Game } from '../../../libs/tengine/game';
 import {
-  applyCameraToContainer,
-  render,
+  applyCameraToWorld,
   mapMouseInput,
   moveCameraByDragging,
   zoom,
   moveCamera,
   applyWorldBoundariesToCamera,
-} from './ecs';
-import { initTileMap } from './engine/tilemap';
+} from '../../../libs/tengine/ecs';
+import { initTileMap } from '../../../libs/tengine/tilemap';
 import humanAtlasData from './assets/human_atlas.json';
-import { newAnimatedSprites, newDirectionalAnimationFrames } from './engine/animation';
-import { cartesianTileRowCol, tileCartesianPosition } from './engine/isometric';
+import { newAnimatedSprites, newDirectionalAnimationFrames } from '../../../libs/tengine/animation';
+import { cartesianTileRowCol, tileCartesianPosition } from '../../../libs/tengine/isometric';
+import { render } from 'libs/tengine/render';
 
-const fillSceneContainer = async (worldScene: WorldScene) => {
+const fillSceneContainer = async (game: Game) => {
   const texture = (await Assets.load('assets/star.png')) as Texture;
 
   const starsContrainer = new Container();
@@ -46,7 +36,7 @@ const fillSceneContainer = async (worldScene: WorldScene) => {
 
   const rtElement = new Sprite({
     texture: texture,
-    x: worldScene.size.width - (texture.width / 2) * scale,
+    x: game.world.size.width - (texture.width / 2) * scale,
     y: 0 + texture.height * 0.7 * scale,
     scale: scale,
     anchor: {
@@ -59,7 +49,7 @@ const fillSceneContainer = async (worldScene: WorldScene) => {
   const lbElement = new Sprite({
     texture: texture,
     x: 0 + (texture.width / 2) * scale,
-    y: worldScene.size.height - texture.height * 0.7 * scale,
+    y: game.world.size.height - texture.height * 0.7 * scale,
     scale: scale,
     anchor: {
       x: 0.5,
@@ -70,8 +60,8 @@ const fillSceneContainer = async (worldScene: WorldScene) => {
 
   const rbElement = new Sprite({
     texture: texture,
-    x: worldScene.size.width - (texture.width / 2) * scale,
-    y: worldScene.size.height - texture.height * 0.7 * scale,
+    x: game.world.size.width - (texture.width / 2) * scale,
+    y: game.world.size.height - texture.height * 0.7 * scale,
     scale: scale,
     anchor: {
       x: 0.5,
@@ -82,8 +72,8 @@ const fillSceneContainer = async (worldScene: WorldScene) => {
 
   const centerElement = new Sprite({
     texture: texture,
-    x: worldScene.size.width / 2 - texture.width / 2 + (texture.width / 2) * scale,
-    y: worldScene.size.height / 2 - texture.height * 0.3 + texture.height * 0.7 * scale,
+    x: game.world.size.width / 2 - texture.width / 2 + (texture.width / 2) * scale,
+    y: game.world.size.height / 2 - texture.height * 0.3 + texture.height * 0.7 * scale,
     scale: scale,
     anchor: {
       x: 0.5,
@@ -95,11 +85,35 @@ const fillSceneContainer = async (worldScene: WorldScene) => {
   // sort the trees by their y position
   starsContrainer.children.sort((a, b) => a.position.y - b.position.y);
 
-  worldScene.container.addChild(starsContrainer);
+  game.world.container.addChild(starsContrainer);
 };
 
 export const initWorld = async (app: Application) => {
-  const essence = newWorld();
+  // # Game
+  const game = newGame({
+    app,
+    camera: {
+      // position: {
+      //   x: 0,
+      //   y: 0,
+      // },
+      scale: {
+        x: 0.5,
+        y: 0.5,
+      },
+      zoom: {
+        min: 0.1,
+        max: 2,
+        step: 0.1,
+      },
+    },
+    world: {
+      size: {
+        width: 5000,
+        height: 3000,
+      },
+    },
+  });
 
   // # Init map
   const map = await initTileMap({
@@ -125,29 +139,7 @@ export const initWorld = async (app: Application) => {
   // mapContainer.x = 100;
   // mapContainer.y = 100;
 
-  // # Main Scene Container
-  const worldScene = createWorldScene(app, map, {
-    camera: {
-      position: {
-        x: 0,
-        y: 0,
-      },
-      scale: 0.5,
-      size: {
-        width: app.renderer.width,
-        height: app.renderer.height,
-      },
-    },
-    worldScene: {
-      size: {
-        x: 5000,
-        y: 3000,
-      },
-    },
-  });
-
-  // # Add to stage
-  app.stage.addChild(worldScene.container);
+  game.world.container.addChild(map.container);
 
   // # Center camera
   // setCameraPosition(
@@ -157,7 +149,7 @@ export const initWorld = async (app: Application) => {
   // );
 
   // ## Fill with some data
-  fillSceneContainer(worldScene);
+  fillSceneContainer(game);
 
   // # Init player
   const playerContainer = new Container();
@@ -208,7 +200,10 @@ export const initWorld = async (app: Application) => {
   // Generate all the Textures asynchronously
   await playerSpritesheet.parse();
 
-  const playerAnimationSprites = newAnimatedSprites(playerSpritesheet.animations, { x: 0.5, y: 0.9 });
+  const playerAnimationSprites = newAnimatedSprites(playerSpritesheet.animations, {
+    x: 0.5,
+    y: 0.9,
+  });
 
   const currentAnimation = playerAnimationSprites.runB;
 
@@ -226,27 +221,28 @@ export const initWorld = async (app: Application) => {
   app.canvas.addEventListener('click', (e) => {
     currentAnimation.gotoAndPlay(0);
 
-    playerContainer.position.set(worldScene.input.mouse.mapPosition.x, worldScene.input.mouse.mapPosition.y);
+    playerContainer.position.set(game.input.mouse.mapPosition.x, game.input.mouse.mapPosition.y);
 
     const { x, y } = playerContainer.position;
     const { tileWidth, tileHeight } = tileMap;
-
-    const rc = cartesianTileRowCol(playerContainer.position, { width: tileWidth, height: tileHeight });
-
+    const rc = cartesianTileRowCol(playerContainer.position, {
+      width: tileWidth,
+      height: tileHeight,
+    });
     console.log({ x, y }, rc, tileCartesianPosition(rc, { width: tileWidth, height: tileHeight }));
   });
 
   // # Systems
   // ## Inputs
-  registerSystem(essence, mapMouseInput(worldScene, mapContainer));
+  registerSystem(game.essence, mapMouseInput(game, map));
   // # Camera
-  registerSystem(essence, moveCameraByDragging(worldScene));
-  registerSystem(essence, zoom(worldScene));
-  registerSystem(essence, applyWorldBoundariesToCamera(worldScene));
-  registerSystem(essence, moveCamera(worldScene));
-  registerSystem(essence, applyCameraToContainer(worldScene));
+  registerSystem(game.essence, moveCameraByDragging(game));
+  registerSystem(game.essence, zoom(game));
+  registerSystem(game.essence, applyWorldBoundariesToCamera(game));
+  registerSystem(game.essence, moveCamera(game));
+  registerSystem(game.essence, applyCameraToWorld(game));
   // # Render
-  registerSystem(essence, render(essence, app), 'postUpdate');
+  registerSystem(game.essence, render(game), 'postUpdate');
 
   // const entity = spawnEntity(world);
   // const circle = new Graphics().circle(0, 0, 50);
@@ -256,5 +252,5 @@ export const initWorld = async (app: Application) => {
   // setComponent(world, entity, Size, { width: 100, height: 100 });
   // setComponent(world, entity, Color, { value: 'red' });
 
-  return essence;
+  return game;
 };

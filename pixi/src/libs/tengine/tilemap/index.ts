@@ -1,5 +1,5 @@
 import { Texture, Assets, Container, TilingSprite } from 'pixi.js';
-import firstMapData from '../assets/FirstMap.json';
+import exampleData from './example.json';
 
 export type Tile = {
   id: number;
@@ -53,12 +53,12 @@ export type TileMap<D> = {
   activeTileSet: string;
 };
 
-export type Map<MD extends typeof firstMapData> = {
+export type Map<MD extends typeof exampleData> = {
   container: Container;
   tileMap: TileMap<MD>;
 };
 
-export const initTileMap = async <MD extends typeof firstMapData>(props: {
+export const initTileMap = async <MD extends typeof exampleData>(props: {
   assetName: string;
   texture: Texture | string;
   mapData: MD;
