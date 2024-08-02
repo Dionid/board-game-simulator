@@ -60,27 +60,27 @@ export function rectangleColliderComponent(opts: {
     x: opts.parentPosition.x + opts.offset.x,
     y: opts.parentPosition.y + opts.offset.y,
   };
-  const colliderPosition = {
+  const verticesStartPosition = {
     x: origin.x - opts.size.width * opts.anchor.x,
     y: origin.y - opts.size.height * opts.anchor.y,
   };
 
   const colliderVertices = [
     {
-      x: colliderPosition.x,
-      y: colliderPosition.y,
+      x: verticesStartPosition.x,
+      y: verticesStartPosition.y,
     },
     {
-      x: colliderPosition.x + opts.size.width,
-      y: colliderPosition.y,
+      x: verticesStartPosition.x + opts.size.width,
+      y: verticesStartPosition.y,
     },
     {
-      x: colliderPosition.x + opts.size.width,
-      y: colliderPosition.y + opts.size.height,
+      x: verticesStartPosition.x + opts.size.width,
+      y: verticesStartPosition.y + opts.size.height,
     },
     {
-      x: colliderPosition.x,
-      y: colliderPosition.y + opts.size.height,
+      x: verticesStartPosition.x,
+      y: verticesStartPosition.y + opts.size.height,
     },
   ];
 
@@ -133,21 +133,21 @@ export function lineColliderComponent(opts: {
   };
 
   // PROBLEM IS THAT ANGLE DOESN'T APPLY HERE
-  const colliderPosition = {
+  const verticesStartPosition = {
     x: origin.x - opts.length * opts.anchor.x,
     y: origin.y - opts.length * opts.anchor.y,
   };
 
-  console.log(colliderPosition);
+  console.log(verticesStartPosition);
 
   const colliderVertices = [
     {
-      x: colliderPosition.x,
-      y: colliderPosition.y,
+      x: verticesStartPosition.x,
+      y: verticesStartPosition.y,
     },
     {
-      x: colliderPosition.x,
-      y: colliderPosition.y + opts.length,
+      x: verticesStartPosition.x,
+      y: verticesStartPosition.y + opts.length,
     },
   ];
 
@@ -220,15 +220,15 @@ export function verticesColliderComponent(opts: {
   const width = maxX - minX;
   const height = maxY - minY;
 
-  const colliderPosition = {
+  const verticesStartPosition = {
     x: origin.x - width * opts.anchor.x,
     y: origin.y - height * opts.anchor.y,
   };
 
-  // # Apply colliderPosition to vertices
+  // # Apply verticesStartPosition to vertices
   for (let i = 0; i < opts.vertices.length; i++) {
-    opts.vertices[i].x += colliderPosition.x;
-    opts.vertices[i].y += colliderPosition.y;
+    opts.vertices[i].x += verticesStartPosition.x;
+    opts.vertices[i].y += verticesStartPosition.y;
   }
 
   mutRotateVertices2Around(opts.vertices, opts.angle, origin);
@@ -270,7 +270,7 @@ export function circleColliderComponent(opts: {
   anchor: Vector2;
   radius: number;
 }): Component<typeof Collider> {
-  const origin = {
+  const position = {
     x: opts.parentPosition.x + opts.offset.x,
     y: opts.parentPosition.y + opts.offset.y,
   };
@@ -288,7 +288,7 @@ export function circleColliderComponent(opts: {
       anchor: opts.anchor,
       radius: opts.radius,
     },
-    _position: origin,
+    _position: position,
     _vertices: colliderVertices,
     _normalAxes: normalAxes,
     _prev: {

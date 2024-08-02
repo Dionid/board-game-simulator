@@ -1,5 +1,5 @@
 import { Component } from 'libs/tecs';
-import { Collider } from './components';
+import { Collider, ColliderSet } from './components';
 import { inverseMass } from './math';
 import { Axis2, multV2, mutAddV2, mutSubV2, Position2 } from '../core';
 import { translateCollider } from './collider-transform';
@@ -7,8 +7,10 @@ import { translateCollider } from './collider-transform';
 export function resolvePenetration(
   axis: Axis2,
   overlap: number,
+  aColliderSet: Component<typeof ColliderSet>,
   aCollider: Component<typeof Collider>,
   aPosition: Position2,
+  bColliderSet: Component<typeof ColliderSet>,
   bCollider: Component<typeof Collider>,
   bPosition: Position2
 ) {
@@ -40,6 +42,14 @@ export function resolvePenetration(
     y: bPosition.y - bPrevPosition.y,
   };
 
-  translateCollider(aCollider, aPositionDelta);
-  translateCollider(bCollider, bPositionDelta);
+  for (const collider of aColliderSet.list) {
+    translateCollider(collider, aPositionDelta);
+  }
+
+  // translateCollider(aCollider, aPositionDelta);
+  // translateCollider(bCollider, bPositionDelta);
+
+  for (const collider of bColliderSet.list) {
+    translateCollider(collider, bPositionDelta);
+  }
 }

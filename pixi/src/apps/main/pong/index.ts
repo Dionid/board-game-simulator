@@ -291,7 +291,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   // setComponent(game.essence, ballEntity, Dynamic);
 
   // # Capsule
-  // const capsuleEntity = spawnEntity(game.essence);
+  const capsuleEntity = spawnEntity(game.essence);
   // setComponent(game.essence, capsuleEntity, Wall);
   // // # View
   // setComponent(game.essence, capsuleEntity, View, {
@@ -312,10 +312,58 @@ export async function initPongGame(parentElement: HTMLElement) {
   //     },
   //   },
   // });
-  // setComponent(game.essence, capsuleEntity, Position2, {
-  //   x: 400,
-  //   y: 200,
-  // });
+  const capsulePosition = {
+    x: 400,
+    y: 200,
+    _prev: {
+      x: 400,
+      y: 200,
+    },
+  };
+  setComponent(game.essence, capsuleEntity, Position2, capsulePosition);
+  setComponent(game.essence, capsuleEntity, ColliderSet, {
+    list: [
+      circleColliderComponent({
+        parentPosition: capsulePosition,
+        parentAngle: 0,
+        type: 'solid',
+        mass: 1,
+        offset: { x: 0, y: 0 },
+        angle: 0,
+        anchor: {
+          x: 0,
+          y: 0,
+        },
+        radius: 25,
+      }),
+      rectangleColliderComponent({
+        parentPosition: capsulePosition,
+        parentAngle: 0,
+        type: 'solid',
+        mass: 1,
+        offset: { x: 0, y: 50 },
+        angle: 0,
+        anchor: {
+          x: 0.5,
+          y: 0.5,
+        },
+        size: characterSize,
+      }),
+      circleColliderComponent({
+        parentPosition: capsulePosition,
+        parentAngle: 0,
+        type: 'solid',
+        mass: 1,
+        offset: { x: 0, y: characterSize.height },
+        angle: 0,
+        anchor: {
+          x: 0.5,
+          y: 0.5,
+        },
+        radius: 25,
+      }),
+    ],
+  });
   // // setComponent(game.essence, capsuleEntity, Rotation, { value: Math.PI / 2 });
   // setComponent(game.essence, capsuleEntity, Speed, { value: 1 });
   // setComponent(game.essence, capsuleEntity, Acceleration2, {

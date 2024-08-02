@@ -1,5 +1,6 @@
 # TODO
 
+1. ~~SAT~~
 1. ~~Change render logic to pView~~
 1. ~~Change debug to pView~~
 1. ~~Leave rectangle and circle colliders~~
@@ -7,8 +8,8 @@
 1. ~~Rotate Collider with different pivots~~
 1. ~~Add Rotation to Colliders rotation (changing position and vertices)~~
 1. ~~Add Normal Axes to Collider~~
+1. ~~Line~~
 1. World bounds
-1. Line on Collider Vertices
 
 # Roadmap
 
@@ -30,12 +31,12 @@
     1. Separate concave to convex
     1. Chamfer
     1. Awaken / Asleep
+    1. Fix Circle anchor
 1. Physics
     1. Rotation
     1. OnComponentAdded
         1. Check in physics, that there is no RigidBodyType + Impenetrable
     1. Joints
-1. Previous state component
 1. Character movement
     1. Move and slide
 1. ...
@@ -45,16 +46,20 @@
 1. Top-down Tilemap
 1. ...
 1. Tweens
+1. ...
 
 # Features
 
 1. Game loop
 1. Camera (zoom, pan, world bounds, move)
-1. Render Pixi Graphics
+1. Pixi renderer
 1. Tilemap (isometric)
 1. Animations
 1. Debug
 1. Input (keyboard, mouse)
+1. Collision
+    1. Circles, Rectangles and Vertices
+    1. Narrow (on SAT)
 
 # Entities
 
