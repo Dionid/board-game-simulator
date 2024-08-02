@@ -27,11 +27,15 @@
     1. ~~Compound / Composite~~
     1. ~~Capsule on Compound~~
     1. ~~Pairs + Dedup~~
-    1. Awaken / Asleep
+    1. ~~Awaken / Asleep~~
+    1. Triangle on Vertices
+    1. Polygon on Vertices
     1. Collision Queries
+    1. Angular velocity
+    1. World Bounds
+    1. Fix Circle anchor
     1. Separate concave to convex
     1. Chamfer
-    1. Fix Circle anchor
 1. Physics
     1. Rotation
     1. OnComponentAdded

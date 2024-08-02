@@ -143,8 +143,6 @@ export function lineColliderComponent(opts: {
     y: origin.y - opts.length * opts.anchor.y,
   };
 
-  console.log(verticesStartPosition);
-
   const colliderVertices = [
     {
       x: verticesStartPosition.x,
@@ -161,6 +159,103 @@ export function lineColliderComponent(opts: {
 
   // # Rectangle can have only 2 normal axes
   const normalAxes = [normalV2(unitV2(subV2(colliderVertices[1], colliderVertices[0])))];
+
+  const component = {
+    type: opts.type,
+    mass: opts.mass,
+    offset: opts.offset,
+    angle: opts.angle,
+    shape: {
+      type: 'vertices' as const,
+      anchor: opts.anchor,
+    },
+    _position: origin,
+    _vertices: colliderVertices,
+    _normalAxes: normalAxes,
+    _prev: {
+      angle: opts.angle,
+      offset: {
+        x: opts.offset.x,
+        y: opts.offset.y,
+      },
+    },
+  };
+
+  return component;
+}
+
+export function isoscelesRightTriangleColliderComponent(opts: {
+  parentPosition: Vector2; // TODO: remove this
+  parentAngle: number; // TODO: remove this
+  type: 'solid' | 'sensor';
+  mass: number;
+  offset: Vector2;
+  angle: number;
+  anchor: Vector2;
+  length: number;
+}): Component<typeof Collider> {
+  // const origin = {
+  //   x: opts.parentPosition.x + opts.offset.x,
+  //   y: opts.parentPosition.y + opts.offset.y,
+  // };
+
+  // const xyOffset = Math.sqrt(opts.length ** 2 / 2);
+
+  // const verticesStartPosition = {
+  //   x: origin.x - xyOffset * opts.anchor.x,
+  //   y: origin.y - xyOffset * opts.anchor.y,
+  // };
+
+  // const colliderVertices = [
+  //   {
+  //     x: verticesStartPosition.x,
+  //     y: verticesStartPosition.y,
+  //   },
+  //   {
+  //     x: verticesStartPosition.x + xyOffset,
+  //     y: verticesStartPosition.y + xyOffset,
+  //   },
+  //   {
+  //     x: verticesStartPosition.x - xyOffset,
+  //     y: verticesStartPosition.y + xyOffset,
+  //   },
+  // ];
+
+  // const xyOffset = Math.sqrt(opts.length ** 2 / 2);
+
+  const origin = {
+    x: opts.parentPosition.x + opts.offset.x,
+    y: opts.parentPosition.y + opts.offset.y,
+  };
+
+  const centroidX = opts.length / 3;
+  const centroidY = opts.length / 3;
+
+  const verticesStartPosition = {
+    x: origin.x - 2 * centroidX * opts.anchor.x,
+    y: origin.y + 2 * centroidY * opts.anchor.y,
+  };
+
+  const colliderVertices = [
+    {
+      x: verticesStartPosition.x,
+      y: verticesStartPosition.y,
+    },
+    {
+      x: verticesStartPosition.x,
+      y: verticesStartPosition.y - opts.length,
+    },
+    {
+      x: verticesStartPosition.x + opts.length,
+      y: verticesStartPosition.y,
+    },
+  ];
+
+  mutRotateVertices2Around(colliderVertices, opts.angle, origin);
+  mutRotateVertices2Around(colliderVertices, opts.parentAngle, opts.parentPosition);
+
+  // # Rectangle can have only 2 normal axes
+  const normalAxes = normalAxes2(colliderVertices);
 
   const component = {
     type: opts.type,

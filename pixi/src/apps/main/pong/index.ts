@@ -17,6 +17,7 @@ import {
   lineColliderComponent,
   capsuleColliderComponent,
   filterCollisionEvents,
+  isoscelesRightTriangleColliderComponent,
 } from 'libs/tengine/collision';
 import {
   applyRigidBodyAccelerationToVelocity,
@@ -364,6 +365,70 @@ export async function initPongGame(parentElement: HTMLElement) {
     elasticityMode: 'average',
   });
   setComponent(game.essence, capsuleEntity, Dynamic);
+
+  // # Triangle
+  const triangleEntity = spawnEntity(game.essence);
+  // setComponent(game.essence, triangleEntity, Wall);
+  // // # View
+  // setComponent(game.essence, triangleEntity, View, {
+  //   offset: { x: 0, y: 0 },
+  //   scale: { x: 1, y: 1 },
+  //   rotation: 0,
+  //   model: {
+  //     type: 'graphics',
+  //     color: '0xfff',
+  //     shape: {
+  //       anchor: {
+  //         x: 0.5,
+  //         y: 0.5,
+  //       },
+  //       type: 'triangle',
+  //       length: 100,
+  //       radius: 25,
+  //     },
+  //   },
+  // });
+  const trianglePosition = {
+    x: 600,
+    y: 300,
+    _prev: {
+      x: 400,
+      y: 200,
+    },
+  };
+  setComponent(game.essence, triangleEntity, Position2, trianglePosition);
+  const triangleAngle = 0;
+  setComponent(game.essence, triangleEntity, Angle, {
+    value: triangleAngle,
+    _prev: triangleAngle,
+  });
+  setComponent(game.essence, triangleEntity, CollisionsMonitoring);
+  setComponent(game.essence, triangleEntity, ColliderBody, {
+    parts: [
+      isoscelesRightTriangleColliderComponent({
+        parentPosition: trianglePosition,
+        parentAngle: triangleAngle,
+        type: 'solid',
+        mass: 1,
+        offset: { x: 0, y: 0 },
+        length: 100,
+        angle: 0,
+        anchor: {
+          x: 0.5,
+          y: 0.5,
+        },
+      }),
+    ],
+  });
+  setComponent(game.essence, triangleEntity, Velocity2, {
+    x: 0,
+    y: 0,
+  });
+  setComponent(game.essence, triangleEntity, RigidBody, {
+    elasticity: 1,
+    elasticityMode: 'average',
+  });
+  setComponent(game.essence, triangleEntity, Dynamic);
 
   // # Systems
   // ## Caches invalidation
