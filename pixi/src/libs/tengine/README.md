@@ -24,13 +24,13 @@
 1. Collision
     1. ~~SAT~~
     1. ~~Raw Vertices~~
-    1. Compound / Composite
-    1. Capsule on Compound
+    1. ~~Compound / Composite~~
+    1. ~~Capsule on Compound~~
     1. Pairs + Dedup
     1. Collision Queries
+    1. Awaken / Asleep
     1. Separate concave to convex
     1. Chamfer
-    1. Awaken / Asleep
     1. Fix Circle anchor
 1. Physics
     1. Rotation

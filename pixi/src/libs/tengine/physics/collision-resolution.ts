@@ -3,10 +3,9 @@ import { Game } from '../game';
 import { Position2 } from '../core/types';
 import { unfilteredColliding, Impenetrable, resolvePenetration } from '../collision';
 import { Dynamic, Kinematic, RigidBody, Static } from './components';
-import { Velocity2 } from '../core';
+import { dotV2, multV2, subV2, Velocity2 } from '../core';
 import { inverseMass } from '../collision/math';
 import { safeGuard } from 'libs/tecs/switch';
-import { resolveCircleCircleCollision } from './resolvers';
 
 // # Resolve Dynamic bodies Collision
 
@@ -74,8 +73,8 @@ export const dynamicRigidBodyCollisionResolution = (game: Game): System => {
 
       // # Dynamic bodies collision response
 
-      const aMass = aStatic || aKinematic ? 0 : a.collider.mass;
-      const bMass = bStatic || bKinematic ? 0 : b.collider.mass;
+      // const aMass = aStatic || aKinematic ? 0 : a.collider.mass;
+      // const bMass = bStatic || bKinematic ? 0 : b.collider.mass;
 
       // # Resolve penetration
       resolvePenetration(axis, overlap, a.colliderSet, aPosition, b.colliderSet, bPosition);
@@ -127,40 +126,69 @@ export const dynamicRigidBodyCollisionResolution = (game: Game): System => {
         continue;
       }
 
-      const aInvertedMass = inverseMass(aMass);
-      const bInvertedMass = inverseMass(bMass);
-      const combinedInvertedMass = aInvertedMass + bInvertedMass;
+      const aTotalMass = a.colliderSet.parts.reduce((acc, cur) => {
+        acc += cur.mass;
+        return acc;
+      }, 0);
+      const bTotalMass = b.colliderSet.parts.reduce((acc, cur) => {
+        acc += cur.mass;
+        return acc;
+      }, 0);
+      const aInvertedMass = inverseMass(aTotalMass);
+      const bInvertedMass = inverseMass(bTotalMass);
+      const combinedInvertedMass = aTotalMass + bTotalMass;
 
       // # If both bodies have infinite mass, skip
       if (combinedInvertedMass === 0) {
         continue;
       }
 
-      switch (a.collider.shape.type) {
-        case 'circle':
-          switch (b.collider.shape.type) {
-            case 'circle':
-              resolveCircleCircleCollision(
-                elasticity,
-                aPosition,
-                aVelocity,
-                aInvertedMass,
-                bPosition,
-                bVelocity,
-                bInvertedMass,
-                combinedInvertedMass
-              );
-              continue;
-            case 'vertices':
-              continue;
-            default:
-              return safeGuard(b.collider.shape);
-          }
-        case 'vertices':
-          continue;
-        default:
-          return safeGuard(a.collider.shape);
-      }
+      // # Relative direction vector from a to b
+      const normalizedDirection = axis;
+
+      // # Projection of velocities on the relative vector
+      const velocitySeparation = dotV2(subV2(aVelocity, bVelocity), normalizedDirection);
+
+      // # Calculate the separation velocity with elasticity
+      const velocitySeparationWithElasticity = -1 * velocitySeparation * elasticity;
+
+      const velocitySeparationDiff = velocitySeparationWithElasticity - velocitySeparation;
+
+      const impulse = velocitySeparationDiff / combinedInvertedMass;
+
+      const impulseVector = multV2(normalizedDirection, impulse);
+
+      aVelocity.x += impulseVector.x * aInvertedMass;
+      aVelocity.y += impulseVector.y * aInvertedMass;
+
+      bVelocity.x -= impulseVector.x * bInvertedMass;
+      bVelocity.y -= impulseVector.y * bInvertedMass;
+
+      // switch (a.collider.shape.type) {
+      //   case 'circle':
+      //     switch (b.collider.shape.type) {
+      //       case 'circle':
+      //         resolveCircleCircleCollision(
+      //           elasticity,
+      //           aPosition,
+      //           aVelocity,
+      //           aInvertedMass,
+      //           bPosition,
+      //           bVelocity,
+      //           bInvertedMass,
+      //           combinedInvertedMass
+      //         );
+      //         continue;
+      //       case 'vertices':
+      //         continue;
+      //       default:
+      //         return safeGuard(b.collider.shape);
+      //     }
+      //   case 'vertices':
+      //     continue;
+      //   default:
+      //     return safeGuard(a.collider.shape);
+      // }
     }
   };
 };

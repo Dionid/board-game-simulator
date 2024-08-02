@@ -99,8 +99,8 @@ export const drawDebugLines = (
               continue;
             }
 
-            globalDebugGraphics.circle(collider._position.x, collider._position.y, 4);
-            globalDebugGraphics.fill({ color: 'green' });
+            globalDebugGraphics.circle(collider._position.x, collider._position.y, 6);
+            globalDebugGraphics.fill({ color: 'gray' });
 
             globalDebugGraphics.beginPath();
             globalDebugGraphics.moveTo(collider._vertices[0].x, collider._vertices[0].y);

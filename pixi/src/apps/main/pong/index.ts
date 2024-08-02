@@ -2,7 +2,7 @@ import { Container } from 'pixi.js';
 import { initGame, newGame } from '../../../libs/tengine/game';
 import { registerSystem, setComponent, spawnEntity } from '../../../libs/tecs';
 import { mapKeyboardInput, mapMouseInput } from '../../../libs/tengine/ecs';
-import { Kinematic, RigidBody } from 'libs/tengine/physics/components';
+import { Dynamic, Kinematic, RigidBody } from 'libs/tengine/physics/components';
 import { Position2, Velocity2, Speed, Acceleration2, Angle } from 'libs/tengine/core';
 import { Ball, Enemy, Player, accelerateByArrows } from './ecs';
 import {
@@ -20,6 +20,7 @@ import {
 import {
   applyRigidBodyAccelerationToVelocity,
   applyRigidBodyVelocityToPosition,
+  dynamicRigidBodyCollisionResolution,
 } from 'libs/tengine/physics';
 import { drawViews, View, drawDebugLines, addNewViews } from 'libs/tengine/render';
 import { penetrationResolution } from 'libs/tengine/collision/penetration-resolution';
@@ -99,7 +100,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   });
   // # Collisions
   setComponent(game.essence, playerEntity, CollisionsMonitoring);
-  setComponent(game.essence, playerEntity, Impenetrable);
+  // setComponent(game.essence, playerEntity, Impenetrable);
   setComponent(game.essence, playerEntity, ColliderBody, {
     parts: [
       rectangleColliderComponent({
@@ -122,7 +123,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     elasticity: 1,
     elasticityMode: 'average',
   });
-  setComponent(game.essence, playerEntity, Kinematic);
+  setComponent(game.essence, playerEntity, Dynamic);
 
   // # Enemy
   const enemyEntity = spawnEntity(game.essence);
@@ -172,7 +173,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   });
   // # Collisions
   // setComponent(game.essence, enemyEntity, CollisionsMonitoring);
-  setComponent(game.essence, enemyEntity, Impenetrable);
+  // setComponent(game.essence, enemyEntity, Impenetrable);
   setComponent(game.essence, enemyEntity, ColliderBody, {
     parts: [
       verticesColliderComponent({
@@ -200,15 +201,16 @@ export async function initPongGame(parentElement: HTMLElement) {
     elasticity: 1,
     elasticityMode: 'average',
   });
-  setComponent(game.essence, enemyEntity, Kinematic);
+  setComponent(game.essence, enemyEntity, Dynamic);
 
+  // # Wall
   const wallEntity = spawnEntity(game.essence);
   const wallPosition = {
     x: game.world.size.width / 2 + 100,
     y: game.world.size.height / 2 - 100,
     _prev: { x: 0, y: 0 },
   };
-  setComponent(game.essence, wallEntity, Impenetrable);
+  // setComponent(game.essence, wallEntity, Impenetrable);
   setComponent(game.essence, wallEntity, Position2, wallPosition);
   // # Collisions
   setComponent(game.essence, wallEntity, ColliderBody, {
@@ -228,6 +230,15 @@ export async function initPongGame(parentElement: HTMLElement) {
       }),
     ],
   });
+  setComponent(game.essence, wallEntity, Velocity2, {
+    x: 0,
+    y: 0,
+  });
+  setComponent(game.essence, wallEntity, RigidBody, {
+    elasticity: 1,
+    elasticityMode: 'average',
+  });
+  setComponent(game.essence, wallEntity, Dynamic);
 
   // # Ball
   const ballEntity = spawnEntity(game.essence);
@@ -265,7 +276,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   };
   setComponent(game.essence, ballEntity, Position2, ballPosition);
   // # Collisions
-  setComponent(game.essence, ballEntity, CollisionsMonitoring);
+  // setComponent(game.essence, ballEntity, CollisionsMonitoring);
   // setComponent(game.essence, ballEntity, Impenetrable);
   setComponent(game.essence, ballEntity, ColliderBody, {
     parts: [
@@ -288,7 +299,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     elasticity: 1,
     elasticityMode: 'average',
   });
-  // setComponent(game.essence, ballEntity, Dynamic);
+  setComponent(game.essence, ballEntity, Dynamic);
 
   // # Capsule
   const capsuleEntity = spawnEntity(game.essence);
@@ -333,24 +344,22 @@ export async function initPongGame(parentElement: HTMLElement) {
         parentAngle: capsuleAngle,
         type: 'solid',
         mass: 1,
-        offset: { x: 20, y: 20 },
+        offset: { x: 0, y: 0 },
         length: 100,
         radius: 25,
         angle: 0,
       }),
     ],
   });
-  // // setComponent(game.essence, capsuleEntity, Rotation, { value: Math.PI / 2 });
-  // setComponent(game.essence, capsuleEntity, Speed, { value: 1 });
-  // setComponent(game.essence, capsuleEntity, Acceleration2, {
-  //   x: 0,
-  //   y: 0,
-  // });
-  // setComponent(game.essence, capsuleEntity, Velocity2, {
-  //   x: 0,
-  //   y: 0,
-  // });
-  // setComponent(game.essence, capsuleEntity, RigidBody);
+  setComponent(game.essence, capsuleEntity, Velocity2, {
+    x: 0,
+    y: 0,
+  });
+  setComponent(game.essence, capsuleEntity, RigidBody, {
+    elasticity: 1,
+    elasticityMode: 'average',
+  });
+  setComponent(game.essence, capsuleEntity, Dynamic);
 
   // # Systems
   // ## Caches invalidation
@@ -375,7 +384,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   // ## Collision
   registerSystem(game.essence, checkNarrowCollisionSimple(game));
   registerSystem(game.essence, penetrationResolution(game));
-  // registerSystem(game.essence, dynamicRigidBodyCollisionResolution(game));
+  registerSystem(game.essence, dynamicRigidBodyCollisionResolution(game));
 
   // ## Render
   const viewContainer = new Container();
