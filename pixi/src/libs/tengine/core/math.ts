@@ -188,3 +188,9 @@ export const Velocity2 = newSchema({
   y: number,
   max: number,
 });
+
+export type Friction = number;
+
+export const Friction = newSchema({
+  value: number,
+});

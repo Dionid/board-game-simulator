@@ -1,5 +1,5 @@
-import { newQuery, System, registerQuery, table } from 'libs/tecs';
-import { Acceleration2, Velocity2, Position2 } from '../core';
+import { newQuery, System, registerQuery, table, tryTable } from 'libs/tecs';
+import { Acceleration2, Velocity2, Position2, Friction } from '../core';
 import { Game } from '../game';
 import { RigidBody } from './components';
 
@@ -42,7 +42,34 @@ export const applyRigidBodyAccelerationToVelocity = (game: Game): System => {
     }
   };
 };
+
 // # Position
+
+export const rigidBodyVelocityQuery = newQuery(RigidBody, Velocity2);
+
+export const applyRigidBodyFriction = (game: Game, fixedFriction: number = 0): System => {
+  const query = registerQuery(game.essence, rigidBodyVelocityQuery);
+
+  return ({ deltaTime }) => {
+    for (let i = 0; i < query.archetypes.length; i++) {
+      const archetype = query.archetypes[i];
+      const velocityT = table(archetype, Velocity2);
+      const frictionT = tryTable(archetype, Friction);
+
+      for (let j = 0; j < archetype.entities.length; j++) {
+        const velocity = velocityT[j];
+        let friction = frictionT ? frictionT[j].value : 0;
+
+        const calculatedFriction = 1 - friction - fixedFriction;
+
+        const appliedFriction = calculatedFriction < 0 ? 0 : calculatedFriction;
+
+        velocity.x *= appliedFriction * deltaTime;
+        velocity.y *= appliedFriction * deltaTime;
+      }
+    }
+  };
+};
 
 export const velocityPositionQuery = newQuery(RigidBody, Velocity2, Position2);
 
@@ -58,10 +85,6 @@ export const applyRigidBodyVelocityToPosition = (game: Game): System => {
       for (let j = 0; j < archetype.entities.length; j++) {
         const position = positionT[j];
         const velocity = velocityT[j];
-
-        // TODO: move add friction system
-        velocity.x *= 0.9 * deltaTime;
-        velocity.y *= 0.9 * deltaTime;
 
         position.x += velocity.x * deltaTime;
         position.y += velocity.y * deltaTime;
