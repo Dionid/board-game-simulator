@@ -16,6 +16,7 @@ import {
   verticesColliderComponent,
   lineColliderComponent,
   capsuleColliderComponent,
+  filterCollisionEvents,
 } from 'libs/tengine/collision';
 import {
   applyRigidBodyAccelerationToVelocity,
@@ -172,7 +173,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     },
   });
   // # Collisions
-  // setComponent(game.essence, enemyEntity, CollisionsMonitoring);
+  setComponent(game.essence, enemyEntity, CollisionsMonitoring);
   // setComponent(game.essence, enemyEntity, Impenetrable);
   setComponent(game.essence, enemyEntity, ColliderBody, {
     parts: [
@@ -213,6 +214,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   // setComponent(game.essence, wallEntity, Impenetrable);
   setComponent(game.essence, wallEntity, Position2, wallPosition);
   // # Collisions
+  setComponent(game.essence, wallEntity, CollisionsMonitoring);
   setComponent(game.essence, wallEntity, ColliderBody, {
     parts: [
       lineColliderComponent({
@@ -276,7 +278,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   };
   setComponent(game.essence, ballEntity, Position2, ballPosition);
   // # Collisions
-  // setComponent(game.essence, ballEntity, CollisionsMonitoring);
+  setComponent(game.essence, ballEntity, CollisionsMonitoring);
   // setComponent(game.essence, ballEntity, Impenetrable);
   setComponent(game.essence, ballEntity, ColliderBody, {
     parts: [
@@ -337,6 +339,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     value: capsuleAngle,
     _prev: capsuleAngle,
   });
+  setComponent(game.essence, capsuleEntity, CollisionsMonitoring);
   setComponent(game.essence, capsuleEntity, ColliderBody, {
     parts: [
       ...capsuleColliderComponent({
@@ -383,6 +386,7 @@ export async function initPongGame(parentElement: HTMLElement) {
 
   // ## Collision
   registerSystem(game.essence, checkNarrowCollisionSimple(game));
+  registerSystem(game.essence, filterCollisionEvents(game));
   registerSystem(game.essence, penetrationResolution(game));
   registerSystem(game.essence, dynamicRigidBodyCollisionResolution(game));
 

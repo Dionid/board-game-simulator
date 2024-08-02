@@ -8,12 +8,12 @@ import {
 } from 'libs/tecs';
 import { Game } from '../game';
 import { Position2 } from '../core';
-import { unfilteredColliding } from './topics';
+import { colliding } from './topics';
 import { ColliderBody, Impenetrable } from './components';
 import { resolvePenetration } from './resolvers';
 
 export const penetrationResolution = (game: Game): System => {
-  const topic = registerTopic(game.essence, unfilteredColliding);
+  const topic = registerTopic(game.essence, colliding);
 
   return () => {
     for (const event of topic) {

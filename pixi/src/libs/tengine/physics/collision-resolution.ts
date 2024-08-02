@@ -1,7 +1,7 @@
 import { componentByEntity, registerTopic, System } from '../../tecs';
 import { Game } from '../game';
 import { Position2 } from '../core/types';
-import { unfilteredColliding, Impenetrable, resolvePenetration } from '../collision';
+import { Impenetrable, resolvePenetration, colliding } from '../collision';
 import { Dynamic, Kinematic, RigidBody, Static } from './components';
 import { dotV2, multV2, subV2, Velocity2 } from '../core';
 import { inverseMass } from '../collision/math';
@@ -10,7 +10,7 @@ import { safeGuard } from 'libs/tecs/switch';
 // # Resolve Dynamic bodies Collision
 
 export const dynamicRigidBodyCollisionResolution = (game: Game): System => {
-  const topic = registerTopic(game.essence, unfilteredColliding);
+  const topic = registerTopic(game.essence, colliding);
 
   return () => {
     for (const event of topic) {
@@ -71,13 +71,10 @@ export const dynamicRigidBodyCollisionResolution = (game: Game): System => {
         continue;
       }
 
-      // # Dynamic bodies collision response
-
-      // const aMass = aStatic || aKinematic ? 0 : a.collider.mass;
-      // const bMass = bStatic || bKinematic ? 0 : b.collider.mass;
-
       // # Resolve penetration
       resolvePenetration(axis, overlap, a.colliderSet, aPosition, b.colliderSet, bPosition);
+
+      // # Dynamic bodies collision response
 
       // ## Dynamic vs Static or Kinematic
       if ((aDynamic && (bStatic || bKinematic)) || (bDynamic && (aStatic || aKinematic))) {

@@ -27,8 +27,8 @@
     1. ~~Compound / Composite~~
     1. ~~Capsule on Compound~~
     1. Pairs + Dedup
-    1. Collision Queries
     1. Awaken / Asleep
+    1. Collision Queries
     1. Separate concave to convex
     1. Chamfer
     1. Fix Circle anchor

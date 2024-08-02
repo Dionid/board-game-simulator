@@ -1,34 +1,57 @@
-import { registerTopic, System } from '../../tecs';
+import { registerTopic, System, Topic } from '../../tecs';
 import { Game } from '../game';
-import { unfilteredColliding } from './topics';
+import {
+  collideEndedTopic,
+  collideStartedTopic,
+  colliding,
+  CollidingEvent,
+  unfilteredColliding,
+} from './topics';
 
-export const resolveCollisionPairs = (game: Game): System => {
-  const topic = registerTopic(game.essence, unfilteredColliding);
+export type CollidingPairsIndex = Record<string, CollidingEvent>;
+
+export const filterCollisionEvents = (game: Game): System => {
+  const unfilteredCollidingT = registerTopic(game.essence, unfilteredColliding);
+  const collidingT = registerTopic(game.essence, colliding);
+  const collideStartedTopicT = registerTopic(game.essence, collideStartedTopic);
+  const collideEndedTopicT = registerTopic(game.essence, collideEndedTopic);
+
+  const pairs: CollidingPairsIndex = {};
 
   return () => {
-    for (const event of topic) {
+    const temp: CollidingPairsIndex = {};
+
+    for (const event of unfilteredCollidingT) {
       const { a, b } = event;
 
-      // # Emit collision started event
-      // QUESTION: if collision was with sensor collider, than somehow need to determine
-      // is it "started", "active" or "ended" collision
-      // emit(
-      //   collideStartedTopic,
-      //   {
-      //     name: 'collisionStarted',
-      //     a: {
-      //       entity: a.entity,
-      //       colliderSet: a.colliderSet,
-      //       collider: a.collider,
-      //     },
-      //     b: {
-      //       entity: b.entity,
-      //       colliderSet: b.colliderSet,
-      //       collider: b.collider,
-      //     },
-      //   },
-      //   true
-      // );
+      const index = [a.entity, b.entity].sort().join('-');
+
+      if (temp[index]) {
+        continue;
+      }
+
+      // # Emit deduped colliding events
+      Topic.emit(collidingT, event, true);
+
+      temp[index] = event;
+    }
+
+    for (const index in pairs) {
+      if (!temp[index]) {
+        Topic.emit(collideEndedTopicT, pairs[index], true);
+        delete pairs[index];
+      }
+    }
+
+    for (const index in temp) {
+      const event = temp[index];
+
+      // # Collision started events
+      if (!pairs[index]) {
+        Topic.emit(collideStartedTopicT, event, true);
+      }
+
+      pairs[index] = event;
     }
   };
 };
