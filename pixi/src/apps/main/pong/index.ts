@@ -3,7 +3,15 @@ import { initGame, newGame } from '../../../libs/tengine/game';
 import { registerSystem, setComponent, spawnEntity } from '../../../libs/tecs';
 import { mapKeyboardInput, mapMouseInput } from '../../../libs/tengine/ecs';
 import { Dynamic, Kinematic, RigidBody } from 'libs/tengine/physics/components';
-import { Position2, Velocity2, Speed, Acceleration2, Angle, Friction } from 'libs/tengine/core';
+import {
+  Position2,
+  Velocity2,
+  Speed,
+  Acceleration2,
+  Angle,
+  Friction,
+  DisableFriction,
+} from 'libs/tengine/core';
 import { Ball, Enemy, Player, accelerateByArrows } from './ecs';
 import {
   CollisionsMonitoring,
@@ -78,8 +86,9 @@ export async function initPongGame(parentElement: HTMLElement) {
     x: 0,
     y: 0,
   });
+  setComponent(game.essence, playerEntity, DisableFriction);
   setComponent(game.essence, playerEntity, Friction, {
-    value: 0.08,
+    value: 0,
   });
   setComponent(game.essence, playerEntity, Velocity2, {
     max: 10,
@@ -156,7 +165,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     y: 0,
   });
   setComponent(game.essence, enemyEntity, Friction, {
-    value: 0.08,
+    value: 0,
   });
   setComponent(game.essence, enemyEntity, Velocity2, {
     max: 10,
@@ -245,7 +254,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     ],
   });
   setComponent(game.essence, wallEntity, Friction, {
-    value: 0.08,
+    value: 0,
   });
   setComponent(game.essence, wallEntity, Velocity2, {
     max: 10,
@@ -284,7 +293,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     y: 0,
   });
   setComponent(game.essence, ballEntity, Friction, {
-    value: 0.08,
+    value: 0,
   });
   setComponent(game.essence, ballEntity, Velocity2, {
     max: 10,
@@ -375,7 +384,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     ],
   });
   setComponent(game.essence, capsuleEntity, Friction, {
-    value: 0.08,
+    value: 0,
   });
   setComponent(game.essence, capsuleEntity, Velocity2, {
     max: 10,
@@ -428,7 +437,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     ],
   });
   setComponent(game.essence, isoscelesRightTriangleColliderEntity, Friction, {
-    value: 0.08,
+    value: 0,
   });
   setComponent(game.essence, isoscelesRightTriangleColliderEntity, Velocity2, {
     max: 10,
@@ -489,7 +498,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     ],
   });
   setComponent(game.essence, triangleEntity, Friction, {
-    value: 0.08,
+    value: 0,
   });
   setComponent(game.essence, triangleEntity, Velocity2, {
     max: 10,
@@ -572,7 +581,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     ],
   });
   setComponent(game.essence, centroidTriangleEntity, Friction, {
-    value: 0.08,
+    value: 0,
   });
   setComponent(game.essence, centroidTriangleEntity, Velocity2, {
     max: 10,
@@ -600,7 +609,7 @@ export async function initPongGame(parentElement: HTMLElement) {
 
   // ## Basic physics
   registerSystem(game.essence, applyRigidBodyAccelerationToVelocity(game));
-  registerSystem(game.essence, applyRigidBodyFriction(game));
+  registerSystem(game.essence, applyRigidBodyFriction(game, 0.01));
   registerSystem(game.essence, applyRigidBodyVelocityToPosition(game));
 
   // ## Transform

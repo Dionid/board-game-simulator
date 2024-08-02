@@ -1,5 +1,5 @@
 import { newQuery, System, registerQuery, table, tryTable } from 'libs/tecs';
-import { Acceleration2, Velocity2, Position2, Friction } from '../core';
+import { Acceleration2, Velocity2, Position2, Friction, DisableFriction } from '../core';
 import { Game } from '../game';
 import { RigidBody } from './components';
 
@@ -55,6 +55,12 @@ export const applyRigidBodyFriction = (game: Game, fixedFriction: number = 0): S
       const archetype = query.archetypes[i];
       const velocityT = table(archetype, Velocity2);
       const frictionT = tryTable(archetype, Friction);
+
+      const disableFrictionT = tryTable(archetype, DisableFriction);
+
+      if (disableFrictionT) {
+        continue;
+      }
 
       for (let j = 0; j < archetype.entities.length; j++) {
         const velocity = velocityT[j];

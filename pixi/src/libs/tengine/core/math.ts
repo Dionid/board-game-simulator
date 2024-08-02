@@ -1,4 +1,4 @@
-import { newSchema, number } from 'libs/tecs';
+import { newSchema, newTag, number } from 'libs/tecs';
 
 export function round(value: number, decimals = 0): number {
   const factor = 10 ** decimals;
@@ -194,3 +194,5 @@ export type Friction = number;
 export const Friction = newSchema({
   value: number,
 });
+
+export const DisableFriction = newTag();
