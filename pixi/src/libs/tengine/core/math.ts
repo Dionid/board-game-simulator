@@ -109,6 +109,47 @@ export const mutUnitNormalV2 = (v: Vector2): void => {
   mutUnitV2(normalV2(v));
 };
 
+export function translateV2(vertex: Vector2, x: number, y: number): Vector2 {
+  return {
+    x: vertex.x + x,
+    y: vertex.y + y,
+  };
+}
+
+export function mutTranslateV2(vertex: Vector2, x: number, y: number): void {
+  vertex.x += x;
+  vertex.y += y;
+}
+
+export function rotateV2(vertex: Vector2, angle: number): Vector2 {
+  return {
+    x: vertex.x * Math.cos(angle) - vertex.y * Math.sin(angle),
+    y: vertex.x * Math.sin(angle) + vertex.y * Math.cos(angle),
+  };
+}
+
+export function mutRotateV2(vertex: Vector2, angle: number): void {
+  const x = vertex.x;
+  vertex.x = x * Math.cos(angle) - vertex.y * Math.sin(angle);
+  vertex.y = x * Math.sin(angle) + vertex.y * Math.cos(angle);
+}
+
+export function rotateV2Around(vertex: Vector2, angle: number, center: Vector2): Vector2 {
+  const x = vertex.x - center.x;
+  const y = vertex.y - center.y;
+  return {
+    x: x * Math.cos(angle) - y * Math.sin(angle) + center.x,
+    y: x * Math.sin(angle) + y * Math.cos(angle) + center.y,
+  };
+}
+
+export function mutRotateV2Around(vertex: Vector2, angle: number, center: Vector2): void {
+  const x = vertex.x - center.x;
+  const y = vertex.y - center.y;
+  vertex.x = x * Math.cos(angle) - y * Math.sin(angle) + center.x;
+  vertex.y = x * Math.sin(angle) + y * Math.cos(angle) + center.y;
+}
+
 export const horizontalVector = {
   x: 1,
   y: 0,

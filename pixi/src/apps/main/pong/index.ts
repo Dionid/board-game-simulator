@@ -15,6 +15,7 @@ import {
   circleColliderComponent,
   verticesColliderComponent,
   lineColliderComponent,
+  capsuleColliderComponent,
 } from 'libs/tengine/collision';
 import {
   applyRigidBodyAccelerationToVelocity,
@@ -274,7 +275,6 @@ export async function initPongGame(parentElement: HTMLElement) {
         type: 'solid',
         mass: 1,
         offset: { x: 0, y: 0 },
-        angle: 0,
         anchor: {
           x: 0.5,
           y: 0.5,
@@ -321,46 +321,22 @@ export async function initPongGame(parentElement: HTMLElement) {
     },
   };
   setComponent(game.essence, capsuleEntity, Position2, capsulePosition);
+  const capsuleAngle = 0;
+  setComponent(game.essence, capsuleEntity, Angle, {
+    value: capsuleAngle,
+    _prev: capsuleAngle,
+  });
   setComponent(game.essence, capsuleEntity, ColliderBody, {
     parts: [
-      circleColliderComponent({
+      ...capsuleColliderComponent({
         parentPosition: capsulePosition,
-        parentAngle: 0,
+        parentAngle: capsuleAngle,
         type: 'solid',
         mass: 1,
-        offset: { x: 0, y: 0 },
-        angle: 0,
-        anchor: {
-          x: 0,
-          y: 0,
-        },
+        offset: { x: 20, y: 20 },
+        length: 100,
         radius: 25,
-      }),
-      rectangleColliderComponent({
-        parentPosition: capsulePosition,
-        parentAngle: 0,
-        type: 'solid',
-        mass: 1,
-        offset: { x: 0, y: 50 },
         angle: 0,
-        anchor: {
-          x: 0.5,
-          y: 0.5,
-        },
-        size: characterSize,
-      }),
-      circleColliderComponent({
-        parentPosition: capsulePosition,
-        parentAngle: 0,
-        type: 'solid',
-        mass: 1,
-        offset: { x: 0, y: characterSize.height },
-        angle: 0,
-        anchor: {
-          x: 0.5,
-          y: 0.5,
-        },
-        radius: 25,
       }),
     ],
   });

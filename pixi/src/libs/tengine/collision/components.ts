@@ -1,6 +1,7 @@
 import { newSchema, arrayOf, union, literal, number, newTag, Component } from '../../tecs';
 import {
   Axes2,
+  mutRotateV2Around,
   mutRotateVertices2Around,
   normalAxes2,
   normalV2,
@@ -60,6 +61,9 @@ export function rectangleColliderComponent(opts: {
     x: opts.parentPosition.x + opts.offset.x,
     y: opts.parentPosition.y + opts.offset.y,
   };
+
+  mutRotateV2Around(origin, opts.parentAngle, opts.parentPosition);
+
   const verticesStartPosition = {
     x: origin.x - opts.size.width * opts.anchor.x,
     y: origin.y - opts.size.height * opts.anchor.y,
@@ -84,8 +88,7 @@ export function rectangleColliderComponent(opts: {
     },
   ];
 
-  mutRotateVertices2Around(colliderVertices, opts.angle, origin);
-  mutRotateVertices2Around(colliderVertices, opts.parentAngle, opts.parentPosition);
+  mutRotateVertices2Around(colliderVertices, opts.angle + opts.parentAngle, origin);
 
   // # Rectangle can have only 2 normal axes
   const normalAxes = [
@@ -262,11 +265,10 @@ export function verticesColliderComponent(opts: {
 
 export function circleColliderComponent(opts: {
   parentPosition: Vector2; // TODO: remove this
-  parentAngle: number; // TODO: remove this
+  parentAngle: number;
   type: 'solid' | 'sensor';
   mass: number;
   offset: Vector2;
-  angle: number;
   anchor: Vector2;
   radius: number;
 }): Component<typeof Collider> {
@@ -278,11 +280,13 @@ export function circleColliderComponent(opts: {
 
   const normalAxes = normalAxes2(colliderVertices);
 
+  mutRotateV2Around(position, opts.parentAngle, opts.parentPosition);
+
   return {
     type: opts.type,
     mass: opts.mass,
     offset: opts.offset,
-    angle: opts.angle,
+    angle: 0,
     shape: {
       type: 'circle' as const,
       anchor: opts.anchor,
@@ -292,13 +296,76 @@ export function circleColliderComponent(opts: {
     _vertices: colliderVertices,
     _normalAxes: normalAxes,
     _prev: {
-      angle: opts.angle,
+      angle: 0,
       offset: {
         x: opts.offset.x,
         y: opts.offset.y,
       },
     },
   };
+}
+
+export function capsuleColliderComponent(opts: {
+  parentPosition: Vector2; // TODO: remove this
+  parentAngle: number; // TODO: remove this
+  type: 'solid' | 'sensor';
+  mass: number;
+  offset: Vector2;
+  length: number;
+  radius: number;
+  angle: number;
+}): Component<typeof Collider>[] {
+  const mass = opts.mass / 3;
+
+  const rectangleSize = {
+    width: opts.radius * 2,
+    height: opts.length,
+  };
+
+  const rectangle = rectangleColliderComponent({
+    parentPosition: opts.parentPosition,
+    parentAngle: opts.parentAngle,
+    type: opts.type,
+    mass,
+    offset: { x: opts.offset.x, y: opts.offset.y },
+    angle: opts.angle,
+    anchor: {
+      x: 0.5,
+      y: 0.5,
+    },
+    size: rectangleSize,
+  });
+
+  const firstCircle = circleColliderComponent({
+    parentPosition: opts.parentPosition,
+    type: opts.type,
+    parentAngle: opts.parentAngle,
+    mass,
+    offset: { x: opts.offset.x, y: opts.offset.y - rectangleSize.height / 2 },
+    anchor: {
+      x: 0.5,
+      y: 0.5,
+    },
+    radius: opts.radius,
+  });
+
+  const secondCircle = circleColliderComponent({
+    parentPosition: opts.parentPosition,
+    type: opts.type,
+    parentAngle: opts.parentAngle,
+    mass,
+    offset: { x: opts.offset.x, y: opts.offset.y + rectangleSize.height / 2 },
+    anchor: {
+      x: 0.5,
+      y: 0.5,
+    },
+    radius: opts.radius,
+  });
+
+  mutRotateV2Around(firstCircle._position, opts.angle, rectangle._position);
+  mutRotateV2Around(secondCircle._position, opts.angle, rectangle._position);
+
+  return [firstCircle, rectangle, secondCircle];
 }
 
 export const ColliderBody = newSchema({
