@@ -3,7 +3,7 @@ import { newQuery, registerQuery, System, table, tryTable } from '../../tecs';
 import { Game } from '../game';
 import { Acceleration2, multV2, Position2, Velocity2 } from '../core';
 import { Map, Vector2 } from '../core';
-import { ColliderSet } from '../collision';
+import { ColliderBody } from '../collision';
 import { pView, View } from './components';
 
 const drawLine = (
@@ -21,7 +21,7 @@ const drawLine = (
 const debugViewQuery = newQuery(View, Position2);
 const debugPositionQuery = newQuery(Position2);
 const debugPViewQuery = newQuery(pView);
-const debugCollisionSetQuery = newQuery(ColliderSet, Position2);
+const debugCollisionSetQuery = newQuery(ColliderBody, Position2);
 
 export const globalDebugGraphicsDeferred: ((g: Graphics) => void)[] = [];
 
@@ -80,12 +80,12 @@ export const drawDebugLines = (
     if (options.collision) {
       for (let i = 0; i < collisionQuery.archetypes.length; i++) {
         const archetype = collisionQuery.archetypes[i];
-        const collisionSetT = table(archetype, ColliderSet);
+        const collisionSetT = table(archetype, ColliderBody);
 
         for (let j = 0; j < archetype.entities.length; j++) {
           const collisionSet = collisionSetT[j];
 
-          for (const collider of collisionSet.list) {
+          for (const collider of collisionSet.parts) {
             if (collider.shape.type === 'circle') {
               globalDebugGraphics.circle(
                 collider._position.x,

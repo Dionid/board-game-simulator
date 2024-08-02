@@ -8,7 +8,7 @@ import {
   subV2,
 } from '../core';
 import { Game } from '../game';
-import { Collider, ColliderSet } from './components';
+import { Collider, ColliderBody } from './components';
 
 export function translateCollider(collider: Component<typeof Collider>, positionDelta: Position2) {
   collider._position.x += positionDelta.x;
@@ -19,7 +19,7 @@ export function translateCollider(collider: Component<typeof Collider>, position
   }
 }
 
-export const positionColliderSetQuery = newQuery(ColliderSet, Position2);
+export const positionColliderSetQuery = newQuery(ColliderBody, Position2);
 
 export const transformCollider = (game: Game): System => {
   const query = registerQuery(game.essence, positionColliderSetQuery);
@@ -28,7 +28,7 @@ export const transformCollider = (game: Game): System => {
     for (let i = 0; i < query.archetypes.length; i++) {
       const archetype = query.archetypes[i];
 
-      const colliderSetT = table(archetype, ColliderSet);
+      const colliderSetT = table(archetype, ColliderBody);
       const positionT = table(archetype, Position2);
 
       const angleT = tryTable(archetype, Angle);
@@ -49,7 +49,7 @@ export const transformCollider = (game: Game): System => {
         //   console.log('positionDelta', positionDelta);
         // }
 
-        for (const collider of colliderSet.list) {
+        for (const collider of colliderSet.parts) {
           const angleDelta = collider.angle - collider._prev.angle;
           collider._prev.angle = collider.angle;
 

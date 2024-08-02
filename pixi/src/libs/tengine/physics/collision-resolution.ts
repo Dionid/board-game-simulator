@@ -78,16 +78,7 @@ export const dynamicRigidBodyCollisionResolution = (game: Game): System => {
       const bMass = bStatic || bKinematic ? 0 : b.collider.mass;
 
       // # Resolve penetration
-      resolvePenetration(
-        axis,
-        overlap,
-        a.colliderSet,
-        a.collider,
-        aPosition,
-        b.colliderSet,
-        b.collider,
-        bPosition
-      );
+      resolvePenetration(axis, overlap, a.colliderSet, aPosition, b.colliderSet, bPosition);
 
       // ## Dynamic vs Static or Kinematic
       if ((aDynamic && (bStatic || bKinematic)) || (bDynamic && (aStatic || aKinematic))) {

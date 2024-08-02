@@ -1,7 +1,7 @@
 import { newQuery, registerQuery, Entity, KindToType, System, table, emit } from '../../tecs';
 import { Position2 } from '../core/types';
 import { Game } from '../game';
-import { ColliderSet, CollisionsMonitoring } from './components';
+import { ColliderBody, CollisionsMonitoring } from './components';
 import { unfilteredColliding } from './topics';
 import { collision } from './collision';
 
@@ -10,8 +10,8 @@ import { collision } from './collision';
 // 1. Check if the next position collides with any other ColliderSet
 // 1. If collides create event
 
-export const checkCollisionsQuery = newQuery(CollisionsMonitoring, ColliderSet, Position2);
-export const collidersQuery = newQuery(ColliderSet, Position2);
+export const checkCollisionsQuery = newQuery(CollisionsMonitoring, ColliderBody, Position2);
+export const collidersQuery = newQuery(ColliderBody, Position2);
 
 export const checkNarrowCollisionSimple = (game: Game): System => {
   const forCheckQ = registerQuery(game.essence, checkCollisionsQuery);
@@ -20,14 +20,14 @@ export const checkNarrowCollisionSimple = (game: Game): System => {
   return () => {
     const forCheckColliders: {
       entity: Entity;
-      colliderSet: KindToType<typeof ColliderSet>;
+      colliderSet: KindToType<typeof ColliderBody>;
       position: KindToType<typeof Position2>;
     }[] = [];
 
     for (let i = 0; i < forCheckQ.archetypes.length; i++) {
       const archetype = forCheckQ.archetypes[i];
 
-      const colliderSetT = table(archetype, ColliderSet);
+      const colliderSetT = table(archetype, ColliderBody);
       const positionT = table(archetype, Position2);
 
       for (let i = 0; i < archetype.entities.length; i++) {
@@ -51,7 +51,7 @@ export const checkNarrowCollisionSimple = (game: Game): System => {
     for (let i = 0; i < allCollidersQ.archetypes.length; i++) {
       const archetype = allCollidersQ.archetypes[i];
 
-      const colliderSetTB = table(archetype, ColliderSet);
+      const colliderSetTB = table(archetype, ColliderBody);
 
       for (let a = 0; a < forCheckColliders.length; a++) {
         const entityA = forCheckColliders[a].entity;
@@ -66,8 +66,8 @@ export const checkNarrowCollisionSimple = (game: Game): System => {
 
           const colliderSetB = colliderSetTB[i];
 
-          for (const colliderA of colliderSetA.list) {
-            for (const colliderB of colliderSetB.list) {
+          for (const colliderA of colliderSetA.parts) {
+            for (const colliderB of colliderSetB.parts) {
               let result = collision(colliderA, colliderB);
 
               if (result && result.overlap >= 0) {

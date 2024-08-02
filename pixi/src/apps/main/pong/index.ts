@@ -9,7 +9,7 @@ import {
   CollisionsMonitoring,
   transformCollider,
   checkNarrowCollisionSimple,
-  ColliderSet,
+  ColliderBody,
   rectangleColliderComponent,
   Impenetrable,
   circleColliderComponent,
@@ -99,8 +99,8 @@ export async function initPongGame(parentElement: HTMLElement) {
   // # Collisions
   setComponent(game.essence, playerEntity, CollisionsMonitoring);
   setComponent(game.essence, playerEntity, Impenetrable);
-  setComponent(game.essence, playerEntity, ColliderSet, {
-    list: [
+  setComponent(game.essence, playerEntity, ColliderBody, {
+    parts: [
       rectangleColliderComponent({
         parentPosition: playerPosition,
         parentAngle: playerAngle,
@@ -172,8 +172,8 @@ export async function initPongGame(parentElement: HTMLElement) {
   // # Collisions
   // setComponent(game.essence, enemyEntity, CollisionsMonitoring);
   setComponent(game.essence, enemyEntity, Impenetrable);
-  setComponent(game.essence, enemyEntity, ColliderSet, {
-    list: [
+  setComponent(game.essence, enemyEntity, ColliderBody, {
+    parts: [
       verticesColliderComponent({
         parentPosition: enemyPosition,
         parentAngle: enemyAngle,
@@ -210,8 +210,8 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, wallEntity, Impenetrable);
   setComponent(game.essence, wallEntity, Position2, wallPosition);
   // # Collisions
-  setComponent(game.essence, wallEntity, ColliderSet, {
-    list: [
+  setComponent(game.essence, wallEntity, ColliderBody, {
+    parts: [
       lineColliderComponent({
         parentPosition: wallPosition,
         parentAngle: 0,
@@ -266,8 +266,8 @@ export async function initPongGame(parentElement: HTMLElement) {
   // # Collisions
   setComponent(game.essence, ballEntity, CollisionsMonitoring);
   // setComponent(game.essence, ballEntity, Impenetrable);
-  setComponent(game.essence, ballEntity, ColliderSet, {
-    list: [
+  setComponent(game.essence, ballEntity, ColliderBody, {
+    parts: [
       circleColliderComponent({
         parentPosition: ballPosition,
         parentAngle: 0,
@@ -321,8 +321,8 @@ export async function initPongGame(parentElement: HTMLElement) {
     },
   };
   setComponent(game.essence, capsuleEntity, Position2, capsulePosition);
-  setComponent(game.essence, capsuleEntity, ColliderSet, {
-    list: [
+  setComponent(game.essence, capsuleEntity, ColliderBody, {
+    parts: [
       circleColliderComponent({
         parentPosition: capsulePosition,
         parentAngle: 0,

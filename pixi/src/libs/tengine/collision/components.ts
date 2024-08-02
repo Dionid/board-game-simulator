@@ -301,6 +301,6 @@ export function circleColliderComponent(opts: {
   };
 }
 
-export const ColliderSet = newSchema({
-  list: arrayOf(Collider),
+export const ColliderBody = newSchema({
+  parts: arrayOf(Collider),
 });

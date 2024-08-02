@@ -9,7 +9,7 @@ import {
 import { Game } from '../game';
 import { Position2 } from '../core';
 import { unfilteredColliding } from './topics';
-import { ColliderSet, Impenetrable } from './components';
+import { ColliderBody, Impenetrable } from './components';
 import { resolvePenetration } from './resolvers';
 
 export const penetrationResolution = (game: Game): System => {
@@ -39,23 +39,14 @@ export const penetrationResolution = (game: Game): System => {
         continue;
       }
 
-      const aColliderSet = componentByEntity(game.essence, a.entity, ColliderSet);
-      const bColliderSet = componentByEntity(game.essence, b.entity, ColliderSet);
+      const aColliderSet = componentByEntity(game.essence, a.entity, ColliderBody);
+      const bColliderSet = componentByEntity(game.essence, b.entity, ColliderBody);
 
       if (!aColliderSet || !bColliderSet) {
         continue;
       }
 
-      resolvePenetration(
-        axis,
-        overlap,
-        a.colliderSet,
-        a.collider,
-        aPosition,
-        b.colliderSet,
-        b.collider,
-        bPosition
-      );
+      resolvePenetration(axis, overlap, a.colliderSet, aPosition, b.colliderSet, bPosition);
 
       continue;
     }
@@ -64,7 +55,7 @@ export const penetrationResolution = (game: Game): System => {
 
 // # World boundaries
 
-const characterPositionColliderQ = newQuery(Position2, ColliderSet);
+const characterPositionColliderQ = newQuery(Position2, ColliderBody);
 
 export const applyWorldBoundaries = (game: Game): System => {
   const query = registerQuery(game.essence, characterPositionColliderQ);
@@ -73,13 +64,13 @@ export const applyWorldBoundaries = (game: Game): System => {
     for (let i = 0; i < query.archetypes.length; i++) {
       const archetype = query.archetypes[i];
       const positionT = table(archetype, Position2);
-      const colliderSetT = table(archetype, ColliderSet);
+      const colliderSetT = table(archetype, ColliderBody);
 
       for (let j = 0; j < archetype.entities.length; j++) {
         const position = positionT[j];
         const colliderSet = colliderSetT[j];
 
-        for (const collider of colliderSet.list) {
+        for (const collider of colliderSet.parts) {
           // Add SAT
           // ...
         }
