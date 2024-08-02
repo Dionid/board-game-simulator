@@ -2,7 +2,7 @@ import { Container } from 'pixi.js';
 import { initGame, newGame } from '../../../libs/tengine/game';
 import { registerSystem, setComponent, spawnEntity } from '../../../libs/tecs';
 import { mapKeyboardInput, mapMouseInput } from '../../../libs/tengine/ecs';
-import { Dynamic, Kinematic, RigidBody } from 'libs/tengine/physics/components';
+import { Dynamic, Kinematic, RigidBody, Static } from 'libs/tengine/physics/components';
 import {
   Position2,
   Velocity2,
@@ -66,6 +66,71 @@ export async function initPongGame(parentElement: HTMLElement) {
     height: 100,
   };
 
+  // # World boundaries
+  const boundaries = [
+    {
+      x: 0,
+      y: 0,
+      length: game.world.size.width,
+      angle: -Math.PI / 2,
+    },
+    {
+      x: game.world.size.width,
+      y: 0,
+      length: game.world.size.height,
+      angle: 0,
+    },
+    {
+      x: game.world.size.width,
+      y: game.world.size.height,
+      length: game.world.size.width,
+      angle: Math.PI / 2,
+    },
+    {
+      x: 0,
+      y: game.world.size.height,
+      length: game.world.size.height,
+      angle: Math.PI,
+    },
+  ];
+
+  for (const boundary of boundaries) {
+    const boundaryEntity = spawnEntity(game.essence);
+
+    setComponent(game.essence, boundaryEntity, Position2, {
+      x: boundary.x,
+      y: boundary.y,
+      _prev: {
+        x: boundary.x,
+        y: boundary.y,
+      },
+    });
+    // setComponent(game.essence, boundaryEntity, Impenetrable);
+    setComponent(game.essence, boundaryEntity, ColliderBody, {
+      parts: [
+        lineColliderComponent({
+          parentPosition: boundary,
+          parentAngle: 0,
+          type: 'solid',
+          mass: 0,
+          offset: { x: 0, y: 0 },
+          angle: boundary.angle,
+          anchor: {
+            x: 0,
+            y: 0,
+          },
+          length: boundary.length,
+        }),
+      ],
+    });
+    setComponent(game.essence, boundaryEntity, RigidBody, {
+      elasticity: 0,
+      elasticityMode: 'average',
+    });
+    setComponent(game.essence, boundaryEntity, Static);
+    // debugger;
+  }
+
   // # Player
   const playerEntity = spawnEntity(game.essence);
 
@@ -87,9 +152,9 @@ export async function initPongGame(parentElement: HTMLElement) {
     x: 0,
     y: 0,
   });
-  setComponent(game.essence, playerEntity, DisableFriction);
+  // setComponent(game.essence, playerEntity, DisableFriction);
   setComponent(game.essence, playerEntity, Friction, {
-    value: 0,
+    value: 0.1,
   });
   setComponent(game.essence, playerEntity, Velocity2, {
     max: 10,
@@ -203,7 +268,7 @@ export async function initPongGame(parentElement: HTMLElement) {
         parentPosition: enemyPosition,
         parentAngle: enemyAngle,
         type: 'solid',
-        mass: 1,
+        mass: 0,
         offset: { x: 0, y: 0 },
         angle: Math.PI / 2,
         anchor: {
@@ -224,7 +289,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     elasticity: 1,
     elasticityMode: 'average',
   });
-  setComponent(game.essence, enemyEntity, Dynamic);
+  setComponent(game.essence, enemyEntity, Static);
 
   // # Wall
   const wallEntity = spawnEntity(game.essence);
@@ -243,12 +308,12 @@ export async function initPongGame(parentElement: HTMLElement) {
         parentPosition: wallPosition,
         parentAngle: 0,
         type: 'solid',
-        mass: 1,
+        mass: 0,
         offset: { x: 0, y: 0 },
-        angle: Math.PI / 4,
+        angle: -Math.PI / 2,
         anchor: {
           x: 0,
-          y: 0.5,
+          y: 0,
         },
         length: 150,
       }),
@@ -266,7 +331,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     elasticity: 1,
     elasticityMode: 'average',
   });
-  setComponent(game.essence, wallEntity, Dynamic);
+  setComponent(game.essence, wallEntity, Static);
 
   // # Ball
   const ballEntity = spawnEntity(game.essence);
@@ -316,7 +381,7 @@ export async function initPongGame(parentElement: HTMLElement) {
         parentPosition: ballPosition,
         parentAngle: 0,
         type: 'solid',
-        mass: 1,
+        mass: 0,
         offset: { x: 0, y: 0 },
         anchor: {
           x: 0.5,
@@ -331,7 +396,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     elasticity: 1,
     elasticityMode: 'average',
   });
-  setComponent(game.essence, ballEntity, Dynamic);
+  setComponent(game.essence, ballEntity, Static);
 
   // # Capsule
   const capsuleEntity = spawnEntity(game.essence);
@@ -376,7 +441,7 @@ export async function initPongGame(parentElement: HTMLElement) {
         parentPosition: capsulePosition,
         parentAngle: capsuleAngle,
         type: 'solid',
-        mass: 1,
+        mass: 0,
         offset: { x: 0, y: 0 },
         length: 100,
         radius: 25,
@@ -396,7 +461,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     elasticity: 1,
     elasticityMode: 'average',
   });
-  setComponent(game.essence, capsuleEntity, Dynamic);
+  setComponent(game.essence, capsuleEntity, Static);
 
   // # Triangle
   const isoscelesRightTriangleColliderEntity = spawnEntity(game.essence);
@@ -426,7 +491,7 @@ export async function initPongGame(parentElement: HTMLElement) {
         parentPosition: isoscelesRightTriangleColliderPosition,
         parentAngle: isoscelesRightTriangleColliderAngle,
         type: 'solid',
-        mass: 1,
+        mass: 0,
         offset: { x: 0, y: 0 },
         length: 100,
         angle: 0,
@@ -449,7 +514,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     elasticity: 1,
     elasticityMode: 'average',
   });
-  setComponent(game.essence, isoscelesRightTriangleColliderEntity, Dynamic);
+  setComponent(game.essence, isoscelesRightTriangleColliderEntity, Static);
 
   // # Triangle
   const triangleEntity = spawnEntity(game.essence);
@@ -474,7 +539,7 @@ export async function initPongGame(parentElement: HTMLElement) {
         parentPosition: trianglePosition,
         parentAngle: triangleAngle,
         type: 'solid',
-        mass: 1,
+        mass: 0,
         offset: { x: 0, y: 0 },
         vertices: [
           {
@@ -510,7 +575,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     elasticity: 1,
     elasticityMode: 'average',
   });
-  setComponent(game.essence, triangleEntity, Dynamic);
+  setComponent(game.essence, triangleEntity, Static);
 
   // # Triangle
   const centroidTriangleEntity = spawnEntity(game.essence);
@@ -535,7 +600,7 @@ export async function initPongGame(parentElement: HTMLElement) {
         parentPosition: centroidTrianglePosition,
         parentAngle: centroidTriangleAngle,
         type: 'solid',
-        mass: 1,
+        mass: 0,
         offset: { x: 0, y: 0 },
         a: {
           x: 0,
@@ -559,7 +624,7 @@ export async function initPongGame(parentElement: HTMLElement) {
         parentPosition: centroidTrianglePosition,
         parentAngle: centroidTriangleAngle,
         type: 'solid',
-        mass: 1,
+        mass: 0,
         offset: { x: 0, y: 0 },
         a: {
           x: 0,
@@ -593,7 +658,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     elasticity: 1,
     elasticityMode: 'average',
   });
-  setComponent(game.essence, centroidTriangleEntity, Dynamic);
+  setComponent(game.essence, centroidTriangleEntity, Static);
 
   // # Triangle
   const polygonEntity = spawnEntity(game.essence);
@@ -618,11 +683,11 @@ export async function initPongGame(parentElement: HTMLElement) {
         parentPosition: polygonPosition,
         parentAngle: polygonAngle,
         type: 'solid',
-        mass: 1,
+        mass: 0,
         offset: { x: 0, y: 0 },
         radius: 50,
         sides: 5,
-        angle: Math.PI,
+        angle: 0,
         anchor: {
           x: 0.5,
           y: 0.5,
@@ -642,7 +707,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     elasticity: 1,
     elasticityMode: 'average',
   });
-  setComponent(game.essence, polygonEntity, Dynamic);
+  setComponent(game.essence, polygonEntity, Static);
 
   // # Systems
   // ## Previous invalidation

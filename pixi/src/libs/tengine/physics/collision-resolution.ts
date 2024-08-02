@@ -131,8 +131,8 @@ export const dynamicRigidBodyCollisionResolution = (game: Game): System => {
         acc += cur.mass;
         return acc;
       }, 0);
-      const aInvertedMass = inverseMass(aTotalMass);
-      const bInvertedMass = inverseMass(bTotalMass);
+      const aInvertedTotalMass = inverseMass(aTotalMass);
+      const bInvertedTotalMass = inverseMass(bTotalMass);
       const combinedInvertedMass = aTotalMass + bTotalMass;
 
       // # If both bodies have infinite mass, skip
@@ -143,49 +143,21 @@ export const dynamicRigidBodyCollisionResolution = (game: Game): System => {
       // # Relative direction vector from a to b
       const normalizedDirection = axis;
 
-      // # Projection of velocities on the relative vector
+      // # Velocity Separation
       const velocitySeparation = dotV2(subV2(aVelocity, bVelocity), normalizedDirection);
-
-      // # Calculate the separation velocity with elasticity
       const velocitySeparationWithElasticity = -1 * velocitySeparation * elasticity;
-
       const velocitySeparationDiff = velocitySeparationWithElasticity - velocitySeparation;
 
+      // # Impulse
       const impulse = velocitySeparationDiff / combinedInvertedMass;
-
       const impulseVector = multV2(normalizedDirection, impulse);
 
-      aVelocity.x += impulseVector.x * aInvertedMass;
-      aVelocity.y += impulseVector.y * aInvertedMass;
+      // # Change velocity
+      aVelocity.x += impulseVector.x * aInvertedTotalMass;
+      aVelocity.y += impulseVector.y * aInvertedTotalMass;
 
-      bVelocity.x -= impulseVector.x * bInvertedMass;
-      bVelocity.y -= impulseVector.y * bInvertedMass;
-
-      // switch (a.collider.shape.type) {
-      //   case 'circle':
-      //     switch (b.collider.shape.type) {
-      //       case 'circle':
-      //         resolveCircleCircleCollision(
-      //           elasticity,
-      //           aPosition,
-      //           aVelocity,
-      //           aInvertedMass,
-      //           bPosition,
-      //           bVelocity,
-      //           bInvertedMass,
-      //           combinedInvertedMass
-      //         );
-      //         continue;
-      //       case 'vertices':
-      //         continue;
-      //       default:
-      //         return safeGuard(b.collider.shape);
-      //     }
-      //   case 'vertices':
-      //     continue;
-      //   default:
-      //     return safeGuard(a.collider.shape);
-      // }
+      bVelocity.x -= impulseVector.x * bInvertedTotalMass;
+      bVelocity.y -= impulseVector.y * bInvertedTotalMass;
     }
   };
 };

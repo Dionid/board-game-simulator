@@ -9,9 +9,12 @@
 1. ~~Add Rotation to Colliders rotation (changing position and vertices)~~
 1. ~~Add Normal Axes to Collider~~
 1. ~~Line~~
-1. Polygon on Vertices
+1. ~~Polygon on Vertices~~
+1. ~~World bounds~~
+1. ~~Fix line collision tremble~~
 1. Collision Queries
-1. World bounds
+1. Character movement
+1. Simulate containment
 
 # Roadmap
 
@@ -31,7 +34,7 @@
     1. ~~Pairs + Dedup~~
     1. ~~Awaken / Asleep~~
     1. ~~Triangle on Vertices~~
-    1. Polygon on Vertices
+    1. ~~Polygon on Vertices~~
     1. Collision Queries
     1. Angular velocity
     1. World Bounds
@@ -40,8 +43,6 @@
     1. Chamfer
 1. Physics
     1. Rotation
-    1. OnComponentAdded
-        1. Check in physics, that there is no RigidBodyType + Impenetrable
     1. Joints
 1. Character movement
     1. Move and slide

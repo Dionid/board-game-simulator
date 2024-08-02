@@ -66,18 +66,20 @@ export function getCircleAxesAndVertices(
   };
 }
 
-export function overlapAxes(
-  verticesA: Vector2[],
-  verticesB: Vector2[],
-  axes: Vector2[]
-): {
-  overlap: number;
-  axis: Vector2;
-} {
+export function overlapAxes(verticesA: Vector2[], verticesB: Vector2[], axes: Vector2[]) {
+  let aOverlapMin = 0;
+  let aOverlapMax = 0;
+  let bOverlapMin = 0;
+  let bOverlapMax = 0;
+
   if (axes.length === 0 || verticesA.length === 0 || verticesB.length === 0) {
     return {
       overlap: 0,
       axis: { x: 0, y: 0 },
+      aOverlapMin,
+      aOverlapMax,
+      bOverlapMin,
+      bOverlapMax,
     };
   }
 
@@ -90,11 +92,6 @@ export function overlapAxes(
   let overlapMin: number = Number.MAX_VALUE;
   let overlapAxisX = axes[0].x;
   let overlapAxisY = axes[0].y;
-
-  let aOverlapMin = 0;
-  let aOverlapMax = 0;
-  let bOverlapMin = 0;
-  let bOverlapMax = 0;
 
   for (let i = 0; i < axes.length; i++) {
     const axis = axes[i];
@@ -147,8 +144,9 @@ export function overlapAxes(
 
   // # Check for containment
   if (
-    (aOverlapMax > bOverlapMax && aOverlapMin < bOverlapMin) ||
-    (bOverlapMax > aOverlapMax && bOverlapMin < aOverlapMin)
+    axes.length > 1 && // TODO: this hack for lines
+    ((aOverlapMax > bOverlapMax && aOverlapMin < bOverlapMin) ||
+      (bOverlapMax > aOverlapMax && bOverlapMin < aOverlapMin))
   ) {
     const mins = Math.abs(aOverlapMin - bOverlapMin);
     const maxes = Math.abs(aOverlapMax - bOverlapMax);
@@ -166,6 +164,10 @@ export function overlapAxes(
       x: overlapAxisX,
       y: overlapAxisY,
     },
+    aOverlapMin,
+    aOverlapMax,
+    bOverlapMin,
+    bOverlapMax,
   };
 }
 
@@ -196,10 +198,25 @@ export function sat(
 
   const minOverlap = overlapAB.overlap < overlapBA.overlap ? overlapAB : overlapBA;
 
+  // if (
+  //   (minOverlap.aOverlapMax > minOverlap.bOverlapMax &&
+  //     minOverlap.aOverlapMin < minOverlap.bOverlapMin) ||
+  //   (minOverlap.bOverlapMax > minOverlap.aOverlapMax &&
+  //     minOverlap.bOverlapMin < minOverlap.aOverlapMin)
+  // ) {
+  //   const mins = Math.abs(minOverlap.aOverlapMin - minOverlap.bOverlapMin);
+  //   const maxes = Math.abs(minOverlap.aOverlapMax - minOverlap.bOverlapMax);
+
+  //   if (mins < maxes) {
+  //     minOverlap.overlap += mins;
+  //   } else {
+  //     minOverlap.overlap += maxes;
+  //   }
+  // }
+
   // # Ensure minOverlap is pointing from A to B
   const centerAToCenterB = subV2(bPosition, aPosition);
   const dot = dotV2(centerAToCenterB, minOverlap.axis);
-
   if (dot > 0) {
     minOverlap.axis.x *= -1;
     minOverlap.axis.y *= -1;

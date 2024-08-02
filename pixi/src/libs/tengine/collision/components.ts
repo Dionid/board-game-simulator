@@ -467,12 +467,11 @@ export function polygonColliderComponent(opts: {
   };
 
   const theta = (2 * Math.PI) / sides;
-  const offset = theta * 0.5;
 
   const vertices: Axes2 = [];
 
   for (var i = 0; i < sides; i += 1) {
-    const angle = offset + i * theta;
+    const angle = i * theta;
     const xx = Math.cos(angle) * radius;
     const yy = Math.sin(angle) * radius;
 
