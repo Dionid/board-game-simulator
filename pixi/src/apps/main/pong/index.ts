@@ -18,6 +18,7 @@ import {
   capsuleColliderComponent,
   filterCollisionEvents,
   isoscelesRightTriangleColliderComponent,
+  centroidTriangleColliderComponent,
 } from 'libs/tengine/collision';
 import {
   applyRigidBodyAccelerationToVelocity,
@@ -81,26 +82,26 @@ export async function initPongGame(parentElement: HTMLElement) {
     y: 0,
   });
   // # Visuals
-  setComponent(game.essence, playerEntity, View, {
-    offset: { x: 0, y: 0 },
-    scale: { x: 1, y: 1 },
-    rotation: Math.PI / 2,
-    anchor: {
-      x: 0.5,
-      y: 0.5,
-    },
-    model: {
-      type: 'graphics',
-      color: 'blue',
-      shape: {
-        type: 'rectangle',
-        size: {
-          width: characterSize.width,
-          height: characterSize.height,
-        },
-      },
-    },
-  });
+  // setComponent(game.essence, playerEntity, View, {
+  //   offset: { x: 0, y: 0 },
+  //   scale: { x: 1, y: 1 },
+  //   rotation: Math.PI / 2,
+  //   anchor: {
+  //     x: 0.5,
+  //     y: 0.5,
+  //   },
+  //   model: {
+  //     type: 'graphics',
+  //     color: 'blue',
+  //     shape: {
+  //       type: 'rectangle',
+  //       size: {
+  //         width: characterSize.width,
+  //         height: characterSize.height,
+  //       },
+  //     },
+  //   },
+  // });
   // # Collisions
   setComponent(game.essence, playerEntity, CollisionsMonitoring);
   // setComponent(game.essence, playerEntity, Impenetrable);
@@ -154,26 +155,26 @@ export async function initPongGame(parentElement: HTMLElement) {
     y: 0,
   });
   // # Visuals
-  setComponent(game.essence, enemyEntity, View, {
-    offset: { x: 0, y: 0 },
-    scale: { x: 1, y: 1 },
-    rotation: Math.PI / 2,
-    anchor: {
-      x: 0.5,
-      y: 0.5,
-    },
-    model: {
-      type: 'graphics',
-      color: 'red',
-      shape: {
-        type: 'rectangle',
-        size: {
-          width: characterSize.width,
-          height: characterSize.height,
-        },
-      },
-    },
-  });
+  // setComponent(game.essence, enemyEntity, View, {
+  //   offset: { x: 0, y: 0 },
+  //   scale: { x: 1, y: 1 },
+  //   rotation: Math.PI / 2,
+  //   anchor: {
+  //     x: 0.5,
+  //     y: 0.5,
+  //   },
+  //   model: {
+  //     type: 'graphics',
+  //     color: 'red',
+  //     shape: {
+  //       type: 'rectangle',
+  //       size: {
+  //         width: characterSize.width,
+  //         height: characterSize.height,
+  //       },
+  //     },
+  //   },
+  // });
   // # Collisions
   setComponent(game.essence, enemyEntity, CollisionsMonitoring);
   // setComponent(game.essence, enemyEntity, Impenetrable);
@@ -247,23 +248,23 @@ export async function initPongGame(parentElement: HTMLElement) {
   // # Ball
   const ballEntity = spawnEntity(game.essence);
   setComponent(game.essence, ballEntity, Ball);
-  setComponent(game.essence, ballEntity, View, {
-    offset: { x: 0, y: 0 },
-    scale: { x: 1, y: 1 },
-    rotation: 0,
-    anchor: {
-      x: 0.5,
-      y: 0.5,
-    },
-    model: {
-      type: 'graphics',
-      color: '0xfff',
-      shape: {
-        type: 'circle',
-        radius: 25,
-      },
-    },
-  });
+  // setComponent(game.essence, ballEntity, View, {
+  //   offset: { x: 0, y: 0 },
+  //   scale: { x: 1, y: 1 },
+  //   rotation: 0,
+  //   anchor: {
+  //     x: 0.5,
+  //     y: 0.5,
+  //   },
+  //   model: {
+  //     type: 'graphics',
+  //     color: '0xfff',
+  //     shape: {
+  //       type: 'circle',
+  //       radius: 25,
+  //     },
+  //   },
+  // });
   setComponent(game.essence, ballEntity, Speed, { value: 1 });
   setComponent(game.essence, ballEntity, Acceleration2, {
     x: 0,
@@ -367,33 +368,62 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, capsuleEntity, Dynamic);
 
   // # Triangle
-  const triangleEntity = spawnEntity(game.essence);
-  // setComponent(game.essence, triangleEntity, Wall);
-  // // # View
-  // setComponent(game.essence, triangleEntity, View, {
-  //   offset: { x: 0, y: 0 },
-  //   scale: { x: 1, y: 1 },
-  //   rotation: 0,
-  //   model: {
-  //     type: 'graphics',
-  //     color: '0xfff',
-  //     shape: {
-  //       anchor: {
-  //         x: 0.5,
-  //         y: 0.5,
-  //       },
-  //       type: 'triangle',
-  //       length: 100,
-  //       radius: 25,
-  //     },
-  //   },
-  // });
-  const trianglePosition = {
+  const isoscelesRightTriangleColliderEntity = spawnEntity(game.essence);
+  const isoscelesRightTriangleColliderPosition = {
     x: 600,
     y: 300,
     _prev: {
       x: 400,
       y: 200,
+    },
+  };
+  setComponent(
+    game.essence,
+    isoscelesRightTriangleColliderEntity,
+    Position2,
+    isoscelesRightTriangleColliderPosition
+  );
+  const isoscelesRightTriangleColliderAngle = 0;
+  setComponent(game.essence, isoscelesRightTriangleColliderEntity, Angle, {
+    value: isoscelesRightTriangleColliderAngle,
+    _prev: isoscelesRightTriangleColliderAngle,
+  });
+  setComponent(game.essence, isoscelesRightTriangleColliderEntity, CollisionsMonitoring);
+  setComponent(game.essence, isoscelesRightTriangleColliderEntity, ColliderBody, {
+    parts: [
+      isoscelesRightTriangleColliderComponent({
+        parentPosition: isoscelesRightTriangleColliderPosition,
+        parentAngle: isoscelesRightTriangleColliderAngle,
+        type: 'solid',
+        mass: 1,
+        offset: { x: 0, y: 0 },
+        length: 100,
+        angle: 0,
+        anchor: {
+          x: 0.5,
+          y: 0.5,
+        },
+      }),
+    ],
+  });
+  setComponent(game.essence, isoscelesRightTriangleColliderEntity, Velocity2, {
+    x: 0,
+    y: 0,
+  });
+  setComponent(game.essence, isoscelesRightTriangleColliderEntity, RigidBody, {
+    elasticity: 1,
+    elasticityMode: 'average',
+  });
+  setComponent(game.essence, isoscelesRightTriangleColliderEntity, Dynamic);
+
+  // # Triangle
+  const triangleEntity = spawnEntity(game.essence);
+  const trianglePosition = {
+    x: 800,
+    y: 300,
+    _prev: {
+      x: 800,
+      y: 300,
     },
   };
   setComponent(game.essence, triangleEntity, Position2, trianglePosition);
@@ -405,13 +435,26 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, triangleEntity, CollisionsMonitoring);
   setComponent(game.essence, triangleEntity, ColliderBody, {
     parts: [
-      isoscelesRightTriangleColliderComponent({
+      verticesColliderComponent({
         parentPosition: trianglePosition,
         parentAngle: triangleAngle,
         type: 'solid',
         mass: 1,
         offset: { x: 0, y: 0 },
-        length: 100,
+        vertices: [
+          {
+            x: 0,
+            y: 0,
+          },
+          {
+            x: 100,
+            y: 0,
+          },
+          {
+            x: 50,
+            y: 100,
+          },
+        ],
         angle: 0,
         anchor: {
           x: 0.5,
@@ -429,6 +472,61 @@ export async function initPongGame(parentElement: HTMLElement) {
     elasticityMode: 'average',
   });
   setComponent(game.essence, triangleEntity, Dynamic);
+
+  // # Triangle
+  const centroidTriangleEntity = spawnEntity(game.essence);
+  const centroidTrianglePosition = {
+    x: 1000,
+    y: 300,
+    _prev: {
+      x: 1000,
+      y: 300,
+    },
+  };
+  setComponent(game.essence, centroidTriangleEntity, Position2, centroidTrianglePosition);
+  const centroidTriangleAngle = 0;
+  setComponent(game.essence, centroidTriangleEntity, Angle, {
+    value: centroidTriangleAngle,
+    _prev: centroidTriangleAngle,
+  });
+  setComponent(game.essence, centroidTriangleEntity, CollisionsMonitoring);
+  setComponent(game.essence, centroidTriangleEntity, ColliderBody, {
+    parts: [
+      centroidTriangleColliderComponent({
+        parentPosition: centroidTrianglePosition,
+        parentAngle: centroidTriangleAngle,
+        type: 'solid',
+        mass: 1,
+        offset: { x: 0, y: 0 },
+        a: {
+          x: 0,
+          y: 0,
+        },
+        b: {
+          x: 100,
+          y: 0,
+        },
+        c: {
+          x: 50,
+          y: 100,
+        },
+        angle: 0,
+        anchor: {
+          x: 0.5,
+          y: 0.5,
+        },
+      }),
+    ],
+  });
+  setComponent(game.essence, centroidTriangleEntity, Velocity2, {
+    x: 0,
+    y: 0,
+  });
+  setComponent(game.essence, centroidTriangleEntity, RigidBody, {
+    elasticity: 1,
+    elasticityMode: 'average',
+  });
+  setComponent(game.essence, centroidTriangleEntity, Dynamic);
 
   // # Systems
   // ## Caches invalidation

@@ -8,6 +8,7 @@ import {
   subV2,
   unitV2,
   Vector2,
+  Vertex2,
   Vertices2,
 } from '../core';
 
@@ -194,35 +195,6 @@ export function isoscelesRightTriangleColliderComponent(opts: {
   anchor: Vector2;
   length: number;
 }): Component<typeof Collider> {
-  // const origin = {
-  //   x: opts.parentPosition.x + opts.offset.x,
-  //   y: opts.parentPosition.y + opts.offset.y,
-  // };
-
-  // const xyOffset = Math.sqrt(opts.length ** 2 / 2);
-
-  // const verticesStartPosition = {
-  //   x: origin.x - xyOffset * opts.anchor.x,
-  //   y: origin.y - xyOffset * opts.anchor.y,
-  // };
-
-  // const colliderVertices = [
-  //   {
-  //     x: verticesStartPosition.x,
-  //     y: verticesStartPosition.y,
-  //   },
-  //   {
-  //     x: verticesStartPosition.x + xyOffset,
-  //     y: verticesStartPosition.y + xyOffset,
-  //   },
-  //   {
-  //     x: verticesStartPosition.x - xyOffset,
-  //     y: verticesStartPosition.y + xyOffset,
-  //   },
-  // ];
-
-  // const xyOffset = Math.sqrt(opts.length ** 2 / 2);
-
   const origin = {
     x: opts.parentPosition.x + opts.offset.x,
     y: opts.parentPosition.y + opts.offset.y,
@@ -268,6 +240,70 @@ export function isoscelesRightTriangleColliderComponent(opts: {
     },
     _position: origin,
     _vertices: colliderVertices,
+    _normalAxes: normalAxes,
+    _prev: {
+      angle: opts.angle,
+      offset: {
+        x: opts.offset.x,
+        y: opts.offset.y,
+      },
+    },
+  };
+
+  return component;
+}
+
+export function centroidTriangleColliderComponent(opts: {
+  parentPosition: Vector2; // TODO: remove this
+  parentAngle: number; // TODO: remove this
+  type: 'solid' | 'sensor';
+  mass: number;
+  offset: Vector2;
+  angle: number;
+  anchor: Vector2;
+  a: Vertex2;
+  b: Vertex2;
+  c: Vertex2;
+}): Component<typeof Collider> {
+  const { a, b, c } = opts;
+
+  const origin = {
+    x: opts.parentPosition.x + opts.offset.x,
+    y: opts.parentPosition.y + opts.offset.y,
+  };
+
+  const centroidX = (a.x + b.x + c.x) / 3;
+  const centroidY = (a.y + b.y + c.y) / 3;
+
+  const verticesStartPosition = {
+    x: origin.x - 2 * centroidX * opts.anchor.x,
+    y: origin.y - 2 * centroidY * opts.anchor.y,
+  };
+
+  const vertices = [a, b, c];
+
+  // # Apply verticesStartPosition to vertices
+  for (let i = 0; i < vertices.length; i++) {
+    vertices[i].x += verticesStartPosition.x;
+    vertices[i].y += verticesStartPosition.y;
+  }
+
+  mutRotateVertices2Around(vertices, opts.angle, origin);
+  mutRotateVertices2Around(vertices, opts.parentAngle, opts.parentPosition);
+
+  const normalAxes = normalAxes2(vertices);
+
+  const component = {
+    type: opts.type,
+    mass: opts.mass,
+    offset: opts.offset,
+    angle: opts.angle,
+    shape: {
+      type: 'vertices' as const,
+      anchor: opts.anchor,
+    },
+    _position: origin,
+    _vertices: vertices,
     _normalAxes: normalAxes,
     _prev: {
       angle: opts.angle,
