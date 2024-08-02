@@ -28,7 +28,7 @@
     1. ~~Capsule on Compound~~
     1. ~~Pairs + Dedup~~
     1. ~~Awaken / Asleep~~
-    1. Triangle on Vertices
+    1. ~~Triangle on Vertices~~
     1. Polygon on Vertices
     1. Collision Queries
     1. Angular velocity

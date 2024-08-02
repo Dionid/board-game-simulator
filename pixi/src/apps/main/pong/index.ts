@@ -508,9 +508,33 @@ export async function initPongGame(parentElement: HTMLElement) {
         },
         c: {
           x: 50,
-          y: 100,
+          y: 90,
         },
         angle: 0,
+        anchor: {
+          x: 0.5,
+          y: 0.5,
+        },
+      }),
+      centroidTriangleColliderComponent({
+        parentPosition: centroidTrianglePosition,
+        parentAngle: centroidTriangleAngle,
+        type: 'solid',
+        mass: 1,
+        offset: { x: 0, y: 0 },
+        a: {
+          x: 0,
+          y: 0,
+        },
+        b: {
+          x: 100,
+          y: 0,
+        },
+        c: {
+          x: 50,
+          y: 90,
+        },
+        angle: Math.PI,
         anchor: {
           x: 0.5,
           y: 0.5,
