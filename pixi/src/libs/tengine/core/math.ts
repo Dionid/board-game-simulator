@@ -186,4 +186,5 @@ export type Velocity2 = Vector2;
 export const Velocity2 = newSchema({
   x: number,
   y: number,
+  max: number,
 });

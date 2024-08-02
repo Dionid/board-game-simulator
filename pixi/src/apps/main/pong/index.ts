@@ -78,6 +78,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     y: 0,
   });
   setComponent(game.essence, playerEntity, Velocity2, {
+    max: 10,
     x: 0,
     y: 0,
   });
@@ -151,6 +152,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     y: 0,
   });
   setComponent(game.essence, enemyEntity, Velocity2, {
+    max: 10,
     x: 0,
     y: 0,
   });
@@ -236,6 +238,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     ],
   });
   setComponent(game.essence, wallEntity, Velocity2, {
+    max: 10,
     x: 0,
     y: 0,
   });
@@ -271,6 +274,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     y: 0,
   });
   setComponent(game.essence, ballEntity, Velocity2, {
+    max: 10,
     x: 0,
     y: 0,
   });
@@ -358,6 +362,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     ],
   });
   setComponent(game.essence, capsuleEntity, Velocity2, {
+    max: 10,
     x: 0,
     y: 0,
   });
@@ -407,6 +412,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     ],
   });
   setComponent(game.essence, isoscelesRightTriangleColliderEntity, Velocity2, {
+    max: 10,
     x: 0,
     y: 0,
   });
@@ -464,6 +470,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     ],
   });
   setComponent(game.essence, triangleEntity, Velocity2, {
+    max: 10,
     x: 0,
     y: 0,
   });
@@ -543,6 +550,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     ],
   });
   setComponent(game.essence, centroidTriangleEntity, Velocity2, {
+    max: 10,
     x: 0,
     y: 0,
   });

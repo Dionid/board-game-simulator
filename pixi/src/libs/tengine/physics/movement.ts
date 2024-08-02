@@ -24,6 +24,20 @@ export const applyRigidBodyAccelerationToVelocity = (game: Game): System => {
 
         velocity.x += acceleration.x * deltaTime;
         velocity.y += acceleration.y * deltaTime;
+
+        if (velocity.max > 0) {
+          if (velocity.x > velocity.max) {
+            velocity.x = velocity.max;
+          } else if (velocity.x < -velocity.max) {
+            velocity.x = -velocity.max;
+          }
+
+          if (velocity.y > velocity.max) {
+            velocity.y = velocity.max;
+          } else if (velocity.y < -velocity.max) {
+            velocity.y = -velocity.max;
+          }
+        }
       }
     }
   };
