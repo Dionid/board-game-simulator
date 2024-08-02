@@ -10,17 +10,24 @@ export function resolvePenetration(
   aColliderSet: Component<typeof ColliderBody>,
   aPosition: Position2,
   bColliderSet: Component<typeof ColliderBody>,
-  bPosition: Position2
+  bPosition: Position2,
+  options: {
+    aMass?: number;
+    bMass?: number;
+  } = {}
 ) {
-  // TODO: precalculate
-  const aTotalMass = aColliderSet.parts.reduce((acc, cur) => {
-    acc += cur.mass;
-    return acc;
-  }, 0);
-  const bTotalMass = bColliderSet.parts.reduce((acc, cur) => {
-    acc += cur.mass;
-    return acc;
-  }, 0);
+  const aTotalMass =
+    options.aMass ??
+    aColliderSet.parts.reduce((acc, cur) => {
+      acc += cur.mass;
+      return acc;
+    }, 0);
+  const bTotalMass =
+    options.bMass ??
+    bColliderSet.parts.reduce((acc, cur) => {
+      acc += cur.mass;
+      return acc;
+    }, 0);
 
   const aInvertedMass = inverseMass(aTotalMass);
   const bInvertedMass = inverseMass(bTotalMass);

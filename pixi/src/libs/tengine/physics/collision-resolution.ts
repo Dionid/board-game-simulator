@@ -1,7 +1,7 @@
 import { componentByEntity, registerTopic, System } from '../../tecs';
 import { Game } from '../game';
 import { Position2 } from '../core/types';
-import { Impenetrable, resolvePenetration, colliding } from '../collision';
+import { Impenetrable, resolvePenetration, colliding, unfilteredColliding } from '../collision';
 import { Dynamic, Kinematic, RigidBody, Static } from './components';
 import { dotV2, multV2, subV2, Velocity2 } from '../core';
 import { inverseMass } from '../collision/math';
@@ -10,6 +10,7 @@ import { safeGuard } from 'libs/tecs/switch';
 // # Resolve Dynamic bodies Collision
 
 export const dynamicRigidBodyCollisionResolution = (game: Game): System => {
+  // const topic = registerTopic(game.essence, unfilteredColliding);
   const topic = registerTopic(game.essence, colliding);
 
   return () => {
@@ -72,11 +73,12 @@ export const dynamicRigidBodyCollisionResolution = (game: Game): System => {
       }
 
       // # Resolve penetration
-      resolvePenetration(axis, overlap, a.colliderSet, aPosition, b.colliderSet, bPosition);
+      resolvePenetration(axis, overlap, a.colliderSet, aPosition, b.colliderSet, bPosition, {
+        aMass: aDynamic ? undefined : 0, // force 0 mass for not Dynamic
+        bMass: bDynamic ? undefined : 0, // force 0 mass for not Dynamic
+      });
 
-      // # Dynamic bodies collision response
-
-      // ## Dynamic vs Static or Kinematic
+      // # Dynamic vs Static or Kinematic
       if ((aDynamic && (bStatic || bKinematic)) || (bDynamic && (aStatic || aKinematic))) {
         continue;
       }
@@ -88,8 +90,7 @@ export const dynamicRigidBodyCollisionResolution = (game: Game): System => {
         continue;
       }
 
-      // ## Dynamic vs Dynamic
-
+      // # Dynamic vs Dynamic
       const elasticityMode =
         aRigidBody.elasticityMode === 'max' || bRigidBody.elasticityMode === 'max'
           ? 'max'
@@ -123,11 +124,11 @@ export const dynamicRigidBodyCollisionResolution = (game: Game): System => {
         continue;
       }
 
-      const aTotalMass = a.colliderSet.parts.reduce((acc, cur) => {
+      let aTotalMass = a.colliderSet.parts.reduce((acc, cur) => {
         acc += cur.mass;
         return acc;
       }, 0);
-      const bTotalMass = b.colliderSet.parts.reduce((acc, cur) => {
+      let bTotalMass = b.colliderSet.parts.reduce((acc, cur) => {
         acc += cur.mass;
         return acc;
       }, 0);

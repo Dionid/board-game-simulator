@@ -441,7 +441,7 @@ export async function initPongGame(parentElement: HTMLElement) {
         parentPosition: capsulePosition,
         parentAngle: capsuleAngle,
         type: 'solid',
-        mass: 0,
+        mass: 1,
         offset: { x: 0, y: 0 },
         length: 100,
         radius: 25,
@@ -462,6 +462,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     elasticityMode: 'average',
   });
   setComponent(game.essence, capsuleEntity, Static);
+  // setComponent(game.essence, capsuleEntity, Dynamic);
 
   // # Triangle
   const isoscelesRightTriangleColliderEntity = spawnEntity(game.essence);

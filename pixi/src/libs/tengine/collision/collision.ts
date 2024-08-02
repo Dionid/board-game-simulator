@@ -32,8 +32,6 @@ export function collision(
             colliderB
           );
 
-          // console.log(colliderB._origin);
-
           return sat(
             colliderA._position,
             circleVertices,
