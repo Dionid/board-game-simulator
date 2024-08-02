@@ -27,6 +27,7 @@ import {
   filterCollisionEvents,
   isoscelesRightTriangleColliderComponent,
   centroidTriangleColliderComponent,
+  polygonColliderComponent,
 } from 'libs/tengine/collision';
 import {
   applyRigidBodyAccelerationToVelocity,
@@ -594,8 +595,57 @@ export async function initPongGame(parentElement: HTMLElement) {
   });
   setComponent(game.essence, centroidTriangleEntity, Dynamic);
 
+  // # Triangle
+  const polygonEntity = spawnEntity(game.essence);
+  const polygonPosition = {
+    x: 1200,
+    y: 300,
+    _prev: {
+      x: 1000,
+      y: 300,
+    },
+  };
+  setComponent(game.essence, polygonEntity, Position2, polygonPosition);
+  const polygonAngle = 0;
+  setComponent(game.essence, polygonEntity, Angle, {
+    value: polygonAngle,
+    _prev: polygonAngle,
+  });
+  setComponent(game.essence, polygonEntity, CollisionsMonitoring);
+  setComponent(game.essence, polygonEntity, ColliderBody, {
+    parts: [
+      polygonColliderComponent({
+        parentPosition: polygonPosition,
+        parentAngle: polygonAngle,
+        type: 'solid',
+        mass: 1,
+        offset: { x: 0, y: 0 },
+        radius: 50,
+        sides: 5,
+        angle: Math.PI,
+        anchor: {
+          x: 0.5,
+          y: 0.5,
+        },
+      }),
+    ],
+  });
+  setComponent(game.essence, polygonEntity, Friction, {
+    value: 0,
+  });
+  setComponent(game.essence, polygonEntity, Velocity2, {
+    max: 10,
+    x: 0,
+    y: 0,
+  });
+  setComponent(game.essence, polygonEntity, RigidBody, {
+    elasticity: 1,
+    elasticityMode: 'average',
+  });
+  setComponent(game.essence, polygonEntity, Dynamic);
+
   // # Systems
-  // ## Caches invalidation
+  // ## Previous invalidation
   registerSystem(game.essence, updatePrevious(game));
 
   // ## Input

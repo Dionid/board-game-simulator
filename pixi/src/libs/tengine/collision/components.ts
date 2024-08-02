@@ -5,6 +5,7 @@ import {
   mutRotateVertices2Around,
   normalAxes2,
   normalV2,
+  round,
   subV2,
   unitV2,
   Vector2,
@@ -427,6 +428,75 @@ export function circleColliderComponent(opts: {
     },
     _position: position,
     _vertices: colliderVertices,
+    _normalAxes: normalAxes,
+    _prev: {
+      angle: 0,
+      offset: {
+        x: opts.offset.x,
+        y: opts.offset.y,
+      },
+    },
+  };
+}
+
+export function polygonColliderComponent(opts: {
+  parentPosition: Vector2; // TODO: remove this
+  parentAngle: number;
+  type: 'solid' | 'sensor';
+  mass: number;
+  offset: Vector2;
+  anchor: Vector2;
+  radius: number;
+  angle: number;
+  sides: number;
+}): Component<typeof Collider> {
+  const { sides, radius, anchor } = opts;
+
+  if (sides < 3) {
+    return circleColliderComponent(opts);
+  }
+
+  const position = {
+    x: opts.parentPosition.x + opts.offset.x,
+    y: opts.parentPosition.y + opts.offset.y,
+  };
+
+  const verticesStaringPosition = {
+    x: position.x + radius - 2 * radius * anchor.x,
+    y: position.y + radius - 2 * radius * anchor.y,
+  };
+
+  const theta = (2 * Math.PI) / sides;
+  const offset = theta * 0.5;
+
+  const vertices: Axes2 = [];
+
+  for (var i = 0; i < sides; i += 1) {
+    const angle = offset + i * theta;
+    const xx = Math.cos(angle) * radius;
+    const yy = Math.sin(angle) * radius;
+
+    vertices.push({
+      x: verticesStaringPosition.x + round(xx, 3),
+      y: verticesStaringPosition.y + round(yy, 3),
+    });
+  }
+
+  const normalAxes = normalAxes2(vertices);
+
+  // mutRotateV2Around(position, opts.parentAngle, opts.parentPosition);
+
+  return {
+    type: opts.type,
+    mass: opts.mass,
+    offset: opts.offset,
+    angle: 0,
+    shape: {
+      type: 'vertices' as const,
+      anchor: opts.anchor,
+    },
+    _position: position,
+    _vertices: vertices,
     _normalAxes: normalAxes,
     _prev: {
       angle: 0,

@@ -9,6 +9,8 @@
 1. ~~Add Rotation to Colliders rotation (changing position and vertices)~~
 1. ~~Add Normal Axes to Collider~~
 1. ~~Line~~
+1. Polygon on Vertices
+1. Collision Queries
 1. World bounds
 
 # Roadmap
