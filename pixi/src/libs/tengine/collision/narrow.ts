@@ -66,8 +66,12 @@ export const checkNarrowCollisionSimple = (game: Game): System => {
 
           const colliderSetB = colliderSetTB[i];
 
-          for (const colliderA of colliderSetA.parts) {
-            for (const colliderB of colliderSetB.parts) {
+          for (let acId = 0; acId < colliderSetA.parts.length; acId++) {
+            const colliderA = colliderSetA.parts[acId];
+
+            for (let bcId = 0; bcId < colliderSetB.parts.length; bcId++) {
+              const colliderB = colliderSetB.parts[bcId];
+
               let result = collision(colliderA, colliderB);
 
               if (result && result.overlap >= 0) {
@@ -81,11 +85,13 @@ export const checkNarrowCollisionSimple = (game: Game): System => {
                       entity: entityA,
                       colliderSet: colliderSetA,
                       collider: colliderA,
+                      colliderId: acId,
                     },
                     b: {
                       entity: entityB,
                       colliderSet: colliderSetB,
                       collider: colliderB,
+                      colliderId: bcId,
                     },
                   },
                   true

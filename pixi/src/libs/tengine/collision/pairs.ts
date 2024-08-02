@@ -24,7 +24,14 @@ export const filterCollisionEvents = (game: Game): System => {
     for (const event of unfilteredCollidingT) {
       const { a, b } = event;
 
-      const index = [a.entity, b.entity].sort().join('-');
+      const index = [a, b]
+        .sort((a, b) => {
+          return a.entity - b.entity;
+        })
+        .map((ent) => {
+          return `${ent.entity}-${ent.colliderId}`;
+        })
+        .join('-');
 
       if (temp[index]) {
         continue;

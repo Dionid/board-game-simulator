@@ -10,11 +10,13 @@ export type CollidingEvent = {
     entity: Entity;
     colliderSet: KindToType<typeof ColliderBody>;
     collider: KindToType<typeof Collider>;
+    colliderId: number;
   };
   b: {
     entity: Entity;
     colliderSet: KindToType<typeof ColliderBody>;
     collider: KindToType<typeof Collider>;
+    colliderId: number;
   };
 };
 
