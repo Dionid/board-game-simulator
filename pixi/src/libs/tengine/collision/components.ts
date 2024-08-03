@@ -615,27 +615,31 @@ export function polygonColliderComponent(opts: {
 
 export function capsuleColliderComponent(opts: {
   parentPosition: Vector2; // TODO: remove this
-  parentAngle: number; // TODO: remove this
-  type: 'solid' | 'sensor';
-  mass: number;
-  offset: Vector2;
+  parentAngle?: number; // TODO: remove this
+  type?: 'solid' | 'sensor';
+  mass?: number;
+  offset?: Vector2;
   length: number;
   radius: number;
-  angle: number;
+  angle?: number;
 }): Component<typeof Collider>[] {
-  const mass = opts.mass / 3;
+  const mass = (opts.mass ?? 1) / 3;
+  const offset = opts.offset ?? { x: 0, y: 0 };
+  const type = opts.type ?? 'solid';
+  const parentAngle = opts.parentAngle ?? 0;
+  const angle = opts.angle ?? 0;
 
   const rectangleSize = {
     width: opts.radius * 2,
-    height: opts.length,
+    height: opts.length - opts.radius * 2,
   };
 
   const rectangle = rectangleColliderComponent({
     parentPosition: opts.parentPosition,
     parentAngle: opts.parentAngle,
-    type: opts.type,
+    type,
     mass,
-    offset: { x: opts.offset.x, y: opts.offset.y },
+    offset,
     angle: opts.angle,
     anchor: {
       x: 0.5,
@@ -649,10 +653,10 @@ export function capsuleColliderComponent(opts: {
 
   const firstCircle = circleColliderComponent({
     parentPosition: opts.parentPosition,
-    type: opts.type,
-    parentAngle: opts.parentAngle,
+    type,
+    parentAngle,
     mass,
-    offset: { x: opts.offset.x, y: opts.offset.y - rectangleSize.height / 2 + circleThreshold },
+    offset: { x: offset.x, y: offset.y - rectangleSize.height / 2 + circleThreshold },
     anchor: {
       x: 0.5,
       y: 0.5,
@@ -662,10 +666,10 @@ export function capsuleColliderComponent(opts: {
 
   const secondCircle = circleColliderComponent({
     parentPosition: opts.parentPosition,
-    type: opts.type,
-    parentAngle: opts.parentAngle,
+    type,
+    parentAngle,
     mass,
-    offset: { x: opts.offset.x, y: opts.offset.y + rectangleSize.height / 2 - circleThreshold },
+    offset: { x: offset.x, y: offset.y + rectangleSize.height / 2 - circleThreshold },
     anchor: {
       x: 0.5,
       y: 0.5,
@@ -673,8 +677,8 @@ export function capsuleColliderComponent(opts: {
     radius: opts.radius,
   });
 
-  mutRotateV2Around(firstCircle._position, opts.angle, rectangle._position);
-  mutRotateV2Around(secondCircle._position, opts.angle, rectangle._position);
+  mutRotateV2Around(firstCircle._position, angle, rectangle._position);
+  mutRotateV2Around(secondCircle._position, angle, rectangle._position);
 
   return [firstCircle, rectangle, secondCircle];
 }

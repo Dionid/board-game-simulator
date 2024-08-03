@@ -33,7 +33,7 @@ export const internalColliding = newTopic<CollidingEvent>();
 export const colliding = newTopic<CollidingEvent>();
 
 // # Collision started events
-export const collideStartedTopic = newTopic<CollidingEvent>();
+export const collisionStartedTopic = newTopic<CollidingEvent>();
 
 // # Collision ended events
-export const collideEndedTopic = newTopic<CollidingEvent>();
+export const collisionEndedTopic = newTopic<CollidingEvent>();

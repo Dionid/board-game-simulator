@@ -1,6 +1,6 @@
 import { Container } from 'pixi.js';
 import { initGame, newGame } from '../../../libs/tengine/game';
-import { componentByEntity, registerSystem, setComponent, spawnEntity } from '../../../libs/tecs';
+import { registerSystem, setComponent, spawnEntity, tryComponent } from '../../../libs/tecs';
 import { mapKeyboardInput, mapMouseInput } from '../../../libs/tengine/ecs';
 import { Dynamic, Kinematic, RigidBody, Static } from 'libs/tengine/physics/components';
 import {
@@ -11,7 +11,6 @@ import {
   Angle,
   Friction,
   DisableFriction,
-  subV2,
 } from 'libs/tengine/core';
 import {
   Ball,
@@ -36,6 +35,8 @@ import {
   verticesColliderComponent,
   lineColliderComponent,
   filterCollisionEvents,
+  collisionStartedTopic,
+  capsuleColliderComponent,
 } from 'libs/tengine/collision';
 import {
   applyRigidBodyAccelerationToVelocity,
@@ -73,12 +74,6 @@ export async function initPongGame(parentElement: HTMLElement) {
   };
 
   game.world.container.addChild(map.container);
-
-  // # Initial Game Objects
-  const characterSize = {
-    width: 50,
-    height: 150,
-  };
 
   // # World boundaries
   const boundariesOffset = 0;
@@ -200,6 +195,11 @@ export async function initPongGame(parentElement: HTMLElement) {
     },
   });
 
+  const characterSize = {
+    width: 50,
+    height: 150,
+  };
+
   // # Player
   const playerEntity = spawnEntity(game.essence);
   setComponent(game.essence, playerEntity, Player);
@@ -252,7 +252,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   });
   // # Physics
   setComponent(game.essence, playerEntity, RigidBody, {
-    elasticity: 1,
+    elasticity: 0,
     elasticityMode: 'average',
   });
   setComponent(game.essence, playerEntity, Kinematic);
@@ -278,7 +278,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   const enemyAngle = 0;
   setComponent(game.essence, enemyEntity, Angle, { value: enemyAngle, _prev: 0 });
   // ## Acceleration based Movement
-  setComponent(game.essence, enemyEntity, Speed, { value: 0.7 });
+  setComponent(game.essence, enemyEntity, Speed, { value: 1 });
   setComponent(game.essence, enemyEntity, Acceleration2, {
     x: 0,
     y: 0,
@@ -317,7 +317,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   });
   // # Physics
   setComponent(game.essence, enemyEntity, RigidBody, {
-    elasticity: 1,
+    elasticity: 0,
     elasticityMode: 'average',
   });
   setComponent(game.essence, enemyEntity, Kinematic);
@@ -326,10 +326,11 @@ export async function initPongGame(parentElement: HTMLElement) {
   const ballEntity = spawnEntity(game.essence);
   setComponent(game.essence, ballEntity, Ball);
   setComponent(game.essence, ballEntity, Speed, { value: 2 });
-  setComponent(game.essence, ballEntity, Acceleration2, {
+  const ballAcceleration = {
     x: 0,
     y: 0,
-  });
+  };
+  setComponent(game.essence, ballEntity, Acceleration2, ballAcceleration);
   setComponent(game.essence, ballEntity, DisableFriction);
   setComponent(game.essence, ballEntity, Friction, {
     value: 0,
@@ -444,14 +445,47 @@ export async function initPongGame(parentElement: HTMLElement) {
 
   // ## Game logic
   // ### Start ball
+  registerSystem(game.essence, () => {
+    for (const event of collisionStartedTopic) {
+      const { a, b } = event;
+
+      let character;
+
+      if (a.entity === playerEntity || a.entity === enemyEntity) {
+        character = a;
+      } else if (b.entity === playerEntity || b.entity === enemyEntity) {
+        character = b;
+      } else {
+        return;
+      }
+
+      let ball;
+
+      if (a.entity === ballEntity) {
+        ball = a;
+      } else if (b.entity === ballEntity) {
+        ball = b;
+      } else {
+        return;
+      }
+
+      const characterVelocity = tryComponent(character.archetype, character.entity, Velocity2);
+      const ballVelocity = tryComponent(ball.archetype, ball.entity, Velocity2);
+
+      // # Add paddle y velocity to ball to make paddle movement more angular impactful
+      if (characterVelocity && ballVelocity) {
+        ballVelocity.y += characterVelocity.y * 0.7;
+      }
+    }
+  });
   registerSystem(
     game.essence,
     () => {
       setTimeout(() => {
         const randomAngle = Math.random() * Math.PI * 2;
 
-        ballVelocity.x = Math.cos(randomAngle) * 10;
-        ballVelocity.y = Math.sin(randomAngle) * 10;
+        ballVelocity.x = Math.cos(randomAngle) * 5;
+        ballVelocity.y = Math.sin(randomAngle) * 5;
 
         roundStarted.value = true;
       }, 1000);

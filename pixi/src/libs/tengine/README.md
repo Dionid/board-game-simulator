@@ -13,8 +13,8 @@
 1. ~~World bounds~~
 1. ~~Fix line collision tremble~~
 1. ~~Fix multiple collision body penetrations~~
-1. Collision Queries
-1. Character movement
+1. ~~Collision Queries~~
+1. FIX: capsule collider circle error
 1. Simulate containment
 ? Apply movement before or after gamelogic
 

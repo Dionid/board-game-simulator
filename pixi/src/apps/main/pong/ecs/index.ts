@@ -8,7 +8,7 @@ import {
   tryComponent,
   tryTable,
 } from 'libs/tecs';
-import { collideStartedTopic } from 'libs/tengine/collision';
+import { collisionStartedTopic } from 'libs/tengine/collision';
 import {
   KeyBoardInput,
   Acceleration2,
@@ -22,6 +22,7 @@ import {
 } from 'libs/tengine/core';
 import { Game } from 'libs/tengine/game';
 import { scores, uiState } from '../state';
+import { safeGuard } from 'libs/tecs/switch';
 
 // export const GameObject = newTag();
 
@@ -199,8 +200,8 @@ export function resetRound(
   setTimeout(() => {
     const randomAngle = Math.random() * Math.PI * 2;
 
-    ballVelocity.x = Math.cos(randomAngle) * 10;
-    ballVelocity.y = Math.sin(randomAngle) * 10;
+    ballVelocity.x = Math.cos(randomAngle) * 5;
+    ballVelocity.y = Math.sin(randomAngle) * 5;
 
     roundStarted.value = true;
   }, 1000);
@@ -215,10 +216,10 @@ export function scoring(
   initialEnemyPosition: Vector2,
   roundStarted: { value: boolean }
 ): System {
-  registerTopic(game.essence, collideStartedTopic);
+  registerTopic(game.essence, collisionStartedTopic);
 
   return () => {
-    for (const event of collideStartedTopic) {
+    for (const event of collisionStartedTopic) {
       const { a, b } = event;
 
       const aGoalsT = tryTable(a.archetype, Goals);
@@ -328,8 +329,13 @@ export function enemyAi(
   ballEntity: Entity,
   enemyGoalsEntity: Entity,
   enemySize: Size2,
-  roundStarted: { value: boolean }
+  roundStarted: { value: boolean },
+  opts: {
+    enemyTactics?: 'center' | 'follow';
+  } = {}
 ): System {
+  const enemyTactics = opts.enemyTactics || 'follow';
+
   return ({ deltaTime }) => {
     if (roundStarted.value === false) {
       return;
@@ -355,19 +361,53 @@ export function enemyAi(
     }
 
     // # Follow ball Y
-    if (ballPosition.y > enemyPosition.y + 10) {
-      enemyAcceleration.y = enemySpeed.value * deltaTime;
-    } else if (ballPosition.y < enemyPosition.y - 10) {
-      enemyAcceleration.y = -enemySpeed.value * deltaTime;
-    } else {
-      enemyAcceleration.y = 0;
-    }
 
     // # Go to ball X when it is on enemy side of field
-    if (ballPosition.x > game.world.size.width / 2) {
-      enemyAcceleration.x = -enemySpeed.value * deltaTime;
-    } else {
-      enemyAcceleration.x = enemySpeed.value * deltaTime;
+    switch (enemyTactics) {
+      case 'center': {
+        if (ballPosition.x >= game.world.size.width / 2) {
+          enemyAcceleration.x = -enemySpeed.value * 0.9 * deltaTime;
+          // # Move to ball Y
+          if (ballPosition.y > enemyPosition.y + 10) {
+            enemyAcceleration.y = enemySpeed.value * deltaTime;
+          } else if (ballPosition.y < enemyPosition.y - 10) {
+            enemyAcceleration.y = -enemySpeed.value * deltaTime;
+          } else {
+            enemyAcceleration.y = 0;
+          }
+        } else {
+          enemyAcceleration.x = enemySpeed.value * deltaTime;
+          // # Move to center Y
+          if (enemyPosition.y > game.world.size.height / 2 + 20) {
+            enemyAcceleration.y = -enemySpeed.value * deltaTime;
+          } else if (enemyPosition.y < game.world.size.height / 2 - 20) {
+            enemyAcceleration.y = enemySpeed.value * deltaTime;
+          } else {
+            enemyAcceleration.y = 0;
+          }
+        }
+        break;
+      }
+      case 'follow': {
+        // # Follow ball Y
+        if (ballPosition.y > enemyPosition.y + 10) {
+          enemyAcceleration.y = enemySpeed.value * deltaTime;
+        } else if (ballPosition.y < enemyPosition.y - 10) {
+          enemyAcceleration.y = -enemySpeed.value * deltaTime;
+        } else {
+          enemyAcceleration.y = 0;
+        }
+
+        // # Go to ball X when it is on enemy side of field
+        if (ballPosition.x > game.world.size.width / 2) {
+          enemyAcceleration.x = -enemySpeed.value * 0.9 * deltaTime;
+        } else {
+          enemyAcceleration.x = enemySpeed.value * deltaTime;
+        }
+        break;
+      }
+      default:
+        return safeGuard(enemyTactics);
     }
 
     // # If ball going behind enemy, go back
@@ -396,10 +436,6 @@ export function enemyAi(
         }
       }
     }
-
-    // if (enemyPosition.x >= goalsPosition.x - 50) {
-    //   enemyPosition.x = goalsPosition.x - 51;
-    // }
   };
 }
 

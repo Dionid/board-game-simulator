@@ -1,8 +1,8 @@
 import { registerTopic, System, Topic } from '../../tecs';
 import { Game } from '../game';
 import {
-  collideEndedTopic,
-  collideStartedTopic,
+  collisionEndedTopic,
+  collisionStartedTopic,
   internalColliding,
   CollidingEvent,
   internalUnfilteredColliding,
@@ -15,8 +15,8 @@ export const filterCollisionEvents = (game: Game): System => {
   const unfilteredCollidingT = registerTopic(game.essence, internalUnfilteredColliding);
   const internalCollidingT = registerTopic(game.essence, internalColliding);
   const collidingT = registerTopic(game.essence, colliding);
-  const collideStartedTopicT = registerTopic(game.essence, collideStartedTopic);
-  const collideEndedTopicT = registerTopic(game.essence, collideEndedTopic);
+  const collideStartedTopicT = registerTopic(game.essence, collisionStartedTopic);
+  const collideEndedTopicT = registerTopic(game.essence, collisionEndedTopic);
 
   const pairs: CollidingPairsIndex = {};
 
