@@ -24,6 +24,9 @@ const debugPViewQuery = newQuery(pView);
 const debugCollisionSetQuery = newQuery(ColliderBody, Position2);
 
 export const globalDebugGraphicsDeferred: ((g: Graphics) => void)[] = [];
+export const DEBUG = {
+  isActive: false,
+};
 
 export const drawDebugLines = (
   game: Game,

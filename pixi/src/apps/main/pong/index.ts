@@ -46,13 +46,15 @@ import {
   applyRigidBodyVelocityToPosition,
   dynamicRigidBodyCollisionResolution,
 } from 'libs/tengine/physics';
-import { drawViews, View, drawDebugLines, addNewViews } from 'libs/tengine/render';
+import { drawViews, View, drawDebugLines, addNewViews, DEBUG } from 'libs/tengine/render';
 import { penetrationResolution } from 'libs/tengine/collision/penetration-resolution';
 import { updatePrevious } from 'libs/tengine/core/update-previous';
 import { awakening } from 'libs/tengine/collision/awakening';
 import { ray } from 'libs/tengine/collision/query';
 
 export async function initPongGame(parentElement: HTMLElement) {
+  DEBUG.isActive = true;
+
   const game = newGame({
     canvas: {
       parentElement,
@@ -204,7 +206,7 @@ export async function initPongGame(parentElement: HTMLElement) {
         type: 'solid',
         mass: 1,
         offset: { x: 0, y: 0 },
-        angle: -Math.PI / 4,
+        angle: 0,
         anchor: {
           x: 0.5,
           y: 0.5,
@@ -749,20 +751,27 @@ export async function initPongGame(parentElement: HTMLElement) {
 
         for (let i = 0; i < colliderBodiesQ.archetypes.length; i++) {
           const archetype = colliderBodiesQ.archetypes[i];
-
-          if (archetype === playerArchetype) {
-            continue;
-          }
-
           const colliderBodiesT = table(archetype, ColliderBody);
 
-          const collisions = ray(colliderBodiesT, playerPosition, {
-            x: playerPosition.x + 100,
-            y: playerPosition.y,
-          });
+          for (let j = 0; j < archetype.entities.length; j++) {
+            const entity = archetype.entities[j];
 
-          if (collisions.length > 0) {
-            debugger;
+            if (entity === playerEntity) {
+              continue;
+            }
+
+            const colliderBody = colliderBodiesT[j];
+
+            const collisions = ray(colliderBody, playerPosition, {
+              x: playerPosition.x + characterSize.width / 2 + 10,
+              y: playerPosition.y,
+            });
+
+            if (collisions.length > 0) {
+              debugger;
+
+              return;
+            }
           }
         }
       };

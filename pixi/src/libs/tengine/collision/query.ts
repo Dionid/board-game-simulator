@@ -1,11 +1,11 @@
 import { SchemaToType } from 'libs/tecs';
-import { Vector2 } from '../core';
+import { Axis2, Vector2 } from '../core';
 import { Collider, ColliderBody, rectangleColliderComponentSE } from './components';
 import { collides } from './collision';
-import { globalDebugGraphicsDeferred } from '../render';
+import { DEBUG, globalDebugGraphicsDeferred } from '../render';
 
 export function ray(
-  bodies: SchemaToType<typeof ColliderBody>[],
+  bodies: SchemaToType<typeof ColliderBody>[] | SchemaToType<typeof ColliderBody>,
   start: Vector2,
   end: Vector2,
   opts: {
@@ -15,6 +15,8 @@ export function ray(
 ): {
   colliderBody: SchemaToType<typeof ColliderBody>;
   collider: SchemaToType<typeof Collider>;
+  overlap: number;
+  axis: Axis2;
 }[] {
   const width = opts.width ?? 1;
   const stopOnFirst = opts.stopOnFirst ?? false;
@@ -31,18 +33,43 @@ export function ray(
     width,
   });
 
-  globalDebugGraphicsDeferred.push((graphics) => {
-    for (let i = 0; i < rayCollider._vertices.length; i++) {
-      const start = rayCollider._vertices[i];
-      const end = rayCollider._vertices[(i + 1) % rayCollider._vertices.length];
+  if (DEBUG.isActive) {
+    globalDebugGraphicsDeferred.push((graphics) => {
+      for (let i = 0; i < rayCollider._vertices.length; i++) {
+        const start = rayCollider._vertices[i];
+        const end = rayCollider._vertices[(i + 1) % rayCollider._vertices.length];
 
-      graphics.moveTo(start.x, start.y);
-      graphics.lineTo(end.x, end.y);
-    }
-    graphics.stroke({ color: 'green' });
-  });
+        graphics.moveTo(start.x, start.y);
+        graphics.lineTo(end.x, end.y);
+      }
+      graphics.stroke({ color: 'green' });
+    });
+  }
 
   const result = [];
+
+  if (!Array.isArray(bodies)) {
+    for (let j = 0; j < bodies.parts.length; j++) {
+      const part = bodies.parts[j];
+
+      let collision = collides(rayCollider, part);
+
+      if (collision) {
+        result.push({
+          colliderBody: bodies,
+          collider: part,
+          overlap: collision.overlap,
+          axis: collision.axis,
+        });
+
+        if (stopOnFirst) {
+          return result;
+        }
+      }
+    }
+
+    return result;
+  }
 
   for (let i = 0; i < bodies.length; i++) {
     const body = bodies[i];
@@ -56,6 +83,8 @@ export function ray(
         result.push({
           colliderBody: body,
           collider: part,
+          overlap: collision.overlap,
+          axis: collision.axis,
         });
 
         if (stopOnFirst) {
