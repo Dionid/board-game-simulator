@@ -242,7 +242,7 @@ export const initWorld = async (app: Application) => {
   registerSystem(game.essence, moveCamera(game));
   registerSystem(game.essence, applyCameraToWorld(game));
   // # Render
-  registerSystem(game.essence, render(game), 'postUpdate');
+  registerSystem(game.essence, render(game));
 
   // const entity = spawnEntity(world);
   // const circle = new Graphics().circle(0, 0, 50);

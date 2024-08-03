@@ -325,8 +325,12 @@ export function applyDeferredOp(essence: Essence, operation: Operation): void {
 export function registerSystem(
   essence: Essence,
   system: System,
-  type?: 'onFirstStep' | 'preUpdate' | 'update' | 'postUpdate'
+  opts: {
+    type?: 'onFirstStep' | 'preUpdate' | 'update' | 'postUpdate';
+  } = {}
 ) {
+  const type = opts.type;
+
   essence.systems[type || 'update'].push(system);
 }
 

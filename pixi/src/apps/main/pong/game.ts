@@ -1,12 +1,6 @@
 import { Container } from 'pixi.js';
 import { initGame, newGame } from '../../../libs/tengine/game';
-import {
-  registerSystem,
-  registerTopic,
-  setComponent,
-  spawnEntity,
-  tryTable,
-} from '../../../libs/tecs';
+import { registerSystem, setComponent, spawnEntity } from '../../../libs/tecs';
 import { mapKeyboardInput, mapMouseInput } from '../../../libs/tengine/ecs';
 import { Dynamic, Kinematic, RigidBody, Static } from 'libs/tengine/physics/components';
 import {
@@ -18,7 +12,17 @@ import {
   Friction,
   DisableFriction,
 } from 'libs/tengine/core';
-import { Ball, Enemy, EnemyGoals, Goals, Player, PlayerGoals, accelerateByArrows } from './ecs';
+import {
+  Ball,
+  Enemy,
+  EnemyGoals,
+  Goals,
+  Player,
+  PlayerGoals,
+  accelerateByArrows,
+  paddleWorldBoundaries,
+  scoring,
+} from './ecs';
 import {
   CollisionsMonitoring,
   transformCollider,
@@ -29,7 +33,6 @@ import {
   verticesColliderComponent,
   lineColliderComponent,
   filterCollisionEvents,
-  collideStartedTopic,
 } from 'libs/tengine/collision';
 import {
   applyRigidBodyAccelerationToVelocity,
@@ -41,8 +44,6 @@ import { drawViews, drawDebugLines, addNewViews, DEBUG, View } from 'libs/tengin
 import { penetrationResolution } from 'libs/tengine/collision/penetration-resolution';
 import { updatePrevious } from 'libs/tengine/core/update-previous';
 import { awakening } from 'libs/tengine/collision/awakening';
-import { tryComponent } from 'libs/tecs/archetype';
-import { scores, uiState } from './state';
 
 export async function initPongGame(parentElement: HTMLElement) {
   DEBUG.isActive = true;
@@ -141,17 +142,17 @@ export async function initPongGame(parentElement: HTMLElement) {
   const centerLine = spawnEntity(game.essence);
   setComponent(game.essence, centerLine, Position2, {
     x: game.world.size.width / 2,
-    y: 0,
+    y: game.world.size.height / 2,
     _prev: {
       x: game.world.size.width / 2,
-      y: 0,
+      y: game.world.size.height / 2,
     },
   });
   setComponent(game.essence, centerLine, View, {
     offset: { x: 0, y: 0 },
     scale: { x: 1, y: 1 },
     rotation: 0,
-    anchor: { x: 0, y: 0 },
+    anchor: { x: 0.5, y: 0.5 },
     alpha: 0.5,
     model: {
       type: 'graphics',
@@ -159,7 +160,7 @@ export async function initPongGame(parentElement: HTMLElement) {
         type: 'rectangle',
         size: {
           width: 1,
-          height: game.world.size.height,
+          height: game.world.size.height - 60,
         },
       },
       color: '0xFFFFFF',
@@ -438,109 +439,34 @@ export async function initPongGame(parentElement: HTMLElement) {
   // ### Movement
   registerSystem(game.essence, accelerateByArrows(game, playerEntity));
   // ### Start ball
-  // TODO: Move to systems
-  setTimeout(() => {
-    const randomAngle = Math.random() * Math.PI * 2;
-
-    ballVelocity.x = Math.cos(randomAngle) * 7;
-    ballVelocity.y = Math.sin(randomAngle) * 7;
-  }, 1000);
-  registerSystem(game.essence, () => {
-    if (playerPosition.y < characterSize.height / 2) {
-      playerPosition.y = characterSize.height / 2;
-    } else if (playerPosition.y > game.world.size.height - characterSize.height / 2) {
-      playerPosition.y = game.world.size.height - characterSize.height / 2;
-    }
-
-    if (playerPosition.x < characterSize.width / 2) {
-      playerPosition.x = characterSize.width / 2;
-    } else if (playerPosition.x > game.world.size.width / 2 - characterSize.width / 2) {
-      playerPosition.x = game.world.size.width / 2 - characterSize.width / 2;
-    }
-
-    if (enemyPosition.y < characterSize.height / 2) {
-      enemyPosition.y = characterSize.height / 2;
-    } else if (enemyPosition.y > game.world.size.height - characterSize.height / 2) {
-      enemyPosition.y = game.world.size.height - characterSize.height / 2;
-    }
-
-    if (playerPosition.x > game.world.size.width - characterSize.width / 2) {
-      enemyPosition.x = game.world.size.width - characterSize.width / 2;
-    } else if (enemyPosition.x < game.world.size.width / 2 + characterSize.width / 2) {
-      enemyPosition.x = game.world.size.width / 2 + characterSize.width / 2;
-    }
-  });
   registerSystem(
     game.essence,
-    (() => {
-      registerTopic(game.essence, collideStartedTopic);
-      return () => {
-        for (const event of collideStartedTopic) {
-          const { a, b } = event;
+    () => {
+      setTimeout(() => {
+        const randomAngle = Math.random() * Math.PI * 2;
 
-          const aGoalsT = tryTable(a.archetype, Goals);
-          const aBallT = tryTable(a.archetype, Ball);
-          const bGoalsT = tryTable(b.archetype, Goals);
-          const bBallT = tryTable(b.archetype, Ball);
-
-          // # If none are goals or ball, than ignore
-          if ((aBallT && bGoalsT) || (aGoalsT && bBallT)) {
-            const ball = aBallT ? a : b;
-            const goals = aGoalsT ? a : b;
-
-            const isPlayerGoals = tryComponent(goals.archetype, goals.entity, PlayerGoals);
-            const isEnemyGoals = tryComponent(goals.archetype, goals.entity, EnemyGoals);
-
-            if (isPlayerGoals) {
-              uiState.set(scores, (prev) => {
-                return {
-                  ...prev,
-                  enemy: prev.enemy + 1,
-                };
-              });
-            } else if (isEnemyGoals) {
-              uiState.set(scores, (prev) => {
-                return {
-                  ...prev,
-                  player: prev.player + 1,
-                };
-              });
-            }
-
-            // # Reset ball
-            const position = tryComponent(ball.archetype, ball.entity, Position2)!;
-            const velocity = tryComponent(ball.archetype, ball.entity, Velocity2)!;
-            const acceleration = tryComponent(ball.archetype, ball.entity, Acceleration2)!;
-
-            velocity.x = 0;
-            velocity.y = 0;
-
-            acceleration.x = 0;
-            acceleration.y = 0;
-
-            position.x = initialBallPosition.x;
-            position.y = initialBallPosition.y;
-
-            // # Reset characters
-            playerPosition.x = initialPlayerPosition.x;
-            playerPosition.y = initialPlayerPosition.y;
-
-            enemyPosition.x = initialEnemyPosition.x;
-            enemyPosition.y = initialEnemyPosition.y;
-
-            // # Restart ball
-            setTimeout(() => {
-              const randomAngle = Math.random() * Math.PI * 2;
-
-              velocity.x = Math.cos(randomAngle) * 7;
-              velocity.y = Math.sin(randomAngle) * 7;
-            }, 1000);
-
-            return;
-          }
-        }
-      };
-    })()
+        ballVelocity.x = Math.cos(randomAngle) * 7;
+        ballVelocity.y = Math.sin(randomAngle) * 7;
+      }, 1000);
+    },
+    {
+      type: 'onFirstStep',
+    }
+  );
+  registerSystem(
+    game.essence,
+    paddleWorldBoundaries(game, playerEntity, enemyEntity, characterSize)
+  );
+  registerSystem(
+    game.essence,
+    scoring(
+      game,
+      playerEntity,
+      enemyEntity,
+      initialBallPosition,
+      initialPlayerPosition,
+      initialEnemyPosition
+    )
   );
 
   // ## Transform

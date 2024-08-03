@@ -1,4 +1,14 @@
-import { archetypeByEntity, Entity, newTag, System, tryTable } from 'libs/tecs';
+import {
+  archetypeByEntity,
+  componentByEntity,
+  Entity,
+  newTag,
+  registerTopic,
+  System,
+  tryComponent,
+  tryTable,
+} from 'libs/tecs';
+import { collideStartedTopic } from 'libs/tengine/collision';
 import {
   KeyBoardInput,
   Acceleration2,
@@ -6,8 +16,12 @@ import {
   Velocity2,
   normalizeV2,
   mutMultV2,
+  Position2,
+  Vector2,
+  Size2,
 } from 'libs/tengine/core';
 import { Game } from 'libs/tengine/game';
+import { scores, uiState } from '../state';
 
 // export const GameObject = newTag();
 
@@ -142,3 +156,121 @@ export const changeVelocityByArrows = (game: Game, charEntity: Entity): System =
     velocity.y = newVel.y * deltaTime;
   };
 };
+
+export function scoring(
+  game: Game,
+  playerEntity: Entity,
+  enemyEntity: Entity,
+  initialBallPosition: Vector2,
+  initialPlayerPosition: Vector2,
+  initialEnemyPosition: Vector2
+): System {
+  registerTopic(game.essence, collideStartedTopic);
+
+  return () => {
+    for (const event of collideStartedTopic) {
+      const { a, b } = event;
+
+      const aGoalsT = tryTable(a.archetype, Goals);
+      const aBallT = tryTable(a.archetype, Ball);
+      const bGoalsT = tryTable(b.archetype, Goals);
+      const bBallT = tryTable(b.archetype, Ball);
+
+      // # If none are goals or ball, than ignore
+      if ((aBallT && bGoalsT) || (aGoalsT && bBallT)) {
+        const ball = aBallT ? a : b;
+        const goals = aGoalsT ? a : b;
+
+        const isPlayerGoals = tryComponent(goals.archetype, goals.entity, PlayerGoals);
+        const isEnemyGoals = tryComponent(goals.archetype, goals.entity, EnemyGoals);
+
+        if (isPlayerGoals) {
+          uiState.set(scores, (prev) => {
+            return {
+              ...prev,
+              enemy: prev.enemy + 1,
+            };
+          });
+        } else if (isEnemyGoals) {
+          uiState.set(scores, (prev) => {
+            return {
+              ...prev,
+              player: prev.player + 1,
+            };
+          });
+        }
+
+        // # Reset ball
+        const position = tryComponent(ball.archetype, ball.entity, Position2)!;
+        const velocity = tryComponent(ball.archetype, ball.entity, Velocity2)!;
+        const acceleration = tryComponent(ball.archetype, ball.entity, Acceleration2)!;
+
+        velocity.x = 0;
+        velocity.y = 0;
+
+        acceleration.x = 0;
+        acceleration.y = 0;
+
+        position.x = initialBallPosition.x;
+        position.y = initialBallPosition.y;
+
+        // # Reset characters
+        const playerPosition = componentByEntity(game.essence, playerEntity, Position2)!;
+
+        playerPosition.x = initialPlayerPosition.x;
+        playerPosition.y = initialPlayerPosition.y;
+
+        const enemyPosition = componentByEntity(game.essence, enemyEntity, Position2)!;
+
+        enemyPosition.x = initialEnemyPosition.x;
+        enemyPosition.y = initialEnemyPosition.y;
+
+        // # Restart ball
+        setTimeout(() => {
+          const randomAngle = Math.random() * Math.PI * 2;
+
+          velocity.x = Math.cos(randomAngle) * 7;
+          velocity.y = Math.sin(randomAngle) * 7;
+        }, 1000);
+
+        return;
+      }
+    }
+  };
+}
+
+export function paddleWorldBoundaries(
+  game: Game,
+  playerEntity: Entity,
+  enemyEntity: Entity,
+  characterSize: Size2
+): System {
+  return () => {
+    const playerPosition = componentByEntity(game.essence, playerEntity, Position2)!;
+    const enemyPosition = componentByEntity(game.essence, enemyEntity, Position2)!;
+
+    if (playerPosition.y < characterSize.height / 2) {
+      playerPosition.y = characterSize.height / 2;
+    } else if (playerPosition.y > game.world.size.height - characterSize.height / 2) {
+      playerPosition.y = game.world.size.height - characterSize.height / 2;
+    }
+
+    if (playerPosition.x < characterSize.width / 2) {
+      playerPosition.x = characterSize.width / 2;
+    } else if (playerPosition.x > game.world.size.width / 2 - characterSize.width / 2) {
+      playerPosition.x = game.world.size.width / 2 - characterSize.width / 2;
+    }
+
+    if (enemyPosition.y < characterSize.height / 2) {
+      enemyPosition.y = characterSize.height / 2;
+    } else if (enemyPosition.y > game.world.size.height - characterSize.height / 2) {
+      enemyPosition.y = game.world.size.height - characterSize.height / 2;
+    }
+
+    if (playerPosition.x > game.world.size.width - characterSize.width / 2) {
+      enemyPosition.x = game.world.size.width - characterSize.width / 2;
+    } else if (enemyPosition.x < game.world.size.width / 2 + characterSize.width / 2) {
+      enemyPosition.x = game.world.size.width / 2 + characterSize.width / 2;
+    }
+  };
+}
