@@ -17,10 +17,10 @@ import {
 } from '../core';
 
 // # Check this object for collisions with any other Colliders
-export const CollisionsMonitoring = newTag();
+export const CollisionsMonitoring = newTag('CollisionsMonitoring');
 
 // # Forbid penetration of solid Colliders
-export const Impenetrable = newTag();
+export const Impenetrable = newTag('Impenetrable');
 
 // # Awaken
 export const Awaken = newTag('Awaken');

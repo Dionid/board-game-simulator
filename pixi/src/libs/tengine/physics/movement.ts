@@ -18,10 +18,6 @@ export const applyRigidBodyAccelerationToVelocity = (game: Game): System => {
         const acceleration = accelerationT[i];
         const velocity = velocityT[i];
 
-        if (!acceleration || !velocity) {
-          continue;
-        }
-
         velocity.x += acceleration.x * deltaTime;
         velocity.y += acceleration.y * deltaTime;
 

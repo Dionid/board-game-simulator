@@ -10,11 +10,20 @@ import { collides } from './collision';
 // 1. Check if the next position collides with any other ColliderSet
 // 1. If collides create event
 
-export const checkCollisionsQuery = newQuery(CollisionsMonitoring, Awaken, ColliderBody, Position2);
+export const checkAwakenCollisionsQuery = newQuery(
+  CollisionsMonitoring,
+  Awaken,
+  ColliderBody,
+  Position2
+);
+export const checkCollisionsQuery = newQuery(CollisionsMonitoring, ColliderBody, Position2);
 export const collidersQuery = newQuery(ColliderBody, Position2);
 
-export const checkNarrowCollisionSimple = (game: Game): System => {
-  const forCheckQ = registerQuery(game.essence, checkCollisionsQuery);
+export const checkNarrowCollisionSimple = (game: Game, awakened: boolean = true): System => {
+  const forCheckQ = awakened
+    ? registerQuery(game.essence, checkAwakenCollisionsQuery)
+    : registerQuery(game.essence, checkCollisionsQuery);
+
   const allCollidersQ = registerQuery(game.essence, collidersQuery);
 
   return () => {
