@@ -10,7 +10,7 @@ export type CollisionResult = {
   axis: Axis2;
 };
 
-export function collision(
+export function collides(
   colliderA: Component<typeof Collider>,
   colliderB: Component<typeof Collider>
 ): CollisionResult | null {

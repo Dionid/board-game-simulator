@@ -15,6 +15,10 @@ export const Vector2 = newSchema({
   y: number,
 });
 
+export function angleV2(a: Vector2, b: Vector2): number {
+  return Math.atan2(b.y - a.y, b.x - a.x);
+}
+
 export function multV2(v: Vector2, scalar: number): Vector2 {
   return {
     x: v.x * scalar,

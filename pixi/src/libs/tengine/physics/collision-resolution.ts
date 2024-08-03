@@ -124,14 +124,14 @@ export const dynamicRigidBodyCollisionResolution = (game: Game): System => {
         continue;
       }
 
-      let aTotalMass = a.colliderSet.parts.reduce((acc, cur) => {
-        acc += cur.mass;
-        return acc;
-      }, 0);
-      let bTotalMass = b.colliderSet.parts.reduce((acc, cur) => {
-        acc += cur.mass;
-        return acc;
-      }, 0);
+      let aTotalMass = 0;
+      for (let i = 0; i < a.colliderSet.parts.length; i++) {
+        aTotalMass += a.colliderSet.parts[i].mass;
+      }
+      let bTotalMass = 0;
+      for (let i = 0; i < b.colliderSet.parts.length; i++) {
+        bTotalMass += b.colliderSet.parts[i].mass;
+      }
       const aInvertedTotalMass = inverseMass(aTotalMass);
       const bInvertedTotalMass = inverseMass(bTotalMass);
       const combinedInvertedMass = aTotalMass + bTotalMass;

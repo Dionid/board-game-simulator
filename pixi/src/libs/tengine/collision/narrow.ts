@@ -3,7 +3,7 @@ import { Position2 } from '../core/types';
 import { Game } from '../game';
 import { Awaken, ColliderBody, CollisionsMonitoring } from './components';
 import { unfilteredColliding } from './topics';
-import { collision } from './collision';
+import { collides } from './collision';
 
 // 1. Get all entities that have CollisionSource + ColliderSet + Position (+ Awaken)
 // 1. Calculate the next position based on the current position + velocity
@@ -72,7 +72,7 @@ export const checkNarrowCollisionSimple = (game: Game): System => {
             for (let bcId = 0; bcId < colliderSetB.parts.length; bcId++) {
               const colliderB = colliderSetB.parts[bcId];
 
-              let result = collision(colliderA, colliderB);
+              let result = collides(colliderA, colliderB);
 
               if (result && result.overlap >= 0) {
                 emit(

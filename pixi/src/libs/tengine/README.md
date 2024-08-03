@@ -36,14 +36,13 @@
     1. ~~Awaken / Asleep~~
     1. ~~Triangle on Vertices~~
     1. ~~Polygon on Vertices~~
+    1. ~~World Bounds~~
     1. Collision Queries
-    1. Angular velocity
-    1. World Bounds
     1. Fix Circle anchor
     1. Separate concave to convex
-    1. Chamfer
+    1. Multiple iterations per one cycle
 1. Physics
-    1. Rotation
+    1. Angle + Angular velocity
     1. Joints
 1. Character movement
     1. Move and slide
@@ -160,6 +159,7 @@ Most of other components will depend on these ones
         1. https://rapier.rs/docs/user_guides/rust/rigid_bodies
 1. Engine
     1. https://developer.ibm.com/tutorials/wa-build2dphysicsengine/
+    1. https://www.youtube.com/@simondev758
 
 
 # Questions

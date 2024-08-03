@@ -1,6 +1,9 @@
 import { newSchema, arrayOf, union, literal, number, newTag, Component } from '../../tecs';
 import {
+  angleV2,
   Axes2,
+  dotV2,
+  magV2,
   mutRotateV2Around,
   mutRotateVertices2Around,
   normalAxes2,
@@ -53,24 +56,29 @@ export const Collider = newSchema({
 
 export function rectangleColliderComponent(opts: {
   parentPosition: Vector2; // TODO: remove this
-  parentAngle: number; // TODO: remove this
+  parentAngle?: number; // TODO: remove this
   type: 'solid' | 'sensor';
   mass: number;
-  offset: Vector2;
-  angle: number;
-  anchor: Vector2;
+  offset?: Vector2;
+  angle?: number;
+  anchor?: Vector2;
   size: { width: number; height: number };
 }): Component<typeof Collider> {
+  const offset = opts.offset || { x: 0, y: 0 };
+  const parentAngle = opts.parentAngle ?? 0;
+  const anchor = opts.anchor || { x: 0.5, y: 0.5 };
+  const angle = opts.angle || 0;
+
   const origin = {
-    x: opts.parentPosition.x + opts.offset.x,
-    y: opts.parentPosition.y + opts.offset.y,
+    x: opts.parentPosition.x + offset.x,
+    y: opts.parentPosition.y + offset.y,
   };
 
-  mutRotateV2Around(origin, opts.parentAngle, opts.parentPosition);
+  mutRotateV2Around(origin, parentAngle, opts.parentPosition);
 
   const verticesStartPosition = {
-    x: origin.x - opts.size.width * opts.anchor.x,
-    y: origin.y - opts.size.height * opts.anchor.y,
+    x: origin.x - opts.size.width * anchor.x,
+    y: origin.y - opts.size.height * anchor.y,
   };
 
   const colliderVertices = [
@@ -92,7 +100,7 @@ export function rectangleColliderComponent(opts: {
     },
   ];
 
-  mutRotateVertices2Around(colliderVertices, opts.angle + opts.parentAngle, origin);
+  mutRotateVertices2Around(colliderVertices, angle + parentAngle, origin);
 
   // # Rectangle can have only 2 normal axes
   const normalAxes = [
@@ -103,20 +111,118 @@ export function rectangleColliderComponent(opts: {
   const component = {
     type: opts.type,
     mass: opts.mass,
-    offset: opts.offset,
-    angle: opts.angle,
+    offset: offset,
+    angle: angle,
     shape: {
       type: 'vertices' as const,
-      anchor: opts.anchor,
+      anchor: anchor,
     },
     _position: origin,
     _vertices: colliderVertices,
     _normalAxes: normalAxes,
     _prev: {
-      angle: opts.angle,
+      angle: angle,
       offset: {
-        x: opts.offset.x,
-        y: opts.offset.y,
+        x: offset.x,
+        y: offset.y,
+      },
+    },
+  };
+
+  return component;
+}
+
+export function rectangleColliderComponentSE(opts: {
+  parentAngle?: number; // TODO: remove this
+  type: 'solid' | 'sensor';
+  mass: number;
+  start: Vector2;
+  end: Vector2;
+  width: number;
+  angle?: number;
+  anchor?: Vector2;
+}): Component<typeof Collider> {
+  const offset = { x: 0, y: 0 };
+  const parentAngle = opts.parentAngle ?? 0;
+  const anchor = opts.anchor || { x: 0.5, y: 0.5 };
+  let angle = opts.angle || 0;
+
+  const { start, end, width } = opts;
+
+  const height = magV2(subV2(end, start));
+
+  const verticesStartPosition = {
+    x: start.x - width * anchor.x,
+    y: start.y - height * anchor.y,
+  };
+
+  const colliderVertices = [
+    {
+      x: verticesStartPosition.x,
+      y: verticesStartPosition.y,
+    },
+    {
+      x: verticesStartPosition.x + width,
+      y: verticesStartPosition.y,
+    },
+    {
+      x: verticesStartPosition.x + width,
+      y: verticesStartPosition.y + height,
+    },
+    {
+      x: verticesStartPosition.x,
+      y: verticesStartPosition.y + height,
+    },
+  ];
+
+  const dotProd = dotV2(
+    {
+      x: 0,
+      y: height,
+    },
+    {
+      x: end.x - start.x,
+      y: end.y - start.y,
+    }
+  );
+
+  const aMag = height;
+  const bMag = magV2({
+    x: end.x - start.x,
+    y: end.y - start.y,
+  });
+
+  const cosTheta = dotProd / (aMag * bMag);
+
+  const clampedCosTheta = Math.max(-1, Math.min(1, cosTheta));
+
+  angle -= Math.acos(clampedCosTheta);
+
+  mutRotateVertices2Around(colliderVertices, angle + parentAngle, start);
+
+  // # Rectangle can have only 2 normal axes
+  const normalAxes = [
+    normalV2(unitV2(subV2(colliderVertices[1], colliderVertices[0]))),
+    normalV2(unitV2(subV2(colliderVertices[2], colliderVertices[1]))),
+  ];
+
+  const component = {
+    type: opts.type,
+    mass: opts.mass,
+    offset: offset,
+    angle: angle,
+    shape: {
+      type: 'vertices' as const,
+      anchor: anchor,
+    },
+    _position: start,
+    _vertices: colliderVertices,
+    _normalAxes: normalAxes,
+    _prev: {
+      angle: angle,
+      offset: {
+        x: offset.x,
+        y: offset.y,
       },
     },
   };

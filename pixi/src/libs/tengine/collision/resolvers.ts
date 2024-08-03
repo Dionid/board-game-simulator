@@ -16,18 +16,21 @@ export function resolvePenetration(
     bMass?: number;
   } = {}
 ) {
-  const aTotalMass =
-    options.aMass ??
-    aColliderSet.parts.reduce((acc, cur) => {
-      acc += cur.mass;
-      return acc;
-    }, 0);
-  const bTotalMass =
-    options.bMass ??
-    bColliderSet.parts.reduce((acc, cur) => {
-      acc += cur.mass;
-      return acc;
-    }, 0);
+  let aTotalMass = options.aMass;
+  if (aTotalMass === undefined) {
+    aTotalMass = 0;
+    for (let i = 0; i < aColliderSet.parts.length; i++) {
+      aTotalMass += aColliderSet.parts[i].mass;
+    }
+  }
+
+  let bTotalMass = options.bMass;
+  if (bTotalMass === undefined) {
+    bTotalMass = 0;
+    for (let i = 0; i < bColliderSet.parts.length; i++) {
+      bTotalMass += bColliderSet.parts[i].mass;
+    }
+  }
 
   const aInvertedMass = inverseMass(aTotalMass);
   const bInvertedMass = inverseMass(bTotalMass);
@@ -60,9 +63,6 @@ export function resolvePenetration(
   for (const collider of aColliderSet.parts) {
     translateCollider(collider, aPositionDelta);
   }
-
-  // translateCollider(aCollider, aPositionDelta);
-  // translateCollider(bCollider, bPositionDelta);
 
   for (const collider of bColliderSet.parts) {
     translateCollider(collider, bPositionDelta);

@@ -1,6 +1,14 @@
 import { Container } from 'pixi.js';
 import { initGame, newGame } from '../../../libs/tengine/game';
-import { registerSystem, setComponent, spawnEntity } from '../../../libs/tecs';
+import {
+  archetypeByEntity,
+  newQuery,
+  registerQuery,
+  registerSystem,
+  setComponent,
+  spawnEntity,
+  table,
+} from '../../../libs/tecs';
 import { mapKeyboardInput, mapMouseInput } from '../../../libs/tengine/ecs';
 import { Dynamic, Kinematic, RigidBody, Static } from 'libs/tengine/physics/components';
 import {
@@ -11,6 +19,9 @@ import {
   Angle,
   Friction,
   DisableFriction,
+  angleV2,
+  magV2,
+  subV2,
 } from 'libs/tengine/core';
 import { Ball, Enemy, Player, accelerateByArrows } from './ecs';
 import {
@@ -39,6 +50,7 @@ import { drawViews, View, drawDebugLines, addNewViews } from 'libs/tengine/rende
 import { penetrationResolution } from 'libs/tengine/collision/penetration-resolution';
 import { updatePrevious } from 'libs/tengine/core/update-previous';
 import { awakening } from 'libs/tengine/collision/awakening';
+import { ray } from 'libs/tengine/collision/query';
 
 export async function initPongGame(parentElement: HTMLElement) {
   const game = newGame({
@@ -112,7 +124,7 @@ export async function initPongGame(parentElement: HTMLElement) {
           parentPosition: boundary,
           parentAngle: 0,
           type: 'solid',
-          mass: 0,
+          mass: 1,
           offset: { x: 0, y: 0 },
           angle: boundary.angle,
           anchor: {
@@ -128,7 +140,6 @@ export async function initPongGame(parentElement: HTMLElement) {
       elasticityMode: 'average',
     });
     setComponent(game.essence, boundaryEntity, Static);
-    // debugger;
   }
 
   // # Player
@@ -268,7 +279,7 @@ export async function initPongGame(parentElement: HTMLElement) {
         parentPosition: enemyPosition,
         parentAngle: enemyAngle,
         type: 'solid',
-        mass: 0,
+        mass: 1,
         offset: { x: 0, y: 0 },
         angle: Math.PI / 2,
         anchor: {
@@ -289,7 +300,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     elasticity: 1,
     elasticityMode: 'average',
   });
-  setComponent(game.essence, enemyEntity, Static);
+  setComponent(game.essence, enemyEntity, Dynamic);
 
   // # Wall
   const wallEntity = spawnEntity(game.essence);
@@ -308,7 +319,7 @@ export async function initPongGame(parentElement: HTMLElement) {
         parentPosition: wallPosition,
         parentAngle: 0,
         type: 'solid',
-        mass: 0,
+        mass: 1,
         offset: { x: 0, y: 0 },
         angle: -Math.PI / 2,
         anchor: {
@@ -331,7 +342,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     elasticity: 1,
     elasticityMode: 'average',
   });
-  setComponent(game.essence, wallEntity, Static);
+  setComponent(game.essence, wallEntity, Dynamic);
 
   // # Ball
   const ballEntity = spawnEntity(game.essence);
@@ -381,7 +392,7 @@ export async function initPongGame(parentElement: HTMLElement) {
         parentPosition: ballPosition,
         parentAngle: 0,
         type: 'solid',
-        mass: 0,
+        mass: 1,
         offset: { x: 0, y: 0 },
         anchor: {
           x: 0.5,
@@ -396,7 +407,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     elasticity: 1,
     elasticityMode: 'average',
   });
-  setComponent(game.essence, ballEntity, Static);
+  setComponent(game.essence, ballEntity, Dynamic);
 
   // # Capsule
   const capsuleEntity = spawnEntity(game.essence);
@@ -461,7 +472,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     elasticity: 1,
     elasticityMode: 'average',
   });
-  setComponent(game.essence, capsuleEntity, Static);
+  setComponent(game.essence, capsuleEntity, Dynamic);
   // setComponent(game.essence, capsuleEntity, Dynamic);
 
   // # Triangle
@@ -492,7 +503,7 @@ export async function initPongGame(parentElement: HTMLElement) {
         parentPosition: isoscelesRightTriangleColliderPosition,
         parentAngle: isoscelesRightTriangleColliderAngle,
         type: 'solid',
-        mass: 0,
+        mass: 1,
         offset: { x: 0, y: 0 },
         length: 100,
         angle: 0,
@@ -515,7 +526,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     elasticity: 1,
     elasticityMode: 'average',
   });
-  setComponent(game.essence, isoscelesRightTriangleColliderEntity, Static);
+  setComponent(game.essence, isoscelesRightTriangleColliderEntity, Dynamic);
 
   // # Triangle
   const triangleEntity = spawnEntity(game.essence);
@@ -540,7 +551,7 @@ export async function initPongGame(parentElement: HTMLElement) {
         parentPosition: trianglePosition,
         parentAngle: triangleAngle,
         type: 'solid',
-        mass: 0,
+        mass: 1,
         offset: { x: 0, y: 0 },
         vertices: [
           {
@@ -576,7 +587,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     elasticity: 1,
     elasticityMode: 'average',
   });
-  setComponent(game.essence, triangleEntity, Static);
+  setComponent(game.essence, triangleEntity, Dynamic);
 
   // # Triangle
   const centroidTriangleEntity = spawnEntity(game.essence);
@@ -601,7 +612,7 @@ export async function initPongGame(parentElement: HTMLElement) {
         parentPosition: centroidTrianglePosition,
         parentAngle: centroidTriangleAngle,
         type: 'solid',
-        mass: 0,
+        mass: 1,
         offset: { x: 0, y: 0 },
         a: {
           x: 0,
@@ -625,7 +636,7 @@ export async function initPongGame(parentElement: HTMLElement) {
         parentPosition: centroidTrianglePosition,
         parentAngle: centroidTriangleAngle,
         type: 'solid',
-        mass: 0,
+        mass: 1,
         offset: { x: 0, y: 0 },
         a: {
           x: 0,
@@ -659,7 +670,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     elasticity: 1,
     elasticityMode: 'average',
   });
-  setComponent(game.essence, centroidTriangleEntity, Static);
+  setComponent(game.essence, centroidTriangleEntity, Dynamic);
 
   // # Triangle
   const polygonEntity = spawnEntity(game.essence);
@@ -684,7 +695,7 @@ export async function initPongGame(parentElement: HTMLElement) {
         parentPosition: polygonPosition,
         parentAngle: polygonAngle,
         type: 'solid',
-        mass: 0,
+        mass: 1,
         offset: { x: 0, y: 0 },
         radius: 50,
         sides: 5,
@@ -708,7 +719,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     elasticity: 1,
     elasticityMode: 'average',
   });
-  setComponent(game.essence, polygonEntity, Static);
+  setComponent(game.essence, polygonEntity, Dynamic);
 
   // # Systems
   // ## Previous invalidation
@@ -727,6 +738,36 @@ export async function initPongGame(parentElement: HTMLElement) {
   registerSystem(game.essence, applyRigidBodyAccelerationToVelocity(game));
   registerSystem(game.essence, applyRigidBodyFriction(game, 0.01));
   registerSystem(game.essence, applyRigidBodyVelocityToPosition(game));
+
+  registerSystem(
+    game.essence,
+    (() => {
+      const colliderBodiesQ = registerQuery(game.essence, newQuery(ColliderBody));
+
+      return () => {
+        const playerArchetype = archetypeByEntity(game.essence, playerEntity);
+
+        for (let i = 0; i < colliderBodiesQ.archetypes.length; i++) {
+          const archetype = colliderBodiesQ.archetypes[i];
+
+          if (archetype === playerArchetype) {
+            continue;
+          }
+
+          const colliderBodiesT = table(archetype, ColliderBody);
+
+          const collisions = ray(colliderBodiesT, playerPosition, {
+            x: playerPosition.x + 100,
+            y: playerPosition.y,
+          });
+
+          if (collisions.length > 0) {
+            debugger;
+          }
+        }
+      };
+    })()
+  );
 
   // ## Transform
   registerSystem(game.essence, transformCollider(game));
