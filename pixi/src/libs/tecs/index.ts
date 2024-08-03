@@ -11,6 +11,7 @@ export {
   tryTablesList,
   component,
   componentsList,
+  tryComponent,
 } from './archetype';
 export * from './query';
 export * from './operations';

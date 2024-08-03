@@ -1,7 +1,12 @@
 import { componentByEntity, registerTopic, System } from '../../tecs';
 import { Game } from '../game';
 import { Position2 } from '../core/types';
-import { Impenetrable, resolvePenetration, colliding, unfilteredColliding } from '../collision';
+import {
+  Impenetrable,
+  resolvePenetration,
+  internalColliding,
+  internalUnfilteredColliding,
+} from '../collision';
 import { Dynamic, Kinematic, RigidBody, Static } from './components';
 import { dotV2, multV2, subV2, Velocity2 } from '../core';
 import { inverseMass } from '../collision/math';
@@ -11,7 +16,7 @@ import { safeGuard } from 'libs/tecs/switch';
 
 export const dynamicRigidBodyCollisionResolution = (game: Game): System => {
   // const topic = registerTopic(game.essence, unfilteredColliding);
-  const topic = registerTopic(game.essence, colliding);
+  const topic = registerTopic(game.essence, internalColliding);
 
   return () => {
     for (const event of topic) {

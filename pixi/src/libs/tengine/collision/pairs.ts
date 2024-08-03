@@ -3,15 +3,17 @@ import { Game } from '../game';
 import {
   collideEndedTopic,
   collideStartedTopic,
-  colliding,
+  internalColliding,
   CollidingEvent,
-  unfilteredColliding,
+  internalUnfilteredColliding,
+  colliding,
 } from './topics';
 
 export type CollidingPairsIndex = Record<string, CollidingEvent>;
 
 export const filterCollisionEvents = (game: Game): System => {
-  const unfilteredCollidingT = registerTopic(game.essence, unfilteredColliding);
+  const unfilteredCollidingT = registerTopic(game.essence, internalUnfilteredColliding);
+  const internalCollidingT = registerTopic(game.essence, internalColliding);
   const collidingT = registerTopic(game.essence, colliding);
   const collideStartedTopicT = registerTopic(game.essence, collideStartedTopic);
   const collideEndedTopicT = registerTopic(game.essence, collideEndedTopic);
@@ -38,14 +40,15 @@ export const filterCollisionEvents = (game: Game): System => {
       }
 
       // # Emit deduped colliding events
-      Topic.emit(collidingT, event, true);
+      Topic.emit(internalCollidingT, event, true);
+      Topic.emit(collidingT, event);
 
       temp[index] = event;
     }
 
     for (const index in pairs) {
       if (!temp[index]) {
-        Topic.emit(collideEndedTopicT, pairs[index], true);
+        Topic.emit(collideEndedTopicT, pairs[index]);
         delete pairs[index];
       }
     }
@@ -55,7 +58,7 @@ export const filterCollisionEvents = (game: Game): System => {
 
       // # Collision started events
       if (!pairs[index]) {
-        Topic.emit(collideStartedTopicT, event, true);
+        Topic.emit(collideStartedTopicT, event);
       }
 
       pairs[index] = event;

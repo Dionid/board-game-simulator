@@ -304,6 +304,27 @@ export function component<S extends Schema, A extends Archetype<ReadonlyArray<Sc
   return component as KindToType<S>;
 }
 
+export function tryComponent<S extends Schema>(
+  archetype: Archetype<any>,
+  entity: Entity,
+  schema: S
+): KindToType<S> | undefined {
+  const componentId = Internals.getSchemaId(schema);
+  const componentIndex = archetype.entitiesSS.sparse[entity];
+  const componentTable = archetype.table[componentId];
+  if (!componentTable) {
+    return undefined;
+  }
+  if (schema[$kind] === $tag) {
+    return {} as KindToType<S>;
+  }
+  const component = componentTable[componentIndex];
+  if (!component) {
+    return undefined;
+  }
+  return component as KindToType<S> | undefined;
+}
+
 // OK
 export const table = <S extends Schema, A extends Archetype<any>>(
   archetype: A,

@@ -14,7 +14,10 @@ import { Game } from 'libs/tengine/game';
 export const Player = newTag();
 export const Enemy = newTag();
 export const Ball = newTag();
-export const Wall = newTag();
+
+export const Goals = newTag();
+export const PlayerGoals = newTag();
+export const EnemyGoals = newTag();
 
 export type Directions = 'up' | 'down' | 'left' | 'right';
 

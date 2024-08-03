@@ -19,14 +19,16 @@
 
 # Roadmap
 
+1. ECS
+    1. Events
+        1. Default topics (ComponentAdded, ComponentRemoved, ComponentChanged, EntitySpawned, EntityKilled)
+        1. Subscribe by one entity
 1. View
     1. Capsule
     1. Polygon
     1. Change to ViewSet
     1. On entity kill destroy pView
     1. Scale
-1. ECS
-    1. Default topics (ComponentAdded, ComponentRemoved, ComponentChanged, EntitySpawned, EntityKilled)
 1. Collision
     1. ~~SAT~~
     1. ~~Raw Vertices~~
@@ -67,6 +69,7 @@
 1. Collision
     1. Circles, Rectangles and Vertices
     1. Narrow (on SAT)
+1. Events Monitoring
 
 # Entities
 

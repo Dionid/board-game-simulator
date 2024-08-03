@@ -2,8 +2,9 @@ import { newQuery, registerQuery, Entity, KindToType, System, table, emit } from
 import { Position2 } from '../core/types';
 import { Game } from '../game';
 import { Awaken, ColliderBody, CollisionsMonitoring } from './components';
-import { unfilteredColliding } from './topics';
+import { internalUnfilteredColliding } from './topics';
 import { collides } from './collision';
+import { Archetype } from 'libs/tecs/archetype';
 
 // 1. Get all entities that have CollisionSource + ColliderSet + Position (+ Awaken)
 // 1. Calculate the next position based on the current position + velocity
@@ -31,6 +32,7 @@ export const checkNarrowCollisionSimple = (game: Game, awakened: boolean = true)
       entity: Entity;
       colliderSet: KindToType<typeof ColliderBody>;
       position: KindToType<typeof Position2>;
+      archetype: Archetype;
     }[] = [];
 
     for (let i = 0; i < forCheckQ.archetypes.length; i++) {
@@ -49,6 +51,7 @@ export const checkNarrowCollisionSimple = (game: Game, awakened: boolean = true)
           entity,
           colliderSet,
           position,
+          archetype,
         });
       }
     }
@@ -58,16 +61,17 @@ export const checkNarrowCollisionSimple = (game: Game, awakened: boolean = true)
     }
 
     for (let i = 0; i < allCollidersQ.archetypes.length; i++) {
-      const archetype = allCollidersQ.archetypes[i];
+      const bArchetype = allCollidersQ.archetypes[i];
 
-      const colliderSetTB = table(archetype, ColliderBody);
+      const colliderSetTB = table(bArchetype, ColliderBody);
 
       for (let a = 0; a < forCheckColliders.length; a++) {
+        const aArchetype = forCheckColliders[a].archetype;
         const entityA = forCheckColliders[a].entity;
         const colliderSetA = forCheckColliders[a].colliderSet;
 
-        for (let i = 0; i < archetype.entities.length; i++) {
-          const entityB = archetype.entities[i];
+        for (let i = 0; i < bArchetype.entities.length; i++) {
+          const entityB = bArchetype.entities[i];
 
           if (entityA === entityB) {
             continue;
@@ -85,18 +89,20 @@ export const checkNarrowCollisionSimple = (game: Game, awakened: boolean = true)
 
               if (result && result.overlap >= 0) {
                 emit(
-                  unfilteredColliding,
+                  internalUnfilteredColliding,
                   {
                     name: 'colliding',
                     overlap: result.overlap,
                     axis: result.axis,
                     a: {
+                      archetype: aArchetype,
                       entity: entityA,
                       colliderSet: colliderSetA,
                       collider: colliderA,
                       colliderId: acId,
                     },
                     b: {
+                      archetype: bArchetype,
                       entity: entityB,
                       colliderSet: colliderSetB,
                       collider: colliderB,
