@@ -278,7 +278,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   const enemyAngle = 0;
   setComponent(game.essence, enemyEntity, Angle, { value: enemyAngle, _prev: 0 });
   // ## Acceleration based Movement
-  setComponent(game.essence, enemyEntity, Speed, { value: 0.5 });
+  setComponent(game.essence, enemyEntity, Speed, { value: 0.7 });
   setComponent(game.essence, enemyEntity, Acceleration2, {
     x: 0,
     y: 0,

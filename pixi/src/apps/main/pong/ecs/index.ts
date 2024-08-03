@@ -302,8 +302,8 @@ export function paddleWorldBoundaries(
       playerPosition.y = game.world.size.height - characterSize.height / 2;
     }
 
-    if (playerPosition.x < characterSize.width / 2) {
-      playerPosition.x = characterSize.width / 2;
+    if (playerPosition.x < characterSize.width / 2 + 50) {
+      playerPosition.x = characterSize.width / 2 + 51;
     } else if (playerPosition.x > game.world.size.width / 2 - characterSize.width / 2) {
       playerPosition.x = game.world.size.width / 2 - characterSize.width / 2;
     }
@@ -314,8 +314,8 @@ export function paddleWorldBoundaries(
       enemyPosition.y = game.world.size.height - characterSize.height / 2;
     }
 
-    if (enemyPosition.x > game.world.size.width - characterSize.width / 2) {
-      enemyPosition.x = game.world.size.width - characterSize.width / 2;
+    if (enemyPosition.x > game.world.size.width - characterSize.width / 2 - 50) {
+      enemyPosition.x = game.world.size.width - characterSize.width / 2 - 51;
     } else if (enemyPosition.x < game.world.size.width / 2 + characterSize.width / 2) {
       enemyPosition.x = game.world.size.width / 2 + characterSize.width / 2;
     }
@@ -336,11 +336,12 @@ export function enemyAi(
     }
 
     const enemyAcceleration = componentByEntity(game.essence, enemyEntity, Acceleration2);
+    const enemyVelocity = componentByEntity(game.essence, enemyEntity, Velocity2);
     const enemySpeed = componentByEntity(game.essence, enemyEntity, Speed);
     const enemyPosition = componentByEntity(game.essence, enemyEntity, Position2);
     const ballPosition = componentByEntity(game.essence, ballEntity, Position2);
 
-    if (!enemyAcceleration) {
+    if (!enemyAcceleration || !enemyVelocity) {
       return;
     }
     if (!enemySpeed) {
@@ -353,6 +354,7 @@ export function enemyAi(
       return;
     }
 
+    // # Follow ball Y
     if (ballPosition.y > enemyPosition.y + 10) {
       enemyAcceleration.y = enemySpeed.value * deltaTime;
     } else if (ballPosition.y < enemyPosition.y - 10) {
@@ -361,25 +363,32 @@ export function enemyAi(
       enemyAcceleration.y = 0;
     }
 
+    // # Go to ball X when it is on enemy side of field
     if (ballPosition.x > game.world.size.width / 2) {
       enemyAcceleration.x = -enemySpeed.value * deltaTime;
     } else {
       enemyAcceleration.x = enemySpeed.value * deltaTime;
     }
 
-    if (enemyPosition.x - enemySize.width / 2 - 1 < ballPosition.x) {
-      enemyAcceleration.x = enemySpeed.value * deltaTime;
-      enemyAcceleration.y = 0;
+    // # If ball going behind enemy, go back
+    if (
+      ballPosition.y > enemyPosition.y + enemySize.height / 2 ||
+      ballPosition.y < enemyPosition.y - enemySize.height / 2
+    ) {
+      if (enemyPosition.x < ballPosition.x + enemySize.width + 50) {
+        enemyAcceleration.x = enemySpeed.value * deltaTime;
+        enemyAcceleration.y = 0;
+      }
     }
 
+    // # Goals boundaries
     const goalsPosition = componentByEntity(game.essence, enemyGoalsEntity, Position2);
 
     if (!goalsPosition) {
       return;
     }
 
-    if (enemyPosition.x >= goalsPosition.x - 150) {
-      // enemyPosition.x = goalsPosition.x - 151;
+    if (enemyPosition.x >= goalsPosition.x - 60) {
       if (enemyAcceleration.x > 0) {
         enemyAcceleration.x *= 0.3;
         if (enemyAcceleration.x < 0.1) {
@@ -388,9 +397,9 @@ export function enemyAi(
       }
     }
 
-    if (enemyPosition.x >= goalsPosition.x - 50) {
-      enemyPosition.x = goalsPosition.x - 51;
-    }
+    // if (enemyPosition.x >= goalsPosition.x - 50) {
+    //   enemyPosition.x = goalsPosition.x - 51;
+    // }
   };
 }
 

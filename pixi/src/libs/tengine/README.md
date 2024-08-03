@@ -41,6 +41,7 @@
     1. ~~Polygon on Vertices~~
     1. ~~World Bounds~~
     1. Collision Queries
+    1. CCD
     1. Fix Circle anchor
     1. Separate concave to convex
     1. Multiple iterations per one cycle
