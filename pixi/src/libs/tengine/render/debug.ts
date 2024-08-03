@@ -102,7 +102,7 @@ export const drawDebugLines = (
               continue;
             }
 
-            globalDebugGraphics.circle(collider._position.x, collider._position.y, 6);
+            globalDebugGraphics.circle(collider._position.x, collider._position.y, 3);
             globalDebugGraphics.fill({ color: 'gray' });
 
             globalDebugGraphics.beginPath();
@@ -127,7 +127,7 @@ export const drawDebugLines = (
         for (let j = 0; j < archetype.entities.length; j++) {
           const position = positionT[j];
 
-          globalDebugGraphics.circle(position.x, position.y, 4);
+          globalDebugGraphics.circle(position.x, position.y, 2);
           globalDebugGraphics.fill({ color: 'red' });
         }
       }

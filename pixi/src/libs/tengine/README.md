@@ -16,6 +16,7 @@
 1. Collision Queries
 1. Character movement
 1. Simulate containment
+? Apply movement before or after gamelogic
 
 # Roadmap
 

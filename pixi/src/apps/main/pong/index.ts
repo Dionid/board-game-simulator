@@ -147,10 +147,14 @@ export async function initPongGame(parentElement: HTMLElement) {
   const playerEntity = spawnEntity(game.essence);
   setComponent(game.essence, playerEntity, Player);
   // ## Position
-  const playerPosition = {
+  const initialPlayerPosition = {
     x: game.world.size.width / 6,
     y: game.world.size.height / 2,
-    _prev: { x: 0, y: 0 },
+  };
+  const playerPosition = {
+    x: initialPlayerPosition.x,
+    y: initialPlayerPosition.y,
+    _prev: { x: initialPlayerPosition.x, y: initialPlayerPosition.y },
   };
   setComponent(game.essence, playerEntity, Position2, playerPosition);
   // ## Angle
@@ -200,10 +204,17 @@ export async function initPongGame(parentElement: HTMLElement) {
   const enemyEntity = spawnEntity(game.essence);
   setComponent(game.essence, enemyEntity, Enemy);
   // ## Position
-  const enemyPosition = {
+  const initialEnemyPosition = {
     x: game.world.size.width - game.world.size.width / 6,
     y: game.world.size.height / 2,
-    _prev: { x: 0, y: 0 },
+  };
+  const enemyPosition = {
+    x: initialEnemyPosition.x,
+    y: initialEnemyPosition.y,
+    _prev: {
+      x: initialEnemyPosition.x,
+      y: initialEnemyPosition.y,
+    },
   };
   setComponent(game.essence, enemyEntity, Position2, enemyPosition);
   // ## Angle
@@ -369,6 +380,11 @@ export async function initPongGame(parentElement: HTMLElement) {
   registerSystem(game.essence, mapKeyboardInput(game));
   registerSystem(game.essence, mapMouseInput(game, map));
 
+  // ## Basic physics
+  registerSystem(game.essence, applyRigidBodyAccelerationToVelocity(game));
+  registerSystem(game.essence, applyRigidBodyFriction(game, 0.01));
+  registerSystem(game.essence, applyRigidBodyVelocityToPosition(game));
+
   // ## Game logic
   // ### Movement
   registerSystem(game.essence, accelerateByArrows(game, playerEntity));
@@ -380,6 +396,15 @@ export async function initPongGame(parentElement: HTMLElement) {
     ballVelocity.x = Math.cos(randomAngle) * 7;
     ballVelocity.y = Math.sin(randomAngle) * 7;
   }, 1000);
+  registerSystem(game.essence, () => {
+    if (playerPosition.x > game.world.size.width / 2 - characterSize.width) {
+      playerPosition.x = game.world.size.width / 2 - characterSize.width;
+    }
+
+    if (enemyPosition.x < game.world.size.width / 2 + characterSize.width) {
+      enemyPosition.x = game.world.size.width / 2 + characterSize.width;
+    }
+  });
   registerSystem(
     game.essence,
     (() => {
@@ -403,7 +428,6 @@ export async function initPongGame(parentElement: HTMLElement) {
 
             if (isPlayerGoals) {
               uiState.set(scores, (prev) => {
-                console.log('Player scored', prev);
                 return {
                   ...prev,
                   enemy: prev.enemy + 1,
@@ -418,6 +442,7 @@ export async function initPongGame(parentElement: HTMLElement) {
               });
             }
 
+            // # Reset ball
             const position = tryComponent(ball.archetype, ball.entity, Position2)!;
             const velocity = tryComponent(ball.archetype, ball.entity, Velocity2)!;
             const acceleration = tryComponent(ball.archetype, ball.entity, Acceleration2)!;
@@ -431,6 +456,14 @@ export async function initPongGame(parentElement: HTMLElement) {
             position.x = initialBallPosition.x;
             position.y = initialBallPosition.y;
 
+            // # Reset characters
+            playerPosition.x = initialPlayerPosition.x;
+            playerPosition.y = initialPlayerPosition.y;
+
+            enemyPosition.x = initialEnemyPosition.x;
+            enemyPosition.y = initialEnemyPosition.y;
+
+            // # Restart ball
             setTimeout(() => {
               const randomAngle = Math.random() * Math.PI * 2;
 
@@ -444,11 +477,6 @@ export async function initPongGame(parentElement: HTMLElement) {
       };
     })()
   );
-
-  // ## Basic physics
-  registerSystem(game.essence, applyRigidBodyAccelerationToVelocity(game));
-  registerSystem(game.essence, applyRigidBodyFriction(game, 0.01));
-  registerSystem(game.essence, applyRigidBodyVelocityToPosition(game));
 
   // ## Transform
   registerSystem(game.essence, transformCollider(game));
