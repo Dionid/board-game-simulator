@@ -157,13 +157,63 @@ export const changeVelocityByArrows = (game: Game, charEntity: Entity): System =
   };
 };
 
+export function resetRound(
+  initialBallPosition: Vector2,
+  initialPlayerPosition: Vector2,
+  initialEnemyPosition: Vector2,
+  ballVelocity: Vector2,
+  ballAcceleration: Vector2,
+  ballPosition: Vector2,
+  playerPosition: Vector2,
+  playerVelocity: Vector2,
+  playerAcceleration: Vector2,
+  enemyPosition: Vector2,
+  enemyVelocity: Vector2,
+  enemyAcceleration: Vector2,
+  roundStarted: { value: boolean }
+) {
+  ballVelocity.x = 0;
+  ballVelocity.y = 0;
+  ballAcceleration.x = 0;
+  ballAcceleration.y = 0;
+  ballPosition.x = initialBallPosition.x;
+  ballPosition.y = initialBallPosition.y;
+
+  playerPosition.x = initialPlayerPosition.x;
+  playerPosition.y = initialPlayerPosition.y;
+  playerVelocity.x = 0;
+  playerVelocity.y = 0;
+  playerAcceleration.x = 0;
+  playerAcceleration.y = 0;
+
+  enemyPosition.x = initialEnemyPosition.x;
+  enemyPosition.y = initialEnemyPosition.y;
+  enemyVelocity.x = 0;
+  enemyVelocity.y = 0;
+  enemyAcceleration.x = 0;
+  enemyAcceleration.y = 0;
+
+  roundStarted.value = false;
+
+  // # Restart ball
+  setTimeout(() => {
+    const randomAngle = Math.random() * Math.PI * 2;
+
+    ballVelocity.x = Math.cos(randomAngle) * 10;
+    ballVelocity.y = Math.sin(randomAngle) * 10;
+
+    roundStarted.value = true;
+  }, 1000);
+}
+
 export function scoring(
   game: Game,
   playerEntity: Entity,
   enemyEntity: Entity,
   initialBallPosition: Vector2,
   initialPlayerPosition: Vector2,
-  initialEnemyPosition: Vector2
+  initialEnemyPosition: Vector2,
+  roundStarted: { value: boolean }
 ): System {
   registerTopic(game.essence, collideStartedTopic);
 
@@ -201,37 +251,34 @@ export function scoring(
         }
 
         // # Reset ball
-        const position = tryComponent(ball.archetype, ball.entity, Position2)!;
-        const velocity = tryComponent(ball.archetype, ball.entity, Velocity2)!;
-        const acceleration = tryComponent(ball.archetype, ball.entity, Acceleration2)!;
-
-        velocity.x = 0;
-        velocity.y = 0;
-
-        acceleration.x = 0;
-        acceleration.y = 0;
-
-        position.x = initialBallPosition.x;
-        position.y = initialBallPosition.y;
+        const ballPosition = tryComponent(ball.archetype, ball.entity, Position2)!;
+        const ballVelocity = tryComponent(ball.archetype, ball.entity, Velocity2)!;
+        const ballAcceleration = tryComponent(ball.archetype, ball.entity, Acceleration2)!;
 
         // # Reset characters
         const playerPosition = componentByEntity(game.essence, playerEntity, Position2)!;
-
-        playerPosition.x = initialPlayerPosition.x;
-        playerPosition.y = initialPlayerPosition.y;
+        const playerVelocity = componentByEntity(game.essence, playerEntity, Velocity2)!;
+        const playerAcceleration = componentByEntity(game.essence, playerEntity, Acceleration2)!;
 
         const enemyPosition = componentByEntity(game.essence, enemyEntity, Position2)!;
+        const enemyVelocity = componentByEntity(game.essence, enemyEntity, Velocity2)!;
+        const enemyAcceleration = componentByEntity(game.essence, enemyEntity, Acceleration2)!;
 
-        enemyPosition.x = initialEnemyPosition.x;
-        enemyPosition.y = initialEnemyPosition.y;
-
-        // # Restart ball
-        setTimeout(() => {
-          const randomAngle = Math.random() * Math.PI * 2;
-
-          velocity.x = Math.cos(randomAngle) * 7;
-          velocity.y = Math.sin(randomAngle) * 7;
-        }, 1000);
+        resetRound(
+          initialBallPosition,
+          initialPlayerPosition,
+          initialEnemyPosition,
+          ballVelocity,
+          ballAcceleration,
+          ballPosition,
+          playerPosition,
+          playerVelocity,
+          playerAcceleration,
+          enemyPosition,
+          enemyVelocity,
+          enemyAcceleration,
+          roundStarted
+        );
 
         return;
       }
@@ -280,25 +327,28 @@ export function enemyAi(
   enemyEntity: Entity,
   ballEntity: Entity,
   enemyGoalsEntity: Entity,
-  enemySize: Size2
+  enemySize: Size2,
+  roundStarted: { value: boolean }
 ): System {
   return ({ deltaTime }) => {
+    if (roundStarted.value === false) {
+      return;
+    }
+
     const enemyAcceleration = componentByEntity(game.essence, enemyEntity, Acceleration2);
+    const enemySpeed = componentByEntity(game.essence, enemyEntity, Speed);
+    const enemyPosition = componentByEntity(game.essence, enemyEntity, Position2);
+    const ballPosition = componentByEntity(game.essence, ballEntity, Position2);
+
     if (!enemyAcceleration) {
       return;
     }
-
-    const enemySpeed = componentByEntity(game.essence, enemyEntity, Speed);
     if (!enemySpeed) {
       return;
     }
-
-    const enemyPosition = componentByEntity(game.essence, enemyEntity, Position2);
     if (!enemyPosition) {
       return;
     }
-
-    const ballPosition = componentByEntity(game.essence, ballEntity, Position2);
     if (!ballPosition) {
       return;
     }
@@ -319,6 +369,7 @@ export function enemyAi(
 
     if (enemyPosition.x - enemySize.width / 2 - 1 < ballPosition.x) {
       enemyAcceleration.x = enemySpeed.value * deltaTime;
+      enemyAcceleration.y = 0;
     }
 
     const goalsPosition = componentByEntity(game.essence, enemyGoalsEntity, Position2);
@@ -339,6 +390,67 @@ export function enemyAi(
 
     if (enemyPosition.x >= goalsPosition.x - 50) {
       enemyPosition.x = goalsPosition.x - 51;
+    }
+  };
+}
+
+export function ballTunneling(
+  game: Game,
+  ballEntity: Entity,
+  playerEntity: Entity,
+  enemyEntity: Entity,
+  initialBallPosition: Vector2,
+  initialPlayerPosition: Vector2,
+  initialEnemyPosition: Vector2,
+  roundStarted: { value: boolean }
+): System {
+  return () => {
+    const ballPosition = componentByEntity(game.essence, ballEntity, Position2)!;
+    const ballVelocity = componentByEntity(game.essence, ballEntity, Velocity2)!;
+    const ballAcceleration = componentByEntity(game.essence, ballEntity, Acceleration2)!;
+
+    // # Reset characters
+    const playerPosition = componentByEntity(game.essence, playerEntity, Position2)!;
+    const playerVelocity = componentByEntity(game.essence, playerEntity, Velocity2)!;
+    const playerAcceleration = componentByEntity(game.essence, playerEntity, Acceleration2)!;
+
+    const enemyPosition = componentByEntity(game.essence, enemyEntity, Position2)!;
+    const enemyVelocity = componentByEntity(game.essence, enemyEntity, Velocity2)!;
+    const enemyAcceleration = componentByEntity(game.essence, enemyEntity, Acceleration2)!;
+
+    if (
+      ballPosition.x < 0 ||
+      ballPosition.x > game.world.size.width ||
+      ballPosition.y < 0 ||
+      ballPosition.y > game.world.size.height
+    ) {
+      if (game.world.size.width / 2 <= ballPosition.x) {
+        ballPosition.x -= 50;
+      } else {
+        ballPosition.x += 50;
+      }
+
+      if (game.world.size.height / 2 <= ballPosition.y) {
+        ballPosition.y -= 50;
+      } else {
+        ballPosition.y += 50;
+      }
+
+      // resetRound(
+      //   initialBallPosition,
+      //   initialPlayerPosition,
+      //   initialEnemyPosition,
+      //   ballVelocity,
+      //   ballAcceleration,
+      //   ballPosition,
+      //   playerPosition,
+      //   playerVelocity,
+      //   playerAcceleration,
+      //   enemyPosition,
+      //   enemyVelocity,
+      //   enemyAcceleration,
+      //   roundStarted
+      // );
     }
   };
 }

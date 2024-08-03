@@ -21,6 +21,7 @@ import {
   Player,
   PlayerGoals,
   accelerateByArrows,
+  ballTunneling,
   enemyAi,
   paddleWorldBoundaries,
   scoring,
@@ -60,6 +61,10 @@ export async function initPongGame(parentElement: HTMLElement) {
   await initGame(game, {
     backgroundColor: 0x000000,
   });
+
+  const roundStarted = {
+    value: false,
+  };
 
   const map = {
     container: new Container({
@@ -438,8 +443,6 @@ export async function initPongGame(parentElement: HTMLElement) {
   registerSystem(game.essence, applyRigidBodyVelocityToPosition(game));
 
   // ## Game logic
-  // ### Movement
-  registerSystem(game.essence, accelerateByArrows(game, playerEntity));
   // ### Start ball
   registerSystem(
     game.essence,
@@ -449,6 +452,8 @@ export async function initPongGame(parentElement: HTMLElement) {
 
         ballVelocity.x = Math.cos(randomAngle) * 10;
         ballVelocity.y = Math.sin(randomAngle) * 10;
+
+        roundStarted.value = true;
       }, 1000);
     },
     {
@@ -463,13 +468,35 @@ export async function initPongGame(parentElement: HTMLElement) {
       enemyEntity,
       initialBallPosition,
       initialPlayerPosition,
-      initialEnemyPosition
+      initialEnemyPosition,
+      roundStarted
     )
   );
-  registerSystem(game.essence, enemyAi(game, enemyEntity, ballEntity, enemyGoals, characterSize));
+  // ### Movement
+  registerSystem(game.essence, accelerateByArrows(game, playerEntity));
+  // ### AI
+  registerSystem(
+    game.essence,
+    enemyAi(game, enemyEntity, ballEntity, enemyGoals, characterSize, roundStarted)
+  );
+  // ### Paddle boundaries
   registerSystem(
     game.essence,
     paddleWorldBoundaries(game, playerEntity, enemyEntity, characterSize)
+  );
+  // ### Ball boundaries
+  registerSystem(
+    game.essence,
+    ballTunneling(
+      game,
+      ballEntity,
+      playerEntity,
+      enemyEntity,
+      initialBallPosition,
+      initialPlayerPosition,
+      initialEnemyPosition,
+      roundStarted
+    )
   );
 
   // ## Transform
