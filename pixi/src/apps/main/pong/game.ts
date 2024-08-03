@@ -1,15 +1,10 @@
 import { Container } from 'pixi.js';
 import { initGame, newGame } from '../../../libs/tengine/game';
 import {
-  archetypeByEntity,
-  component,
-  componentByEntity,
-  killEntity,
   registerSystem,
   registerTopic,
   setComponent,
   spawnEntity,
-  table,
   tryTable,
 } from '../../../libs/tecs';
 import { mapKeyboardInput, mapMouseInput } from '../../../libs/tengine/ecs';
@@ -35,7 +30,6 @@ import {
   lineColliderComponent,
   filterCollisionEvents,
   collideStartedTopic,
-  Awaken,
 } from 'libs/tengine/collision';
 import {
   applyRigidBodyAccelerationToVelocity,
@@ -43,7 +37,7 @@ import {
   applyRigidBodyVelocityToPosition,
   dynamicRigidBodyCollisionResolution,
 } from 'libs/tengine/physics';
-import { drawViews, drawDebugLines, addNewViews, DEBUG } from 'libs/tengine/render';
+import { drawViews, drawDebugLines, addNewViews, DEBUG, View } from 'libs/tengine/render';
 import { penetrationResolution } from 'libs/tengine/collision/penetration-resolution';
 import { updatePrevious } from 'libs/tengine/core/update-previous';
 import { awakening } from 'libs/tengine/collision/awakening';
@@ -142,6 +136,61 @@ export async function initPongGame(parentElement: HTMLElement) {
     });
     setComponent(game.essence, boundaryEntity, Static);
   }
+
+  // # Field
+  const centerLine = spawnEntity(game.essence);
+  setComponent(game.essence, centerLine, Position2, {
+    x: game.world.size.width / 2,
+    y: 0,
+    _prev: {
+      x: game.world.size.width / 2,
+      y: 0,
+    },
+  });
+  setComponent(game.essence, centerLine, View, {
+    offset: { x: 0, y: 0 },
+    scale: { x: 1, y: 1 },
+    rotation: 0,
+    anchor: { x: 0, y: 0 },
+    alpha: 0.5,
+    model: {
+      type: 'graphics',
+      shape: {
+        type: 'rectangle',
+        size: {
+          width: 1,
+          height: game.world.size.height,
+        },
+      },
+      color: '0xFFFFFF',
+    },
+  });
+
+  const centerLineCenter = spawnEntity(game.essence);
+  const centerLineCenterRadius = 10;
+  setComponent(game.essence, centerLineCenter, Position2, {
+    x: game.world.size.width / 2,
+    y: game.world.size.height / 2,
+    _prev: {
+      x: game.world.size.width / 2,
+      y: game.world.size.height / 2,
+    },
+  });
+  setComponent(game.essence, centerLineCenter, View, {
+    offset: { x: 0, y: 0 },
+    scale: { x: 1, y: 1 },
+    rotation: 0,
+    anchor: { x: 0.5, y: 0.5 },
+    alpha: 0.5,
+    model: {
+      type: 'graphics',
+      shape: {
+        type: 'circle',
+        radius: centerLineCenterRadius,
+      },
+      color: '0xFFFFFF',
+    },
+  });
 
   // # Player
   const playerEntity = spawnEntity(game.essence);
@@ -285,8 +334,8 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, ballEntity, Velocity2, ballVelocity);
 
   const initialBallPosition = {
-    x: game.world.size.width / 2 - 10,
-    y: game.world.size.height / 2 - 10,
+    x: game.world.size.width / 2,
+    y: game.world.size.height / 2,
   };
   const ballPosition = {
     x: initialBallPosition.x,
@@ -397,12 +446,28 @@ export async function initPongGame(parentElement: HTMLElement) {
     ballVelocity.y = Math.sin(randomAngle) * 7;
   }, 1000);
   registerSystem(game.essence, () => {
-    if (playerPosition.x > game.world.size.width / 2 - characterSize.width) {
-      playerPosition.x = game.world.size.width / 2 - characterSize.width;
+    if (playerPosition.y < characterSize.height / 2) {
+      playerPosition.y = characterSize.height / 2;
+    } else if (playerPosition.y > game.world.size.height - characterSize.height / 2) {
+      playerPosition.y = game.world.size.height - characterSize.height / 2;
     }
 
-    if (enemyPosition.x < game.world.size.width / 2 + characterSize.width) {
-      enemyPosition.x = game.world.size.width / 2 + characterSize.width;
+    if (playerPosition.x < characterSize.width / 2) {
+      playerPosition.x = characterSize.width / 2;
+    } else if (playerPosition.x > game.world.size.width / 2 - characterSize.width / 2) {
+      playerPosition.x = game.world.size.width / 2 - characterSize.width / 2;
+    }
+
+    if (enemyPosition.y < characterSize.height / 2) {
+      enemyPosition.y = characterSize.height / 2;
+    } else if (enemyPosition.y > game.world.size.height - characterSize.height / 2) {
+      enemyPosition.y = game.world.size.height - characterSize.height / 2;
+    }
+
+    if (playerPosition.x > game.world.size.width - characterSize.width / 2) {
+      enemyPosition.x = game.world.size.width - characterSize.width / 2;
+    } else if (enemyPosition.x < game.world.size.width / 2 + characterSize.width / 2) {
+      enemyPosition.x = game.world.size.width / 2 + characterSize.width / 2;
     }
   });
   registerSystem(
@@ -497,7 +562,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   registerSystem(
     game.essence,
     drawDebugLines(game, map, {
-      view: true,
+      view: false,
       xy: true,
       collision: true,
       velocity: true,

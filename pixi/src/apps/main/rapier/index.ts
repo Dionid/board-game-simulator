@@ -63,23 +63,23 @@ export async function initRapierPongGame(parentElement: HTMLElement) {
   // # Game Object
   setComponent(game.essence, playerEntity, Player);
   // # Visuals
-  setComponent(game.essence, playerEntity, View, {
-    offset: { x: 0, y: 0 },
-    scale: { x: 1, y: 1 },
-    rotation: 0,
-    anchor: { x: 0.5, y: 0.5 },
-    model: {
-      type: 'graphics',
-      color: 'blue',
-      shape: {
-        type: 'rectangle',
-        size: {
-          width: characterSize.width,
-          height: characterSize.height,
-        },
-      },
-    },
-  });
+  // setComponent(game.essence, playerEntity, View, {
+  //   offset: { x: 0, y: 0 },
+  //   scale: { x: 1, y: 1 },
+  //   rotation: 0,
+  //   anchor: { x: 0.5, y: 0.5 },
+  //   model: {
+  //     type: 'graphics',
+  //     color: 'blue',
+  //     shape: {
+  //       type: 'rectangle',
+  //       size: {
+  //         width: characterSize.width,
+  //         height: characterSize.height,
+  //       },
+  //     },
+  //   },
+  // });
 
   // # Systems
   // ...

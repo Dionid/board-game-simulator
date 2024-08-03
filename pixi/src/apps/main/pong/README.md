@@ -3,10 +3,14 @@
 1. ~~Bounce from the paddles~~
 1. ~~Score zones~~
 1. ~~Score points~~
-1. Paddles world and half world boundaries
+1. ~~Paddles world and half world boundaries~~
 1. Enemy AI
+1. If no action, that -1 point to where ball is
 
-1. On resize
+# Additional
+
+1. Make paddles and ball move to initial position with animation
+1. ...
 
 # Questions
 

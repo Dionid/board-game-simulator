@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { initPongGame } from ".";
+import { initPongGame } from "./game";
 import { run } from "libs/tengine/game";
 import { useAtom } from "jotai";
 import { scores } from "./state";

@@ -297,13 +297,22 @@ export function defaultFromSchema<S extends Omit<Schema, typeof $defaultFn>>(
 
 export function newSchema<S extends Record<string, KindSt | PrimitiveKind | ComplexKind | Schema>>(
   schema: S,
-  kind?: SchemaKind,
-  defaultFn?: () => KindToType<S>
+  opts: {
+    kind?: SchemaKind;
+    defaultFn?: () => KindToType<S>;
+    name?: string;
+  } = {}
 ): S & { [$kind]: SchemaKind; [$defaultFn]: () => KindToType<S> } {
-  const newSchema: S & { [$kind]: SchemaKind } = {
+  const { kind, defaultFn, name } = opts;
+
+  const newSchema: S & { [$kind]: SchemaKind; [$name]?: string } = {
     ...schema,
     [$kind]: kind ?? $aos,
   };
+
+  if (name) {
+    newSchema[$name] = name;
+  }
 
   const newDefaultFn = defaultFn ?? (() => defaultFromSchema(newSchema));
 
