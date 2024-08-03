@@ -1,6 +1,6 @@
 import { Container } from 'pixi.js';
 import { initGame, newGame } from '../../../libs/tengine/game';
-import { registerSystem, setComponent, spawnEntity } from '../../../libs/tecs';
+import { componentByEntity, registerSystem, setComponent, spawnEntity } from '../../../libs/tecs';
 import { mapKeyboardInput, mapMouseInput } from '../../../libs/tengine/ecs';
 import { Dynamic, Kinematic, RigidBody, Static } from 'libs/tengine/physics/components';
 import {
@@ -11,6 +11,7 @@ import {
   Angle,
   Friction,
   DisableFriction,
+  subV2,
 } from 'libs/tengine/core';
 import {
   Ball,
@@ -20,6 +21,7 @@ import {
   Player,
   PlayerGoals,
   accelerateByArrows,
+  enemyAi,
   paddleWorldBoundaries,
   scoring,
 } from './ecs';
@@ -160,7 +162,7 @@ export async function initPongGame(parentElement: HTMLElement) {
         type: 'rectangle',
         size: {
           width: 1,
-          height: game.world.size.height - 60,
+          height: game.world.size.height / 2,
         },
       },
       color: '0xFFFFFF',
@@ -271,13 +273,13 @@ export async function initPongGame(parentElement: HTMLElement) {
   const enemyAngle = 0;
   setComponent(game.essence, enemyEntity, Angle, { value: enemyAngle, _prev: 0 });
   // ## Acceleration based Movement
-  setComponent(game.essence, enemyEntity, Speed, { value: 1 });
+  setComponent(game.essence, enemyEntity, Speed, { value: 0.5 });
   setComponent(game.essence, enemyEntity, Acceleration2, {
     x: 0,
     y: 0,
   });
   setComponent(game.essence, enemyEntity, Friction, {
-    value: 0,
+    value: 0.1,
   });
   setComponent(game.essence, enemyEntity, Velocity2, {
     max: 10,
@@ -318,7 +320,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   // # Ball
   const ballEntity = spawnEntity(game.essence);
   setComponent(game.essence, ballEntity, Ball);
-  setComponent(game.essence, ballEntity, Speed, { value: 1 });
+  setComponent(game.essence, ballEntity, Speed, { value: 2 });
   setComponent(game.essence, ballEntity, Acceleration2, {
     x: 0,
     y: 0,
@@ -445,17 +447,13 @@ export async function initPongGame(parentElement: HTMLElement) {
       setTimeout(() => {
         const randomAngle = Math.random() * Math.PI * 2;
 
-        ballVelocity.x = Math.cos(randomAngle) * 7;
-        ballVelocity.y = Math.sin(randomAngle) * 7;
+        ballVelocity.x = Math.cos(randomAngle) * 10;
+        ballVelocity.y = Math.sin(randomAngle) * 10;
       }, 1000);
     },
     {
       type: 'onFirstStep',
     }
-  );
-  registerSystem(
-    game.essence,
-    paddleWorldBoundaries(game, playerEntity, enemyEntity, characterSize)
   );
   registerSystem(
     game.essence,
@@ -467,6 +465,11 @@ export async function initPongGame(parentElement: HTMLElement) {
       initialPlayerPosition,
       initialEnemyPosition
     )
+  );
+  registerSystem(game.essence, enemyAi(game, enemyEntity, ballEntity, enemyGoals, characterSize));
+  registerSystem(
+    game.essence,
+    paddleWorldBoundaries(game, playerEntity, enemyEntity, characterSize)
   );
 
   // ## Transform

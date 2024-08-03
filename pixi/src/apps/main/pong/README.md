@@ -4,7 +4,7 @@
 1. ~~Score zones~~
 1. ~~Score points~~
 1. ~~Paddles world and half world boundaries~~
-1. Enemy AI
+1. ~~Enemy AI~~
 1. If no action, that -1 point to where ball is
 
 # Additional

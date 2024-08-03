@@ -267,10 +267,78 @@ export function paddleWorldBoundaries(
       enemyPosition.y = game.world.size.height - characterSize.height / 2;
     }
 
-    if (playerPosition.x > game.world.size.width - characterSize.width / 2) {
+    if (enemyPosition.x > game.world.size.width - characterSize.width / 2) {
       enemyPosition.x = game.world.size.width - characterSize.width / 2;
     } else if (enemyPosition.x < game.world.size.width / 2 + characterSize.width / 2) {
       enemyPosition.x = game.world.size.width / 2 + characterSize.width / 2;
+    }
+  };
+}
+
+export function enemyAi(
+  game: Game,
+  enemyEntity: Entity,
+  ballEntity: Entity,
+  enemyGoalsEntity: Entity,
+  enemySize: Size2
+): System {
+  return ({ deltaTime }) => {
+    const enemyAcceleration = componentByEntity(game.essence, enemyEntity, Acceleration2);
+    if (!enemyAcceleration) {
+      return;
+    }
+
+    const enemySpeed = componentByEntity(game.essence, enemyEntity, Speed);
+    if (!enemySpeed) {
+      return;
+    }
+
+    const enemyPosition = componentByEntity(game.essence, enemyEntity, Position2);
+    if (!enemyPosition) {
+      return;
+    }
+
+    const ballPosition = componentByEntity(game.essence, ballEntity, Position2);
+    if (!ballPosition) {
+      return;
+    }
+
+    if (ballPosition.y > enemyPosition.y + 10) {
+      enemyAcceleration.y = enemySpeed.value * deltaTime;
+    } else if (ballPosition.y < enemyPosition.y - 10) {
+      enemyAcceleration.y = -enemySpeed.value * deltaTime;
+    } else {
+      enemyAcceleration.y = 0;
+    }
+
+    if (ballPosition.x > game.world.size.width / 2) {
+      enemyAcceleration.x = -enemySpeed.value * deltaTime;
+    } else {
+      enemyAcceleration.x = enemySpeed.value * deltaTime;
+    }
+
+    if (enemyPosition.x - enemySize.width / 2 - 1 < ballPosition.x) {
+      enemyAcceleration.x = enemySpeed.value * deltaTime;
+    }
+
+    const goalsPosition = componentByEntity(game.essence, enemyGoalsEntity, Position2);
+
+    if (!goalsPosition) {
+      return;
+    }
+
+    if (enemyPosition.x >= goalsPosition.x - 150) {
+      // enemyPosition.x = goalsPosition.x - 151;
+      if (enemyAcceleration.x > 0) {
+        enemyAcceleration.x *= 0.3;
+        if (enemyAcceleration.x < 0.1) {
+          enemyAcceleration.x = 0;
+        }
+      }
+    }
+
+    if (enemyPosition.x >= goalsPosition.x - 50) {
+      enemyPosition.x = goalsPosition.x - 51;
     }
   };
 }
