@@ -279,7 +279,7 @@ export function defaultFromSchema<S extends Omit<Schema, typeof $defaultFn>>(
       for (const key in schema) {
         const field = schema[key];
 
-        if (isKind(field) || isSchema(field)) {
+        if (isKindSt(field)) {
           component[key as keyof KindToType<S>] = field[$defaultFn]() as any;
         } else {
           throw new Error('Invalid schema');

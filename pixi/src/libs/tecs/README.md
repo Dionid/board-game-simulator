@@ -8,17 +8,12 @@
 1. Query – described by Component filters, returns Archetype pointers containing
 1. Essence – contains Entities, Archetypes, Queries and indexes
 1. Internals – contains registered Schemas
+1. Event Driven – create custom events
+1. Change Detection – contains changes to Entities and Components
 
 # Features
 
 1. Schema -> string, number, boolean, array, typed, union, literal
-1. ...
-
-# Decision
-
-1. BitSet 100%
-1. SparseSet 100%
-1. Components must exist in runtime -> Use schema
 1. ...
 
 # TODO
@@ -31,12 +26,11 @@
 1. ~~Tags~~
 1. ~~Types: Boolean, Array ~~
 1. ~~Defer add and remove entities and components on the same Essence.step or deferred~~
-1. ~~Topics~~
+1. Add empty Archetype to new entities -> Add `newComponent` to `moveEntity` -> Change `setComponent`, to `updateComponent`
 1. Debug
 1. ...
 1. Complex queries
 1. Singleton Component
-1. Change detection
 1. Union type Field
 1. State Machine
 1. ...
@@ -47,20 +41,8 @@
 1. Custom Errors
 1. ...
 
-# Goals
-
-1. ~~Try to separate storage and ECS engine, to use ECS engine just as index~~.
-   Better to make so that person doesn't need to know about storage.
-1. ...
-
 # Ideas
 
 1. I can create Archetype Type, just by concating sorted component ids
-1. ??? Global SparseSet with components
 1. ...
 
-# Thoughts
-
-1. Вспомнил почему плохая идея использовать 1 большой ComponentTable:
-   проблема в том, что итерация по нему не получится последовательной, так как
-   мы будем брать только часть компонентов. Поэтому лучше хранить компоненты в Archetype

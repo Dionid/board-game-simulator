@@ -1,5 +1,12 @@
 import { $kind, Entity } from './core';
-import { Archetype, ArchetypeId, component, hasSchema, setArchetypeComponent } from './archetype';
+import {
+  Archetype,
+  archetypeZero,
+  component,
+  hasSchema,
+  newArchetypeId,
+  setArchetypeComponent,
+} from './archetype';
 import { Internals } from './internals';
 import { $tag, Schema, KindToType } from './schema';
 import { Query } from './query';
@@ -27,6 +34,7 @@ export type Essence = {
   entityGraveyard: number[];
 
   // # Archetypes
+  archetypeZero: Archetype<[]>;
   archetypesById: Map<string, Archetype<any>>;
 
   // # Entity Archetype
@@ -57,17 +65,24 @@ export type Essence = {
 // # Entity
 
 export const spawnEntity = <SL extends Schema[]>(essence: Essence, arch?: Archetype<SL>) => {
+  // # Get new entity or reuse from graveyard
   let entity: number;
   if (essence.entityGraveyard.length > 0) {
     entity = essence.entityGraveyard.pop()!;
   } else {
     entity = essence.nextEntityId++;
   }
+
+  // # Set specific archetype or use archetypeZero
   if (arch) {
     Archetype.addEntity(arch, entity);
     essence.archetypeByEntity[entity] = arch;
+  } else {
+    Archetype.addEntity(essence.archetypeZero, entity);
+    essence.archetypeByEntity[entity] = essence.archetypeZero;
   }
 
+  // # Emit entity spawned event
   if (entitySpawned.isRegistered) {
     Topic.emit(entitySpawned, { name: 'entity-spawned', entity }, true);
   }
@@ -76,10 +91,12 @@ export const spawnEntity = <SL extends Schema[]>(essence: Essence, arch?: Archet
 };
 
 export const killEntity = (essence: Essence, entity: number): void => {
+  // # If already must be killed, return
   if (essence.deferredOperations.killed.has(entity)) {
     return;
   }
 
+  // # If essence in deferred state, than defer
   if (essence.deferredOperations.deferred) {
     essence.deferredOperations.operations.push({
       type: 'killEntity',
@@ -88,14 +105,18 @@ export const killEntity = (essence: Essence, entity: number): void => {
     return;
   }
 
+  // # Move entity to graveyard
   essence.entityGraveyard.push(entity);
 
+  // # Remove entity from archetype
   const archetype = essence.archetypeByEntity[entity];
-  if (archetype) {
-    Archetype.removeEntity(archetype, entity);
+  if (!archetype) {
+    throw new Error(`Can't find archetype for entity ${entity}`);
   }
+  Archetype.removeEntity(archetype, entity);
   essence.archetypeByEntity[entity] = undefined;
 
+  // # Emit killed event
   if (entityKilled.isRegistered) {
     Topic.emit(entityKilled, { name: 'entity-killed', entity }, true);
   }
@@ -107,7 +128,7 @@ export const findOrCreateArchetype = <SL extends Schema[]>(
   essence: Essence,
   ...schemas: SL
 ): Archetype<SL> => {
-  const archId = ArchetypeId.create(schemas);
+  const archId = newArchetypeId(schemas);
 
   let archetype = essence.archetypesById.get(archId) as Archetype<SL> | undefined;
 
@@ -133,7 +154,7 @@ export const registerArchetype = <SL extends Schema[]>(
   essence: Essence,
   newArchetype: Archetype<SL>
 ): Archetype<SL> => {
-  const archId = ArchetypeId.create(newArchetype.type);
+  const archId = newArchetypeId(newArchetype.type);
 
   let existingArchetype = essence.archetypesById.get(archId) as Archetype<SL> | undefined;
 
@@ -203,16 +224,7 @@ export const setComponent = <S extends Schema>(
   // # Get current archetype
   let archetype = essence.archetypeByEntity[entity] as Archetype<any> | undefined;
   if (archetype === undefined) {
-    // # If there were no archetype, create new one
-    const newArchetype = findOrCreateArchetype(essence, schema);
-
-    // # Index archetype by entity
-    essence.archetypeByEntity[entity] = newArchetype;
-
-    // # Add entity to archetype
-    setArchetypeComponent(newArchetype, entity, schemaId, component);
-
-    return;
+    throw new Error(`Can't find archetype for entity ${entity}`);
   }
 
   // # If Schema is already in archetype, than just set Component
@@ -488,14 +500,18 @@ export function newEssence(
     };
   } = {}
 ): Essence {
+  const archetypesById = new Map();
+  archetypesById.set(archetypeZero.id, archetypeZero);
+
   return {
     isFirstStep: true,
     state: 'idle',
     currentStepTime: 0,
     lastStepTime: 0,
     nextEntityId: 1,
+    archetypeZero,
     entityGraveyard: [],
-    archetypesById: new Map(),
+    archetypesById,
     archetypeByEntity: [],
     systems: {
       onFirstStep: props.systems ? props.systems.onFirstStep ?? [] : [],
@@ -537,7 +553,7 @@ export const getSchemaId = Internals.getSchemaId;
 
 // OK
 export const archetypeByEntity = (essence: Essence, entity: Entity) =>
-  essence.archetypeByEntity[entity];
+  essence.archetypeByEntity[entity]!;
 
 // OK
 export const hasComponent = <S extends Schema>(
@@ -547,7 +563,7 @@ export const hasComponent = <S extends Schema>(
 ): boolean => {
   const archetype = essence.archetypeByEntity[entity];
   if (!archetype) {
-    return false;
+    throw new Error(`Can't find archetype for entity ${entity}`);
   }
 
   return !!Archetype.hasSchema(archetype, schema);
@@ -561,7 +577,7 @@ export const componentByEntity = <S extends Schema>(
 ): KindToType<S> | undefined => {
   const archetype = essence.archetypeByEntity[entity];
   if (!archetype) {
-    return;
+    throw new Error(`Can't find archetype for entity ${entity}`);
   }
 
   if (!Archetype.hasSchema(archetype, schema)) {

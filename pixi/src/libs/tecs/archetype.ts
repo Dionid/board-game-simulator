@@ -15,14 +15,11 @@ export type ArchetypeTable<SL extends ReadonlyArray<Schema>> = {
 
 export type ArchetypeId = string;
 
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const ArchetypeId = {
-  create: (schemas: Schema[]) => {
-    return schemas
-      .map((component) => Internals.getSchemaId(component))
-      .sort((a, b) => a - b)
-      .join(',');
-  },
+export const newArchetypeId = (schemas: Schema[]) => {
+  return schemas
+    .map((component) => Internals.getSchemaId(component))
+    .sort((a, b) => a - b)
+    .join(',');
 };
 
 export type Archetype<SL extends ReadonlyArray<Schema> = ReadonlyArray<Schema>> = {
@@ -408,7 +405,7 @@ export const tryTablesList = <SL extends ReadonlyArray<Schema>>(
 
 export function newArchetype<SL extends Schema[]>(...schemas: SL) {
   const ss = SparseSet.new();
-  const archId = ArchetypeId.create(schemas);
+  const archId = newArchetypeId(schemas);
   const archetype: Archetype<SL> = {
     id: archId,
     type: schemas,
@@ -423,9 +420,8 @@ export function newArchetype<SL extends Schema[]>(...schemas: SL) {
   return archetype;
 }
 
-// export function hasSchema<S extends Schema>(archetype: Archetype<any>, schema: S): archetype is Archetype<[S]> {
-//   return isSchemaInArchetype(archetype, schema);
-// }
+export const archetypeZero = newArchetype();
+export const archetypeZeroId = newArchetypeId(archetypeZero.type);
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const Archetype = {
