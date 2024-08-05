@@ -14,7 +14,7 @@
 1. ~~Fix line collision tremble~~
 1. ~~Fix multiple collision body penetrations~~
 1. ~~Collision Queries~~
-1. FIX: capsule collider circle error
+1. ~~FIX: capsule collider circle error~~
 1. Simulate containment
 ? Apply movement before or after gamelogic
 
@@ -22,7 +22,7 @@
 
 1. ECS
     1. Events
-        1. Default topics (ComponentAdded, ComponentRemoved, ComponentChanged, EntitySpawned, EntityKilled)
+        1. ~~Default topics (SchemaAdded, SchemaRemoved, ComponentUpdated, EntitySpawned, EntityKilled)~~
         1. Subscribe by one entity
 1. View
     1. Capsule

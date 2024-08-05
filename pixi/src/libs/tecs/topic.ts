@@ -4,6 +4,7 @@ export type Topic<E> = {
   [Symbol.iterator](): IterableIterator<E>;
   staged: E[];
   ready: E[];
+  isRegistered: boolean;
 };
 
 export function emit<T extends Topic<unknown>>(
@@ -11,6 +12,10 @@ export function emit<T extends Topic<unknown>>(
   event: T extends Topic<infer E> ? E : never,
   immediate = false
 ) {
+  if (!topic.isRegistered) {
+    console.warn('Warning: emitting to unregistered topic', topic, event, immediate);
+  }
+
   if (immediate) {
     return topic.ready.push(event);
   }
@@ -45,6 +50,7 @@ export const newTopic = <$Event = unknown>(): Topic<$Event> => {
     },
     staged,
     ready,
+    isRegistered: false,
   };
 };
 

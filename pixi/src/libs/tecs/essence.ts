@@ -1,5 +1,5 @@
 import { $kind, Entity } from './core';
-import { Archetype, ArchetypeId } from './archetype';
+import { Archetype, ArchetypeId, component } from './archetype';
 import { Internals } from './internals';
 import { $tag, Schema, KindToType } from './schema';
 import { Query } from './query';
@@ -7,6 +7,7 @@ import { System } from './system';
 import { Operation } from './operations';
 import { safeGuard } from './switch';
 import { Topic } from './topic';
+import { schemaAdded, entityKilled, entitySpawned, schemaRemoved } from './default-topics';
 
 /**
  * Essence is a container for Entities, Components and Archetypes.
@@ -65,6 +66,11 @@ export const spawnEntity = <SL extends Schema[]>(essence: Essence, arch?: Archet
     Archetype.addEntity(arch, entity);
     essence.archetypeByEntity[entity] = arch;
   }
+
+  if (entitySpawned.isRegistered) {
+    Topic.emit(entitySpawned, { name: 'entity-spawned', entity }, true);
+  }
+
   return entity;
 };
 
@@ -88,6 +94,10 @@ export const killEntity = (essence: Essence, entity: number): void => {
     Archetype.removeEntity(archetype, entity);
   }
   essence.archetypeByEntity[entity] = undefined;
+
+  if (entityKilled.isRegistered) {
+    Topic.emit(entityKilled, { name: 'entity-killed', entity }, true);
+  }
 };
 
 // # Archetype
@@ -261,27 +271,38 @@ export const removeComponent = <S extends Schema>(
   const schemaId = Internals.getSchemaId(schema);
 
   // # Get current archetype
-  let archetype = essence.archetypeByEntity[entity] as Archetype<Schema[]> | undefined;
-  if (archetype === undefined) {
+  let currentArchetype = essence.archetypeByEntity[entity] as Archetype<Schema[]> | undefined;
+  if (currentArchetype === undefined) {
     throw new Error(`Can't find archetype for entity ${entity}`);
   }
 
   // # Check if component in archetype
-  if (!Archetype.hasSchema(archetype, schema)) {
-    throw new Error(`Can't find component ${schemaId} on this archetype ${archetype.id}`);
+  if (!Archetype.hasSchema(currentArchetype, schema)) {
+    throw new Error(`Can't find component ${schemaId} on this archetype ${currentArchetype.id}`);
   }
 
   // # Find or create new archetype
   const newArchetype = Essence.createArchetype(
     essence,
-    ...archetype.type.filter((c) => c !== schema)
+    ...currentArchetype.type.filter((c) => c !== schema)
   );
 
   // # Index archetype by entity
   essence.archetypeByEntity[entity] = newArchetype;
 
+  // # Get removing schema component
+  const oldComponent = component(currentArchetype, entity, schema);
+
   // # Move entity to new archetype
-  Archetype.moveEntity(archetype, newArchetype, entity);
+  Archetype.moveEntity(currentArchetype, newArchetype, entity);
+
+  if (schemaRemoved.isRegistered) {
+    Topic.emit(
+      schemaRemoved,
+      { name: 'schema-removed', entity, schema, component: oldComponent },
+      true
+    );
+  }
 
   return;
 };
@@ -340,6 +361,7 @@ export function registerTopic<T extends Topic<unknown>>(essence: Essence, topic:
   }
 
   essence.topics.push(topic);
+  topic.isRegistered = true;
 
   return topic;
 }

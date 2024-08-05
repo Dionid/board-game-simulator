@@ -79,7 +79,7 @@ export const checkNarrowCollisionSimple = (game: Game, awakened: boolean = true)
 
           const colliderSetB = colliderSetTB[i];
 
-          const collisionResultsList: (CollisionResult & {
+          const partsCollisionList: (CollisionResult & {
             acId: number;
             bcId: number;
             aCollider: KindToType<typeof Collider>;
@@ -95,8 +95,9 @@ export const checkNarrowCollisionSimple = (game: Game, awakened: boolean = true)
               const result = collides(aCollider, bCollider);
 
               if (result && result.overlap >= 0) {
-                collisionResultsList.push({
-                  ...result,
+                partsCollisionList.push({
+                  overlap: result.overlap,
+                  axis: result.axis,
                   aCollider,
                   bCollider,
                   acId: acId,
@@ -106,36 +107,36 @@ export const checkNarrowCollisionSimple = (game: Game, awakened: boolean = true)
             }
           }
 
-          let result = collisionResultsList[0];
+          let minCollision = partsCollisionList[0];
 
-          for (let i = 1; i < collisionResultsList.length; i++) {
-            const minResult = collisionResultsList[i];
-            if (minResult.overlap >= 0 && result.overlap >= minResult.overlap) {
-              result = minResult;
+          for (let i = 1; i < partsCollisionList.length; i++) {
+            const partCollision = partsCollisionList[i];
+            if (partCollision.overlap < minCollision.overlap) {
+              minCollision = partCollision;
             }
           }
 
           // zero is correct value, -1 and less must be ignored
-          if (result && result.overlap >= 0) {
+          if (minCollision && minCollision.overlap >= 0) {
             emit(
               internalUnfilteredColliding,
               {
                 name: 'colliding',
-                overlap: result.overlap,
-                axis: result.axis,
+                overlap: minCollision.overlap,
+                axis: minCollision.axis,
                 a: {
                   archetype: aArchetype,
                   entity: entityA,
                   colliderSet: colliderSetA,
-                  collider: result.aCollider,
-                  colliderId: result.acId,
+                  collider: minCollision.aCollider,
+                  colliderId: minCollision.acId,
                 },
                 b: {
                   archetype: bArchetype,
                   entity: entityB,
                   colliderSet: colliderSetB,
-                  collider: result.bCollider,
-                  colliderId: result.bcId,
+                  collider: minCollision.bCollider,
+                  colliderId: minCollision.bcId,
                 },
               },
               true

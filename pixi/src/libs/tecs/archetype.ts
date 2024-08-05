@@ -1,9 +1,11 @@
 import { Entity, $kind } from './core';
 import { SparseSet } from './sparse-set';
-import { Schema, KindToType, SchemaId, $tag, $aos, $soa } from './schema';
+import { Schema, KindToType, SchemaId, $tag, $aos, $soa, Component } from './schema';
 import { Internals } from './internals';
 import { ArrayContains } from './ts-types';
 import { safeGuard } from './switch';
+import { Topic } from './topic';
+import { componentUpdated, schemaAdded, schemaRemoved } from './default-topics';
 
 export type ArchetypeTableRow<S extends Schema> = KindToType<S>[];
 
@@ -193,7 +195,7 @@ export function setArchetypeComponent<S extends Schema>(
   arch: Archetype<any>,
   entity: Entity,
   schemaOrId: SchemaId | Schema,
-  component?: KindToType<S>
+  component?: Component<S>
 ): boolean {
   const schemaId = typeof schemaOrId === 'number' ? schemaOrId : Internals.getSchemaId(schemaOrId);
   const schema = (
@@ -214,6 +216,8 @@ export function setArchetypeComponent<S extends Schema>(
   const sSet = arch.entitiesSS;
 
   const denseInd = sSet.sparse[entity] as number | undefined;
+
+  // # Check that component is not in this archetypes table
   if (
     entity >= sSet.sparse.length ||
     denseInd === undefined ||
@@ -224,18 +228,29 @@ export function setArchetypeComponent<S extends Schema>(
     sSet.dense.push(entity);
     switch (schema[$kind]) {
       case $tag:
+        if (schemaAdded.isRegistered) {
+          Topic.emit(schemaAdded, { name: 'schema-added', entity, schema, component }, true);
+        }
         return true;
       case $aos:
-        componentTable.push(component || Schema.default(schema));
+        const newComponent = component ?? Schema.default(schema);
+        componentTable.push(newComponent);
+        if (schemaAdded.isRegistered) {
+          Topic.emit(
+            schemaAdded,
+            { name: 'schema-added', entity, schema, component: newComponent },
+            true
+          );
+        }
         return true;
       case $soa:
         throw new Error('Not implemented');
       default:
-        safeGuard(schema[$kind]);
+        return safeGuard(schema[$kind]);
     }
-    return true;
   }
 
+  // # Set component if it is in this archetypes table
   switch (schema[$kind]) {
     case $tag:
       return true;
@@ -246,7 +261,16 @@ export function setArchetypeComponent<S extends Schema>(
         denseInd < sSet.dense.length &&
         sSet.dense[denseInd] === entity
       ) {
-        componentTable[denseInd] = component || Schema.default(schema);
+        const oldComponent = componentTable[denseInd];
+        const newComponent = component ?? Schema.default(schema);
+        componentTable[denseInd] = newComponent;
+        if (componentUpdated.isRegistered) {
+          Topic.emit(
+            componentUpdated,
+            { name: 'component-updated', entity, schema, old: oldComponent, new: newComponent },
+            true
+          );
+        }
         return true;
       }
       return false;
