@@ -6,7 +6,6 @@ export type Context = {
   stage: Stage;
   deltaTime: number;
   deltaMs: number;
-  speed: number;
   essence: Essence;
 };
 

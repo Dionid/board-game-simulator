@@ -367,30 +367,13 @@ export function registerTopic<T extends Topic<unknown>>(essence: Essence, topic:
 }
 
 // TODO: think more about this
-export function stepWithTicker(
-  essence: Essence,
-  ticker: {
-    deltaTime: number;
-    deltaMS: number;
-    elapsedMS: number;
-    lastTime: number;
-    speed: number;
-    started: boolean;
-    FPS: number;
-  }
-): void {
+export function _step(essence: Essence, now: number, deltaTime: number, deltaMs: number): void {
   // # Set state
   essence.state = 'running';
-  const now = performance.now();
   essence.currentStepTime = now;
   if (essence.lastStepTime === 0) {
     essence.lastStepTime = now;
   }
-
-  // # Set delta
-  const speed = ticker.speed;
-  const deltaTime = ticker.deltaTime;
-  const deltaMs = ticker.deltaMS;
 
   // # Execute deferred operations
   const operations = essence.deferredOperations.operations;
@@ -407,8 +390,11 @@ export function stepWithTicker(
   }
 
   // # Execute systems
+
+  // ## Set deferred
   essence.deferredOperations.deferred = true;
 
+  // ## Run only on first step
   if (essence.isFirstStep) {
     for (let i = 0, l = essence.systems.onFirstStep.length; i < l; i++) {
       const system = essence.systems.onFirstStep[i];
@@ -417,11 +403,11 @@ export function stepWithTicker(
         essence,
         deltaTime,
         deltaMs,
-        speed,
       });
     }
   }
 
+  // ## Pre update
   for (let i = 0, l = essence.systems.preUpdate.length; i < l; i++) {
     const system = essence.systems.preUpdate[i];
     system({
@@ -429,11 +415,11 @@ export function stepWithTicker(
       deltaTime,
 
       deltaMs,
-      speed,
       stage: 'preUpdate',
     });
   }
 
+  // ## Update
   for (let i = 0, l = essence.systems.update.length; i < l; i++) {
     const system = essence.systems.update[i];
     system({
@@ -441,11 +427,11 @@ export function stepWithTicker(
       deltaTime,
 
       deltaMs,
-      speed,
       stage: 'update',
     });
   }
 
+  // ## Post update
   for (let i = 0, l = essence.systems.postUpdate.length; i < l; i++) {
     const system = essence.systems.postUpdate[i];
     system({
@@ -453,107 +439,41 @@ export function stepWithTicker(
       deltaTime,
 
       deltaMs,
-      speed,
       stage: 'postUpdate',
     });
   }
 
+  // ## Reset deferred
   essence.deferredOperations.deferred = false;
 
-  // # Reset killed
+  // ## Reset killed
   essence.deferredOperations.killed.clear();
 
-  // # Set state
+  // ## Reset state
   essence.lastStepTime = now;
   essence.state = 'idle';
   essence.isFirstStep = false;
 }
 
+export function stepWithTicker(
+  essence: Essence,
+  ticker: {
+    deltaTime: number;
+    deltaMS: number;
+    elapsedMS: number;
+    speed: number;
+  }
+): void {
+  return _step(essence, ticker.elapsedMS, ticker.deltaTime, ticker.deltaMS);
+}
+
 export function step(essence: Essence): void {
   // # Set state
-  essence.state = 'running';
-  const now = Date.now();
-  essence.currentStepTime = now;
-  if (essence.lastStepTime === 0) {
-    essence.lastStepTime = now;
-  }
-
-  // # Set delta
+  const now = performance.now();
   let deltaMs = Math.max(0, now - essence.lastStepTime);
   let deltaTime = deltaMs * 0.06;
 
-  // # Execute deferred operations
-  const operations = essence.deferredOperations.operations;
-
-  for (let i = 0; i < operations.length; i++) {
-    applyDeferredOp(essence, operations[i]);
-  }
-
-  essence.deferredOperations.operations = [];
-
-  // # Flush topics
-  for (let i = 0; i < essence.topics.length; i++) {
-    Topic.flush(essence.topics[i]);
-  }
-
-  // # Execute systems
-  essence.deferredOperations.deferred = true;
-
-  if (essence.isFirstStep) {
-    for (let i = 0, l = essence.systems.onFirstStep.length; i < l; i++) {
-      const system = essence.systems.onFirstStep[i];
-      system({
-        stage: 'onFirstStep',
-        essence,
-        deltaTime, // TODO: add this
-        deltaMs,
-        speed: 1, // TODO: add this
-      });
-    }
-  }
-
-  for (let i = 0, l = essence.systems.preUpdate.length; i < l; i++) {
-    const system = essence.systems.preUpdate[i];
-    system({
-      essence,
-      deltaTime,
-      deltaMs,
-      speed: 1, // TODO: add this
-      stage: 'preUpdate',
-    });
-  }
-
-  for (let i = 0, l = essence.systems.update.length; i < l; i++) {
-    const system = essence.systems.update[i];
-    system({
-      essence,
-      deltaTime,
-      deltaMs,
-      speed: 1, // TODO: add this
-      stage: 'update',
-    });
-  }
-
-  for (let i = 0, l = essence.systems.postUpdate.length; i < l; i++) {
-    const system = essence.systems.postUpdate[i];
-    system({
-      essence,
-      deltaTime,
-      deltaMs,
-      speed: 1, // TODO: add this
-      stage: 'postUpdate',
-    });
-  }
-
-  essence.deferredOperations.deferred = false;
-
-  // # Reset killed
-  essence.deferredOperations.killed.clear();
-
-  // # Set state
-  essence.lastStepTime = now;
-  essence.state = 'idle';
-  essence.isFirstStep = false;
+  return _step(essence, now, deltaTime, deltaMs);
 }
 
 export function newEssence(
