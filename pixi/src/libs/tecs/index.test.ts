@@ -548,10 +548,10 @@ describe('aws', () => {
       };
 
       Essence.registerSystem(essence, UpdateHandler(essence), {
-        type: 'update',
+        stage: 'update',
       });
       Essence.registerSystem(essence, CheckUpdateHandler(essence), {
-        type: 'postUpdate',
+        stage: 'postUpdate',
       });
 
       Essence.step(essence);

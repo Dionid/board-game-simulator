@@ -27,7 +27,6 @@ export const globalDebugGraphicsDeferred: ((g: Graphics) => void)[] = [];
 
 export const drawDebugLines = (
   game: Game,
-  map: Map,
   options: {
     view?: boolean;
     xy?: boolean;
@@ -51,7 +50,7 @@ export const drawDebugLines = (
   const positionQuery = registerQuery(game.essence, debugPositionQuery);
 
   const globalDebugGraphics = new Graphics();
-  map.container.addChild(globalDebugGraphics);
+  game.world.container.addChild(globalDebugGraphics);
 
   const strokeWidth = 2;
 

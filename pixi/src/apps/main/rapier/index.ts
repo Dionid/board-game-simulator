@@ -3,7 +3,7 @@ import { initGame, newGame } from '../../../libs/tengine/game';
 import { registerSystem, setComponent, spawnEntity } from '../../../libs/tecs';
 import { mapKeyboardInput, mapMouseInput } from '../../../libs/tengine/ecs';
 import { Player } from './ecs';
-import { drawViews, View, drawDebugLines } from 'libs/tengine/render';
+import { drawViews } from 'libs/tengine/render';
 import { rapierDrawDebugLines } from 'libs/tengine/rapier/debug';
 // import RAPIER from '@dimforge/rapier2d';
 

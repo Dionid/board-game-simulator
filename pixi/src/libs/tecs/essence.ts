@@ -347,10 +347,10 @@ export function registerSystem(
   essence: Essence,
   system: System,
   opts: {
-    type?: 'onFirstStep' | 'preUpdate' | 'update' | 'postUpdate';
+    stage?: 'onFirstStep' | 'preUpdate' | 'update' | 'postUpdate';
   } = {}
 ) {
-  const type = opts.type;
+  const type = opts.stage;
 
   essence.systems[type || 'update'].push(system);
 }
