@@ -156,21 +156,21 @@ export function moveEntity<CL extends Schema[]>(
   // # Move all Components to new Archetype Table
   const fromDenseEntityInd = from.entitiesSS.sparse[entity]!;
   for (let i = 0; i < to.table.length; i++) {
-    const componentId = i;
+    const schemaId = i;
 
-    const toComponentTable = to.table[componentId];
+    const toComponentTable = to.table[schemaId];
     if (!toComponentTable) {
       continue;
     }
 
-    const fromComponentTable = from.table[componentId];
+    const fromComponentTable = from.table[schemaId];
     if (!fromComponentTable) {
       continue;
     }
 
-    const schema = Internals.getSchemaById(componentId);
+    const schema = Internals.getSchemaById(schemaId);
     if (!schema) {
-      throw new Error(`Can't find schema ${componentId}`);
+      throw new Error(`Can't find schema ${schemaId}`);
     }
 
     switch (schema[$kind]) {
@@ -179,7 +179,7 @@ export function moveEntity<CL extends Schema[]>(
       case $soa:
         throw new Error('Not implemented');
       case $aos:
-        setArchetypeComponent(to, entity, componentId, fromComponentTable[fromDenseEntityInd]);
+        setArchetypeComponent(to, entity, schemaId, fromComponentTable[fromDenseEntityInd], false);
         break;
       default:
         safeGuard(schema[$kind]);
@@ -195,7 +195,8 @@ export function setArchetypeComponent<S extends Schema>(
   arch: Archetype<any>,
   entity: Entity,
   schemaOrId: SchemaId | Schema,
-  component?: Component<S>
+  component?: Component<S>,
+  emitEvents: boolean = true
 ): boolean {
   const schemaId = typeof schemaOrId === 'number' ? schemaOrId : Internals.getSchemaId(schemaOrId);
   const schema = (
@@ -228,14 +229,14 @@ export function setArchetypeComponent<S extends Schema>(
     sSet.dense.push(entity);
     switch (schema[$kind]) {
       case $tag:
-        if (schemaAdded.isRegistered) {
+        if (emitEvents && schemaAdded.isRegistered) {
           Topic.emit(schemaAdded, { name: 'schema-added', entity, schema, component }, true);
         }
         return true;
       case $aos:
         const newComponent = component ?? Schema.default(schema);
         componentTable.push(newComponent);
-        if (schemaAdded.isRegistered) {
+        if (emitEvents && schemaAdded.isRegistered) {
           Topic.emit(
             schemaAdded,
             { name: 'schema-added', entity, schema, component: newComponent },
@@ -264,7 +265,7 @@ export function setArchetypeComponent<S extends Schema>(
         const oldComponent = componentTable[denseInd];
         const newComponent = component ?? Schema.default(schema);
         componentTable[denseInd] = newComponent;
-        if (componentUpdated.isRegistered) {
+        if (emitEvents && componentUpdated.isRegistered) {
           Topic.emit(
             componentUpdated,
             { name: 'component-updated', entity, schema, old: oldComponent, new: newComponent },

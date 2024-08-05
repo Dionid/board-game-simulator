@@ -39,6 +39,9 @@ export function debugEvents(
   if (opts.componentUpdated) {
     registerTopic(game.essence, componentUpdated);
   }
+
+  let counter = 0;
+
   return () => {
     const events: TopicEvent<Record<PropertyKey, any>>[] = [];
 
@@ -77,7 +80,8 @@ export function debugEvents(
     });
 
     for (const event of events) {
-      console.log(`${event.name ?? ''}`, event);
+      counter++;
+      console.log(`(de) ${counter}:`, event);
     }
   };
 }

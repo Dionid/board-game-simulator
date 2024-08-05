@@ -15,7 +15,7 @@ const containerStyle: CSSProperties = {
   display: "flex",
   justifyContent: "space-between",
   alignItems: "center",
-  opacity: 0.07,
+  opacity: 0.3,
   fontSize: "120px",
   fontFamily: "monospace",
 }

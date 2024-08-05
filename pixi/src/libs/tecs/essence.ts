@@ -1,5 +1,5 @@
 import { $kind, Entity } from './core';
-import { Archetype, ArchetypeId, component } from './archetype';
+import { Archetype, ArchetypeId, component, hasSchema, setArchetypeComponent } from './archetype';
 import { Internals } from './internals';
 import { $tag, Schema, KindToType } from './schema';
 import { Query } from './query';
@@ -7,7 +7,7 @@ import { System } from './system';
 import { Operation } from './operations';
 import { safeGuard } from './switch';
 import { Topic } from './topic';
-import { schemaAdded, entityKilled, entitySpawned, schemaRemoved } from './default-topics';
+import { entityKilled, entitySpawned, schemaRemoved } from './default-topics';
 import { mutableEmpty } from './array';
 
 /**
@@ -103,7 +103,7 @@ export const killEntity = (essence: Essence, entity: number): void => {
 
 // # Archetype
 
-export const createArchetype = <SL extends Schema[]>(
+export const findOrCreateArchetype = <SL extends Schema[]>(
   essence: Essence,
   ...schemas: SL
 ): Archetype<SL> => {
@@ -204,26 +204,26 @@ export const setComponent = <S extends Schema>(
   let archetype = essence.archetypeByEntity[entity] as Archetype<any> | undefined;
   if (archetype === undefined) {
     // # If there were no archetype, create new one
-    const newArchetype = Essence.createArchetype(essence, schema);
+    const newArchetype = findOrCreateArchetype(essence, schema);
 
     // # Index archetype by entity
     essence.archetypeByEntity[entity] = newArchetype;
 
     // # Add entity to archetype
-    Archetype.setComponent(newArchetype, entity, schemaId, component);
+    setArchetypeComponent(newArchetype, entity, schemaId, component);
 
     return;
   }
 
   // # If Schema is already in archetype, than just set Component
-  if (Archetype.hasSchema(archetype, schema)) {
-    Archetype.setComponent(archetype, entity, schemaId, component);
+  if (hasSchema(archetype, schema)) {
+    setArchetypeComponent(archetype, entity, schemaId, component);
 
     return;
   }
 
   // # If not, create new Archetype
-  const newArchetype = Essence.createArchetype(
+  const newArchetype = findOrCreateArchetype(
     essence,
     schema,
     ...archetype.type
@@ -236,7 +236,7 @@ export const setComponent = <S extends Schema>(
   Archetype.moveEntity(archetype, newArchetype, entity);
 
   // # Add new data
-  Archetype.setComponent(newArchetype, entity, schemaId, component);
+  setArchetypeComponent(newArchetype, entity, schemaId, component);
 
   return;
 };
@@ -591,7 +591,7 @@ export const Essence = {
   getSchemaId,
 
   // # Archetypes
-  createArchetype,
+  createArchetype: findOrCreateArchetype,
   registerArchetype,
 
   // # Archetypes Entities & Components

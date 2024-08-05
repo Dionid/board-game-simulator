@@ -1,6 +1,5 @@
 import { newSchema, arrayOf, union, literal, number, newTag, Component } from '../../tecs';
 import {
-  angleV2,
   Axes2,
   dotV2,
   magV2,
@@ -39,20 +38,25 @@ export const ColliderVertices = newSchema({
 
 export const ColliderShape = union(ColliderCircle, ColliderVertices);
 
-export const Collider = newSchema({
-  type: union(literal('solid'), literal('sensor')),
-  offset: Vector2,
-  angle: number,
-  shape: ColliderShape,
-  mass: number,
-  _position: Vector2, // position of colliders center
-  _vertices: Vertices2,
-  _normalAxes: Axes2,
-  _prev: newSchema({
-    angle: number,
+export const Collider = newSchema(
+  {
+    type: union(literal('solid'), literal('sensor')),
     offset: Vector2,
-  }),
-});
+    angle: number,
+    shape: ColliderShape,
+    mass: number,
+    _position: Vector2, // position of colliders center
+    _vertices: Vertices2,
+    _normalAxes: Axes2,
+    _prev: newSchema({
+      angle: number,
+      offset: Vector2,
+    }),
+  },
+  {
+    name: 'Collider',
+  }
+);
 
 export function rectangleColliderComponent(opts: {
   parentPosition: Vector2; // TODO: remove this
@@ -683,6 +687,11 @@ export function capsuleColliderComponent(opts: {
   return [firstCircle, rectangle, secondCircle];
 }
 
-export const ColliderBody = newSchema({
-  parts: arrayOf(Collider),
-});
+export const ColliderBody = newSchema(
+  {
+    parts: arrayOf(Collider),
+  },
+  {
+    name: 'ColliderBody',
+  }
+);
