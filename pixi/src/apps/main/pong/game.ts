@@ -235,18 +235,23 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, playerEntity, CollisionsMonitoring);
   setComponent(game.essence, playerEntity, ColliderBody, {
     parts: [
-      rectangleColliderComponent({
+      // rectangleColliderComponent({
+      //   parentPosition: playerPosition,
+      //   parentAngle: playerAngle,
+      //   type: 'solid',
+      //   mass: 1,
+      //   offset: { x: 0, y: 0 },
+      //   angle: 0,
+      //   anchor: {
+      //     x: 0.5,
+      //     y: 0.5,
+      //   },
+      //   size: characterSize,
+      // }),
+      ...capsuleColliderComponent({
         parentPosition: playerPosition,
-        parentAngle: playerAngle,
-        type: 'solid',
-        mass: 1,
-        offset: { x: 0, y: 0 },
-        angle: 0,
-        anchor: {
-          x: 0.5,
-          y: 0.5,
-        },
-        size: characterSize,
+        length: characterSize.height,
+        radius: characterSize.width / 2,
       }),
     ],
   });

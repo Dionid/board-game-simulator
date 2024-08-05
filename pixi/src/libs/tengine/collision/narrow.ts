@@ -1,9 +1,9 @@
 import { newQuery, registerQuery, Entity, KindToType, System, table, emit } from '../../tecs';
 import { Position2 } from '../core/types';
 import { Game } from '../game';
-import { Awaken, ColliderBody, CollisionsMonitoring } from './components';
+import { Awaken, Collider, ColliderBody, CollisionsMonitoring } from './components';
 import { internalUnfilteredColliding } from './topics';
-import { collides } from './collision';
+import { collides, CollisionResult } from './collision';
 import { Archetype } from 'libs/tecs/archetype';
 
 // 1. Get all entities that have CollisionSource + ColliderSet + Position (+ Awaken)
@@ -79,40 +79,67 @@ export const checkNarrowCollisionSimple = (game: Game, awakened: boolean = true)
 
           const colliderSetB = colliderSetTB[i];
 
+          const collisionResultsList: (CollisionResult & {
+            acId: number;
+            bcId: number;
+            aCollider: KindToType<typeof Collider>;
+            bCollider: KindToType<typeof Collider>;
+          })[] = [];
+
           for (let acId = 0; acId < colliderSetA.parts.length; acId++) {
-            const colliderA = colliderSetA.parts[acId];
+            const aCollider = colliderSetA.parts[acId];
 
             for (let bcId = 0; bcId < colliderSetB.parts.length; bcId++) {
-              const colliderB = colliderSetB.parts[bcId];
+              const bCollider = colliderSetB.parts[bcId];
 
-              let result = collides(colliderA, colliderB);
+              const result = collides(aCollider, bCollider);
 
               if (result && result.overlap >= 0) {
-                emit(
-                  internalUnfilteredColliding,
-                  {
-                    name: 'colliding',
-                    overlap: result.overlap,
-                    axis: result.axis,
-                    a: {
-                      archetype: aArchetype,
-                      entity: entityA,
-                      colliderSet: colliderSetA,
-                      collider: colliderA,
-                      colliderId: acId,
-                    },
-                    b: {
-                      archetype: bArchetype,
-                      entity: entityB,
-                      colliderSet: colliderSetB,
-                      collider: colliderB,
-                      colliderId: bcId,
-                    },
-                  },
-                  true
-                );
+                collisionResultsList.push({
+                  ...result,
+                  aCollider,
+                  bCollider,
+                  acId: acId,
+                  bcId: bcId,
+                });
               }
             }
+          }
+
+          let result = collisionResultsList[0];
+
+          for (let i = 1; i < collisionResultsList.length; i++) {
+            const minResult = collisionResultsList[i];
+            if (minResult.overlap >= 0 && result.overlap >= minResult.overlap) {
+              result = minResult;
+            }
+          }
+
+          // zero is correct value, -1 and less must be ignored
+          if (result && result.overlap >= 0) {
+            emit(
+              internalUnfilteredColliding,
+              {
+                name: 'colliding',
+                overlap: result.overlap,
+                axis: result.axis,
+                a: {
+                  archetype: aArchetype,
+                  entity: entityA,
+                  colliderSet: colliderSetA,
+                  collider: result.aCollider,
+                  colliderId: result.acId,
+                },
+                b: {
+                  archetype: bArchetype,
+                  entity: entityB,
+                  colliderSet: colliderSetB,
+                  collider: result.bCollider,
+                  colliderId: result.bcId,
+                },
+              },
+              true
+            );
           }
         }
       }
