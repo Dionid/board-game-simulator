@@ -155,7 +155,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     scale: { x: 1, y: 1 },
     rotation: 0,
     anchor: { x: 0.5, y: 0.5 },
-    alpha: 0.5,
+    alpha: 0.2,
     model: {
       type: 'graphics',
       shape: {
@@ -184,7 +184,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     scale: { x: 1, y: 1 },
     rotation: 0,
     anchor: { x: 0.5, y: 0.5 },
-    alpha: 0.5,
+    alpha: 0.2,
     model: {
       type: 'graphics',
       shape: {
@@ -553,7 +553,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     game.essence,
     drawDebugLines(game, map, {
       view: false,
-      xy: true,
+      xy: false,
       collision: true,
       velocity: true,
       acceleration: true,

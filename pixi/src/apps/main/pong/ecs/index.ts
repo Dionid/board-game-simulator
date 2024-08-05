@@ -428,11 +428,13 @@ export function enemyAi(
       return;
     }
 
-    if (enemyPosition.x >= goalsPosition.x - 60) {
-      if (enemyAcceleration.x > 0) {
-        enemyAcceleration.x *= 0.3;
-        if (enemyAcceleration.x < 0.1) {
-          enemyAcceleration.x = 0;
+    if (ballPosition.x < game.world.size.width / 2) {
+      if (enemyPosition.x >= goalsPosition.x - 200) {
+        if (enemyAcceleration.x > 0) {
+          enemyAcceleration.x *= 0.2;
+          if (enemyAcceleration.x < 0.1) {
+            enemyAcceleration.x = 0;
+          }
         }
       }
     }
