@@ -4,8 +4,9 @@ import {
   archetypeZero,
   component,
   hasSchema,
+  moveEntity,
   newArchetypeId,
-  setArchetypeComponent,
+  updateComponent,
 } from './archetype';
 import { Internals } from './internals';
 import { $tag, Schema, KindToType } from './schema';
@@ -14,7 +15,13 @@ import { System } from './system';
 import { Operation } from './operations';
 import { safeGuard } from './switch';
 import { Topic } from './topic';
-import { entityKilled, entitySpawned, schemaRemoved } from './default-topics';
+import {
+  componentUpdated,
+  entityKilled,
+  entitySpawned,
+  componentAdded,
+  componentRemoved,
+} from './default-topics';
 import { mutableEmpty } from './array';
 
 /**
@@ -200,21 +207,21 @@ export function addEntity<CL extends Schema[]>(
  * @param essence
  * @param entity
  * @param schema
- * @param component
+ * @param newComponent
  * @returns
  */
 export const setComponent = <S extends Schema>(
   essence: Essence,
   entity: Entity,
   schema: S,
-  component?: S[typeof $kind] extends typeof $tag ? never : KindToType<S>
+  newComponent?: S[typeof $kind] extends typeof $tag ? never : KindToType<S>
 ): void => {
   if (essence.deferredOperations.deferred) {
     essence.deferredOperations.operations.push({
       type: 'setComponent',
       entityId: entity,
       schema,
-      component,
+      component: newComponent,
     });
     return;
   }
@@ -227,9 +234,19 @@ export const setComponent = <S extends Schema>(
     throw new Error(`Can't find archetype for entity ${entity}`);
   }
 
-  // # If Schema is already in archetype, than just set Component
+  // # If schema is already in archetype, than just update Component
   if (hasSchema(archetype, schema)) {
-    setArchetypeComponent(archetype, entity, schemaId, component);
+    const oldComponent = component(archetype, entity, schema);
+
+    updateComponent(archetype, entity, schemaId, newComponent);
+
+    if (componentUpdated.isRegistered) {
+      Topic.emit(
+        componentUpdated,
+        { name: 'component-updated', entity, schema, old: oldComponent, new: newComponent },
+        true
+      );
+    }
 
     return;
   }
@@ -245,10 +262,16 @@ export const setComponent = <S extends Schema>(
   essence.archetypeByEntity[entity] = newArchetype;
 
   // # Move Entity to new Archetype
-  Archetype.moveEntity(archetype, newArchetype, entity);
+  moveEntity(archetype, newArchetype, entity, schema, newComponent);
 
-  // # Add new data
-  setArchetypeComponent(newArchetype, entity, schemaId, component);
+  // # Emit event of new component added
+  if (componentAdded.isRegistered) {
+    Topic.emit(
+      componentAdded,
+      { name: 'component-added', entity, schema, component: newComponent },
+      true
+    );
+  }
 
   return;
 };
@@ -307,12 +330,12 @@ export const removeComponent = <S extends Schema>(
   const oldComponent = component(currentArchetype, entity, schema);
 
   // # Move entity to new archetype
-  Archetype.moveEntity(currentArchetype, newArchetype, entity);
+  moveEntity(currentArchetype, newArchetype, entity);
 
-  if (schemaRemoved.isRegistered) {
+  if (componentRemoved.isRegistered) {
     Topic.emit(
-      schemaRemoved,
-      { name: 'schema-removed', entity, schema, component: oldComponent },
+      componentRemoved,
+      { name: 'component-removed', entity, schema, component: oldComponent },
       true
     );
   }

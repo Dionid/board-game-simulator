@@ -5,7 +5,7 @@ import { Internals } from './internals';
 import { ArrayContains } from './ts-types';
 import { safeGuard } from './switch';
 import { Topic } from './topic';
-import { componentUpdated, schemaAdded, schemaRemoved } from './default-topics';
+import { componentUpdated, componentAdded, componentRemoved } from './default-topics';
 
 export type ArchetypeTableRow<S extends Schema> = KindToType<S>[];
 
@@ -133,11 +133,12 @@ export function removeEntity<CL extends Schema[]>(arch: Archetype<CL>, entity: E
   return;
 }
 
-// OK
 export function moveEntity<CL extends Schema[]>(
   from: Archetype<CL>,
   to: Archetype<CL>,
-  entity: Entity
+  entity: Entity,
+  newSchema?: Schema,
+  newComponent?: Component<Schema>
 ) {
   // # Check if entity is in `to` or not in `from`
   if (
@@ -162,6 +163,8 @@ export function moveEntity<CL extends Schema[]>(
 
     const fromComponentTable = from.table[schemaId];
     if (!fromComponentTable) {
+      // # If there is schema in `to` but not in `from` then add default component
+      updateComponent(to, entity, schemaId, undefined);
       continue;
     }
 
@@ -176,11 +179,16 @@ export function moveEntity<CL extends Schema[]>(
       case $soa:
         throw new Error('Not implemented');
       case $aos:
-        setArchetypeComponent(to, entity, schemaId, fromComponentTable[fromDenseEntityInd], false);
+        updateComponent(to, entity, schemaId, fromComponentTable[fromDenseEntityInd]);
         break;
       default:
         safeGuard(schema[$kind]);
     }
+  }
+
+  // # Add new component if needed
+  if (newSchema) {
+    updateComponent(to, entity, newSchema, newComponent);
   }
 
   // # Remove it from `from` entities (sSet dense) and components
@@ -188,12 +196,11 @@ export function moveEntity<CL extends Schema[]>(
 }
 
 // OK
-export function setArchetypeComponent<S extends Schema>(
+export function updateComponent<S extends Schema>(
   arch: Archetype<any>,
   entity: Entity,
   schemaOrId: SchemaId | Schema,
-  component?: Component<S>,
-  emitEvents: boolean = true
+  component?: Component<S>
 ): boolean {
   const schemaId = typeof schemaOrId === 'number' ? schemaOrId : Internals.getSchemaId(schemaOrId);
   const schema = (
@@ -212,40 +219,17 @@ export function setArchetypeComponent<S extends Schema>(
   }
 
   const sSet = arch.entitiesSS;
-
   const denseInd = sSet.sparse[entity] as number | undefined;
 
-  // # Check that component is not in this archetypes table
-  if (
+  const isEntityNotInArchetype =
     entity >= sSet.sparse.length ||
     denseInd === undefined ||
     denseInd >= sSet.dense.length ||
-    sSet.dense[denseInd] !== entity
-  ) {
-    sSet.sparse[entity] = sSet.dense.length;
-    sSet.dense.push(entity);
-    switch (schema[$kind]) {
-      case $tag:
-        if (emitEvents && schemaAdded.isRegistered) {
-          Topic.emit(schemaAdded, { name: 'schema-added', entity, schema, component }, true);
-        }
-        return true;
-      case $aos:
-        const newComponent = component ?? Schema.default(schema);
-        componentTable.push(newComponent);
-        if (emitEvents && schemaAdded.isRegistered) {
-          Topic.emit(
-            schemaAdded,
-            { name: 'schema-added', entity, schema, component: newComponent },
-            true
-          );
-        }
-        return true;
-      case $soa:
-        throw new Error('Not implemented');
-      default:
-        return safeGuard(schema[$kind]);
-    }
+    sSet.dense[denseInd] !== entity;
+
+  // # Check that component is not in this archetypes table
+  if (isEntityNotInArchetype) {
+    throw new Error(`Entity ${entity} is not in this archetype ${arch.id}`);
   }
 
   // # Set component if it is in this archetypes table
@@ -259,16 +243,8 @@ export function setArchetypeComponent<S extends Schema>(
         denseInd < sSet.dense.length &&
         sSet.dense[denseInd] === entity
       ) {
-        const oldComponent = componentTable[denseInd];
         const newComponent = component ?? Schema.default(schema);
         componentTable[denseInd] = newComponent;
-        if (emitEvents && componentUpdated.isRegistered) {
-          Topic.emit(
-            componentUpdated,
-            { name: 'component-updated', entity, schema, old: oldComponent, new: newComponent },
-            true
-          );
-        }
         return true;
       }
       return false;
@@ -432,7 +408,7 @@ export const Archetype = {
   component,
   table,
   tablesList,
-  setComponent: setArchetypeComponent,
+  setComponent: updateComponent,
   addEntity: addArchetypeEntity,
   removeEntity,
   moveEntity,

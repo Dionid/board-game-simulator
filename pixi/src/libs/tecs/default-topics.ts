@@ -1,5 +1,5 @@
 import { Entity } from './core';
-import { Component, Schema, SchemaToType } from './schema';
+import { Component, Schema } from './schema';
 import { newTopic } from './topic';
 
 // # Entity spawned
@@ -22,25 +22,25 @@ export const entityKilled = newTopic<EntityKilled>();
 
 // # Schema added
 
-export type SchemaAdded<S extends Schema> = {
-  name: 'schema-added';
+export type ComponentAdded<S extends Schema> = {
+  name: 'component-added';
   entity: Entity;
   schema: S;
   component?: Component<S>;
 };
 
-export const schemaAdded = newTopic<SchemaAdded<any>>();
+export const componentAdded = newTopic<ComponentAdded<any>>();
 
 // # Schema removed
 
-export type SchemaRemoved<S extends Schema> = {
-  name: 'schema-removed';
+export type ComponentRemoved<S extends Schema> = {
+  name: 'component-removed';
   entity: Entity;
   schema: S;
   component?: Component<S>;
 };
 
-export const schemaRemoved = newTopic<SchemaRemoved<any>>();
+export const componentRemoved = newTopic<ComponentRemoved<any>>();
 
 // # Schema updated
 
@@ -48,8 +48,8 @@ export type ComponentUpdated<S extends Schema> = {
   name: 'component-updated';
   entity: Entity;
   schema: S;
-  old: Component<S>;
-  new: Component<S>;
+  old?: Component<S>;
+  new?: Component<S>;
 };
 
 export const componentUpdated = newTopic<ComponentUpdated<any>>();

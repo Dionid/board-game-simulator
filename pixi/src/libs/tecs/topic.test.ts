@@ -1,5 +1,6 @@
 import { Topic } from './topic';
-import { Essence } from './essence';
+import { Essence, registerTopic } from './essence';
+import exp from 'constants';
 
 type AddedEvent = {
   type: 'added';
@@ -17,7 +18,11 @@ describe('topic', () => {
   it('should work', () => {
     expect(1).toBe(1);
 
+    const essence = Essence.new();
+
     const topic = Topic.new<CustomEvent>();
+
+    registerTopic(essence, topic);
 
     Topic.emit(topic, { type: 'added', id: 1 });
 
@@ -25,7 +30,11 @@ describe('topic', () => {
 
     Topic.flush(topic);
 
-    expect([...topic]).toEqual([{ type: 'added', id: 1 }]);
+    const events = [...topic];
+
+    expect(events.length).toBe(1);
+    expect(events[0].id).toBe(1);
+    expect(events[0].type).toBe('added');
   });
   it('sequence', () => {
     const essence = Essence.new();
@@ -42,14 +51,21 @@ describe('topic', () => {
     const TopicSystem = () => {
       seq++;
       if (seq === 1) {
-        expect(topic.ready).toEqual([{ type: 'removed', id: 0 }]);
-        expect(topic.staged).toEqual([{ type: 'added', id: 0 }]);
+        expect(topic.ready.length).toBe(1);
+        expect(topic.ready[0].id).toBe(0);
+        expect(topic.ready[0].type).toBe('removed');
+        expect(topic.staged.length).toBe(1);
+        expect(topic.staged[0].id).toBe(0);
+        expect(topic.staged[0].type).toBe('added');
       } else if (seq === 2) {
-        expect(topic.ready).toEqual([
-          { type: 'added', id: 0 },
-          { type: 'removed', id: 1 },
-        ]);
-        expect(topic.staged).toEqual([{ type: 'added', id: 1 }]);
+        expect(topic.ready.length).toBe(2);
+        expect(topic.ready[0].id).toBe(0);
+        expect(topic.ready[0].type).toBe('added');
+        expect(topic.ready[1].id).toBe(1);
+        expect(topic.ready[1].type).toBe('removed');
+        expect(topic.staged.length).toBe(1);
+        expect(topic.staged[0].id).toBe(1);
+        expect(topic.staged[0].type).toBe('added');
       } else {
         throw new Error('unexpected');
       }

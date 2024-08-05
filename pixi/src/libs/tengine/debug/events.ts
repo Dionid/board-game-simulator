@@ -2,8 +2,8 @@ import { registerTopic, TopicEvent, topicEventMeta } from 'libs/tecs';
 import {
   entitySpawned,
   entityKilled,
-  schemaAdded,
-  schemaRemoved,
+  componentAdded,
+  componentRemoved,
   componentUpdated,
 } from 'libs/tecs/default-topics';
 import { Game } from '../game';
@@ -31,10 +31,10 @@ export function debugEvents(
     registerTopic(game.essence, entityKilled);
   }
   if (opts.schemaAdded) {
-    registerTopic(game.essence, schemaAdded);
+    registerTopic(game.essence, componentAdded);
   }
   if (opts.schemaRemoved) {
-    registerTopic(game.essence, schemaRemoved);
+    registerTopic(game.essence, componentRemoved);
   }
   if (opts.componentUpdated) {
     registerTopic(game.essence, componentUpdated);
@@ -58,13 +58,13 @@ export function debugEvents(
     }
 
     if (opts.schemaAdded) {
-      for (const event of schemaAdded) {
+      for (const event of componentAdded) {
         events.push(event);
       }
     }
 
     if (opts.schemaRemoved) {
-      for (const event of schemaRemoved) {
+      for (const event of componentRemoved) {
         events.push(event);
       }
     }
