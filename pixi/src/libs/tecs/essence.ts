@@ -8,6 +8,7 @@ import { Operation } from './operations';
 import { safeGuard } from './switch';
 import { Topic } from './topic';
 import { schemaAdded, entityKilled, entitySpawned, schemaRemoved } from './default-topics';
+import { mutableEmpty } from './array';
 
 /**
  * Essence is a container for Entities, Components and Archetypes.
@@ -366,27 +367,12 @@ export function registerTopic<T extends Topic<unknown>>(essence: Essence, topic:
   return topic;
 }
 
-// TODO: think more about this
 export function _step(essence: Essence, now: number, deltaTime: number, deltaMs: number): void {
   // # Set state
   essence.state = 'running';
   essence.currentStepTime = now;
   if (essence.lastStepTime === 0) {
     essence.lastStepTime = now;
-  }
-
-  // # Execute deferred operations
-  const operations = essence.deferredOperations.operations;
-
-  for (let i = 0; i < operations.length; i++) {
-    applyDeferredOp(essence, operations[i]);
-  }
-
-  essence.deferredOperations.operations = [];
-
-  // # Flush topics
-  for (let i = 0; i < essence.topics.length; i++) {
-    Topic.flush(essence.topics[i]);
   }
 
   // # Execute systems
@@ -445,6 +431,20 @@ export function _step(essence: Essence, now: number, deltaTime: number, deltaMs:
 
   // ## Reset deferred
   essence.deferredOperations.deferred = false;
+
+  // # Execute deferred operations
+  const operations = essence.deferredOperations.operations;
+
+  for (let i = 0; i < operations.length; i++) {
+    applyDeferredOp(essence, operations[i]);
+  }
+
+  mutableEmpty(essence.deferredOperations.operations);
+
+  // # Flush topics
+  for (let i = 0; i < essence.topics.length; i++) {
+    Topic.flush(essence.topics[i]);
+  }
 
   // ## Reset killed
   essence.deferredOperations.killed.clear();
