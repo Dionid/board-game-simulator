@@ -4,7 +4,7 @@ import { Game } from '../game';
 import { Acceleration2, multV2, Position2, Velocity2 } from '../core';
 import { Map, Vector2 } from '../core';
 import { ColliderBody } from '../collision';
-import { pView, View } from './components';
+import { pView, View } from '../render/components';
 
 const drawLine = (
   globalGraphics: Graphics,
@@ -24,9 +24,6 @@ const debugPViewQuery = newQuery(pView);
 const debugCollisionSetQuery = newQuery(ColliderBody, Position2);
 
 export const globalDebugGraphicsDeferred: ((g: Graphics) => void)[] = [];
-export const DEBUG = {
-  isActive: false,
-};
 
 export const drawDebugLines = (
   game: Game,

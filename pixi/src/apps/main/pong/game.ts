@@ -44,10 +44,11 @@ import {
   applyRigidBodyVelocityToPosition,
   dynamicRigidBodyCollisionResolution,
 } from 'libs/tengine/physics';
-import { drawViews, drawDebugLines, addNewViews, DEBUG, View } from 'libs/tengine/render';
+import { drawViews, drawDebugLines, addNewViews, View } from 'libs/tengine/render';
 import { penetrationResolution } from 'libs/tengine/collision/penetration-resolution';
 import { updatePrevious } from 'libs/tengine/core/update-previous';
 import { awakening } from 'libs/tengine/collision/awakening';
+import { DEBUG } from 'libs/tengine/debug';
 
 export async function initPongGame(parentElement: HTMLElement) {
   DEBUG.isActive = true;

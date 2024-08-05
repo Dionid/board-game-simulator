@@ -54,6 +54,9 @@
 1. Preload assets
 1. Culling
 1. ...
+1. Debug
+    1. Subscribe on all default topics, to show all default events
+1. ...
 1. Top-down Tilemap
 1. ...
 1. Tweens
