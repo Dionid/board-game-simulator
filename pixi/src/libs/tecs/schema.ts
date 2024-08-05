@@ -199,23 +199,29 @@ export function arrayOf<K extends KindSt | Schema>(field: K) {
 
 // ## Union
 
-export type union<V extends (PrimitiveKind | Schema)[]> = {
+export type union<V extends KindSt[]> = {
   variants: V;
   [$kind]: typeof $union;
-  [$defaultFn]: () => V[number];
+  [$defaultFn]: () => KindToType<V[0]>;
 };
 
-export function union<V extends (PrimitiveKind | Schema)[]>(
+export function union<V extends KindSt[]>(
   ...variants: V
 ): {
   variants: V;
   [$kind]: typeof $union;
-  [$defaultFn]: () => V[number];
+  [$defaultFn]: () => KindToType<V[0]>;
 } {
+  if (variants.length === 0) {
+    throw new Error('Union must have at least one variant');
+  }
+
   return {
     variants,
     [$kind]: $union,
-    [$defaultFn]: () => variants[0],
+    [$defaultFn]: () => {
+      return variants[0][$defaultFn]() as KindToType<V[0]>;
+    },
   };
 }
 
@@ -319,7 +325,7 @@ export function newSchema<S extends Record<string, KindSt | PrimitiveKind | Comp
   return {
     ...newSchema,
     [$defaultFn]: newDefaultFn,
-  } as S & { [$kind]: SchemaKind; [$defaultFn]: () => KindToType<S> };
+  };
 }
 
 export const Schema = {

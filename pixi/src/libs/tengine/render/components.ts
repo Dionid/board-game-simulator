@@ -28,11 +28,16 @@ export const Circle = newSchema({
 //   // ...
 // });
 
+const color = {
+  ...string,
+  [$defaultFn]: () => '#000000',
+};
+
 export const Graphics = newSchema(
   {
     type: literal('graphics'),
     shape: union(Rectangle, Circle),
-    color: string,
+    color: color,
   },
   {
     name: 'graphics',
