@@ -60,11 +60,19 @@ const getYDirection = (keyboard: KeyBoardInput): number => {
   return 0;
 };
 
-export const accelerateByArrows = (game: Game, playerEntity: Entity): System => {
+export const accelerateByArrows = (
+  game: Game,
+  playerEntity: Entity,
+  roundStarted: { value: boolean }
+): System => {
   const input = game.input;
   const keyboard = input.keyboard;
 
   return ({ deltaTime }) => {
+    if (!roundStarted.value) {
+      return;
+    }
+
     const playerArchetype = archetypeByEntity(game.essence, playerEntity);
 
     if (!playerArchetype) {
@@ -109,11 +117,19 @@ export const accelerateByArrows = (game: Game, playerEntity: Entity): System => 
   };
 };
 
-export const changeVelocityByArrows = (game: Game, charEntity: Entity): System => {
+export const changeVelocityByArrows = (
+  game: Game,
+  charEntity: Entity,
+  roundStarted: { value: boolean }
+): System => {
   const input = game.input;
   const keyboard = input.keyboard;
 
   return ({ deltaTime }) => {
+    if (!roundStarted.value) {
+      return;
+    }
+
     const charArchetype = archetypeByEntity(game.essence, charEntity);
 
     if (!charArchetype) {

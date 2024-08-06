@@ -513,7 +513,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     )
   );
   // ### Movement
-  registerSystem(game.essence, accelerateByArrows(game, playerEntity));
+  registerSystem(game.essence, accelerateByArrows(game, playerEntity, roundStarted));
   // ### AI
   registerSystem(
     game.essence,
