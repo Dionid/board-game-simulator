@@ -9,7 +9,7 @@ import {
   tryComponent,
   tryTable,
 } from 'libs/tecs';
-import { collisionStartedTopic } from 'libs/tengine/collision';
+import { checkNarrowCollisionSimple, collisionStartedTopic } from 'libs/tengine/collision';
 import {
   KeyBoardInput,
   Acceleration2,
@@ -544,5 +544,17 @@ export const changeBallDirectionBasedOnPaddleVelocity = (
         ballVelocity.y += characterVelocity.y * 0.7;
       }
     }
+  };
+};
+
+export const checkCollisions = (game: Game, roundStarted: { value: boolean }): System => {
+  const mainSystem = checkNarrowCollisionSimple(game);
+
+  return (ctx) => {
+    if (roundStarted.value === false) {
+      return;
+    }
+
+    return mainSystem(ctx);
   };
 };

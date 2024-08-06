@@ -1,6 +1,6 @@
 import { Container } from 'pixi.js';
 import { initGame, newGame } from '../../../libs/tengine/game';
-import { registerSystem, setComponent, spawnEntity } from '../../../libs/tecs';
+import { registerSystem, setComponent, spawnEntity, System } from '../../../libs/tecs';
 import { mapKeyboardInput, mapMouseInput } from '../../../libs/tengine/ecs';
 import { Dynamic, Kinematic, RigidBody, Static } from 'libs/tengine/physics/components';
 import {
@@ -22,6 +22,7 @@ import {
   accelerateByArrows,
   ballTunneling,
   changeBallDirectionBasedOnPaddleVelocity,
+  checkCollisions,
   enemyAi,
   paddleWorldBoundaries,
   scoring,
@@ -591,7 +592,7 @@ export async function initPongGame(parentElement: HTMLElement) {
 
   // ### Calculate collisions
   registerSystem(game.essence, awakening(game));
-  registerSystem(game.essence, checkNarrowCollisionSimple(game));
+  registerSystem(game.essence, checkCollisions(game, roundStarted));
   registerSystem(game.essence, filterCollisionEvents(game));
   registerSystem(game.essence, penetrationResolution(game));
 
