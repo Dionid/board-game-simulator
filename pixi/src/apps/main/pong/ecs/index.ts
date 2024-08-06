@@ -176,6 +176,15 @@ export const changeVelocityByArrows = (
   };
 };
 
+export function startRound(ballVelocity: Vector2, roundStarted: { value: boolean }) {
+  const randomAngle = Math.random() * Math.PI * 2;
+
+  ballVelocity.x = Math.cos(randomAngle) * 5;
+  ballVelocity.y = Math.sin(randomAngle) * 5;
+
+  roundStarted.value = true;
+}
+
 export function resetRound(
   game: Game,
   initialBallPosition: Vector2,
@@ -240,12 +249,7 @@ export function resetRound(
 
   // # Restart ball
   setTimeout(() => {
-    const randomAngle = Math.random() * Math.PI * 2;
-
-    ballVelocity.x = Math.cos(randomAngle) * 5;
-    ballVelocity.y = Math.sin(randomAngle) * 5;
-
-    roundStarted.value = true;
+    startRound(ballVelocity, roundStarted);
   }, 1300);
 }
 
@@ -334,31 +338,46 @@ export function paddleWorldBoundaries(
   characterSize: Size2
 ): System {
   return () => {
-    const playerPosition = componentByEntity(game.essence, playerEntity, Position2)!;
-    const enemyPosition = componentByEntity(game.essence, enemyEntity, Position2)!;
+    const playerPosition = componentByEntity(game.essence, playerEntity, Position2);
+    const playerVelocity = componentByEntity(game.essence, playerEntity, Velocity2);
+
+    const enemyPosition = componentByEntity(game.essence, enemyEntity, Position2);
+    const enemyVelocity = componentByEntity(game.essence, enemyEntity, Velocity2);
+
+    if (!playerPosition || !playerVelocity || !enemyPosition || !enemyVelocity) {
+      return;
+    }
 
     if (playerPosition.y < characterSize.height / 2) {
       playerPosition.y = characterSize.height / 2;
+      playerVelocity.y = 0;
     } else if (playerPosition.y > game.world.size.height - characterSize.height / 2) {
       playerPosition.y = game.world.size.height - characterSize.height / 2;
+      playerVelocity.y = 0;
     }
 
     if (playerPosition.x < characterSize.width / 2 + 50) {
       playerPosition.x = characterSize.width / 2 + 51;
+      playerVelocity.x = 0;
     } else if (playerPosition.x > game.world.size.width / 2 - characterSize.width / 2) {
       playerPosition.x = game.world.size.width / 2 - characterSize.width / 2;
+      playerVelocity.x = 0;
     }
 
     if (enemyPosition.y < characterSize.height / 2) {
       enemyPosition.y = characterSize.height / 2;
+      enemyVelocity.y = 0;
     } else if (enemyPosition.y > game.world.size.height - characterSize.height / 2) {
       enemyPosition.y = game.world.size.height - characterSize.height / 2;
+      enemyVelocity.y = 0;
     }
 
     if (enemyPosition.x > game.world.size.width - characterSize.width / 2 - 50) {
       enemyPosition.x = game.world.size.width - characterSize.width / 2 - 51;
+      enemyVelocity.x = 0;
     } else if (enemyPosition.x < game.world.size.width / 2 + characterSize.width / 2) {
       enemyPosition.x = game.world.size.width / 2 + characterSize.width / 2;
+      enemyVelocity.x = 0;
     }
   };
 }
@@ -548,13 +567,21 @@ export const changeBallDirectionBasedOnPaddleVelocity = (
 };
 
 export const checkCollisions = (game: Game, roundStarted: { value: boolean }): System => {
-  const mainSystem = checkNarrowCollisionSimple(game);
+  const narrow = checkNarrowCollisionSimple(game);
 
   return (ctx) => {
     if (roundStarted.value === false) {
       return;
     }
 
-    return mainSystem(ctx);
+    return narrow(ctx);
+  };
+};
+
+export const startGame = (ballVelocity: Vector2, roundStarted: { value: boolean }): System => {
+  return function startGame() {
+    setTimeout(() => {
+      startRound(ballVelocity, roundStarted);
+    }, 1000);
   };
 };

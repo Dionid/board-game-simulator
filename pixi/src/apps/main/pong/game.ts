@@ -26,11 +26,11 @@ import {
   enemyAi,
   paddleWorldBoundaries,
   scoring,
+  startGame,
 } from './ecs';
 import {
   CollisionsMonitoring,
   transformCollider,
-  checkNarrowCollisionSimple,
   ColliderBody,
   rectangleColliderComponent,
   circleColliderComponent,
@@ -522,6 +522,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, enemyGoals, Static);
 
   // # Systems
+
   // ## Previous invalidation
   registerSystem(game.essence, updatePrevious(game));
 
@@ -536,25 +537,12 @@ export async function initPongGame(parentElement: HTMLElement) {
 
   // ## Game logic
   // ### Start ball
+  registerSystem(game.essence, startGame(ballVelocity, roundStarted), {
+    stage: 'onFirstStep',
+  });
   registerSystem(
     game.essence,
     changeBallDirectionBasedOnPaddleVelocity(game, playerEntity, enemyEntity, ballEntity)
-  );
-  registerSystem(
-    game.essence,
-    () => {
-      setTimeout(() => {
-        const randomAngle = Math.random() * Math.PI * 2;
-
-        ballVelocity.x = Math.cos(randomAngle) * 5;
-        ballVelocity.y = Math.sin(randomAngle) * 5;
-
-        roundStarted.value = true;
-      }, 1000);
-    },
-    {
-      stage: 'onFirstStep',
-    }
   );
   registerSystem(
     game.essence,

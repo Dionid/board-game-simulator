@@ -5,7 +5,7 @@
 1. ~~Score points~~
 1. ~~Paddles world and half world boundaries~~
 1. ~~Enemy AI~~
-1. Menu
-1. Reset game
+1. ~~Menu~~
+1. ~~Reset game~~
 1. Audio
 1. Multiplayer
