@@ -178,17 +178,16 @@ export const changeVelocityByArrows = (
 
 export function resetRound(
   game: Game,
-  playerEntity: Entity,
   initialBallPosition: Vector2,
   initialPlayerPosition: Vector2,
   initialEnemyPosition: Vector2,
+  ballEntity: Entity,
   ballVelocity: Vector2,
   ballAcceleration: Vector2,
-  ballPosition: Vector2,
-  playerPosition: Vector2,
+  playerEntity: Entity,
   playerVelocity: Vector2,
   playerAcceleration: Vector2,
-  enemyPosition: Vector2,
+  enemyEntity: Entity,
   enemyVelocity: Vector2,
   enemyAcceleration: Vector2,
   roundStarted: { value: boolean }
@@ -197,8 +196,16 @@ export function resetRound(
   ballVelocity.y = 0;
   ballAcceleration.x = 0;
   ballAcceleration.y = 0;
-  ballPosition.x = initialBallPosition.x;
-  ballPosition.y = initialBallPosition.y;
+  // ballPosition.x = initialBallPosition.x;
+  // ballPosition.y = initialBallPosition.y;
+
+  setComponent(game.essence, ballEntity, TranslateAnimation, {
+    x: initialBallPosition.x,
+    y: initialBallPosition.y,
+    duration: 1000,
+    easing: 'easeIn',
+    startTime: game.essence.currentStepTime,
+  });
 
   console.log('initialPlayerPosition', initialPlayerPosition);
 
@@ -217,8 +224,15 @@ export function resetRound(
   playerAcceleration.x = 0;
   playerAcceleration.y = 0;
 
-  enemyPosition.x = initialEnemyPosition.x;
-  enemyPosition.y = initialEnemyPosition.y;
+  setComponent(game.essence, enemyEntity, TranslateAnimation, {
+    x: initialEnemyPosition.x,
+    y: initialEnemyPosition.y,
+    duration: 1000,
+    easing: 'easeIn',
+    startTime: game.essence.currentStepTime,
+  });
+  // enemyPosition.x = initialEnemyPosition.x;
+  // enemyPosition.y = initialEnemyPosition.y;
   enemyVelocity.x = 0;
   enemyVelocity.y = 0;
   enemyAcceleration.x = 0;
@@ -297,17 +311,16 @@ export function scoring(
 
         resetRound(
           game,
-          playerEntity,
           initialBallPosition,
           initialPlayerPosition,
           initialEnemyPosition,
+          ball.entity,
           ballVelocity,
           ballAcceleration,
-          ballPosition,
-          playerPosition,
+          playerEntity,
           playerVelocity,
           playerAcceleration,
-          enemyPosition,
+          enemyEntity,
           enemyVelocity,
           enemyAcceleration,
           roundStarted
