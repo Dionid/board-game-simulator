@@ -1,6 +1,6 @@
 import { Container } from 'pixi.js';
 import { initGame, newGame } from '../../../libs/tengine/game';
-import { registerSystem, setComponent, spawnEntity, tryComponent } from '../../../libs/tecs';
+import { registerSystem, setComponent, spawnEntity } from '../../../libs/tecs';
 import { mapKeyboardInput, mapMouseInput } from '../../../libs/tengine/ecs';
 import { Dynamic, Kinematic, RigidBody, Static } from 'libs/tengine/physics/components';
 import {
@@ -36,8 +36,6 @@ import {
   verticesColliderComponent,
   lineColliderComponent,
   filterCollisionEvents,
-  collisionStartedTopic,
-  capsuleColliderComponent,
 } from 'libs/tengine/collision';
 import {
   applyRigidBodyAccelerationToVelocity,

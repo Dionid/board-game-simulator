@@ -43,7 +43,6 @@ export function translateWithAnimation(game: Game): System {
 
         // # If current position is the same as the target position, remove the animation component
         if (position.x === animation.x && position.y === animation.y) {
-          debugger;
           removeComponent(essence, entity, TranslateAnimation);
           continue;
         }
@@ -53,7 +52,6 @@ export function translateWithAnimation(game: Game): System {
           position.x = animation.x;
           position.y = animation.y;
 
-          debugger;
           removeComponent(essence, entity, TranslateAnimation);
 
           continue;

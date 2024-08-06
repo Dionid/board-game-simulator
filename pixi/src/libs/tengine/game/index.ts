@@ -141,6 +141,10 @@ export function run(game: Game) {
 export function destroyGame(game: Game): void {
   game.app.stop();
 
+  if (game.essence.state !== 'idle') {
+    throw new Error('Game is not idle');
+  }
+
   destroyEssence(game.essence);
 
   (globalThis as any).__TENGINE_GAMES__ = (globalThis as any).__TENGINE_GAMES__.filter(
@@ -153,5 +157,6 @@ export function destroyGame(game: Game): void {
 export const Game = {
   new: newGame,
   init: initGame,
+  destroy: destroyGame,
   run,
 };

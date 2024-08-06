@@ -20,7 +20,7 @@ const containerStyle: CSSProperties = {
   fontFamily: "monospace",
 }
 
-export const PongGame: FunctionComponent<{ winScore: number, goBackToMenu: () => void }> = ({ winScore, goBackToMenu }) => {
+export const PongGame: FunctionComponent<{ winScore: number, goBackToMenu: (playerWon: boolean) => void }> = ({ winScore, goBackToMenu }) => {
     useEffect(() => {
         const gameHolder = document.getElementById('gameHolder') as HTMLCanvasElement;
 
@@ -36,7 +36,7 @@ export const PongGame: FunctionComponent<{ winScore: number, goBackToMenu: () =>
                 game.app.ticker.addOnce(() => {
                   destroyGame(game)
                   uiState.set(scores, { player: 0, enemy: 0 })
-                  goBackToMenu()
+                  goBackToMenu(state.player >= winScore)
                 })
               }
             })
@@ -92,22 +92,47 @@ const menuContainer: CSSProperties = {
   cursor: "pointer",
 }
 
-export const PongGameMenu: FunctionComponent<{ setStartGame: (v: boolean ) => void}> = ({ setStartGame }) => {
+export const PongGameMenu: FunctionComponent<{ startGame: () => void}> = ({ startGame }) => {
   return (
     <div style={menuContainer}>
     <h1>SUPER PONG</h1>
-    <div style={buttonStyle} onClick={() => setStartGame(true)}>PLAY</div>
+    <div style={buttonStyle} onClick={startGame}>PLAY</div>
+  </div>
+  )
+}
+
+export const PongEndGameScreen: FunctionComponent<{ isPlayerWon: boolean, startGame: () => void}> = ({ isPlayerWon, startGame }) => {
+  return (
+    <div style={menuContainer}>
+    <h1>
+      { isPlayerWon ? "YOU WON" : "YOU LOSE" }
+    </h1>
+    <div style={buttonStyle} onClick={startGame}>PLAY AGAIN</div>
   </div>
   )
 }
 
 export const PongApp = () => {
-  const [startGame, setStartGame] = useState(false)
+  const [isGameStarted, setIsGameStarted] = useState(false)
+  const [gamePlayed, setGamePlayed] = useState(false)
+  const [playerWon, setPlayerWon] = useState(false)
 
   return (
     <div style={pongAppContainerStyle}>
       {
-        startGame ? <PongGame winScore={1} goBackToMenu={ () => setStartGame(false) } /> : <PongGameMenu setStartGame={ setStartGame } />
+        isGameStarted && <PongGame winScore={5} goBackToMenu={(playerWon) => {
+          setIsGameStarted(false)
+          setGamePlayed(true)
+          setPlayerWon(playerWon)
+        }}/>
+      }
+      {
+        !isGameStarted && !gamePlayed && <PongGameMenu startGame={ () => setIsGameStarted(true) }/>
+      }
+      {
+        !isGameStarted && gamePlayed && <PongEndGameScreen isPlayerWon={playerWon} startGame={() => {
+          setIsGameStarted(true)
+        } }/>
       }
     </div>
   )
