@@ -21,6 +21,7 @@ import {
   PlayerGoals,
   accelerateByArrows,
   ballTunneling,
+  changeBallDirectionBasedOnPaddleVelocity,
   enemyAi,
   paddleWorldBoundaries,
   scoring,
@@ -49,6 +50,7 @@ import { penetrationResolution } from 'libs/tengine/collision/penetration-resolu
 import { updatePrevious } from 'libs/tengine/core/update-previous';
 import { awakening } from 'libs/tengine/collision/awakening';
 import { activateDebugMode } from 'libs/tengine/debug';
+import { translateWithAnimation } from 'libs/tengine/animation';
 
 export async function initPongGame(parentElement: HTMLElement) {
   const game = newGame({
@@ -451,39 +453,10 @@ export async function initPongGame(parentElement: HTMLElement) {
 
   // ## Game logic
   // ### Start ball
-  registerSystem(game.essence, () => {
-    for (const event of collisionStartedTopic) {
-      const { a, b } = event;
-
-      let character;
-
-      if (a.entity === playerEntity || a.entity === enemyEntity) {
-        character = a;
-      } else if (b.entity === playerEntity || b.entity === enemyEntity) {
-        character = b;
-      } else {
-        return;
-      }
-
-      let ball;
-
-      if (a.entity === ballEntity) {
-        ball = a;
-      } else if (b.entity === ballEntity) {
-        ball = b;
-      } else {
-        return;
-      }
-
-      const characterVelocity = tryComponent(character.archetype, character.entity, Velocity2);
-      const ballVelocity = tryComponent(ball.archetype, ball.entity, Velocity2);
-
-      // # Add paddle y velocity to ball to make paddle movement more angular impactful
-      if (characterVelocity && ballVelocity) {
-        ballVelocity.y += characterVelocity.y * 0.7;
-      }
-    }
-  });
+  registerSystem(
+    game.essence,
+    changeBallDirectionBasedOnPaddleVelocity(game, playerEntity, enemyEntity, ballEntity)
+  );
   registerSystem(
     game.essence,
     () => {
@@ -525,28 +498,22 @@ export async function initPongGame(parentElement: HTMLElement) {
     paddleWorldBoundaries(game, playerEntity, enemyEntity, characterSize)
   );
   // ### Ball boundaries
-  registerSystem(
-    game.essence,
-    ballTunneling(
-      game,
-      ballEntity,
-      playerEntity,
-      enemyEntity,
-      initialBallPosition,
-      initialPlayerPosition,
-      initialEnemyPosition,
-      roundStarted
-    )
-  );
+  registerSystem(game.essence, ballTunneling(game, ballEntity));
 
-  // ## Transform
-  registerSystem(game.essence, transformCollider(game));
+  // ## Animations
+  registerSystem(game.essence, translateWithAnimation(game));
 
   // ## Collision
+  // ### Transform
+  registerSystem(game.essence, transformCollider(game));
+
+  // ### Calculate collisions
   registerSystem(game.essence, awakening(game));
   registerSystem(game.essence, checkNarrowCollisionSimple(game));
   registerSystem(game.essence, filterCollisionEvents(game));
   registerSystem(game.essence, penetrationResolution(game));
+
+  // ## Physics
   registerSystem(game.essence, dynamicRigidBodyCollisionResolution(game));
 
   // ## Render

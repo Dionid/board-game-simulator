@@ -4,6 +4,7 @@ import {
   Entity,
   newTag,
   registerTopic,
+  setComponent,
   System,
   tryComponent,
   tryTable,
@@ -23,6 +24,7 @@ import {
 import { Game } from 'libs/tengine/game';
 import { scores, uiState } from '../state';
 import { safeGuard } from 'libs/tecs/switch';
+import { TranslateAnimation } from 'libs/tengine/animation';
 
 // export const GameObject = newTag();
 
@@ -175,6 +177,8 @@ export const changeVelocityByArrows = (
 };
 
 export function resetRound(
+  game: Game,
+  playerEntity: Entity,
   initialBallPosition: Vector2,
   initialPlayerPosition: Vector2,
   initialEnemyPosition: Vector2,
@@ -196,8 +200,18 @@ export function resetRound(
   ballPosition.x = initialBallPosition.x;
   ballPosition.y = initialBallPosition.y;
 
-  playerPosition.x = initialPlayerPosition.x;
-  playerPosition.y = initialPlayerPosition.y;
+  console.log('initialPlayerPosition', initialPlayerPosition);
+
+  setComponent(game.essence, playerEntity, TranslateAnimation, {
+    x: initialPlayerPosition.x,
+    y: initialPlayerPosition.y,
+    duration: 1000,
+    easing: 'easeIn',
+    startTime: game.essence.currentStepTime,
+  });
+
+  // playerPosition.x = initialPlayerPosition.x;
+  // playerPosition.y = initialPlayerPosition.y;
   playerVelocity.x = 0;
   playerVelocity.y = 0;
   playerAcceleration.x = 0;
@@ -220,7 +234,7 @@ export function resetRound(
     ballVelocity.y = Math.sin(randomAngle) * 5;
 
     roundStarted.value = true;
-  }, 1000);
+  }, 2000);
 }
 
 export function scoring(
@@ -282,6 +296,8 @@ export function scoring(
         const enemyAcceleration = componentByEntity(game.essence, enemyEntity, Acceleration2)!;
 
         resetRound(
+          game,
+          playerEntity,
           initialBallPosition,
           initialPlayerPosition,
           initialEnemyPosition,
@@ -457,29 +473,9 @@ export function enemyAi(
   };
 }
 
-export function ballTunneling(
-  game: Game,
-  ballEntity: Entity,
-  playerEntity: Entity,
-  enemyEntity: Entity,
-  initialBallPosition: Vector2,
-  initialPlayerPosition: Vector2,
-  initialEnemyPosition: Vector2,
-  roundStarted: { value: boolean }
-): System {
+export function ballTunneling(game: Game, ballEntity: Entity): System {
   return () => {
     const ballPosition = componentByEntity(game.essence, ballEntity, Position2)!;
-    const ballVelocity = componentByEntity(game.essence, ballEntity, Velocity2)!;
-    const ballAcceleration = componentByEntity(game.essence, ballEntity, Acceleration2)!;
-
-    // # Reset characters
-    const playerPosition = componentByEntity(game.essence, playerEntity, Position2)!;
-    const playerVelocity = componentByEntity(game.essence, playerEntity, Velocity2)!;
-    const playerAcceleration = componentByEntity(game.essence, playerEntity, Acceleration2)!;
-
-    const enemyPosition = componentByEntity(game.essence, enemyEntity, Position2)!;
-    const enemyVelocity = componentByEntity(game.essence, enemyEntity, Velocity2)!;
-    const enemyAcceleration = componentByEntity(game.essence, enemyEntity, Acceleration2)!;
 
     if (
       ballPosition.x < 0 ||
@@ -498,22 +494,47 @@ export function ballTunneling(
       } else {
         ballPosition.y += 50;
       }
-
-      // resetRound(
-      //   initialBallPosition,
-      //   initialPlayerPosition,
-      //   initialEnemyPosition,
-      //   ballVelocity,
-      //   ballAcceleration,
-      //   ballPosition,
-      //   playerPosition,
-      //   playerVelocity,
-      //   playerAcceleration,
-      //   enemyPosition,
-      //   enemyVelocity,
-      //   enemyAcceleration,
-      //   roundStarted
-      // );
     }
   };
 }
+
+export const changeBallDirectionBasedOnPaddleVelocity = (
+  game: Game,
+  playerEntity: Entity,
+  enemyEntity: Entity,
+  ballEntity: Entity
+) => {
+  return () => {
+    for (const event of collisionStartedTopic) {
+      const { a, b } = event;
+
+      let character;
+
+      if (a.entity === playerEntity || a.entity === enemyEntity) {
+        character = a;
+      } else if (b.entity === playerEntity || b.entity === enemyEntity) {
+        character = b;
+      } else {
+        return;
+      }
+
+      let ball;
+
+      if (a.entity === ballEntity) {
+        ball = a;
+      } else if (b.entity === ballEntity) {
+        ball = b;
+      } else {
+        return;
+      }
+
+      const characterVelocity = tryComponent(character.archetype, character.entity, Velocity2);
+      const ballVelocity = tryComponent(ball.archetype, ball.entity, Velocity2);
+
+      // # Add paddle y velocity to ball to make paddle movement more angular impactful
+      if (characterVelocity && ballVelocity) {
+        ballVelocity.y += characterVelocity.y * 0.7;
+      }
+    }
+  };
+};
