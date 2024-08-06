@@ -2,7 +2,7 @@
 
 IF I have enough time, I will create a few examples of games using tEngine.
 
-1. Pong
+1. ~~Pong~~
 1. Mario
 1. Flappy Bird
 1. Terraria
