@@ -62,9 +62,6 @@ export const initTileMap = async <MD extends typeof exampleData>(props: {
   assetName: string;
   texture: Texture | string;
   mapData: MD;
-  layerTileDepthModifier: {
-    [key in MD['layers'][number]['name']]: number;
-  } & { default: number };
 }): Promise<Map<MD>> => {
   const mapContainer = new Container();
 

@@ -4,7 +4,6 @@ import { destroyGame, run } from "libs/tengine/game";
 import { useAtom } from "jotai";
 import { scores, uiState } from "./state";
 import { zzfx } from "libs/zzfx";
-import { ZZFX } from "libs/zzfx";
 
 const containerStyle: CSSProperties = {
   padding: 15,

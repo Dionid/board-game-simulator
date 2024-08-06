@@ -120,12 +120,12 @@ export const initWorld = async (app: Application) => {
     assetName: 'kennytilesheet',
     texture: 'assets/kennytilesheet.png',
     mapData: firstMapData,
-    layerTileDepthModifier: {
-      Floor: 410,
-      'Outer Walls': 400,
-      'Inner Walls': 400,
-      default: 460,
-    },
+    // layerTileDepthModifier: {
+    //   Floor: 410,
+    //   'Outer Walls': 400,
+    //   'Inner Walls': 400,
+    //   default: 460,
+    // },
   });
 
   const { container: mapContainer, tileMap } = map;
