@@ -1,7 +1,9 @@
 import {
   Component,
+  componentByEntity,
   newQuery,
   registerQuery,
+  registerTopic,
   setComponent,
   System,
   table,
@@ -13,12 +15,14 @@ import { Container } from 'pixi.js';
 import { pView, View } from './components';
 import { safeGuard } from 'libs/tecs/switch';
 import { circleView, circleViewPivot, rectangleView, rectangleViewPivot } from './draw-shapes';
+import { entityKilled } from 'libs/tecs/default-topics';
 
 // TODO: Refactor to use filter `not`
 export const newViewQuery = newQuery(View, Position2);
 
 export const addNewViews = (game: Game, viewsContainer: Container): System => {
   const query = registerQuery(game.essence, newViewQuery);
+  registerTopic(game.essence, entityKilled);
 
   return () => {
     for (const archetype of query.archetypes) {
@@ -114,6 +118,19 @@ export const addNewViews = (game: Game, viewsContainer: Container): System => {
         }
 
         setComponent(game.essence, archetype.entities[i], pView, pViewComponent!);
+      }
+    }
+
+    // # Destroy pView on entity killed
+    for (const event of entityKilled) {
+      const entity = event.entity;
+
+      const pv = componentByEntity(game.essence, entity, pView);
+
+      if (pv) {
+        pv.graphics.destroy();
+        pv.container.destroy();
+        viewsContainer.removeChild(pv.container);
       }
     }
   };

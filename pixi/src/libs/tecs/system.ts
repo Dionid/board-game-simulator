@@ -7,6 +7,7 @@ export type Context = {
   deltaTime: number;
   deltaMs: number;
   essence: Essence;
+  elapsedTime: number;
 };
 
 export type System = (ctx: Context) => void;

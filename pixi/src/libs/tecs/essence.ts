@@ -8,7 +8,7 @@ import {
   newArchetypeId,
   updateComponent,
 } from './archetype';
-import { Internals } from './internals';
+import { clearUnsafeInternals, Internals } from './internals';
 import { $tag, Schema, KindToType } from './schema';
 import { Query } from './query';
 import { System } from './system';
@@ -426,6 +426,7 @@ export function _step(essence: Essence, now: number, deltaTime: number, deltaMs:
         essence,
         deltaTime,
         deltaMs,
+        elapsedTime: now,
       });
     }
   }
@@ -436,7 +437,7 @@ export function _step(essence: Essence, now: number, deltaTime: number, deltaMs:
     system({
       essence,
       deltaTime,
-
+      elapsedTime: now,
       deltaMs,
       stage: 'preUpdate',
     });
@@ -448,7 +449,7 @@ export function _step(essence: Essence, now: number, deltaTime: number, deltaMs:
     system({
       essence,
       deltaTime,
-
+      elapsedTime: now,
       deltaMs,
       stage: 'update',
     });
@@ -460,7 +461,7 @@ export function _step(essence: Essence, now: number, deltaTime: number, deltaMs:
     system({
       essence,
       deltaTime,
-
+      elapsedTime: now,
       deltaMs,
       stage: 'postUpdate',
     });
@@ -501,7 +502,7 @@ export function stepWithTicker(
     speed: number;
   }
 ): void {
-  return _step(essence, ticker.elapsedMS, ticker.deltaTime, ticker.deltaMS);
+  return _step(essence, performance.now(), ticker.deltaTime, ticker.deltaMS);
 }
 
 export function step(essence: Essence): void {
@@ -554,7 +555,27 @@ export function newEssence(
   };
 }
 
-// MAYBE NOT REQUESTANIMATIONFRAME
+// # OK
+export const destroyEssence = (essence: Essence) => {
+  for (const topic of essence.topics) {
+    topic.isRegistered = false;
+    mutableEmpty(topic.staged);
+    mutableEmpty(topic.ready);
+  }
+
+  // # Reset deferred operations
+  essence.deferredOperations.deferred = false;
+  essence.deferredOperations.killed.clear();
+  mutableEmpty(essence.deferredOperations.operations);
+
+  // # Reset queries
+  for (const query of essence.queries) {
+    mutableEmpty(query.archetypes);
+  }
+
+  clearUnsafeInternals();
+};
+
 export function run(essence: Essence): void {
   const frame = () => {
     step(essence);

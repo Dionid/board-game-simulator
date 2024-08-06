@@ -15,8 +15,6 @@
 1. ~~Fix multiple collision body penetrations~~
 1. ~~Collision Queries~~
 1. ~~FIX: capsule collider circle error~~
-1. Simulate containment
-? Apply movement before or after gamelogic
 
 # Roadmap
 
@@ -25,10 +23,10 @@
         1. ~~Default topics (SchemaAdded, SchemaRemoved, ComponentUpdated, EntitySpawned, EntityKilled)~~
         1. Subscribe by one entity
 1. View
-    1. Capsule
+    1. ~~On entity kill destroy pView~~
     1. Polygon
-    1. Change to ViewSet
-    1. On entity kill destroy pView
+    1. Capsule
+    1. View -> ViewSet
     1. Scale
 1. Collision
     1. ~~SAT~~
@@ -40,7 +38,7 @@
     1. ~~Triangle on Vertices~~
     1. ~~Polygon on Vertices~~
     1. ~~World Bounds~~
-    1. Collision Queries
+    1. ~~Ray casting~~
     1. CCD
     1. Fix Circle anchor
     1. Separate concave to convex
@@ -55,7 +53,8 @@
 1. Culling
 1. ...
 1. Debug
-    1. Subscribe on all default topics, to show all default events
+    1. ~~Subscribe on all default topics, to show all default events~~
+1. Simulate containment
 1. ...
 1. Top-down Tilemap
 1. ...

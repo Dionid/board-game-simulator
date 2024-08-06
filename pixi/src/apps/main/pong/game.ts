@@ -1,6 +1,6 @@
 import { Container } from 'pixi.js';
 import { initGame, newGame } from '../../../libs/tengine/game';
-import { registerSystem, setComponent, spawnEntity, tryComponent } from '../../../libs/tecs';
+import { registerSystem, setComponent, spawnEntity, System } from '../../../libs/tecs';
 import { mapKeyboardInput, mapMouseInput } from '../../../libs/tengine/ecs';
 import { Dynamic, Kinematic, RigidBody, Static } from 'libs/tengine/physics/components';
 import {
@@ -21,6 +21,8 @@ import {
   PlayerGoals,
   accelerateByArrows,
   ballTunneling,
+  changeBallDirectionBasedOnPaddleVelocity,
+  checkCollisions,
   enemyAi,
   paddleWorldBoundaries,
   scoring,
@@ -35,8 +37,6 @@ import {
   verticesColliderComponent,
   lineColliderComponent,
   filterCollisionEvents,
-  collisionStartedTopic,
-  capsuleColliderComponent,
 } from 'libs/tengine/collision';
 import {
   applyRigidBodyAccelerationToVelocity,
@@ -49,6 +49,7 @@ import { penetrationResolution } from 'libs/tengine/collision/penetration-resolu
 import { updatePrevious } from 'libs/tengine/core/update-previous';
 import { awakening } from 'libs/tengine/collision/awakening';
 import { activateDebugMode } from 'libs/tengine/debug';
+import { translateWithAnimation } from 'libs/tengine/animation';
 
 export async function initPongGame(parentElement: HTMLElement) {
   const game = newGame({
@@ -58,7 +59,15 @@ export async function initPongGame(parentElement: HTMLElement) {
     },
   });
 
-  activateDebugMode(game);
+  activateDebugMode(game, {
+    render: {
+      view: false,
+      xy: false,
+      collision: false,
+      velocity: false,
+      acceleration: false,
+    },
+  });
 
   await initGame(game, {
     backgroundColor: 0x000000,
@@ -130,7 +139,6 @@ export async function initPongGame(parentElement: HTMLElement) {
             y: 0,
           },
           length: boundary.length,
-          // size: { width: 10, height: boundary.length },
         }),
       ],
     });
@@ -156,7 +164,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     scale: { x: 1, y: 1 },
     rotation: 0,
     anchor: { x: 0.5, y: 0.5 },
-    alpha: 0.2,
+    alpha: 1,
     model: {
       type: 'graphics',
       shape: {
@@ -166,7 +174,7 @@ export async function initPongGame(parentElement: HTMLElement) {
           height: game.world.size.height / 2,
         },
       },
-      color: '0xFFFFFF',
+      color: '#333333',
     },
   });
 
@@ -185,25 +193,41 @@ export async function initPongGame(parentElement: HTMLElement) {
     scale: { x: 1, y: 1 },
     rotation: 0,
     anchor: { x: 0.5, y: 0.5 },
-    alpha: 0.2,
+    alpha: 1,
     model: {
       type: 'graphics',
       shape: {
         type: 'circle',
         radius: centerLineCenterRadius,
       },
-      color: '0xFFFFFF',
+      color: '#333333',
     },
   });
 
   const characterSize = {
     width: 50,
-    height: 150,
+    height: 175,
   };
 
   // # Player
   const playerEntity = spawnEntity(game.essence);
   setComponent(game.essence, playerEntity, Player);
+  // ## View
+  setComponent(game.essence, playerEntity, View, {
+    offset: { x: 0, y: 0 },
+    scale: { x: 1, y: 1 },
+    rotation: 0,
+    anchor: { x: 0.5, y: 0.5 },
+    alpha: 1,
+    model: {
+      type: 'graphics',
+      shape: {
+        type: 'rectangle',
+        size: characterSize,
+      },
+      color: '0xFFFFFF',
+    },
+  });
   // ## Position
   const initialPlayerPosition = {
     x: game.world.size.width / 6,
@@ -236,23 +260,18 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, playerEntity, CollisionsMonitoring);
   setComponent(game.essence, playerEntity, ColliderBody, {
     parts: [
-      // rectangleColliderComponent({
-      //   parentPosition: playerPosition,
-      //   parentAngle: playerAngle,
-      //   type: 'solid',
-      //   mass: 1,
-      //   offset: { x: 0, y: 0 },
-      //   angle: 0,
-      //   anchor: {
-      //     x: 0.5,
-      //     y: 0.5,
-      //   },
-      //   size: characterSize,
-      // }),
-      ...capsuleColliderComponent({
+      rectangleColliderComponent({
         parentPosition: playerPosition,
-        length: characterSize.height,
-        radius: characterSize.width / 2,
+        parentAngle: playerAngle,
+        type: 'solid',
+        mass: 1,
+        offset: { x: 0, y: 0 },
+        angle: 0,
+        anchor: {
+          x: 0.5,
+          y: 0.5,
+        },
+        size: characterSize,
       }),
     ],
   });
@@ -266,6 +285,22 @@ export async function initPongGame(parentElement: HTMLElement) {
   // # Enemy
   const enemyEntity = spawnEntity(game.essence);
   setComponent(game.essence, enemyEntity, Enemy);
+  // ## View
+  setComponent(game.essence, enemyEntity, View, {
+    offset: { x: 0, y: 0 },
+    scale: { x: 1, y: 1 },
+    rotation: 0,
+    anchor: { x: 0.5, y: 0.5 },
+    alpha: 1,
+    model: {
+      type: 'graphics',
+      shape: {
+        type: 'rectangle',
+        size: characterSize,
+      },
+      color: '0xFFFFFF',
+    },
+  });
   // ## Position
   const initialEnemyPosition = {
     x: game.world.size.width - game.world.size.width / 6,
@@ -331,6 +366,22 @@ export async function initPongGame(parentElement: HTMLElement) {
   // # Ball
   const ballEntity = spawnEntity(game.essence);
   setComponent(game.essence, ballEntity, Ball);
+  // ## View
+  setComponent(game.essence, ballEntity, View, {
+    offset: { x: 0, y: 0 },
+    scale: { x: 1, y: 1 },
+    rotation: 0,
+    anchor: { x: 0.5, y: 0.5 },
+    alpha: 1,
+    model: {
+      type: 'graphics',
+      shape: {
+        type: 'circle',
+        radius: 25,
+      },
+      color: '0xFFFFFF',
+    },
+  });
   setComponent(game.essence, ballEntity, Speed, { value: 2 });
   const ballAcceleration = {
     x: 0,
@@ -386,11 +437,30 @@ export async function initPongGame(parentElement: HTMLElement) {
   });
   setComponent(game.essence, ballEntity, Dynamic);
 
+  // # Goals
+  const goalsSize = { width: 50, height: game.world.size.height };
+
+  // ## Player
   const playerGoals = spawnEntity(game.essence);
   setComponent(game.essence, playerGoals, Goals);
   setComponent(game.essence, playerGoals, PlayerGoals);
+  setComponent(game.essence, playerGoals, View, {
+    offset: { x: 0, y: 0 },
+    scale: { x: 1, y: 1 },
+    rotation: 0,
+    anchor: { x: 0.5, y: 0.5 },
+    alpha: 0.1,
+    model: {
+      type: 'graphics',
+      shape: {
+        type: 'rectangle',
+        size: goalsSize,
+      },
+      color: '0xFFFFFF',
+    },
+  });
   const playerGoalsPosition = {
-    x: 30,
+    x: goalsSize.width / 2,
     y: game.world.size.height / 2,
     _prev: { x: 0, y: 0 },
   };
@@ -404,7 +474,7 @@ export async function initPongGame(parentElement: HTMLElement) {
         mass: 1,
         offset: { x: 0, y: 0 },
         angle: 0,
-        size: { width: 20, height: game.world.size.height - 50 },
+        size: goalsSize,
       }),
     ],
   });
@@ -414,8 +484,23 @@ export async function initPongGame(parentElement: HTMLElement) {
   const enemyGoals = spawnEntity(game.essence);
   setComponent(game.essence, enemyGoals, Goals);
   setComponent(game.essence, enemyGoals, EnemyGoals);
+  setComponent(game.essence, enemyGoals, View, {
+    offset: { x: 0, y: 0 },
+    scale: { x: 1, y: 1 },
+    rotation: 0,
+    anchor: { x: 0.5, y: 0.5 },
+    alpha: 0.1,
+    model: {
+      type: 'graphics',
+      shape: {
+        type: 'rectangle',
+        size: goalsSize,
+      },
+      color: '0xFFFFFF',
+    },
+  });
   const enemyGoalsPosition = {
-    x: game.world.size.width - 30,
+    x: game.world.size.width - goalsSize.width / 2,
     y: game.world.size.height / 2,
     _prev: { x: 0, y: 0 },
   };
@@ -451,39 +536,10 @@ export async function initPongGame(parentElement: HTMLElement) {
 
   // ## Game logic
   // ### Start ball
-  registerSystem(game.essence, () => {
-    for (const event of collisionStartedTopic) {
-      const { a, b } = event;
-
-      let character;
-
-      if (a.entity === playerEntity || a.entity === enemyEntity) {
-        character = a;
-      } else if (b.entity === playerEntity || b.entity === enemyEntity) {
-        character = b;
-      } else {
-        return;
-      }
-
-      let ball;
-
-      if (a.entity === ballEntity) {
-        ball = a;
-      } else if (b.entity === ballEntity) {
-        ball = b;
-      } else {
-        return;
-      }
-
-      const characterVelocity = tryComponent(character.archetype, character.entity, Velocity2);
-      const ballVelocity = tryComponent(ball.archetype, ball.entity, Velocity2);
-
-      // # Add paddle y velocity to ball to make paddle movement more angular impactful
-      if (characterVelocity && ballVelocity) {
-        ballVelocity.y += characterVelocity.y * 0.7;
-      }
-    }
-  });
+  registerSystem(
+    game.essence,
+    changeBallDirectionBasedOnPaddleVelocity(game, playerEntity, enemyEntity, ballEntity)
+  );
   registerSystem(
     game.essence,
     () => {
@@ -513,7 +569,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     )
   );
   // ### Movement
-  registerSystem(game.essence, accelerateByArrows(game, playerEntity));
+  registerSystem(game.essence, accelerateByArrows(game, playerEntity, roundStarted));
   // ### AI
   registerSystem(
     game.essence,
@@ -525,28 +581,22 @@ export async function initPongGame(parentElement: HTMLElement) {
     paddleWorldBoundaries(game, playerEntity, enemyEntity, characterSize)
   );
   // ### Ball boundaries
-  registerSystem(
-    game.essence,
-    ballTunneling(
-      game,
-      ballEntity,
-      playerEntity,
-      enemyEntity,
-      initialBallPosition,
-      initialPlayerPosition,
-      initialEnemyPosition,
-      roundStarted
-    )
-  );
+  registerSystem(game.essence, ballTunneling(game, ballEntity));
 
-  // ## Transform
-  registerSystem(game.essence, transformCollider(game));
+  // ## Animations
+  registerSystem(game.essence, translateWithAnimation(game));
 
   // ## Collision
+  // ### Transform
+  registerSystem(game.essence, transformCollider(game));
+
+  // ### Calculate collisions
   registerSystem(game.essence, awakening(game));
-  registerSystem(game.essence, checkNarrowCollisionSimple(game));
+  registerSystem(game.essence, checkCollisions(game, roundStarted));
   registerSystem(game.essence, filterCollisionEvents(game));
   registerSystem(game.essence, penetrationResolution(game));
+
+  // ## Physics
   registerSystem(game.essence, dynamicRigidBodyCollisionResolution(game));
 
   // ## Render

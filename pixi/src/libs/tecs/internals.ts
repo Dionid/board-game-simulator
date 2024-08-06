@@ -14,6 +14,14 @@ export const UNSAFE_internals: Internals = {
   nextSchemaId: 0,
 };
 
+(globalThis as any).__TECS_UNSAFE_INTERNALS__ = UNSAFE_internals;
+
+export const clearUnsafeInternals = () => {
+  UNSAFE_internals.schemaIdBySchema = new WeakMap();
+  UNSAFE_internals.schemaById = new Map();
+  UNSAFE_internals.nextSchemaId = 0;
+};
+
 export const Internals = {
   registerSchema: (schema: Schema, schemaId?: SchemaId) => {
     let type = UNSAFE_internals.schemaIdBySchema.get(schema);
@@ -27,7 +35,9 @@ export const Internals = {
       }
       type = UNSAFE_internals.nextSchemaId;
     } else if (UNSAFE_internals.schemaById.has(type)) {
-      throw new Error('Failed to register component type: a component with same id is already registered');
+      throw new Error(
+        'Failed to register component type: a component with same id is already registered'
+      );
     }
     UNSAFE_internals.schemaById.set(type, schema);
     UNSAFE_internals.schemaIdBySchema.set(schema, type);
