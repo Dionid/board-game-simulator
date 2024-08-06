@@ -28,24 +28,45 @@ export const Circle = newSchema({
 //   // ...
 // });
 
-export const Graphics = newSchema({
-  type: literal('graphics'),
-  shape: union(Rectangle, Circle),
-  color: string,
-});
+const color = {
+  ...string,
+  [$defaultFn]: () => '#000000',
+};
 
-export const Sprite = newSchema({
-  type: literal('sprite'),
-  texture: string,
-});
+export const Graphics = newSchema(
+  {
+    type: literal('graphics'),
+    shape: union(Rectangle, Circle),
+    color: color,
+  },
+  {
+    name: 'graphics',
+  }
+);
 
-export const View = newSchema({
-  offset: Vector2,
-  scale: Vector2,
-  rotation: number,
-  anchor: Vector2,
-  model: union(Graphics, Sprite),
-});
+export const Sprite = newSchema(
+  {
+    type: literal('sprite'),
+    texture: string,
+  },
+  {
+    name: 'sprite',
+  }
+);
+
+export const View = newSchema(
+  {
+    offset: Vector2,
+    scale: Vector2,
+    rotation: number,
+    anchor: Vector2,
+    model: union(Graphics, Sprite),
+    alpha: number,
+  },
+  {
+    name: 'View',
+  }
+);
 
 // # pixi specific
 
@@ -65,7 +86,12 @@ export const container = {
   [$defaultFn]: () => new Container(),
 } as const;
 
-export const pView = newSchema({
-  graphics: graphics,
-  container: container,
-});
+export const pView = newSchema(
+  {
+    graphics: graphics,
+    container: container,
+  },
+  {
+    name: 'pView',
+  }
+);

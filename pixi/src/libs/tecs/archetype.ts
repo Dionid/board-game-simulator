@@ -1,9 +1,11 @@
 import { Entity, $kind } from './core';
 import { SparseSet } from './sparse-set';
-import { Schema, KindToType, SchemaId, $tag, $aos, $soa } from './schema';
+import { Schema, KindToType, SchemaId, $tag, $aos, $soa, Component } from './schema';
 import { Internals } from './internals';
 import { ArrayContains } from './ts-types';
 import { safeGuard } from './switch';
+import { Topic } from './topic';
+import { componentUpdated, componentAdded, componentRemoved } from './default-topics';
 
 export type ArchetypeTableRow<S extends Schema> = KindToType<S>[];
 
@@ -13,14 +15,11 @@ export type ArchetypeTable<SL extends ReadonlyArray<Schema>> = {
 
 export type ArchetypeId = string;
 
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const ArchetypeId = {
-  create: (schemas: Schema[]) => {
-    return schemas
-      .map((component) => Internals.getSchemaId(component))
-      .sort((a, b) => a - b)
-      .join(',');
-  },
+export const newArchetypeId = (schemas: Schema[]) => {
+  return schemas
+    .map((component) => Internals.getSchemaId(component))
+    .sort((a, b) => a - b)
+    .join(',');
 };
 
 export type Archetype<SL extends ReadonlyArray<Schema> = ReadonlyArray<Schema>> = {
@@ -134,11 +133,23 @@ export function removeEntity<CL extends Schema[]>(arch: Archetype<CL>, entity: E
   return;
 }
 
-// OK
+/**
+ *
+ * Move entity from one archetype to another:
+ *
+ * 1. If `from` does not have entity or `to` already has entity then return false.
+ * 2. Add entity to `to` archetype.
+ * 3. Move all components to `to` archetype. If there is no component in `from` archetype,
+ * then add default component.
+ * 4. Remove entity from `from` archetype.
+ *
+ */
 export function moveEntity<CL extends Schema[]>(
   from: Archetype<CL>,
   to: Archetype<CL>,
-  entity: Entity
+  entity: Entity,
+  newSchema?: Schema,
+  newComponent?: Component<Schema>
 ) {
   // # Check if entity is in `to` or not in `from`
   if (
@@ -154,21 +165,23 @@ export function moveEntity<CL extends Schema[]>(
   // # Move all Components to new Archetype Table
   const fromDenseEntityInd = from.entitiesSS.sparse[entity]!;
   for (let i = 0; i < to.table.length; i++) {
-    const componentId = i;
+    const schemaId = i;
 
-    const toComponentTable = to.table[componentId];
+    const toComponentTable = to.table[schemaId];
     if (!toComponentTable) {
       continue;
     }
 
-    const fromComponentTable = from.table[componentId];
+    const fromComponentTable = from.table[schemaId];
     if (!fromComponentTable) {
+      // # If there is schema in `to` but not in `from` then add default component
+      updateComponent(to, entity, schemaId, undefined);
       continue;
     }
 
-    const schema = Internals.getSchemaById(componentId);
+    const schema = Internals.getSchemaById(schemaId);
     if (!schema) {
-      throw new Error(`Can't find schema ${componentId}`);
+      throw new Error(`Can't find schema ${schemaId}`);
     }
 
     switch (schema[$kind]) {
@@ -177,11 +190,16 @@ export function moveEntity<CL extends Schema[]>(
       case $soa:
         throw new Error('Not implemented');
       case $aos:
-        setArchetypeComponent(to, entity, componentId, fromComponentTable[fromDenseEntityInd]);
+        updateComponent(to, entity, schemaId, fromComponentTable[fromDenseEntityInd]);
         break;
       default:
         safeGuard(schema[$kind]);
     }
+  }
+
+  // # Add new component if needed
+  if (newSchema) {
+    updateComponent(to, entity, newSchema, newComponent);
   }
 
   // # Remove it from `from` entities (sSet dense) and components
@@ -189,11 +207,11 @@ export function moveEntity<CL extends Schema[]>(
 }
 
 // OK
-export function setArchetypeComponent<S extends Schema>(
+export function updateComponent<S extends Schema>(
   arch: Archetype<any>,
   entity: Entity,
   schemaOrId: SchemaId | Schema,
-  component?: KindToType<S>
+  component?: Component<S>
 ): boolean {
   const schemaId = typeof schemaOrId === 'number' ? schemaOrId : Internals.getSchemaId(schemaOrId);
   const schema = (
@@ -212,30 +230,20 @@ export function setArchetypeComponent<S extends Schema>(
   }
 
   const sSet = arch.entitiesSS;
-
   const denseInd = sSet.sparse[entity] as number | undefined;
-  if (
+
+  const isEntityNotInArchetype =
     entity >= sSet.sparse.length ||
     denseInd === undefined ||
     denseInd >= sSet.dense.length ||
-    sSet.dense[denseInd] !== entity
-  ) {
-    sSet.sparse[entity] = sSet.dense.length;
-    sSet.dense.push(entity);
-    switch (schema[$kind]) {
-      case $tag:
-        return true;
-      case $aos:
-        componentTable.push(component || Schema.default(schema));
-        return true;
-      case $soa:
-        throw new Error('Not implemented');
-      default:
-        safeGuard(schema[$kind]);
-    }
-    return true;
+    sSet.dense[denseInd] !== entity;
+
+  // # Check that component is not in this archetypes table
+  if (isEntityNotInArchetype) {
+    throw new Error(`Entity ${entity} is not in this archetype ${arch.id}`);
   }
 
+  // # Set component if it is in this archetypes table
   switch (schema[$kind]) {
     case $tag:
       return true;
@@ -246,7 +254,8 @@ export function setArchetypeComponent<S extends Schema>(
         denseInd < sSet.dense.length &&
         sSet.dense[denseInd] === entity
       ) {
-        componentTable[denseInd] = component || Schema.default(schema);
+        const newComponent = component ?? Schema.default(schema);
+        componentTable[denseInd] = newComponent;
         return true;
       }
       return false;
@@ -302,6 +311,27 @@ export function component<S extends Schema, A extends Archetype<ReadonlyArray<Sc
     throw new Error(`Can't find component ${componentId} on this archetype ${archetype.id}`);
   }
   return component as KindToType<S>;
+}
+
+export function tryComponent<S extends Schema>(
+  archetype: Archetype<any>,
+  entity: Entity,
+  schema: S
+): KindToType<S> | undefined {
+  const componentId = Internals.getSchemaId(schema);
+  const componentIndex = archetype.entitiesSS.sparse[entity];
+  const componentTable = archetype.table[componentId];
+  if (!componentTable) {
+    return undefined;
+  }
+  if (schema[$kind] === $tag) {
+    return {} as KindToType<S>;
+  }
+  const component = componentTable[componentIndex];
+  if (!component) {
+    return undefined;
+  }
+  return component as KindToType<S> | undefined;
 }
 
 // OK
@@ -362,7 +392,7 @@ export const tryTablesList = <SL extends ReadonlyArray<Schema>>(
 
 export function newArchetype<SL extends Schema[]>(...schemas: SL) {
   const ss = SparseSet.new();
-  const archId = ArchetypeId.create(schemas);
+  const archId = newArchetypeId(schemas);
   const archetype: Archetype<SL> = {
     id: archId,
     type: schemas,
@@ -377,9 +407,8 @@ export function newArchetype<SL extends Schema[]>(...schemas: SL) {
   return archetype;
 }
 
-// export function hasSchema<S extends Schema>(archetype: Archetype<any>, schema: S): archetype is Archetype<[S]> {
-//   return isSchemaInArchetype(archetype, schema);
-// }
+export const archetypeZero = newArchetype();
+export const archetypeZeroId = newArchetypeId(archetypeZero.type);
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const Archetype = {
@@ -390,7 +419,7 @@ export const Archetype = {
   component,
   table,
   tablesList,
-  setComponent: setArchetypeComponent,
+  setComponent: updateComponent,
   addEntity: addArchetypeEntity,
   removeEntity,
   moveEntity,

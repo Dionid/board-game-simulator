@@ -1,7 +1,12 @@
 import { componentByEntity, registerTopic, System } from '../../tecs';
 import { Game } from '../game';
 import { Position2 } from '../core/types';
-import { Impenetrable, resolvePenetration, colliding, unfilteredColliding } from '../collision';
+import {
+  Impenetrable,
+  resolvePenetration,
+  internalColliding,
+  internalUnfilteredColliding,
+} from '../collision';
 import { Dynamic, Kinematic, RigidBody, Static } from './components';
 import { dotV2, multV2, subV2, Velocity2 } from '../core';
 import { inverseMass } from '../collision/math';
@@ -11,7 +16,7 @@ import { safeGuard } from 'libs/tecs/switch';
 
 export const dynamicRigidBodyCollisionResolution = (game: Game): System => {
   // const topic = registerTopic(game.essence, unfilteredColliding);
-  const topic = registerTopic(game.essence, colliding);
+  const topic = registerTopic(game.essence, internalColliding);
 
   return () => {
     for (const event of topic) {
@@ -78,16 +83,14 @@ export const dynamicRigidBodyCollisionResolution = (game: Game): System => {
         bMass: bDynamic ? undefined : 0, // force 0 mass for not Dynamic
       });
 
-      // # Dynamic vs Static or Kinematic
-      if ((aDynamic && (bStatic || bKinematic)) || (bDynamic && (aStatic || aKinematic))) {
-        continue;
+      let aVelocity = componentByEntity(game.essence, a.entity, Velocity2);
+      if (!aVelocity) {
+        aVelocity = { x: 0, y: 0, max: 0 };
       }
 
-      const aVelocity = componentByEntity(game.essence, a.entity, Velocity2);
-      const bVelocity = componentByEntity(game.essence, b.entity, Velocity2);
-
-      if (!aVelocity || !bVelocity) {
-        continue;
+      let bVelocity = componentByEntity(game.essence, b.entity, Velocity2);
+      if (!bVelocity) {
+        bVelocity = { x: 0, y: 0, max: 0 };
       }
 
       // # Dynamic vs Dynamic
@@ -125,12 +128,16 @@ export const dynamicRigidBodyCollisionResolution = (game: Game): System => {
       }
 
       let aTotalMass = 0;
-      for (let i = 0; i < a.colliderSet.parts.length; i++) {
-        aTotalMass += a.colliderSet.parts[i].mass;
+      if (aDynamic) {
+        for (let i = 0; i < a.colliderSet.parts.length; i++) {
+          aTotalMass += a.colliderSet.parts[i].mass;
+        }
       }
       let bTotalMass = 0;
-      for (let i = 0; i < b.colliderSet.parts.length; i++) {
-        bTotalMass += b.colliderSet.parts[i].mass;
+      if (bDynamic) {
+        for (let i = 0; i < b.colliderSet.parts.length; i++) {
+          bTotalMass += b.colliderSet.parts[i].mass;
+        }
       }
       const aInvertedTotalMass = inverseMass(aTotalMass);
       const bInvertedTotalMass = inverseMass(bTotalMass);

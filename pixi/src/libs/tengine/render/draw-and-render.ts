@@ -48,6 +48,7 @@ export const addNewViews = (game: Game, viewsContainer: Container): System => {
                   break;
                 }
 
+                result.container.alpha = view.alpha;
                 result.graphics.fill(view.model.color);
 
                 viewsContainer.addChild(result.container);
@@ -160,6 +161,10 @@ export const drawViews = (game: Game): System => {
         // # Rotation changed
         if (view.rotation !== pView.container.rotation + parentAngle) {
           pView.container.rotation = view.rotation + parentAngle;
+        }
+
+        if (view.alpha !== pView.container.alpha) {
+          pView.container.alpha = view.alpha;
         }
 
         // # Scale changed

@@ -547,19 +547,27 @@ describe('aws', () => {
         };
       };
 
-      Essence.registerSystem(essence, UpdateHandler(essence), 'update');
-      Essence.registerSystem(essence, CheckUpdateHandler(essence), 'postUpdate');
-
-      Essence.step(essence);
+      Essence.registerSystem(essence, UpdateHandler(essence), {
+        stage: 'update',
+      });
+      Essence.registerSystem(essence, CheckUpdateHandler(essence), {
+        stage: 'postUpdate',
+      });
 
       expect(essence.deferredOperations.deferred).toBe(false);
-      expect(essence.deferredOperations.operations.length).toBe(300);
+      expect(essence.deferredOperations.operations.length).toBe(0);
       expect(essence.deferredOperations.killed.size).toBe(0);
 
       Essence.step(essence);
 
       expect(essence.deferredOperations.deferred).toBe(false);
-      expect(essence.deferredOperations.operations.length).toBe(300);
+      expect(essence.deferredOperations.operations.length).toBe(0);
+      expect(essence.deferredOperations.killed.size).toBe(0);
+
+      Essence.step(essence);
+
+      expect(essence.deferredOperations.deferred).toBe(false);
+      expect(essence.deferredOperations.operations.length).toBe(0);
       expect(essence.deferredOperations.killed.size).toBe(0);
     });
   });

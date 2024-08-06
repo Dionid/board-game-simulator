@@ -2,7 +2,7 @@ import { SchemaToType } from 'libs/tecs';
 import { Axis2, Vector2 } from '../core';
 import { Collider, ColliderBody, rectangleColliderComponentSE } from './components';
 import { collides } from './collision';
-import { DEBUG, globalDebugGraphicsDeferred } from '../render';
+import { DEBUG, globalDebugGraphicsDeferred } from '../debug';
 
 export function ray(
   bodies: SchemaToType<typeof ColliderBody>[] | SchemaToType<typeof ColliderBody>,

@@ -1,23 +1,46 @@
 import { mutableEmpty } from './array';
 
-export type Topic<E> = {
+export const topicEventMeta = Symbol('topic-event-meta');
+
+export type TopicEvent<P extends Record<PropertyKey, any>> = P & {
+  [topicEventMeta]: {
+    createdAt: number;
+    name: string;
+  };
+};
+
+export type Topic<E extends TopicEvent<any>> = {
   [Symbol.iterator](): IterableIterator<E>;
   staged: E[];
   ready: E[];
+  isRegistered: boolean;
 };
 
-export function emit<T extends Topic<unknown>>(
+export function emit<T extends Topic<any>>(
   topic: T,
-  event: T extends Topic<infer E> ? E : never,
-  immediate = false
+  eventPayload: T extends Topic<infer E> ? (E extends TopicEvent<infer P> ? P : never) : never,
+  immediate = false,
+  name: string = ''
 ) {
-  if (immediate) {
-    return topic.ready.push(event);
+  if (!eventPayload[topicEventMeta]) {
+    eventPayload[topicEventMeta] = {
+      createdAt: performance.now(),
+      name: 'name' in eventPayload ? eventPayload.name : name,
+    };
   }
-  return topic.staged.push(event);
+
+  if (!topic.isRegistered) {
+    console.warn('Warning: emitting to unregistered topic', topic, eventPayload, immediate);
+  }
+
+  if (immediate) {
+    return topic.ready.push(eventPayload);
+  }
+
+  return topic.staged.push(eventPayload);
 }
 
-export function flush(topic: Topic<unknown>) {
+export function flush(topic: Topic<any>) {
   mutableEmpty(topic.ready);
   const len = topic.staged.length;
   for (let i = len - 1; i >= 0; i--) {
@@ -25,7 +48,7 @@ export function flush(topic: Topic<unknown>) {
   }
 }
 
-export function clear(topic: Topic<unknown>) {
+export function clear(topic: Topic<any>) {
   mutableEmpty(topic.staged);
   mutableEmpty(topic.ready);
 }
@@ -33,9 +56,9 @@ export function clear(topic: Topic<unknown>) {
 /**
  * Create a topic.
  */
-export const newTopic = <$Event = unknown>(): Topic<$Event> => {
-  const staged: $Event[] = [];
-  const ready: $Event[] = [];
+export const newTopic = <P extends Record<PropertyKey, any>>(): Topic<TopicEvent<P>> => {
+  const staged: TopicEvent<P>[] = [];
+  const ready: TopicEvent<P>[] = [];
 
   return {
     *[Symbol.iterator]() {
@@ -45,6 +68,7 @@ export const newTopic = <$Event = unknown>(): Topic<$Event> => {
     },
     staged,
     ready,
+    isRegistered: false,
   };
 };
 

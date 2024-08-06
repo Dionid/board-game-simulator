@@ -1,5 +1,13 @@
 import { $kind, Entity } from './core';
-import { Archetype, ArchetypeId } from './archetype';
+import {
+  Archetype,
+  archetypeZero,
+  component,
+  hasSchema,
+  moveEntity,
+  newArchetypeId,
+  updateComponent,
+} from './archetype';
 import { Internals } from './internals';
 import { $tag, Schema, KindToType } from './schema';
 import { Query } from './query';
@@ -7,6 +15,14 @@ import { System } from './system';
 import { Operation } from './operations';
 import { safeGuard } from './switch';
 import { Topic } from './topic';
+import {
+  componentUpdated,
+  entityKilled,
+  entitySpawned,
+  componentAdded,
+  componentRemoved,
+} from './default-topics';
+import { mutableEmpty } from './array';
 
 /**
  * Essence is a container for Entities, Components and Archetypes.
@@ -25,6 +41,7 @@ export type Essence = {
   entityGraveyard: number[];
 
   // # Archetypes
+  archetypeZero: Archetype<[]>;
   archetypesById: Map<string, Archetype<any>>;
 
   // # Entity Archetype
@@ -55,24 +72,38 @@ export type Essence = {
 // # Entity
 
 export const spawnEntity = <SL extends Schema[]>(essence: Essence, arch?: Archetype<SL>) => {
+  // # Get new entity or reuse from graveyard
   let entity: number;
   if (essence.entityGraveyard.length > 0) {
     entity = essence.entityGraveyard.pop()!;
   } else {
     entity = essence.nextEntityId++;
   }
+
+  // # Set specific archetype or use archetypeZero
   if (arch) {
     Archetype.addEntity(arch, entity);
     essence.archetypeByEntity[entity] = arch;
+  } else {
+    Archetype.addEntity(essence.archetypeZero, entity);
+    essence.archetypeByEntity[entity] = essence.archetypeZero;
   }
+
+  // # Emit entity spawned event
+  if (entitySpawned.isRegistered) {
+    Topic.emit(entitySpawned, { name: 'entity-spawned', entity }, true);
+  }
+
   return entity;
 };
 
 export const killEntity = (essence: Essence, entity: number): void => {
+  // # If already must be killed, return
   if (essence.deferredOperations.killed.has(entity)) {
     return;
   }
 
+  // # If essence in deferred state, than defer
   if (essence.deferredOperations.deferred) {
     essence.deferredOperations.operations.push({
       type: 'killEntity',
@@ -81,22 +112,30 @@ export const killEntity = (essence: Essence, entity: number): void => {
     return;
   }
 
+  // # Move entity to graveyard
   essence.entityGraveyard.push(entity);
 
+  // # Remove entity from archetype
   const archetype = essence.archetypeByEntity[entity];
-  if (archetype) {
-    Archetype.removeEntity(archetype, entity);
+  if (!archetype) {
+    throw new Error(`Can't find archetype for entity ${entity}`);
   }
+  Archetype.removeEntity(archetype, entity);
   essence.archetypeByEntity[entity] = undefined;
+
+  // # Emit killed event
+  if (entityKilled.isRegistered) {
+    Topic.emit(entityKilled, { name: 'entity-killed', entity }, true);
+  }
 };
 
 // # Archetype
 
-export const createArchetype = <SL extends Schema[]>(
+export const findOrCreateArchetype = <SL extends Schema[]>(
   essence: Essence,
   ...schemas: SL
 ): Archetype<SL> => {
-  const archId = ArchetypeId.create(schemas);
+  const archId = newArchetypeId(schemas);
 
   let archetype = essence.archetypesById.get(archId) as Archetype<SL> | undefined;
 
@@ -122,7 +161,7 @@ export const registerArchetype = <SL extends Schema[]>(
   essence: Essence,
   newArchetype: Archetype<SL>
 ): Archetype<SL> => {
-  const archId = ArchetypeId.create(newArchetype.type);
+  const archId = newArchetypeId(newArchetype.type);
 
   let existingArchetype = essence.archetypesById.get(archId) as Archetype<SL> | undefined;
 
@@ -161,28 +200,30 @@ export function addEntity<CL extends Schema[]>(
 // OK
 /**
  *
- * By setting component to Entity, we will find / create Archetype, that
- * will contain this Component Schema, move Entity and Components to this new
- * Archetype.
+ * By setting component to entity, we will take current Archetype of entity,
+ * and if schema is already in Archetype, than just update Component.
+ * If not, we will find / create new Archetype, that will contain all components from
+ * current Archetype and new component, and move entity and all its Components to
+ * this new Archetype.
  *
  * @param essence
  * @param entity
  * @param schema
- * @param component
+ * @param newComponent
  * @returns
  */
 export const setComponent = <S extends Schema>(
   essence: Essence,
   entity: Entity,
   schema: S,
-  component?: S[typeof $kind] extends typeof $tag ? never : KindToType<S>
+  newComponent?: S[typeof $kind] extends typeof $tag ? never : KindToType<S>
 ): void => {
   if (essence.deferredOperations.deferred) {
     essence.deferredOperations.operations.push({
       type: 'setComponent',
       entityId: entity,
       schema,
-      component,
+      component: newComponent,
     });
     return;
   }
@@ -192,27 +233,28 @@ export const setComponent = <S extends Schema>(
   // # Get current archetype
   let archetype = essence.archetypeByEntity[entity] as Archetype<any> | undefined;
   if (archetype === undefined) {
-    // # If there were no archetype, create new one
-    const newArchetype = Essence.createArchetype(essence, schema);
-
-    // # Index archetype by entity
-    essence.archetypeByEntity[entity] = newArchetype;
-
-    // # Add entity to archetype
-    Archetype.setComponent(newArchetype, entity, schemaId, component);
-
-    return;
+    throw new Error(`Can't find archetype for entity ${entity}`);
   }
 
-  // # If Schema is already in archetype, than just set Component
-  if (Archetype.hasSchema(archetype, schema)) {
-    Archetype.setComponent(archetype, entity, schemaId, component);
+  // # If schema is already in archetype, than just update Component
+  if (hasSchema(archetype, schema)) {
+    const oldComponent = component(archetype, entity, schema);
+
+    updateComponent(archetype, entity, schemaId, newComponent);
+
+    if (componentUpdated.isRegistered) {
+      Topic.emit(
+        componentUpdated,
+        { name: 'component-updated', entity, schema, old: oldComponent, new: newComponent },
+        true
+      );
+    }
 
     return;
   }
 
   // # If not, create new Archetype
-  const newArchetype = Essence.createArchetype(
+  const newArchetype = findOrCreateArchetype(
     essence,
     schema,
     ...archetype.type
@@ -222,10 +264,16 @@ export const setComponent = <S extends Schema>(
   essence.archetypeByEntity[entity] = newArchetype;
 
   // # Move Entity to new Archetype
-  Archetype.moveEntity(archetype, newArchetype, entity);
+  moveEntity(archetype, newArchetype, entity, schema, newComponent);
 
-  // # Add new data
-  Archetype.setComponent(newArchetype, entity, schemaId, component);
+  // # Emit event of new component added
+  if (componentAdded.isRegistered) {
+    Topic.emit(
+      componentAdded,
+      { name: 'component-added', entity, schema, component: newComponent },
+      true
+    );
+  }
 
   return;
 };
@@ -261,27 +309,38 @@ export const removeComponent = <S extends Schema>(
   const schemaId = Internals.getSchemaId(schema);
 
   // # Get current archetype
-  let archetype = essence.archetypeByEntity[entity] as Archetype<Schema[]> | undefined;
-  if (archetype === undefined) {
+  let currentArchetype = essence.archetypeByEntity[entity] as Archetype<Schema[]> | undefined;
+  if (currentArchetype === undefined) {
     throw new Error(`Can't find archetype for entity ${entity}`);
   }
 
   // # Check if component in archetype
-  if (!Archetype.hasSchema(archetype, schema)) {
-    throw new Error(`Can't find component ${schemaId} on this archetype ${archetype.id}`);
+  if (!Archetype.hasSchema(currentArchetype, schema)) {
+    throw new Error(`Can't find component ${schemaId} on this archetype ${currentArchetype.id}`);
   }
 
   // # Find or create new archetype
   const newArchetype = Essence.createArchetype(
     essence,
-    ...archetype.type.filter((c) => c !== schema)
+    ...currentArchetype.type.filter((c) => c !== schema)
   );
 
   // # Index archetype by entity
   essence.archetypeByEntity[entity] = newArchetype;
 
+  // # Get removing schema component
+  const oldComponent = component(currentArchetype, entity, schema);
+
   // # Move entity to new archetype
-  Archetype.moveEntity(archetype, newArchetype, entity);
+  moveEntity(currentArchetype, newArchetype, entity);
+
+  if (componentRemoved.isRegistered) {
+    Topic.emit(
+      componentRemoved,
+      { name: 'component-removed', entity, schema, component: oldComponent },
+      true
+    );
+  }
 
   return;
 };
@@ -325,8 +384,12 @@ export function applyDeferredOp(essence: Essence, operation: Operation): void {
 export function registerSystem(
   essence: Essence,
   system: System,
-  type?: 'onFirstStep' | 'preUpdate' | 'update' | 'postUpdate'
+  opts: {
+    stage?: 'onFirstStep' | 'preUpdate' | 'update' | 'postUpdate';
+  } = {}
 ) {
+  const type = opts.stage;
+
   essence.systems[type || 'update'].push(system);
 }
 
@@ -336,53 +399,25 @@ export function registerTopic<T extends Topic<unknown>>(essence: Essence, topic:
   }
 
   essence.topics.push(topic);
+  topic.isRegistered = true;
 
   return topic;
 }
 
-// TODO: think more about this
-export function stepWithTicker(
-  essence: Essence,
-  ticker: {
-    deltaTime: number;
-    deltaMS: number;
-    elapsedMS: number;
-    lastTime: number;
-    speed: number;
-    started: boolean;
-    FPS: number;
-  }
-): void {
+export function _step(essence: Essence, now: number, deltaTime: number, deltaMs: number): void {
   // # Set state
   essence.state = 'running';
-  const now = performance.now();
   essence.currentStepTime = now;
   if (essence.lastStepTime === 0) {
     essence.lastStepTime = now;
   }
 
-  // # Set delta
-  const speed = ticker.speed;
-  const deltaTime = ticker.deltaTime;
-  const deltaMs = ticker.deltaMS;
-
-  // # Execute deferred operations
-  const operations = essence.deferredOperations.operations;
-
-  for (let i = 0; i < operations.length; i++) {
-    applyDeferredOp(essence, operations[i]);
-  }
-
-  essence.deferredOperations.operations = [];
-
-  // # Flush topics
-  for (let i = 0; i < essence.topics.length; i++) {
-    Topic.flush(essence.topics[i]);
-  }
-
   // # Execute systems
+
+  // ## Set deferred
   essence.deferredOperations.deferred = true;
 
+  // ## Run only on first step
   if (essence.isFirstStep) {
     for (let i = 0, l = essence.systems.onFirstStep.length; i < l; i++) {
       const system = essence.systems.onFirstStep[i];
@@ -391,11 +426,11 @@ export function stepWithTicker(
         essence,
         deltaTime,
         deltaMs,
-        speed,
       });
     }
   }
 
+  // ## Pre update
   for (let i = 0, l = essence.systems.preUpdate.length; i < l; i++) {
     const system = essence.systems.preUpdate[i];
     system({
@@ -403,11 +438,11 @@ export function stepWithTicker(
       deltaTime,
 
       deltaMs,
-      speed,
       stage: 'preUpdate',
     });
   }
 
+  // ## Update
   for (let i = 0, l = essence.systems.update.length; i < l; i++) {
     const system = essence.systems.update[i];
     system({
@@ -415,11 +450,11 @@ export function stepWithTicker(
       deltaTime,
 
       deltaMs,
-      speed,
       stage: 'update',
     });
   }
 
+  // ## Post update
   for (let i = 0, l = essence.systems.postUpdate.length; i < l; i++) {
     const system = essence.systems.postUpdate[i];
     system({
@@ -427,34 +462,12 @@ export function stepWithTicker(
       deltaTime,
 
       deltaMs,
-      speed,
       stage: 'postUpdate',
     });
   }
 
+  // ## Reset deferred
   essence.deferredOperations.deferred = false;
-
-  // # Reset killed
-  essence.deferredOperations.killed.clear();
-
-  // # Set state
-  essence.lastStepTime = now;
-  essence.state = 'idle';
-  essence.isFirstStep = false;
-}
-
-export function step(essence: Essence): void {
-  // # Set state
-  essence.state = 'running';
-  const now = Date.now();
-  essence.currentStepTime = now;
-  if (essence.lastStepTime === 0) {
-    essence.lastStepTime = now;
-  }
-
-  // # Set delta
-  let deltaMs = Math.max(0, now - essence.lastStepTime);
-  let deltaTime = deltaMs * 0.06;
 
   // # Execute deferred operations
   const operations = essence.deferredOperations.operations;
@@ -463,71 +476,41 @@ export function step(essence: Essence): void {
     applyDeferredOp(essence, operations[i]);
   }
 
-  essence.deferredOperations.operations = [];
+  mutableEmpty(essence.deferredOperations.operations);
 
   // # Flush topics
   for (let i = 0; i < essence.topics.length; i++) {
     Topic.flush(essence.topics[i]);
   }
 
-  // # Execute systems
-  essence.deferredOperations.deferred = true;
-
-  if (essence.isFirstStep) {
-    for (let i = 0, l = essence.systems.onFirstStep.length; i < l; i++) {
-      const system = essence.systems.onFirstStep[i];
-      system({
-        stage: 'onFirstStep',
-        essence,
-        deltaTime, // TODO: add this
-        deltaMs,
-        speed: 1, // TODO: add this
-      });
-    }
-  }
-
-  for (let i = 0, l = essence.systems.preUpdate.length; i < l; i++) {
-    const system = essence.systems.preUpdate[i];
-    system({
-      essence,
-      deltaTime,
-      deltaMs,
-      speed: 1, // TODO: add this
-      stage: 'preUpdate',
-    });
-  }
-
-  for (let i = 0, l = essence.systems.update.length; i < l; i++) {
-    const system = essence.systems.update[i];
-    system({
-      essence,
-      deltaTime,
-      deltaMs,
-      speed: 1, // TODO: add this
-      stage: 'update',
-    });
-  }
-
-  for (let i = 0, l = essence.systems.postUpdate.length; i < l; i++) {
-    const system = essence.systems.postUpdate[i];
-    system({
-      essence,
-      deltaTime,
-      deltaMs,
-      speed: 1, // TODO: add this
-      stage: 'postUpdate',
-    });
-  }
-
-  essence.deferredOperations.deferred = false;
-
-  // # Reset killed
+  // ## Reset killed
   essence.deferredOperations.killed.clear();
 
-  // # Set state
+  // ## Reset state
   essence.lastStepTime = now;
   essence.state = 'idle';
   essence.isFirstStep = false;
+}
+
+export function stepWithTicker(
+  essence: Essence,
+  ticker: {
+    deltaTime: number;
+    deltaMS: number;
+    elapsedMS: number;
+    speed: number;
+  }
+): void {
+  return _step(essence, ticker.elapsedMS, ticker.deltaTime, ticker.deltaMS);
+}
+
+export function step(essence: Essence): void {
+  // # Set state
+  const now = performance.now();
+  let deltaMs = Math.max(0, now - essence.lastStepTime);
+  let deltaTime = deltaMs * 0.06;
+
+  return _step(essence, now, deltaTime, deltaMs);
 }
 
 export function newEssence(
@@ -542,14 +525,18 @@ export function newEssence(
     };
   } = {}
 ): Essence {
+  const archetypesById = new Map();
+  archetypesById.set(archetypeZero.id, archetypeZero);
+
   return {
     isFirstStep: true,
     state: 'idle',
     currentStepTime: 0,
     lastStepTime: 0,
     nextEntityId: 1,
+    archetypeZero,
     entityGraveyard: [],
-    archetypesById: new Map(),
+    archetypesById,
     archetypeByEntity: [],
     systems: {
       onFirstStep: props.systems ? props.systems.onFirstStep ?? [] : [],
@@ -591,7 +578,7 @@ export const getSchemaId = Internals.getSchemaId;
 
 // OK
 export const archetypeByEntity = (essence: Essence, entity: Entity) =>
-  essence.archetypeByEntity[entity];
+  essence.archetypeByEntity[entity]!;
 
 // OK
 export const hasComponent = <S extends Schema>(
@@ -601,7 +588,7 @@ export const hasComponent = <S extends Schema>(
 ): boolean => {
   const archetype = essence.archetypeByEntity[entity];
   if (!archetype) {
-    return false;
+    throw new Error(`Can't find archetype for entity ${entity}`);
   }
 
   return !!Archetype.hasSchema(archetype, schema);
@@ -615,7 +602,7 @@ export const componentByEntity = <S extends Schema>(
 ): KindToType<S> | undefined => {
   const archetype = essence.archetypeByEntity[entity];
   if (!archetype) {
-    return;
+    throw new Error(`Can't find archetype for entity ${entity}`);
   }
 
   if (!Archetype.hasSchema(archetype, schema)) {
@@ -645,7 +632,7 @@ export const Essence = {
   getSchemaId,
 
   // # Archetypes
-  createArchetype,
+  createArchetype: findOrCreateArchetype,
   registerArchetype,
 
   // # Archetypes Entities & Components

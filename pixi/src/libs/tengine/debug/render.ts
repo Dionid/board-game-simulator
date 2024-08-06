@@ -4,7 +4,7 @@ import { Game } from '../game';
 import { Acceleration2, multV2, Position2, Velocity2 } from '../core';
 import { Map, Vector2 } from '../core';
 import { ColliderBody } from '../collision';
-import { pView, View } from './components';
+import { pView, View } from '../render/components';
 
 const drawLine = (
   globalGraphics: Graphics,
@@ -24,13 +24,9 @@ const debugPViewQuery = newQuery(pView);
 const debugCollisionSetQuery = newQuery(ColliderBody, Position2);
 
 export const globalDebugGraphicsDeferred: ((g: Graphics) => void)[] = [];
-export const DEBUG = {
-  isActive: false,
-};
 
-export const drawDebugLines = (
+export const drawDebug = (
   game: Game,
-  map: Map,
   options: {
     view?: boolean;
     xy?: boolean;
@@ -54,7 +50,7 @@ export const drawDebugLines = (
   const positionQuery = registerQuery(game.essence, debugPositionQuery);
 
   const globalDebugGraphics = new Graphics();
-  map.container.addChild(globalDebugGraphics);
+  game.world.container.addChild(globalDebugGraphics);
 
   const strokeWidth = 2;
 
@@ -102,7 +98,7 @@ export const drawDebugLines = (
               continue;
             }
 
-            globalDebugGraphics.circle(collider._position.x, collider._position.y, 6);
+            globalDebugGraphics.circle(collider._position.x, collider._position.y, 3);
             globalDebugGraphics.fill({ color: 'gray' });
 
             globalDebugGraphics.beginPath();
@@ -127,7 +123,7 @@ export const drawDebugLines = (
         for (let j = 0; j < archetype.entities.length; j++) {
           const position = positionT[j];
 
-          globalDebugGraphics.circle(position.x, position.y, 4);
+          globalDebugGraphics.circle(position.x, position.y, 2);
           globalDebugGraphics.fill({ color: 'red' });
         }
       }

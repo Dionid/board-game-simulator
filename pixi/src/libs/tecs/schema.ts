@@ -199,23 +199,29 @@ export function arrayOf<K extends KindSt | Schema>(field: K) {
 
 // ## Union
 
-export type union<V extends (PrimitiveKind | Schema)[]> = {
+export type union<V extends KindSt[]> = {
   variants: V;
   [$kind]: typeof $union;
-  [$defaultFn]: () => V[number];
+  [$defaultFn]: () => KindToType<V[0]>;
 };
 
-export function union<V extends (PrimitiveKind | Schema)[]>(
+export function union<V extends KindSt[]>(
   ...variants: V
 ): {
   variants: V;
   [$kind]: typeof $union;
-  [$defaultFn]: () => V[number];
+  [$defaultFn]: () => KindToType<V[0]>;
 } {
+  if (variants.length === 0) {
+    throw new Error('Union must have at least one variant');
+  }
+
   return {
     variants,
     [$kind]: $union,
-    [$defaultFn]: () => variants[0],
+    [$defaultFn]: () => {
+      return variants[0][$defaultFn]() as KindToType<V[0]>;
+    },
   };
 }
 
@@ -279,7 +285,7 @@ export function defaultFromSchema<S extends Omit<Schema, typeof $defaultFn>>(
       for (const key in schema) {
         const field = schema[key];
 
-        if (isKind(field) || isSchema(field)) {
+        if (isKindSt(field)) {
           component[key as keyof KindToType<S>] = field[$defaultFn]() as any;
         } else {
           throw new Error('Invalid schema');
@@ -297,20 +303,29 @@ export function defaultFromSchema<S extends Omit<Schema, typeof $defaultFn>>(
 
 export function newSchema<S extends Record<string, KindSt | PrimitiveKind | ComplexKind | Schema>>(
   schema: S,
-  kind?: SchemaKind,
-  defaultFn?: () => KindToType<S>
+  opts: {
+    kind?: SchemaKind;
+    defaultFn?: () => KindToType<S>;
+    name?: string;
+  } = {}
 ): S & { [$kind]: SchemaKind; [$defaultFn]: () => KindToType<S> } {
-  const newSchema: S & { [$kind]: SchemaKind } = {
+  const { kind, defaultFn, name } = opts;
+
+  const newSchema: S & { [$kind]: SchemaKind; [$name]?: string } = {
     ...schema,
     [$kind]: kind ?? $aos,
   };
+
+  if (name) {
+    newSchema[$name] = name;
+  }
 
   const newDefaultFn = defaultFn ?? (() => defaultFromSchema(newSchema));
 
   return {
     ...newSchema,
     [$defaultFn]: newDefaultFn,
-  } as S & { [$kind]: SchemaKind; [$defaultFn]: () => KindToType<S> };
+  };
 }
 
 export const Schema = {

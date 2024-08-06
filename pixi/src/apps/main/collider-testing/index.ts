@@ -46,11 +46,11 @@ import {
   applyRigidBodyVelocityToPosition,
   dynamicRigidBodyCollisionResolution,
 } from 'libs/tengine/physics';
-import { drawViews, View, drawDebugLines, addNewViews, DEBUG } from 'libs/tengine/render';
+import { drawViews, View, addNewViews } from 'libs/tengine/render';
 import { penetrationResolution } from 'libs/tengine/collision/penetration-resolution';
 import { updatePrevious } from 'libs/tengine/core/update-previous';
 import { awakening } from 'libs/tengine/collision/awakening';
-import { ray } from 'libs/tengine/collision/query';
+import { DEBUG, drawDebug } from 'libs/tengine/debug';
 
 export async function initPongGame(parentElement: HTMLElement) {
   DEBUG.isActive = true;
@@ -741,43 +741,6 @@ export async function initPongGame(parentElement: HTMLElement) {
   registerSystem(game.essence, applyRigidBodyFriction(game, 0.01));
   registerSystem(game.essence, applyRigidBodyVelocityToPosition(game));
 
-  registerSystem(
-    game.essence,
-    (() => {
-      const colliderBodiesQ = registerQuery(game.essence, newQuery(ColliderBody));
-
-      return () => {
-        const playerArchetype = archetypeByEntity(game.essence, playerEntity);
-
-        for (let i = 0; i < colliderBodiesQ.archetypes.length; i++) {
-          const archetype = colliderBodiesQ.archetypes[i];
-          const colliderBodiesT = table(archetype, ColliderBody);
-
-          for (let j = 0; j < archetype.entities.length; j++) {
-            const entity = archetype.entities[j];
-
-            if (entity === playerEntity) {
-              continue;
-            }
-
-            const colliderBody = colliderBodiesT[j];
-
-            const collisions = ray(colliderBody, playerPosition, {
-              x: playerPosition.x + characterSize.width / 2 + 10,
-              y: playerPosition.y,
-            });
-
-            if (collisions.length > 0) {
-              debugger;
-
-              return;
-            }
-          }
-        }
-      };
-    })()
-  );
-
   // ## Transform
   registerSystem(game.essence, transformCollider(game));
 
@@ -796,7 +759,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   registerSystem(game.essence, drawViews(game));
   registerSystem(
     game.essence,
-    drawDebugLines(game, map, {
+    drawDebug(game, {
       view: true,
       xy: true,
       collision: true,

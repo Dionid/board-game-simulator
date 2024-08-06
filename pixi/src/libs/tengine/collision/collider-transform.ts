@@ -45,10 +45,6 @@ export const transformCollider = (game: Game): System => {
           y: position.y - position._prev.y,
         };
 
-        // if (entity) {
-        //   console.log('positionDelta', positionDelta);
-        // }
-
         for (const collider of colliderSet.parts) {
           const angleDelta = collider.angle - collider._prev.angle;
           collider._prev.angle = collider.angle;

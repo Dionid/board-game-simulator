@@ -13,20 +13,23 @@
 1. ~~World bounds~~
 1. ~~Fix line collision tremble~~
 1. ~~Fix multiple collision body penetrations~~
-1. Collision Queries
-1. Character movement
+1. ~~Collision Queries~~
+1. ~~FIX: capsule collider circle error~~
 1. Simulate containment
+? Apply movement before or after gamelogic
 
 # Roadmap
 
+1. ECS
+    1. Events
+        1. ~~Default topics (SchemaAdded, SchemaRemoved, ComponentUpdated, EntitySpawned, EntityKilled)~~
+        1. Subscribe by one entity
 1. View
     1. Capsule
     1. Polygon
     1. Change to ViewSet
     1. On entity kill destroy pView
     1. Scale
-1. ECS
-    1. Default topics (ComponentAdded, ComponentRemoved, ComponentChanged, EntitySpawned, EntityKilled)
 1. Collision
     1. ~~SAT~~
     1. ~~Raw Vertices~~
@@ -38,6 +41,7 @@
     1. ~~Polygon on Vertices~~
     1. ~~World Bounds~~
     1. Collision Queries
+    1. CCD
     1. Fix Circle anchor
     1. Separate concave to convex
     1. Multiple iterations per one cycle
@@ -49,6 +53,9 @@
 1. ...
 1. Preload assets
 1. Culling
+1. ...
+1. Debug
+    1. Subscribe on all default topics, to show all default events
 1. ...
 1. Top-down Tilemap
 1. ...
@@ -67,6 +74,7 @@
 1. Collision
     1. Circles, Rectangles and Vertices
     1. Narrow (on SAT)
+1. Events Monitoring
 
 # Entities
 
