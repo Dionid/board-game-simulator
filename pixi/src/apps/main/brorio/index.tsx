@@ -2,7 +2,7 @@ import { FunctionComponent, useEffect } from "react";
 import { run } from "libs/tengine/game";
 import { initSuperMarioLikeGame } from "./game";
 
-export const SuperMarioLikeApp: FunctionComponent = () => {
+export const BrorioApp: FunctionComponent = () => {
     useEffect(() => {
         const gameHolder = document.getElementById('gameHolder') as HTMLCanvasElement;
 

@@ -579,7 +579,6 @@ export async function initPongGame(parentElement: HTMLElement) {
   registerSystem(game.essence, awakening(game));
   registerSystem(game.essence, checkCollisions(game, roundStarted));
   registerSystem(game.essence, filterCollisionEvents(game));
-  registerSystem(game.essence, penetrationResolution(game));
 
   // ## Physics
   registerSystem(game.essence, dynamicRigidBodyCollisionResolution(game));

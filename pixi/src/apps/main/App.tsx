@@ -1,10 +1,10 @@
 import './App.css';
-import { SuperMarioLikeApp } from './brorio';
+import { BrorioApp } from './brorio';
 
 function App() {
   return (
     <div className="App">
-      <SuperMarioLikeApp/>
+      <BrorioApp/>
     </div>
   );
 }

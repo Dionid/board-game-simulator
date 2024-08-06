@@ -62,7 +62,7 @@ export function rectangleColliderComponent(opts: {
   parentPosition: Vector2; // TODO: remove this
   parentAngle?: number; // TODO: remove this
   type: 'solid' | 'sensor';
-  mass: number;
+  mass?: number;
   offset?: Vector2;
   angle?: number;
   anchor?: Vector2;
@@ -72,6 +72,7 @@ export function rectangleColliderComponent(opts: {
   const parentAngle = opts.parentAngle ?? 0;
   const anchor = opts.anchor || { x: 0.5, y: 0.5 };
   const angle = opts.angle || 0;
+  const mass = opts.mass || 1;
 
   const origin = {
     x: opts.parentPosition.x + offset.x,
@@ -114,7 +115,7 @@ export function rectangleColliderComponent(opts: {
 
   const component = {
     type: opts.type,
-    mass: opts.mass,
+    mass: mass,
     offset: offset,
     angle: angle,
     shape: {
@@ -430,17 +431,24 @@ export function centroidTriangleColliderComponent(opts: {
 
 export function verticesColliderComponent(opts: {
   parentPosition: Vector2; // TODO: remove this
-  parentAngle: number; // TODO: remove this
-  type: 'solid' | 'sensor';
-  mass: number;
-  offset: Vector2;
-  angle: number;
-  anchor: Vector2;
+  parentAngle?: number; // TODO: remove this
+  type?: 'solid' | 'sensor';
+  mass?: number;
+  offset?: Vector2;
+  angle?: number;
+  anchor?: Vector2;
   vertices: Vertices2;
 }): Component<typeof Collider> {
+  const offset = opts.offset || { x: 0, y: 0 };
+  const parentAngle = opts.parentAngle ?? 0;
+  const anchor = opts.anchor || { x: 0.5, y: 0.5 };
+  const angle = opts.angle || 0;
+  const type = opts.type || 'solid';
+  const mass = opts.mass || 1;
+
   const origin = {
-    x: opts.parentPosition.x + opts.offset.x,
-    y: opts.parentPosition.y + opts.offset.y,
+    x: opts.parentPosition.x + offset.x,
+    y: opts.parentPosition.y + offset.y,
   };
 
   // Get min and max x and y values of vertices
@@ -468,8 +476,8 @@ export function verticesColliderComponent(opts: {
   const height = maxY - minY;
 
   const verticesStartPosition = {
-    x: origin.x - width * opts.anchor.x,
-    y: origin.y - height * opts.anchor.y,
+    x: origin.x - width * anchor.x,
+    y: origin.y - height * anchor.y,
   };
 
   // # Apply verticesStartPosition to vertices
@@ -478,28 +486,28 @@ export function verticesColliderComponent(opts: {
     opts.vertices[i].y += verticesStartPosition.y;
   }
 
-  mutRotateVertices2Around(opts.vertices, opts.angle, origin);
-  mutRotateVertices2Around(opts.vertices, opts.parentAngle, opts.parentPosition);
+  mutRotateVertices2Around(opts.vertices, angle, origin);
+  mutRotateVertices2Around(opts.vertices, parentAngle, opts.parentPosition);
 
   const normalAxes = normalAxes2(opts.vertices);
 
-  const component = {
-    type: opts.type,
-    mass: opts.mass,
-    offset: opts.offset,
-    angle: opts.angle,
+  const component: Component<typeof Collider> = {
+    type: type,
+    mass: mass,
+    offset: offset,
+    angle: angle,
     shape: {
       type: 'vertices' as const,
-      anchor: opts.anchor,
+      anchor: anchor,
     },
     _position: origin,
     _vertices: opts.vertices,
     _normalAxes: normalAxes,
     _prev: {
-      angle: opts.angle,
+      angle: angle,
       offset: {
-        x: opts.offset.x,
-        y: opts.offset.y,
+        x: offset.x,
+        y: offset.y,
       },
     },
   };

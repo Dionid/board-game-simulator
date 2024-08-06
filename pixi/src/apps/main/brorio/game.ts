@@ -1,7 +1,30 @@
 import { activateDebugMode } from 'libs/tengine/debug';
 import { newGame, initGame } from 'libs/tengine/game';
-import mapData from './SMC.json';
-import { Assets, Container, Texture, TilingSprite } from 'pixi.js';
+import { Container } from 'pixi.js';
+import { registerSystem, setComponent, spawnEntity } from 'libs/tecs';
+import {
+  awakening,
+  checkNarrowCollisionSimple,
+  ColliderBody,
+  CollisionsMonitoring,
+  filterCollisionEvents,
+  penetrationResolution,
+  rectangleColliderComponent,
+  transformCollider,
+} from 'libs/tengine/collision';
+import { addNewViews, drawViews, View } from 'libs/tengine/render';
+import { mapKeyboardInput, mapMouseInput } from 'libs/tengine/ecs';
+import { updatePrevious } from 'libs/tengine/core/update-previous';
+import {
+  applyRigidBodyAccelerationToVelocity,
+  applyRigidBodyFriction,
+  applyRigidBodyVelocityToPosition,
+  Kinematic,
+  RigidBody,
+} from 'libs/tengine/physics';
+import { initMap } from './map';
+import { Player } from './logic';
+import { Position2, Speed, Acceleration2, Friction, Velocity2 } from 'libs/tengine/core';
 
 export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
   const game = newGame({
@@ -11,82 +34,118 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
     },
   });
 
-  activateDebugMode(game, {
-    render: {
-      view: false,
-      xy: false,
-      collision: false,
-      velocity: false,
-      acceleration: false,
-    },
-  });
+  activateDebugMode(game);
 
   await initGame(game, {
     backgroundColor: 0x000000,
   });
 
-  const mapContainer = new Container();
+  const map = await initMap(game);
 
-  const tilesetTexture = (await Assets.load('assets/world-tiles.png')) as Texture;
+  game.world.container.addChild(map.container);
 
-  const tileMap = {
-    data: mapData,
-    columns: mapData.height,
-    rows: mapData.width,
-    tileWidth: mapData.tilewidth,
-    tileHeight: mapData.tileheight,
+  // # Player
+  const playerEntity = spawnEntity(game.essence);
+  setComponent(game.essence, playerEntity, Player);
+  const characterSize = {
+    width: 16,
+    height: 16,
   };
+  // ## View
+  setComponent(game.essence, playerEntity, View, {
+    offset: { x: 0, y: 0 },
+    scale: { x: 1, y: 1 },
+    rotation: 0,
+    anchor: { x: 0.5, y: 0.5 },
+    alpha: 1,
+    model: {
+      type: 'graphics',
+      shape: {
+        type: 'rectangle',
+        size: characterSize,
+      },
+      color: '0xFFFFFF',
+    },
+  });
+  // ## Position
+  const initialPlayerPosition = {
+    x: 50,
+    y: 100,
+  };
+  const playerPosition = {
+    x: initialPlayerPosition.x,
+    y: initialPlayerPosition.y,
+    _prev: { x: initialPlayerPosition.x, y: initialPlayerPosition.y },
+  };
+  setComponent(game.essence, playerEntity, Position2, playerPosition);
+  setComponent(game.essence, playerEntity, Speed, { value: 1 });
+  setComponent(game.essence, playerEntity, Acceleration2, {
+    x: 0,
+    y: 0,
+  });
+  setComponent(game.essence, playerEntity, Friction, {
+    value: 0.1,
+  });
+  setComponent(game.essence, playerEntity, Velocity2, {
+    max: 10,
+    x: 0,
+    y: 0,
+  });
+  setComponent(game.essence, playerEntity, CollisionsMonitoring);
+  setComponent(game.essence, playerEntity, ColliderBody, {
+    parts: [
+      rectangleColliderComponent({
+        parentPosition: playerPosition,
+        type: 'solid',
+        mass: 1,
+        offset: { x: 0, y: 0 },
+        angle: 0,
+        anchor: {
+          x: 0.5,
+          y: 0.5,
+        },
+        size: characterSize,
+      }),
+    ],
+  });
+  setComponent(game.essence, playerEntity, RigidBody, {
+    elasticity: 0,
+    elasticityMode: 'average',
+  });
+  setComponent(game.essence, playerEntity, Kinematic);
 
-  const tilesetColumns = 18;
+  // # Systems
+  // ## Previous invalidation
+  registerSystem(game.essence, updatePrevious(game));
 
-  console.log('tileMap', tileMap);
+  // ## Input
+  registerSystem(game.essence, mapKeyboardInput(game));
+  registerSystem(game.essence, mapMouseInput(game, map));
 
-  for (const layer of mapData.layers) {
-    if (!layer.data) {
-      continue;
-    }
+  // ## Basic physics
+  registerSystem(game.essence, applyRigidBodyAccelerationToVelocity(game));
+  registerSystem(game.essence, applyRigidBodyFriction(game, 0.01));
+  registerSystem(game.essence, applyRigidBodyVelocityToPosition(game));
 
-    const layerName = layer.name;
+  // ## Game logic
+  // ...
 
-    for (let col = 0; col < tileMap.columns; col++) {
-      for (let row = 0; row < tileMap.rows; row++) {
-        const ind = col * tileMap.rows + row;
-        const tileData = layer.data[ind];
+  // ## Collision
+  // ### Transform
+  registerSystem(game.essence, transformCollider(game));
 
-        if (tileData === 0) {
-          continue;
-        }
+  // ### Calculate collisions
+  registerSystem(game.essence, awakening(game));
+  registerSystem(game.essence, checkNarrowCollisionSimple(game));
+  registerSystem(game.essence, filterCollisionEvents(game));
+  registerSystem(game.essence, penetrationResolution(game));
 
-        const tile = new TilingSprite({
-          label: `${layerName.toLocaleLowerCase().replaceAll(' ', '_')}-tile-${col}-${row}`,
-          texture: tilesetTexture,
-          width: tileMap.tileWidth,
-          height: tileMap.tileHeight,
-          tilePosition: {
-            x: -1 * (tileData % tilesetColumns) * tileMap.tileWidth + tileMap.tileWidth,
-            y: -1 * Math.floor(tileData / tilesetColumns) * tileMap.tileHeight,
-          },
-          x: row * tileMap.tileWidth,
-          y: col * tileMap.tileHeight,
-          anchor: {
-            x: 0,
-            y: 0,
-          },
-          cullable: true,
-          visible: layer.visible,
-        });
+  // ## Render
+  const viewContainer = new Container();
+  map.container.addChild(viewContainer);
 
-        mapContainer.addChild(tile);
-      }
-    }
-  }
-
-  mapContainer.scale.set(1.5);
-
-  mapContainer.x = 50;
-  mapContainer.y = 50;
-
-  game.world.container.addChild(mapContainer);
+  registerSystem(game.essence, addNewViews(game, viewContainer));
+  registerSystem(game.essence, drawViews(game));
 
   return game;
 }

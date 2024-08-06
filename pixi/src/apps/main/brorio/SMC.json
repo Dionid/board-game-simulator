@@ -60,38 +60,43 @@
          "name":"death-colliders",
          "objects":[
                 {
-                 "height":29.7792451608726,
-                 "id":2,
+                 "height":32,
+                 "id":4,
                  "name":"",
-                 "polygon":[
-                        {
-                         "x":-1.27817699229627,
-                         "y":-1.7494659157118
-                        }, 
-                        {
-                         "x":94.7218230077037,
-                         "y":-1.7494659157118
-                        }, 
-                        {
-                         "x":94.7218230077037,
-                         "y":30.2505340842882
-                        }, 
-                        {
-                         "x":-1.27817699229627,
-                         "y":30.2505340842882
-                        }],
                  "properties":[
                         {
-                         "name":"death",
+                         "name":"solid",
                          "type":"bool",
                          "value":true
                         }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
-                 "width":94.5167346410306,
-                 "x":449.278176992296,
-                 "y":209.749465915712
+                 "width":448,
+                 "x":0,
+                 "y":208
+                }, 
+                {
+                 "height":32,
+                 "id":6,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"death",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
+                         "name":"solid",
+                         "type":"bool",
+                         "value":false
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":96,
+                 "x":448,
+                 "y":208
                 }],
          "opacity":1,
          "properties":[
@@ -164,7 +169,7 @@
          "y":0
         }],
  "nextlayerid":12,
- "nextobjectid":4,
+ "nextobjectid":7,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.11.0",

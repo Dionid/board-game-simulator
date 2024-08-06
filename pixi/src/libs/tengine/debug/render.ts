@@ -52,6 +52,8 @@ export const drawDebug = (
   const globalDebugGraphics = new Graphics();
   game.world.container.addChild(globalDebugGraphics);
 
+  globalDebugGraphics.zIndex = 1000;
+
   const strokeWidth = 2;
 
   return () => {

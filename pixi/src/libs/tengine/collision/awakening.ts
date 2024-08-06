@@ -11,10 +11,10 @@ import { Game } from '../game';
 import { Awaken, ColliderBody } from './components';
 import { Position2, Velocity2 } from '../core';
 
-export const collidersQuery = newQuery(ColliderBody, Position2);
+export const awakeningQuery = newQuery(ColliderBody, Position2);
 
 export function awakening(game: Game): System {
-  const query = registerQuery(game.essence, collidersQuery);
+  const query = registerQuery(game.essence, awakeningQuery);
 
   const awakenedIndex: number[] = [];
 
