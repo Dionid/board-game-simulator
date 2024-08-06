@@ -200,9 +200,11 @@ export function addEntity<CL extends Schema[]>(
 // OK
 /**
  *
- * By setting component to Entity, we will find / create Archetype, that
- * will contain this Component Schema, move Entity and Components to this new
- * Archetype.
+ * By setting component to entity, we will take current Archetype of entity,
+ * and if schema is already in Archetype, than just update Component.
+ * If not, we will find / create new Archetype, that will contain all components from
+ * current Archetype and new component, and move entity and all its Components to
+ * this new Archetype.
  *
  * @param essence
  * @param entity

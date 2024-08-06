@@ -133,6 +133,17 @@ export function removeEntity<CL extends Schema[]>(arch: Archetype<CL>, entity: E
   return;
 }
 
+/**
+ *
+ * Move entity from one archetype to another:
+ *
+ * 1. If `from` does not have entity or `to` already has entity then return false.
+ * 2. Add entity to `to` archetype.
+ * 3. Move all components to `to` archetype. If there is no component in `from` archetype,
+ * then add default component.
+ * 4. Remove entity from `from` archetype.
+ *
+ */
 export function moveEntity<CL extends Schema[]>(
   from: Archetype<CL>,
   to: Archetype<CL>,
