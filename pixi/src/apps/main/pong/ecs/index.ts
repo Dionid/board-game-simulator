@@ -25,6 +25,7 @@ import { Game } from 'libs/tengine/game';
 import { scores, uiState } from '../state';
 import { safeGuard } from 'libs/tecs/switch';
 import { TranslateAnimation } from 'libs/tengine/animation';
+import { zzfx } from 'libs/zzfx';
 
 // export const GameObject = newTag();
 
@@ -176,7 +177,7 @@ export const changeVelocityByArrows = (
   };
 };
 
-export function startRound(ballVelocity: Vector2, roundStarted: { value: boolean }) {
+function startRound(ballVelocity: Vector2, roundStarted: { value: boolean }) {
   const randomAngle = Math.random() * Math.PI * 2;
 
   ballVelocity.x = Math.cos(randomAngle) * 5;
@@ -288,6 +289,29 @@ export function scoring(
               enemy: prev.enemy + 1,
             };
           });
+          zzfx(
+            1.2,
+            undefined,
+            556,
+            0.04,
+            0.2,
+            0.05,
+            1,
+            3.3,
+            undefined,
+            5,
+            -145,
+            0.1,
+            0.04,
+            undefined,
+            36,
+            0.1,
+            0.17,
+            0.98,
+            0.25,
+            undefined,
+            -1087
+          );
         } else if (isEnemyGoals) {
           uiState.set(scores, (prev) => {
             return {
@@ -295,6 +319,29 @@ export function scoring(
               player: prev.player + 1,
             };
           });
+          zzfx(
+            0.8,
+            0.05,
+            534,
+            0.06,
+            0.12,
+            0.37,
+            0,
+            3.8,
+            0,
+            -144,
+            268,
+            0.08,
+            0.03,
+            0,
+            0,
+            0,
+            0,
+            0.55,
+            0.29,
+            0,
+            -1107
+          );
         }
 
         // # Reset ball
@@ -525,7 +572,7 @@ export function ballTunneling(game: Game, ballEntity: Entity): System {
   };
 }
 
-export const changeBallDirectionBasedOnPaddleVelocity = (
+export const ballPaddleCollided = (
   game: Game,
   playerEntity: Entity,
   enemyEntity: Entity,
@@ -562,6 +609,8 @@ export const changeBallDirectionBasedOnPaddleVelocity = (
       if (characterVelocity && ballVelocity) {
         ballVelocity.y += characterVelocity.y * 0.7;
       }
+
+      zzfx(1, 0.05, 220, 0, 0, 0.1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0);
     }
   };
 };

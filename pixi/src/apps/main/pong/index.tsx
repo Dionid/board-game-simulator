@@ -3,6 +3,8 @@ import { initPongGame } from "./game";
 import { destroyGame, run } from "libs/tengine/game";
 import { useAtom } from "jotai";
 import { scores, uiState } from "./state";
+import { zzfx } from "libs/zzfx";
+import { ZZFX } from "libs/zzfx";
 
 const containerStyle: CSSProperties = {
   padding: 15,
@@ -29,6 +31,8 @@ export const PongGame: FunctionComponent<{ winScore: number, goBackToMenu: (play
             const stopGame = run(game)
             console.log("PongApp mounted")
 
+            zzfx(1.1,undefined,334,undefined,undefined,.41,1,4.7,undefined,-32,14,.15,undefined,undefined,112,undefined,undefined,.63,.08,undefined,-691); // Random 40
+
             uiState.sub(scores, async () => {
               const state = uiState.get(scores)
               if (state.player >= winScore || state.enemy >= winScore) {
@@ -38,6 +42,11 @@ export const PongGame: FunctionComponent<{ winScore: number, goBackToMenu: (play
                   uiState.set(scores, { player: 0, enemy: 0 })
                   goBackToMenu(state.player >= winScore)
                 })
+                if (state.enemy >= winScore) {
+                  zzfx(1.1,.05,254,.05,.19,.38,0,2.4,1,-2,0,0,.08,0,0,.1,0,.63,.25,.27,0); 
+                } else {
+                  zzfx(1.1,.05,589,.03,.28,.4,0,3.4,0,-21,53,.06,.05,0,0,0,.13,.82,.1,0,-589);
+                }
               }
             })
         })

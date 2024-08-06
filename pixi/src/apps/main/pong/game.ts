@@ -21,7 +21,7 @@ import {
   PlayerGoals,
   accelerateByArrows,
   ballTunneling,
-  changeBallDirectionBasedOnPaddleVelocity,
+  ballPaddleCollided,
   checkCollisions,
   enemyAi,
   paddleWorldBoundaries,
@@ -540,10 +540,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   registerSystem(game.essence, startGame(ballVelocity, roundStarted), {
     stage: 'onFirstStep',
   });
-  registerSystem(
-    game.essence,
-    changeBallDirectionBasedOnPaddleVelocity(game, playerEntity, enemyEntity, ballEntity)
-  );
+  registerSystem(game.essence, ballPaddleCollided(game, playerEntity, enemyEntity, ballEntity));
   registerSystem(
     game.essence,
     scoring(
