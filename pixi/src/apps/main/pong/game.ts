@@ -60,7 +60,15 @@ export async function initPongGame(parentElement: HTMLElement) {
     },
   });
 
-  activateDebugMode(game);
+  activateDebugMode(game, {
+    render: {
+      view: false,
+      xy: false,
+      collision: false,
+      velocity: false,
+      acceleration: false,
+    },
+  });
 
   await initGame(game, {
     backgroundColor: 0x000000,
@@ -132,7 +140,6 @@ export async function initPongGame(parentElement: HTMLElement) {
             y: 0,
           },
           length: boundary.length,
-          // size: { width: 10, height: boundary.length },
         }),
       ],
     });
@@ -158,7 +165,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     scale: { x: 1, y: 1 },
     rotation: 0,
     anchor: { x: 0.5, y: 0.5 },
-    alpha: 0.2,
+    alpha: 1,
     model: {
       type: 'graphics',
       shape: {
@@ -168,7 +175,7 @@ export async function initPongGame(parentElement: HTMLElement) {
           height: game.world.size.height / 2,
         },
       },
-      color: '0xFFFFFF',
+      color: '#333333',
     },
   });
 
@@ -187,25 +194,41 @@ export async function initPongGame(parentElement: HTMLElement) {
     scale: { x: 1, y: 1 },
     rotation: 0,
     anchor: { x: 0.5, y: 0.5 },
-    alpha: 0.2,
+    alpha: 1,
     model: {
       type: 'graphics',
       shape: {
         type: 'circle',
         radius: centerLineCenterRadius,
       },
-      color: '0xFFFFFF',
+      color: '#333333',
     },
   });
 
   const characterSize = {
     width: 50,
-    height: 150,
+    height: 175,
   };
 
   // # Player
   const playerEntity = spawnEntity(game.essence);
   setComponent(game.essence, playerEntity, Player);
+  // ## View
+  setComponent(game.essence, playerEntity, View, {
+    offset: { x: 0, y: 0 },
+    scale: { x: 1, y: 1 },
+    rotation: 0,
+    anchor: { x: 0.5, y: 0.5 },
+    alpha: 1,
+    model: {
+      type: 'graphics',
+      shape: {
+        type: 'rectangle',
+        size: characterSize,
+      },
+      color: '0xFFFFFF',
+    },
+  });
   // ## Position
   const initialPlayerPosition = {
     x: game.world.size.width / 6,
@@ -238,23 +261,18 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, playerEntity, CollisionsMonitoring);
   setComponent(game.essence, playerEntity, ColliderBody, {
     parts: [
-      // rectangleColliderComponent({
-      //   parentPosition: playerPosition,
-      //   parentAngle: playerAngle,
-      //   type: 'solid',
-      //   mass: 1,
-      //   offset: { x: 0, y: 0 },
-      //   angle: 0,
-      //   anchor: {
-      //     x: 0.5,
-      //     y: 0.5,
-      //   },
-      //   size: characterSize,
-      // }),
-      ...capsuleColliderComponent({
+      rectangleColliderComponent({
         parentPosition: playerPosition,
-        length: characterSize.height,
-        radius: characterSize.width / 2,
+        parentAngle: playerAngle,
+        type: 'solid',
+        mass: 1,
+        offset: { x: 0, y: 0 },
+        angle: 0,
+        anchor: {
+          x: 0.5,
+          y: 0.5,
+        },
+        size: characterSize,
       }),
     ],
   });
@@ -268,6 +286,22 @@ export async function initPongGame(parentElement: HTMLElement) {
   // # Enemy
   const enemyEntity = spawnEntity(game.essence);
   setComponent(game.essence, enemyEntity, Enemy);
+  // ## View
+  setComponent(game.essence, enemyEntity, View, {
+    offset: { x: 0, y: 0 },
+    scale: { x: 1, y: 1 },
+    rotation: 0,
+    anchor: { x: 0.5, y: 0.5 },
+    alpha: 1,
+    model: {
+      type: 'graphics',
+      shape: {
+        type: 'rectangle',
+        size: characterSize,
+      },
+      color: '0xFFFFFF',
+    },
+  });
   // ## Position
   const initialEnemyPosition = {
     x: game.world.size.width - game.world.size.width / 6,
@@ -333,6 +367,22 @@ export async function initPongGame(parentElement: HTMLElement) {
   // # Ball
   const ballEntity = spawnEntity(game.essence);
   setComponent(game.essence, ballEntity, Ball);
+  // ## View
+  setComponent(game.essence, ballEntity, View, {
+    offset: { x: 0, y: 0 },
+    scale: { x: 1, y: 1 },
+    rotation: 0,
+    anchor: { x: 0.5, y: 0.5 },
+    alpha: 1,
+    model: {
+      type: 'graphics',
+      shape: {
+        type: 'circle',
+        radius: 25,
+      },
+      color: '0xFFFFFF',
+    },
+  });
   setComponent(game.essence, ballEntity, Speed, { value: 2 });
   const ballAcceleration = {
     x: 0,
@@ -388,11 +438,30 @@ export async function initPongGame(parentElement: HTMLElement) {
   });
   setComponent(game.essence, ballEntity, Dynamic);
 
+  // # Goals
+  const goalsSize = { width: 50, height: game.world.size.height };
+
+  // ## Player
   const playerGoals = spawnEntity(game.essence);
   setComponent(game.essence, playerGoals, Goals);
   setComponent(game.essence, playerGoals, PlayerGoals);
+  setComponent(game.essence, playerGoals, View, {
+    offset: { x: 0, y: 0 },
+    scale: { x: 1, y: 1 },
+    rotation: 0,
+    anchor: { x: 0.5, y: 0.5 },
+    alpha: 0.1,
+    model: {
+      type: 'graphics',
+      shape: {
+        type: 'rectangle',
+        size: goalsSize,
+      },
+      color: '0xFFFFFF',
+    },
+  });
   const playerGoalsPosition = {
-    x: 30,
+    x: goalsSize.width / 2,
     y: game.world.size.height / 2,
     _prev: { x: 0, y: 0 },
   };
@@ -406,7 +475,7 @@ export async function initPongGame(parentElement: HTMLElement) {
         mass: 1,
         offset: { x: 0, y: 0 },
         angle: 0,
-        size: { width: 20, height: game.world.size.height - 50 },
+        size: goalsSize,
       }),
     ],
   });
@@ -416,8 +485,23 @@ export async function initPongGame(parentElement: HTMLElement) {
   const enemyGoals = spawnEntity(game.essence);
   setComponent(game.essence, enemyGoals, Goals);
   setComponent(game.essence, enemyGoals, EnemyGoals);
+  setComponent(game.essence, enemyGoals, View, {
+    offset: { x: 0, y: 0 },
+    scale: { x: 1, y: 1 },
+    rotation: 0,
+    anchor: { x: 0.5, y: 0.5 },
+    alpha: 0.1,
+    model: {
+      type: 'graphics',
+      shape: {
+        type: 'rectangle',
+        size: goalsSize,
+      },
+      color: '0xFFFFFF',
+    },
+  });
   const enemyGoalsPosition = {
-    x: game.world.size.width - 30,
+    x: game.world.size.width - goalsSize.width / 2,
     y: game.world.size.height / 2,
     _prev: { x: 0, y: 0 },
   };

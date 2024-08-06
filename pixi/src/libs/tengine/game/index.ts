@@ -1,8 +1,10 @@
-import { Application, ApplicationOptions, Container } from 'pixi.js';
+import { Application, ApplicationOptions, Container, Ticker } from 'pixi.js';
 import { Size2 } from '../core/types';
 import { Camera, newCamera, NewCameraProps } from '../core/camera';
 import { KeyBoardInput, MouseInput, newMouseInput } from '../core/input';
-import { Essence, newEssence, stepWithTicker } from '../../tecs';
+import { destroyEssence, Essence, newEssence, stepWithTicker } from '../../tecs';
+import { mutableEmpty } from 'libs/tecs/array';
+import { Sleep } from 'libs/sleep';
 
 export type GameCanvas = {
   parentElement: HTMLElement;
@@ -103,8 +105,8 @@ export const newGame = (
     essence: props.essence ?? newEssence(),
   };
 
-  if ((globalThis as any).__TENGINE_GAME__) {
-    (globalThis as any).__TENGINE_GAME__.push(game);
+  if ((globalThis as any).__TENGINE_GAMES__) {
+    (globalThis as any).__TENGINE_GAMES__.push(game);
   } else {
     (globalThis as any).__TENGINE_GAMES__ = [game];
   }
@@ -125,9 +127,27 @@ export async function initGame(game: Game, options: Partial<ApplicationOptions> 
 }
 
 export function run(game: Game) {
-  game.app.ticker.add((ticker) => {
+  const _run = (ticker: Ticker) => {
     stepWithTicker(game.essence, ticker);
-  });
+  };
+
+  game.app.ticker.add(_run);
+
+  return () => {
+    game.app.ticker.remove(_run);
+  };
+}
+
+export function destroyGame(game: Game): void {
+  game.app.stop();
+
+  destroyEssence(game.essence);
+
+  (globalThis as any).__TENGINE_GAMES__ = (globalThis as any).__TENGINE_GAMES__.filter(
+    (g: any) => g !== game
+  );
+
+  (globalThis as any).__PIXI_APP__ = undefined;
 }
 
 export const Game = {

@@ -207,8 +207,6 @@ export function resetRound(
     startTime: game.essence.currentStepTime,
   });
 
-  console.log('initialPlayerPosition', initialPlayerPosition);
-
   setComponent(game.essence, playerEntity, TranslateAnimation, {
     x: initialPlayerPosition.x,
     y: initialPlayerPosition.y,
@@ -248,7 +246,7 @@ export function resetRound(
     ballVelocity.y = Math.sin(randomAngle) * 5;
 
     roundStarted.value = true;
-  }, 2000);
+  }, 1300);
 }
 
 export function scoring(
@@ -296,16 +294,13 @@ export function scoring(
         }
 
         // # Reset ball
-        const ballPosition = tryComponent(ball.archetype, ball.entity, Position2)!;
         const ballVelocity = tryComponent(ball.archetype, ball.entity, Velocity2)!;
         const ballAcceleration = tryComponent(ball.archetype, ball.entity, Acceleration2)!;
 
         // # Reset characters
-        const playerPosition = componentByEntity(game.essence, playerEntity, Position2)!;
         const playerVelocity = componentByEntity(game.essence, playerEntity, Velocity2)!;
         const playerAcceleration = componentByEntity(game.essence, playerEntity, Acceleration2)!;
 
-        const enemyPosition = componentByEntity(game.essence, enemyEntity, Position2)!;
         const enemyVelocity = componentByEntity(game.essence, enemyEntity, Velocity2)!;
         const enemyAcceleration = componentByEntity(game.essence, enemyEntity, Acceleration2)!;
 

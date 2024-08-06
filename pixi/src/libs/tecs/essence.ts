@@ -8,7 +8,7 @@ import {
   newArchetypeId,
   updateComponent,
 } from './archetype';
-import { Internals } from './internals';
+import { clearUnsafeInternals, Internals } from './internals';
 import { $tag, Schema, KindToType } from './schema';
 import { Query } from './query';
 import { System } from './system';
@@ -555,7 +555,27 @@ export function newEssence(
   };
 }
 
-// MAYBE NOT REQUESTANIMATIONFRAME
+// # OK
+export const destroyEssence = (essence: Essence) => {
+  for (const topic of essence.topics) {
+    topic.isRegistered = false;
+    mutableEmpty(topic.staged);
+    mutableEmpty(topic.ready);
+  }
+
+  // # Reset deferred operations
+  essence.deferredOperations.deferred = false;
+  essence.deferredOperations.killed.clear();
+  mutableEmpty(essence.deferredOperations.operations);
+
+  // # Reset queries
+  for (const query of essence.queries) {
+    mutableEmpty(query.archetypes);
+  }
+
+  clearUnsafeInternals();
+};
+
 export function run(essence: Essence): void {
   const frame = () => {
     step(essence);

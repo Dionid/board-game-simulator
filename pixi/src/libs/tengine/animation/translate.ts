@@ -12,20 +12,25 @@ import { Game } from '../game';
 import { Position2, round } from '../core';
 import { safeGuard } from 'libs/tecs/switch';
 
-export const TranslateAnimation = newSchema({
-  x: number,
-  y: number,
-  duration: number,
-  easing,
-  startTime: number,
-});
+export const TranslateAnimation = newSchema(
+  {
+    x: number,
+    y: number,
+    duration: number,
+    easing,
+    startTime: number,
+  },
+  {
+    name: 'TranslateAnimation',
+  }
+);
 
 export const translateWithAnimationQuery = newQuery(Position2, TranslateAnimation);
 
-export function translateWithAnimation(game: Game, defaultPrecision = 0.1): System {
+export function translateWithAnimation(game: Game): System {
   const query = registerQuery(game.essence, translateWithAnimationQuery);
 
-  return function translateWithAnimation({ deltaTime }) {
+  return function translateWithAnimation({ essence, deltaTime }) {
     for (let i = 0; i < query.archetypes.length; i++) {
       const archetype = query.archetypes[i];
       const positionT = table(archetype, Position2);
@@ -38,21 +43,23 @@ export function translateWithAnimation(game: Game, defaultPrecision = 0.1): Syst
 
         // # If current position is the same as the target position, remove the animation component
         if (position.x === animation.x && position.y === animation.y) {
-          removeComponent(game.essence, entity, TranslateAnimation);
+          debugger;
+          removeComponent(essence, entity, TranslateAnimation);
           continue;
         }
 
         // # If current time is greater than the animation end time, set the position to the target position
-        if (game.essence.currentStepTime >= animation.startTime + animation.duration) {
+        if (essence.currentStepTime >= animation.startTime + animation.duration) {
           position.x = animation.x;
           position.y = animation.y;
 
-          removeComponent(game.essence, entity, TranslateAnimation);
+          debugger;
+          removeComponent(essence, entity, TranslateAnimation);
 
           continue;
         }
 
-        const animationDeltaTime = game.essence.currentStepTime - animation.startTime;
+        const animationDeltaTime = essence.currentStepTime - animation.startTime;
 
         // # animation delta time can be negative so just ignore this step
         if (animationDeltaTime < 0) {
@@ -84,8 +91,6 @@ export function translateWithAnimation(game: Game, defaultPrecision = 0.1): Syst
               ),
               2
             );
-
-            console.log(position);
             break;
           case 'easeOut':
             break;
@@ -93,24 +98,24 @@ export function translateWithAnimation(game: Game, defaultPrecision = 0.1): Syst
             return safeGuard(animation.easing);
         }
 
-        const targetPositionXDelta = Math.abs(Math.abs(animation.x) - Math.abs(newX));
-        const targetPositionYDelta = Math.abs(Math.abs(animation.y) - Math.abs(newY));
+        // QUESTION: maybe it will be needed
+        // const targetPositionXDelta = Math.abs(Math.abs(animation.x) - Math.abs(newX));
+        // const targetPositionYDelta = Math.abs(Math.abs(animation.y) - Math.abs(newY));
 
-        if (targetPositionXDelta < defaultPrecision) {
-          newX = animation.x;
-        }
+        // if (targetPositionXDelta < defaultPrecision) {
+        //   newX = animation.x;
+        // }
 
-        if (targetPositionYDelta < defaultPrecision) {
-          newY = animation.y;
-        }
+        // if (targetPositionYDelta < defaultPrecision) {
+        //   newY = animation.y;
+        // }
+
+        // if (targetPositionXDelta < defaultPrecision && targetPositionYDelta < defaultPrecision) {
+        //   removeComponent(essence, entity, TranslateAnimation);
+        // }
 
         position.x = newX;
         position.y = newY;
-
-        if (targetPositionXDelta < defaultPrecision && targetPositionYDelta < defaultPrecision) {
-          removeComponent(game.essence, entity, TranslateAnimation);
-          continue;
-        }
       }
     }
   };

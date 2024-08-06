@@ -1,8 +1,8 @@
-import { CSSProperties, useEffect } from "react";
+import { CSSProperties, FunctionComponent, useEffect, useState } from "react";
 import { initPongGame } from "./game";
-import { run } from "libs/tengine/game";
+import { destroyGame, run } from "libs/tengine/game";
 import { useAtom } from "jotai";
-import { scores } from "./state";
+import { scores, uiState } from "./state";
 
 const containerStyle: CSSProperties = {
   padding: 15,
@@ -20,15 +20,31 @@ const containerStyle: CSSProperties = {
   fontFamily: "monospace",
 }
 
-export const PongApp = () => {
+export const PongGame: FunctionComponent<{ winScore: number, goBackToMenu: () => void }> = ({ winScore, goBackToMenu }) => {
     useEffect(() => {
         const gameHolder = document.getElementById('gameHolder') as HTMLCanvasElement;
 
         // # Pong
         initPongGame(gameHolder).then((game) => {
-            run(game)
+            const stopGame = run(game)
             console.log("PongApp mounted")
+
+            uiState.sub(scores, async () => {
+              const state = uiState.get(scores)
+              if (state.player >= winScore || state.enemy >= winScore) {
+                stopGame();
+                game.app.ticker.addOnce(() => {
+                  destroyGame(game)
+                  uiState.set(scores, { player: 0, enemy: 0 })
+                  goBackToMenu()
+                })
+              }
+            })
         })
+
+        return () => {
+          console.log("PongApp destroyed")
+        }
     }, [])
 
     const [score] = useAtom(scores)
@@ -42,4 +58,57 @@ export const PongApp = () => {
         <div id="gameHolder"></div>
       </div>
     )
+  }
+
+const pongAppContainerStyle: CSSProperties = {
+  padding: 15,
+  color: "#fff",
+  width: "100vw",
+  height: "100vh",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  fontSize: "50px",
+  fontFamily: "monospace",
+  backgroundColor: "#000",
+}
+
+const buttonStyle: CSSProperties = {
+  border: "1px #eee solid",
+  padding: "15px",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  fontSize: "30px",
+  maxWidth: "200px",
+  width: "100%"
+}
+
+const menuContainer: CSSProperties = {
+  display: "flex",
+  justifyContent: "center",
+  flexDirection: "column",
+  alignItems: "center",
+  cursor: "pointer",
+}
+
+export const PongGameMenu: FunctionComponent<{ setStartGame: (v: boolean ) => void}> = ({ setStartGame }) => {
+  return (
+    <div style={menuContainer}>
+    <h1>SUPER PONG</h1>
+    <div style={buttonStyle} onClick={() => setStartGame(true)}>PLAY</div>
+  </div>
+  )
+}
+
+export const PongApp = () => {
+  const [startGame, setStartGame] = useState(false)
+
+  return (
+    <div style={pongAppContainerStyle}>
+      {
+        startGame ? <PongGame winScore={1} goBackToMenu={ () => setStartGame(false) } /> : <PongGameMenu setStartGame={ setStartGame } />
+      }
+    </div>
+  )
 }
