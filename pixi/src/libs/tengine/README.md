@@ -1,27 +1,10 @@
 # TODO
 
-1. ~~SAT~~
-1. ~~Change render logic to pView~~
-1. ~~Change debug to pView~~
-1. ~~Leave rectangle and circle colliders~~
-1. ~~Add vertices to Collider~~
-1. ~~Rotate Collider with different pivots~~
-1. ~~Add Rotation to Colliders rotation (changing position and vertices)~~
-1. ~~Add Normal Axes to Collider~~
-1. ~~Line~~
-1. ~~Polygon on Vertices~~
-1. ~~World bounds~~
-1. ~~Fix line collision tremble~~
-1. ~~Fix multiple collision body penetrations~~
-1. ~~Collision Queries~~
-1. ~~FIX: capsule collider circle error~~
+1. Forces & Impulse
+1. Move Gravity to Forces / Impulse
 
 # Roadmap
 
-1. ECS
-    1. Events
-        1. ~~Default topics (SchemaAdded, SchemaRemoved, ComponentUpdated, EntitySpawned, EntityKilled)~~
-        1. Subscribe by one entity
 1. View
     1. ~~On entity kill destroy pView~~
     1. Polygon
@@ -29,31 +12,23 @@
     1. View -> ViewSet
     1. Scale
 1. Collision
-    1. ~~SAT~~
-    1. ~~Raw Vertices~~
-    1. ~~Compound / Composite~~
-    1. ~~Capsule on Compound~~
-    1. ~~Pairs + Dedup~~
-    1. ~~Awaken / Asleep~~
-    1. ~~Triangle on Vertices~~
-    1. ~~Polygon on Vertices~~
-    1. ~~World Bounds~~
-    1. ~~Ray casting~~
     1. Apply Scale
     1. Shape casting
     1. Borrow phase
+    1. CCD
     1. Ray & Shape casting (https://rapier.rs/docs/user_guides/rust/scene_queries/)
         1. Linear velocity
         1. TOI + max TOI
-    1. CCD
     1. Fix Circle anchor
     1. Separate concave to convex
     1. Multiple iterations per one cycle
 1. Physics
+    1. Forces & Impulse
     1. Angle + Angular velocity
     1. Joints
+    1. Apply gravity without friction
 1. Character controller
-    1. Is grounded
+    1. ~~Is grounded~~
     1. Move and slide
 1. ...
 1. Preload assets
@@ -78,8 +53,10 @@
 1. Debug
 1. Input (keyboard, mouse)
 1. Collision
-    1. Circles, Rectangles and Vertices
-    1. Narrow (on SAT)
+    1. Circles, Rectangles, Polygon and Convex Vertices
+    1. Compound
+    1. Narrow (on SAT + Awakened)
+    1. Ray casting
 1. Events Monitoring
 
 # Entities

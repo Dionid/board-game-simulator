@@ -1,6 +1,7 @@
 import { newQuery, newSchema, number, registerQuery, System, table } from 'libs/tecs';
 import { Game } from '../game';
 import { Vector2, Acceleration2 } from '../core';
+import { Force2 } from './components';
 
 export const AffectedByGravity = newSchema(
   {
@@ -29,6 +30,29 @@ export const applyGravityToAcceleration = (game: Game, defaultGravity: Vector2):
 
         acceleration.x += defaultGravity.x * affectedByGravity.scale * deltaTime;
         acceleration.y += defaultGravity.y * affectedByGravity.scale * deltaTime;
+      }
+    }
+  };
+};
+
+export const affectedByGravityWithForceQuery = newQuery(AffectedByGravity, Force2);
+
+export const applyGravityAsForce = (game: Game, defaultGravity: Vector2): System => {
+  const query = registerQuery(game.essence, affectedByGravityWithForceQuery);
+
+  return ({ deltaTime }) => {
+    for (let i = 0; i < query.archetypes.length; i++) {
+      const archetype = query.archetypes[i];
+
+      const forceT = table(archetype, Force2);
+      const affectedByGravityT = table(archetype, AffectedByGravity);
+
+      for (let j = 0; j < archetype.entities.length; j++) {
+        const force = forceT[j];
+        const affectedByGravity = affectedByGravityT[j];
+
+        force.x += defaultGravity.x * affectedByGravity.scale * deltaTime;
+        force.y += defaultGravity.y * affectedByGravity.scale * deltaTime;
       }
     }
   };

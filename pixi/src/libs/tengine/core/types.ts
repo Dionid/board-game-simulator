@@ -1,4 +1,4 @@
-import { newSchema, number } from 'libs/tecs';
+import { boolean, newSchema, number } from 'libs/tecs';
 import { Container } from 'pixi.js';
 import { Vector2 } from './math';
 
@@ -19,6 +19,11 @@ export const Position2 = newSchema(
     name: 'Position2',
   }
 );
+
+export const LockTranslation2 = newSchema({
+  x: boolean,
+  y: boolean,
+});
 
 export type Size2 = {
   width: number;

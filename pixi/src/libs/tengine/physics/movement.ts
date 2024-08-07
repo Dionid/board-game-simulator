@@ -1,7 +1,56 @@
 import { newQuery, System, registerQuery, table, tryTable } from 'libs/tecs';
-import { Acceleration2, Velocity2, Position2, Friction, DisableFriction } from '../core';
+import { Acceleration2, Velocity2, Position2, Friction, DisableFriction, Mass } from '../core';
 import { Game } from '../game';
-import { RigidBody } from './components';
+import { Force2, RigidBody } from './components';
+
+export const forceAccelerationQuery = newQuery(RigidBody, Force2, Acceleration2, Mass);
+
+export const applyRigidBodyForceToAccelerationQuery = (game: Game): System => {
+  const query = registerQuery(game.essence, forceAccelerationQuery);
+
+  return ({ deltaTime }) => {
+    for (let i = 0; i < query.archetypes.length; i++) {
+      const archetype = query.archetypes[i];
+      const accelerationT = table(archetype, Acceleration2);
+      const forceT = table(archetype, Force2);
+      const massT = table(archetype, Mass);
+
+      for (let i = 0; i < archetype.entities.length; i++) {
+        const acceleration = accelerationT[i];
+        const force = forceT[i];
+        const mass = massT[i].value;
+
+        acceleration.x = force.x / mass;
+        acceleration.y = force.y / mass;
+      }
+    }
+  };
+};
+
+export const resetForceQuery = newQuery(RigidBody, Force2);
+
+/**
+ *
+ * MUST BE AFTER IT APPLIED
+ *
+ */
+export const resetForce = (game: Game): System => {
+  const query = registerQuery(game.essence, resetForceQuery);
+
+  return ({ deltaTime }) => {
+    for (let i = 0; i < query.archetypes.length; i++) {
+      const archetype = query.archetypes[i];
+      const forceT = table(archetype, Force2);
+
+      for (let i = 0; i < archetype.entities.length; i++) {
+        const force = forceT[i];
+
+        force.x = 0;
+        force.y = 0;
+      }
+    }
+  };
+};
 
 export const accelerationVelocityQuery = newQuery(RigidBody, Acceleration2, Velocity2);
 
