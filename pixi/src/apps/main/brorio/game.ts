@@ -15,7 +15,6 @@ import {
   ColliderBody,
   CollisionsMonitoring,
   filterCollisionEvents,
-  penetrationResolution,
   rectangleColliderComponent,
   transformCollider,
 } from 'libs/tengine/collision';
@@ -24,8 +23,7 @@ import { mapKeyboardInput, mapMouseInput } from 'libs/tengine/ecs';
 import { updatePrevious } from 'libs/tengine/core/update-previous';
 import {
   AffectedByGravity,
-  applyGravityAsForce,
-  applyGravityAsImpulse,
+  applyGravity,
   applyRigidBodyAccelerationToVelocity,
   applyRigidBodyForceToAcceleration,
   applyRigidBodyFriction,
@@ -145,6 +143,7 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
           x: 0,
           y: playerRadius,
         },
+        mass: 0,
         type: 'sensor',
         size: {
           width: playerRadius * 2,
@@ -178,8 +177,7 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
   registerSystem(game.essence, addCollisionMassToMass(game));
 
   // ## Gravity
-  // registerSystem(game.essence, applyGravityAsForce(game, { x: 0, y: 0.1 }));
-  registerSystem(game.essence, applyGravityAsImpulse(game, { x: 0, y: 0.1 }));
+  registerSystem(game.essence, applyGravity(game, { x: 0, y: 0.01 }));
 
   // ## Move to new position
   registerSystem(game.essence, applyRigidBodyForceToAcceleration(game));
@@ -205,6 +203,7 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
     // # Remove gravity if grounded
     removeComponent(game.essence, playerEntity, AffectedByGravity);
     velocity.y = 0;
+    acceleration.y = 0;
   });
 
   // ## Collision

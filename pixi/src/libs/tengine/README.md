@@ -1,7 +1,7 @@
 # TODO
 
-1. Forces & Impulse
-1. Move Gravity to Forces / Impulse
+1. Remove mass calculation and change it to Mass component
+1. ...
 
 # Roadmap
 
@@ -52,11 +52,18 @@
 1. Animations
 1. Debug
 1. Input (keyboard, mouse)
+1. Physics
+    1. RigidBody (static, dynamic, kinematic)
+    1. Gravity
+    1. Friction
+    1. Force & Impulse
+    1. Collision Response
 1. Collision
     1. Circles, Rectangles, Polygon and Convex Vertices
     1. Compound
-    1. Narrow (on SAT + Awakened)
+    1. Narrow Collision Check (on SAT + Awakened)
     1. Ray casting
+    1. Collision Resolution
 1. Events Monitoring
 
 # Entities

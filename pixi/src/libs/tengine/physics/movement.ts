@@ -20,8 +20,8 @@ export const applyRigidBodyForceToAcceleration = (game: Game): System => {
         const force = forceT[i];
         const mass = massT[i].value;
 
-        acceleration.x = force.x / mass;
-        acceleration.y = force.y / mass;
+        acceleration.x += force.x / mass;
+        acceleration.y += force.y / mass;
       }
     }
   };
