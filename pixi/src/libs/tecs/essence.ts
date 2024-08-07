@@ -306,17 +306,15 @@ export const removeComponent = <S extends Schema>(
     return;
   }
 
-  const schemaId = Internals.getSchemaId(schema);
-
   // # Get current archetype
   let currentArchetype = essence.archetypeByEntity[entity] as Archetype<Schema[]> | undefined;
   if (currentArchetype === undefined) {
     throw new Error(`Can't find archetype for entity ${entity}`);
   }
 
-  // # Check if component in archetype
+  // # If component is not in archetype, return
   if (!Archetype.hasSchema(currentArchetype, schema)) {
-    throw new Error(`Can't find component ${schemaId} on this archetype ${currentArchetype.id}`);
+    return;
   }
 
   // # Find or create new archetype

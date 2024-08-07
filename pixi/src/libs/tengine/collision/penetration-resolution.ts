@@ -1,7 +1,7 @@
 import { componentByEntity, registerTopic, System } from 'libs/tecs';
 import { Game } from '../game';
 import { Position2 } from '../core';
-import { colliding } from './topics';
+import { colliding, CollidingEvent } from './topics';
 import { ColliderBody, Impenetrable } from './components';
 import { resolvePenetration } from './resolvers';
 
@@ -9,7 +9,29 @@ export const penetrationResolution = (game: Game): System => {
   const topic = registerTopic(game.essence, colliding);
 
   return () => {
+    const minOverlapCollisionEvents: Record<string, CollidingEvent> = {};
+
     for (const event of topic) {
+      const { a, b, overlap } = event;
+
+      const index = [a, b]
+        .sort((a, b) => {
+          return a.entity - b.entity;
+        })
+        .join('-');
+
+      const existingEvent = minOverlapCollisionEvents[index];
+
+      if (existingEvent && existingEvent.overlap < overlap) {
+        continue;
+      }
+
+      minOverlapCollisionEvents[index] = event;
+    }
+
+    for (const eventInd in minOverlapCollisionEvents) {
+      const event = minOverlapCollisionEvents[eventInd];
+
       const { a, b, overlap, axis } = event;
 
       // # We only resolve penetration between solid objects

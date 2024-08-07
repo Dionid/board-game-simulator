@@ -80,8 +80,8 @@ export const checkNarrowCollisionSimple = (game: Game, awakened: boolean = true)
           const colliderSetB = colliderSetTB[i];
 
           const partsCollisionList: (CollisionResult & {
-            acId: number;
-            bcId: number;
+            aColliderId: number;
+            bColliderId: number;
             aCollider: KindToType<typeof Collider>;
             bCollider: KindToType<typeof Collider>;
           })[] = [];
@@ -100,43 +100,34 @@ export const checkNarrowCollisionSimple = (game: Game, awakened: boolean = true)
                   axis: result.axis,
                   aCollider,
                   bCollider,
-                  acId: acId,
-                  bcId: bcId,
+                  aColliderId: acId,
+                  bColliderId: bcId,
                 });
               }
             }
           }
 
-          let minCollision = partsCollisionList[0];
-
-          for (let i = 1; i < partsCollisionList.length; i++) {
-            const partCollision = partsCollisionList[i];
-            if (partCollision.overlap < minCollision.overlap) {
-              minCollision = partCollision;
-            }
-          }
-
-          // zero is correct value, -1 and less must be ignored
-          if (minCollision && minCollision.overlap >= 0) {
+          for (let i = 0; i < partsCollisionList.length; i++) {
+            const collision = partsCollisionList[i];
             emit(
               internalUnfilteredColliding,
               {
                 name: 'colliding',
-                overlap: minCollision.overlap,
-                axis: minCollision.axis,
+                overlap: collision.overlap,
+                axis: collision.axis,
                 a: {
                   archetype: aArchetype,
                   entity: entityA,
                   colliderSet: colliderSetA,
-                  collider: minCollision.aCollider,
-                  colliderId: minCollision.acId,
+                  collider: collision.aCollider,
+                  colliderId: collision.aColliderId,
                 },
                 b: {
                   archetype: bArchetype,
                   entity: entityB,
                   colliderSet: colliderSetB,
-                  collider: minCollision.bCollider,
-                  colliderId: minCollision.bcId,
+                  collider: collision.bCollider,
+                  colliderId: collision.bColliderId,
                 },
               },
               true

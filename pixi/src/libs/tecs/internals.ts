@@ -22,6 +22,8 @@ export const clearUnsafeInternals = () => {
   UNSAFE_internals.nextSchemaId = 0;
 };
 
+export const $internalId = Symbol('internalId');
+
 export const Internals = {
   registerSchema: (schema: Schema, schemaId?: SchemaId) => {
     let type = UNSAFE_internals.schemaIdBySchema.get(schema);
@@ -41,6 +43,9 @@ export const Internals = {
     }
     UNSAFE_internals.schemaById.set(type, schema);
     UNSAFE_internals.schemaIdBySchema.set(schema, type);
+
+    // @ts-expect-error: this is just for debugging purpose
+    schema[$internalId] = type;
 
     return type;
   },

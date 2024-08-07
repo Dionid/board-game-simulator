@@ -9,7 +9,6 @@ import {
   ColliderBody,
   CollisionsMonitoring,
   filterCollisionEvents,
-  Impenetrable,
   penetrationResolution,
   rectangleColliderComponent,
   transformCollider,
@@ -144,7 +143,21 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
   registerSystem(game.essence, applyRigidBodyVelocityToPosition(game));
 
   // ## Game logic
-  // ...
+  // registerSystem(game.essence, () => {
+  //   const isGroundedC = componentByEntity(game.essence, playerEntity, IsGrounded);
+  //   const acceleration = componentByEntity(game.essence, playerEntity, Acceleration2);
+  //   const velocity = componentByEntity(game.essence, playerEntity, Velocity2);
+
+  //   if (!isGroundedC || !acceleration || !velocity) {
+  //     return;
+  //   }
+
+  //   removeComponent(game.essence, playerEntity, AffectedByGravity);
+  //   acceleration.x = 0;
+  //   acceleration.y = 0;
+  //   velocity.x = 0;
+  //   velocity.y = 0;
+  // });
 
   // ## Collision
   // ### Transform

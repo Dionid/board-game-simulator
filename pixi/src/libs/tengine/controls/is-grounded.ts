@@ -71,6 +71,8 @@ export function isGrounded(): System {
       const groundDetection = aGroundDetection ? a : b;
       const ground = aGround ? a : b;
 
+      console.log('Adding is grounded');
+
       setComponent(essence, groundDetection.entity, IsGrounded, {
         entity: ground.entity,
         collider: ground.collider,
@@ -85,7 +87,13 @@ export function isGrounded(): System {
       const bIsGrounded = tryComponent(b.archetype, b.entity, IsGrounded);
 
       // # If not already grounded, skip
-      if (!aIsGrounded || !bIsGrounded) {
+      if (!aIsGrounded && !bIsGrounded) {
+        continue;
+      }
+
+      const isGroundedComponent = aIsGrounded ?? bIsGrounded;
+
+      if (!isGroundedComponent) {
         continue;
       }
 
@@ -98,7 +106,6 @@ export function isGrounded(): System {
       }
 
       const isGroundedCollision = aIsGrounded ? a : b;
-      const isGroundedComponent = aIsGrounded ?? bIsGrounded;
       const ground = aGround ? a : b;
 
       // # If not grounded to the same entity, skip

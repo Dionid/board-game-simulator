@@ -39,6 +39,7 @@
     1. ~~Polygon on Vertices~~
     1. ~~World Bounds~~
     1. ~~Ray casting~~
+    1. Apply Scale
     1. Shape casting
     1. Borrow phase
     1. Ray & Shape casting (https://rapier.rs/docs/user_guides/rust/scene_queries/)
@@ -51,7 +52,8 @@
 1. Physics
     1. Angle + Angular velocity
     1. Joints
-1. Character movement
+1. Character controller
+    1. Is grounded
     1. Move and slide
 1. ...
 1. Preload assets

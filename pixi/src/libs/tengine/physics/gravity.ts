@@ -2,9 +2,14 @@ import { newQuery, newSchema, number, registerQuery, System, table } from 'libs/
 import { Game } from '../game';
 import { Vector2, Acceleration2 } from '../core';
 
-export const AffectedByGravity = newSchema({
-  scale: number,
-});
+export const AffectedByGravity = newSchema(
+  {
+    scale: number,
+  },
+  {
+    name: 'AffectedByGravity',
+  }
+);
 
 export const affectedByGravityQuery = newQuery(AffectedByGravity, Acceleration2);
 
