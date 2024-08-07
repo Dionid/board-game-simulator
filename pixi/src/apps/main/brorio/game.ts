@@ -8,6 +8,7 @@ import {
   ColliderBody,
   CollisionsMonitoring,
   filterCollisionEvents,
+  Impenetrable,
   penetrationResolution,
   rectangleColliderComponent,
   transformCollider,
@@ -16,6 +17,8 @@ import { addNewViews, drawViews, View } from 'libs/tengine/render';
 import { mapKeyboardInput, mapMouseInput } from 'libs/tengine/ecs';
 import { updatePrevious } from 'libs/tengine/core/update-previous';
 import {
+  AffectedByGravity,
+  applyGravityToAcceleration,
   applyRigidBodyAccelerationToVelocity,
   applyRigidBodyFriction,
   applyRigidBodyVelocityToPosition,
@@ -87,7 +90,7 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
     value: 0.1,
   });
   setComponent(game.essence, playerEntity, Velocity2, {
-    max: 10,
+    max: 20,
     x: 0,
     y: 0,
   });
@@ -113,6 +116,9 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
     elasticityMode: 'average',
   });
   setComponent(game.essence, playerEntity, Kinematic);
+  setComponent(game.essence, playerEntity, AffectedByGravity, {
+    scale: 1,
+  });
 
   // # Systems
   // ## Previous invalidation
@@ -123,6 +129,7 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
   registerSystem(game.essence, mapMouseInput(game, map));
 
   // ## Basic physics
+  registerSystem(game.essence, applyGravityToAcceleration(game, { x: 0, y: 0.001 }));
   registerSystem(game.essence, applyRigidBodyAccelerationToVelocity(game));
   registerSystem(game.essence, applyRigidBodyFriction(game, 0.01));
   registerSystem(game.essence, applyRigidBodyVelocityToPosition(game));

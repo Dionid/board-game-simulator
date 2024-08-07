@@ -3,12 +3,14 @@ import {
   verticesColliderComponent,
   rectangleColliderComponent,
   ColliderBody,
+  Impenetrable,
 } from 'libs/tengine/collision';
 import { Position2 } from 'libs/tengine/core';
 import { Game } from 'libs/tengine/game';
 import { Container, Assets, Texture, TilingSprite } from 'pixi.js';
 import { DeathZone } from './logic';
 import mapData from './SMC.json';
+import { RigidBody, Static } from 'libs/tengine/physics';
 
 export const initMap = async (game: Game) => {
   const map = {
@@ -123,6 +125,7 @@ export const initMap = async (game: Game) => {
             vertices: object.polygon as any,
             anchor: { x: 0, y: 0 },
             type,
+            mass: 0,
           })
         );
       } else {
@@ -134,6 +137,7 @@ export const initMap = async (game: Game) => {
               height: object.height,
             },
             type,
+            mass: 0,
             anchor: { x: 0, y: 0 },
           })
         );
@@ -142,6 +146,8 @@ export const initMap = async (game: Game) => {
       setComponent(game.essence, colliderEntity, ColliderBody, {
         parts,
       });
+      setComponent(game.essence, colliderEntity, RigidBody);
+      setComponent(game.essence, colliderEntity, Static);
 
       // # Death zones
       if (
