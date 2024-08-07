@@ -706,6 +706,7 @@ export async function initPongGame(parentElement: HTMLElement) {
           x: 0.5,
           y: 0.5,
         },
+        tags: [],
       }),
     ],
   });

@@ -1,4 +1,4 @@
-import { newSchema, arrayOf, union, literal, number, newTag, Component } from '../../tecs';
+import { newSchema, arrayOf, union, literal, number, newTag, Component, string } from '../../tecs';
 import {
   Axes2,
   dotV2,
@@ -45,6 +45,7 @@ export const Collider = newSchema(
     angle: number,
     shape: ColliderShape,
     mass: number,
+    tags: arrayOf(string),
     _position: Vector2, // position of colliders center
     _vertices: Vertices2,
     _normalAxes: Axes2,
@@ -60,19 +61,22 @@ export const Collider = newSchema(
 
 export function rectangleColliderComponent(opts: {
   parentPosition: Vector2; // TODO: remove this
+  size: { width: number; height: number };
   parentAngle?: number; // TODO: remove this
-  type: 'solid' | 'sensor';
+  type?: 'solid' | 'sensor';
   mass?: number;
   offset?: Vector2;
   angle?: number;
   anchor?: Vector2;
-  size: { width: number; height: number };
+  tags?: string[];
 }): Component<typeof Collider> {
   const offset = opts.offset || { x: 0, y: 0 };
   const parentAngle = opts.parentAngle ?? 0;
   const anchor = opts.anchor || { x: 0.5, y: 0.5 };
   const angle = opts.angle || 0;
   const mass = opts.mass || 1;
+  const tags = opts.tags || [];
+  const type = opts.type || 'solid';
 
   const origin = {
     x: opts.parentPosition.x + offset.x,
@@ -114,7 +118,7 @@ export function rectangleColliderComponent(opts: {
   ];
 
   const component = {
-    type: opts.type,
+    type: type,
     mass: mass,
     offset: offset,
     angle: angle,
@@ -122,6 +126,7 @@ export function rectangleColliderComponent(opts: {
       type: 'vertices' as const,
       anchor: anchor,
     },
+    tags,
     _position: origin,
     _vertices: colliderVertices,
     _normalAxes: normalAxes,
@@ -139,17 +144,21 @@ export function rectangleColliderComponent(opts: {
 
 export function rectangleColliderComponentSE(opts: {
   parentAngle?: number; // TODO: remove this
-  type: 'solid' | 'sensor';
-  mass: number;
+  type?: 'solid' | 'sensor';
+  mass?: number;
   start: Vector2;
   end: Vector2;
   width: number;
   angle?: number;
   anchor?: Vector2;
+  tags?: string[];
 }): Component<typeof Collider> {
   const offset = { x: 0, y: 0 };
   const parentAngle = opts.parentAngle ?? 0;
   const anchor = opts.anchor || { x: 0.5, y: 0.5 };
+  const mass = opts.mass || 1;
+  const tags = opts.tags || [];
+  const type = opts.type || 'solid';
   let angle = opts.angle || 0;
 
   const { start, end, width } = opts;
@@ -212,14 +221,15 @@ export function rectangleColliderComponentSE(opts: {
   ];
 
   const component = {
-    type: opts.type,
-    mass: opts.mass,
+    type: type,
+    mass: mass,
     offset: offset,
     angle: angle,
     shape: {
       type: 'vertices' as const,
       anchor: anchor,
     },
+    tags,
     _position: start,
     _vertices: colliderVertices,
     _normalAxes: normalAxes,
@@ -237,23 +247,31 @@ export function rectangleColliderComponentSE(opts: {
 
 export function lineColliderComponent(opts: {
   parentPosition: Vector2; // TODO: remove this
-  parentAngle: number; // TODO: remove this
-  type: 'solid' | 'sensor';
-  mass: number;
-  offset: Vector2;
-  angle: number;
-  anchor: Vector2;
   length: number;
+  parentAngle: number; // TODO: remove this
+  type?: 'solid' | 'sensor';
+  mass?: number;
+  offset?: Vector2;
+  angle?: number;
+  anchor?: Vector2;
+  tags?: string[];
 }): Component<typeof Collider> {
+  const offset = opts.offset || { x: 0, y: 0 };
+  const mass = opts.mass || 1;
+  const tags = opts.tags || [];
+  const type = opts.type || 'solid';
+  const anchor = opts.anchor || { x: 0, y: 0 };
+  const angle = opts.angle || 0;
+
   const origin = {
-    x: opts.parentPosition.x + opts.offset.x,
-    y: opts.parentPosition.y + opts.offset.y,
+    x: opts.parentPosition.x + offset.x,
+    y: opts.parentPosition.y + offset.y,
   };
 
   // PROBLEM IS THAT ANGLE DOESN'T APPLY HERE
   const verticesStartPosition = {
-    x: origin.x - opts.length * opts.anchor.x,
-    y: origin.y - opts.length * opts.anchor.y,
+    x: origin.x - opts.length * anchor.x,
+    y: origin.y - opts.length * anchor.y,
   };
 
   const colliderVertices = [
@@ -267,29 +285,30 @@ export function lineColliderComponent(opts: {
     },
   ];
 
-  mutRotateVertices2Around(colliderVertices, opts.angle, origin);
+  mutRotateVertices2Around(colliderVertices, angle, origin);
   mutRotateVertices2Around(colliderVertices, opts.parentAngle, opts.parentPosition);
 
   // # Rectangle can have only 2 normal axes
   const normalAxes = [normalV2(unitV2(subV2(colliderVertices[1], colliderVertices[0])))];
 
   const component = {
-    type: opts.type,
-    mass: opts.mass,
-    offset: opts.offset,
-    angle: opts.angle,
+    type: type,
+    mass: mass,
+    offset: offset,
+    angle: angle,
     shape: {
       type: 'vertices' as const,
-      anchor: opts.anchor,
+      anchor: anchor,
     },
+    tags,
     _position: origin,
     _vertices: colliderVertices,
     _normalAxes: normalAxes,
     _prev: {
-      angle: opts.angle,
+      angle: angle,
       offset: {
-        x: opts.offset.x,
-        y: opts.offset.y,
+        x: offset.x,
+        y: offset.y,
       },
     },
   };
@@ -299,25 +318,34 @@ export function lineColliderComponent(opts: {
 
 export function isoscelesRightTriangleColliderComponent(opts: {
   parentPosition: Vector2; // TODO: remove this
-  parentAngle: number; // TODO: remove this
-  type: 'solid' | 'sensor';
-  mass: number;
-  offset: Vector2;
-  angle: number;
-  anchor: Vector2;
   length: number;
+  parentAngle?: number; // TODO: remove this
+  type?: 'solid' | 'sensor';
+  mass?: number;
+  offset?: Vector2;
+  angle?: number;
+  anchor?: Vector2;
+  tags?: string[];
 }): Component<typeof Collider> {
+  const parentAngle = opts.parentAngle ?? 0;
+  const offset = opts.offset || { x: 0, y: 0 };
+  const mass = opts.mass || 1;
+  const tags = opts.tags || [];
+  const type = opts.type || 'solid';
+  const anchor = opts.anchor || { x: 0, y: 0 };
+  const angle = opts.angle || 0;
+
   const origin = {
-    x: opts.parentPosition.x + opts.offset.x,
-    y: opts.parentPosition.y + opts.offset.y,
+    x: opts.parentPosition.x + offset.x,
+    y: opts.parentPosition.y + offset.y,
   };
 
   const centroidX = opts.length / 3;
   const centroidY = opts.length / 3;
 
   const verticesStartPosition = {
-    x: origin.x - 2 * centroidX * opts.anchor.x,
-    y: origin.y + 2 * centroidY * opts.anchor.y,
+    x: origin.x - 2 * centroidX * anchor.x,
+    y: origin.y + 2 * centroidY * anchor.y,
   };
 
   const colliderVertices = [
@@ -335,29 +363,30 @@ export function isoscelesRightTriangleColliderComponent(opts: {
     },
   ];
 
-  mutRotateVertices2Around(colliderVertices, opts.angle, origin);
-  mutRotateVertices2Around(colliderVertices, opts.parentAngle, opts.parentPosition);
+  mutRotateVertices2Around(colliderVertices, angle, origin);
+  mutRotateVertices2Around(colliderVertices, parentAngle, opts.parentPosition);
 
   // # Rectangle can have only 2 normal axes
   const normalAxes = normalAxes2(colliderVertices);
 
   const component = {
-    type: opts.type,
-    mass: opts.mass,
-    offset: opts.offset,
-    angle: opts.angle,
+    type: type,
+    mass: mass,
+    offset: offset,
+    angle: angle,
     shape: {
       type: 'vertices' as const,
-      anchor: opts.anchor,
+      anchor: anchor,
     },
+    tags,
     _position: origin,
     _vertices: colliderVertices,
     _normalAxes: normalAxes,
     _prev: {
-      angle: opts.angle,
+      angle: angle,
       offset: {
-        x: opts.offset.x,
-        y: opts.offset.y,
+        x: offset.x,
+        y: offset.y,
       },
     },
   };
@@ -367,29 +396,38 @@ export function isoscelesRightTriangleColliderComponent(opts: {
 
 export function centroidTriangleColliderComponent(opts: {
   parentPosition: Vector2; // TODO: remove this
-  parentAngle: number; // TODO: remove this
-  type: 'solid' | 'sensor';
-  mass: number;
-  offset: Vector2;
-  angle: number;
-  anchor: Vector2;
   a: Vertex2;
   b: Vertex2;
   c: Vertex2;
+  parentAngle?: number; // TODO: remove this
+  type?: 'solid' | 'sensor';
+  mass?: number;
+  offset?: Vector2;
+  angle?: number;
+  anchor?: Vector2;
+  tags?: string[];
 }): Component<typeof Collider> {
+  const parentAngle = opts.parentAngle ?? 0;
+  const offset = opts.offset || { x: 0, y: 0 };
+  const mass = opts.mass || 1;
+  const tags = opts.tags || [];
+  const type = opts.type || 'solid';
+  const anchor = opts.anchor || { x: 0, y: 0 };
+  const angle = opts.angle || 0;
+
   const { a, b, c } = opts;
 
   const origin = {
-    x: opts.parentPosition.x + opts.offset.x,
-    y: opts.parentPosition.y + opts.offset.y,
+    x: opts.parentPosition.x + offset.x,
+    y: opts.parentPosition.y + offset.y,
   };
 
   const centroidX = (a.x + b.x + c.x) / 3;
   const centroidY = (a.y + b.y + c.y) / 3;
 
   const verticesStartPosition = {
-    x: origin.x - 2 * centroidX * opts.anchor.x,
-    y: origin.y - 2 * centroidY * opts.anchor.y,
+    x: origin.x - 2 * centroidX * anchor.x,
+    y: origin.y - 2 * centroidY * anchor.y,
   };
 
   const vertices = [a, b, c];
@@ -400,28 +438,29 @@ export function centroidTriangleColliderComponent(opts: {
     vertices[i].y += verticesStartPosition.y;
   }
 
-  mutRotateVertices2Around(vertices, opts.angle, origin);
-  mutRotateVertices2Around(vertices, opts.parentAngle, opts.parentPosition);
+  mutRotateVertices2Around(vertices, angle, origin);
+  mutRotateVertices2Around(vertices, parentAngle, opts.parentPosition);
 
   const normalAxes = normalAxes2(vertices);
 
   const component = {
-    type: opts.type,
-    mass: opts.mass,
-    offset: opts.offset,
-    angle: opts.angle,
+    type: type,
+    mass: mass,
+    offset: offset,
+    angle: angle,
     shape: {
       type: 'vertices' as const,
-      anchor: opts.anchor,
+      anchor: anchor,
     },
+    tags,
     _position: origin,
     _vertices: vertices,
     _normalAxes: normalAxes,
     _prev: {
-      angle: opts.angle,
+      angle: angle,
       offset: {
-        x: opts.offset.x,
-        y: opts.offset.y,
+        x: offset.x,
+        y: offset.y,
       },
     },
   };
@@ -438,6 +477,7 @@ export function verticesColliderComponent(opts: {
   angle?: number;
   anchor?: Vector2;
   vertices: Vertices2;
+  tags?: string[];
 }): Component<typeof Collider> {
   const offset = opts.offset || { x: 0, y: 0 };
   const parentAngle = opts.parentAngle ?? 0;
@@ -445,6 +485,7 @@ export function verticesColliderComponent(opts: {
   const angle = opts.angle || 0;
   const type = opts.type || 'solid';
   const mass = opts.mass || 1;
+  const tags = opts.tags || [];
 
   const origin = {
     x: opts.parentPosition.x + offset.x,
@@ -500,6 +541,7 @@ export function verticesColliderComponent(opts: {
       type: 'vertices' as const,
       anchor: anchor,
     },
+    tags,
     _position: origin,
     _vertices: opts.vertices,
     _normalAxes: normalAxes,
@@ -517,41 +559,50 @@ export function verticesColliderComponent(opts: {
 
 export function circleColliderComponent(opts: {
   parentPosition: Vector2; // TODO: remove this
-  parentAngle: number;
-  type: 'solid' | 'sensor';
-  mass: number;
-  offset: Vector2;
-  anchor: Vector2;
   radius: number;
+  parentAngle?: number;
+  type?: 'solid' | 'sensor';
+  mass?: number;
+  offset?: Vector2;
+  anchor?: Vector2;
+  tags?: string[];
 }): Component<typeof Collider> {
+  const offset = opts.offset || { x: 0, y: 0 };
+  const parentAngle = opts.parentAngle ?? 0;
+  const type = opts.type || 'solid';
+  const mass = opts.mass || 1;
+  const anchor = opts.anchor || { x: 0.5, y: 0.5 };
+  const tags = opts.tags || [];
+
   const position = {
-    x: opts.parentPosition.x + opts.offset.x,
-    y: opts.parentPosition.y + opts.offset.y,
+    x: opts.parentPosition.x + offset.x,
+    y: opts.parentPosition.y + offset.y,
   };
   const colliderVertices: Axes2 = [];
 
   const normalAxes = normalAxes2(colliderVertices);
 
-  mutRotateV2Around(position, opts.parentAngle, opts.parentPosition);
+  mutRotateV2Around(position, parentAngle, opts.parentPosition);
 
   return {
-    type: opts.type,
-    mass: opts.mass,
-    offset: opts.offset,
+    type: type,
+    mass: mass,
+    offset: offset,
     angle: 0,
     shape: {
       type: 'circle' as const,
-      anchor: opts.anchor,
+      anchor: anchor,
       radius: opts.radius,
     },
+    tags,
     _position: position,
     _vertices: colliderVertices,
     _normalAxes: normalAxes,
     _prev: {
       angle: 0,
       offset: {
-        x: opts.offset.x,
-        y: opts.offset.y,
+        x: offset.x,
+        y: offset.y,
       },
     },
   };
@@ -559,24 +610,33 @@ export function circleColliderComponent(opts: {
 
 export function polygonColliderComponent(opts: {
   parentPosition: Vector2; // TODO: remove this
-  parentAngle: number;
-  type: 'solid' | 'sensor';
-  mass: number;
-  offset: Vector2;
-  anchor: Vector2;
   radius: number;
-  angle: number;
   sides: number;
+  parentAngle?: number;
+  type?: 'solid' | 'sensor';
+  mass?: number;
+  offset?: Vector2;
+  anchor?: Vector2;
+  angle?: number;
+  tags: string[];
 }): Component<typeof Collider> {
-  const { sides, radius, anchor } = opts;
+  const parentAngle = opts.parentAngle ?? 0;
+  const offset = opts.offset || { x: 0, y: 0 };
+  const mass = opts.mass || 1;
+  const tags = opts.tags || [];
+  const type = opts.type || 'solid';
+  const anchor = opts.anchor || { x: 0, y: 0 };
+  const angle = opts.angle || 0;
+
+  const { sides, radius } = opts;
 
   if (sides < 3) {
     return circleColliderComponent(opts);
   }
 
   const position = {
-    x: opts.parentPosition.x + opts.offset.x,
-    y: opts.parentPosition.y + opts.offset.y,
+    x: opts.parentPosition.x + offset.x,
+    y: opts.parentPosition.y + offset.y,
   };
 
   const verticesStaringPosition = {
@@ -604,22 +664,23 @@ export function polygonColliderComponent(opts: {
   // mutRotateV2Around(position, opts.parentAngle, opts.parentPosition);
 
   return {
-    type: opts.type,
-    mass: opts.mass,
-    offset: opts.offset,
+    type: type,
+    mass: mass,
+    offset: offset,
     angle: 0,
     shape: {
       type: 'vertices' as const,
-      anchor: opts.anchor,
+      anchor: anchor,
     },
+    tags,
     _position: position,
     _vertices: vertices,
     _normalAxes: normalAxes,
     _prev: {
       angle: 0,
       offset: {
-        x: opts.offset.x,
-        y: opts.offset.y,
+        x: offset.x,
+        y: offset.y,
       },
     },
   };

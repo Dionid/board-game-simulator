@@ -5,6 +5,7 @@ import { registerSystem, setComponent, spawnEntity } from 'libs/tecs';
 import {
   awakening,
   checkNarrowCollisionSimple,
+  circleColliderComponent,
   ColliderBody,
   CollisionsMonitoring,
   filterCollisionEvents,
@@ -28,6 +29,7 @@ import {
 import { initMap } from './map';
 import { Player } from './logic';
 import { Position2, Speed, Acceleration2, Friction, Velocity2 } from 'libs/tengine/core';
+import { COLLIDER_GROUND_DETECTOR_TAG, GroundDetection, isGrounded } from 'libs/tengine/controls';
 
 export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
   const game = newGame({
@@ -95,19 +97,25 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
     y: 0,
   });
   setComponent(game.essence, playerEntity, CollisionsMonitoring);
+  const playerRadius = 8;
   setComponent(game.essence, playerEntity, ColliderBody, {
     parts: [
+      circleColliderComponent({
+        parentPosition: playerPosition,
+        radius: playerRadius,
+      }),
       rectangleColliderComponent({
         parentPosition: playerPosition,
-        type: 'solid',
-        mass: 1,
-        offset: { x: 0, y: 0 },
-        angle: 0,
-        anchor: {
-          x: 0.5,
-          y: 0.5,
+        offset: {
+          x: 0,
+          y: playerRadius,
         },
-        size: characterSize,
+        type: 'sensor',
+        size: {
+          width: playerRadius * 2,
+          height: 1,
+        },
+        tags: [COLLIDER_GROUND_DETECTOR_TAG],
       }),
     ],
   });
@@ -119,6 +127,7 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
   setComponent(game.essence, playerEntity, AffectedByGravity, {
     scale: 1,
   });
+  setComponent(game.essence, playerEntity, GroundDetection);
 
   // # Systems
   // ## Previous invalidation
@@ -146,6 +155,9 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
   registerSystem(game.essence, checkNarrowCollisionSimple(game));
   registerSystem(game.essence, filterCollisionEvents(game));
   registerSystem(game.essence, penetrationResolution(game));
+
+  // ## Is grounded
+  registerSystem(game.essence, isGrounded());
 
   // ## Render
   const viewContainer = new Container();

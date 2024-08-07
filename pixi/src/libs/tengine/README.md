@@ -39,7 +39,11 @@
     1. ~~Polygon on Vertices~~
     1. ~~World Bounds~~
     1. ~~Ray casting~~
+    1. Shape casting
     1. Borrow phase
+    1. Ray & Shape casting (https://rapier.rs/docs/user_guides/rust/scene_queries/)
+        1. Linear velocity
+        1. TOI + max TOI
     1. CCD
     1. Fix Circle anchor
     1. Separate concave to convex

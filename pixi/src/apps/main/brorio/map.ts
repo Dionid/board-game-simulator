@@ -3,7 +3,6 @@ import {
   verticesColliderComponent,
   rectangleColliderComponent,
   ColliderBody,
-  Impenetrable,
 } from 'libs/tengine/collision';
 import { Position2 } from 'libs/tengine/core';
 import { Game } from 'libs/tengine/game';
@@ -11,6 +10,7 @@ import { Container, Assets, Texture, TilingSprite } from 'pixi.js';
 import { DeathZone } from './logic';
 import mapData from './SMC.json';
 import { RigidBody, Static } from 'libs/tengine/physics';
+import { Ground } from 'libs/tengine/controls';
 
 export const initMap = async (game: Game) => {
   const map = {
@@ -98,6 +98,7 @@ export const initMap = async (game: Game) => {
       continue;
     }
 
+    // # Add colliders
     for (const object of layer.objects) {
       const colliderEntity = spawnEntity(game.essence);
 
@@ -112,7 +113,7 @@ export const initMap = async (game: Game) => {
       });
 
       const isSolid = object.properties.some((p) => {
-        return p.name === 'solid' && p.value === true;
+        return p.name === 'isSolid' && p.value === true;
       });
       const type = isSolid ? 'solid' : 'sensor';
 
@@ -152,10 +153,19 @@ export const initMap = async (game: Game) => {
       // # Death zones
       if (
         object.properties.some((p) => {
-          return p.name === 'death' && p.value === true;
+          return p.name === 'isDeath' && p.value === true;
         })
       ) {
         setComponent(game.essence, colliderEntity, DeathZone);
+      }
+
+      // # Ground
+      if (
+        object.properties.some((p) => {
+          return p.name === 'isGround' && p.value === true;
+        })
+      ) {
+        setComponent(game.essence, colliderEntity, Ground);
       }
     }
   }

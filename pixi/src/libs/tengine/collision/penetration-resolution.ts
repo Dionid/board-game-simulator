@@ -1,11 +1,4 @@
-import {
-  componentByEntity,
-  newQuery,
-  registerQuery,
-  registerTopic,
-  System,
-  table,
-} from 'libs/tecs';
+import { componentByEntity, registerTopic, System } from 'libs/tecs';
 import { Game } from '../game';
 import { Position2 } from '../core';
 import { colliding } from './topics';
@@ -49,32 +42,6 @@ export const penetrationResolution = (game: Game): System => {
       resolvePenetration(axis, overlap, a.colliderSet, aPosition, b.colliderSet, bPosition);
 
       continue;
-    }
-  };
-};
-
-// # World boundaries
-
-const characterPositionColliderQ = newQuery(Position2, ColliderBody);
-
-export const applyWorldBoundaries = (game: Game): System => {
-  const query = registerQuery(game.essence, characterPositionColliderQ);
-
-  return ({ deltaTime }) => {
-    for (let i = 0; i < query.archetypes.length; i++) {
-      const archetype = query.archetypes[i];
-      const positionT = table(archetype, Position2);
-      const colliderSetT = table(archetype, ColliderBody);
-
-      for (let j = 0; j < archetype.entities.length; j++) {
-        const position = positionT[j];
-        const colliderSet = colliderSetT[j];
-
-        for (const collider of colliderSet.parts) {
-          // Add SAT
-          // ...
-        }
-      }
     }
   };
 };
