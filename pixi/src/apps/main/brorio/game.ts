@@ -25,13 +25,17 @@ import { updatePrevious } from 'libs/tengine/core/update-previous';
 import {
   AffectedByGravity,
   applyGravityAsForce,
+  applyGravityAsImpulse,
   applyRigidBodyAccelerationToVelocity,
-  applyRigidBodyForceToAccelerationQuery,
+  applyRigidBodyForceToAcceleration,
   applyRigidBodyFriction,
+  applyRigidBodyImpulseToVelocity,
   applyRigidBodyVelocityToPosition,
   Force2,
+  Impulse2,
   Kinematic,
   resetForce,
+  resetImpulse,
   RigidBody,
 } from 'libs/tengine/physics';
 import { initMap } from './map';
@@ -111,6 +115,10 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
     x: 0,
     y: 0,
   });
+  setComponent(game.essence, playerEntity, Impulse2, {
+    x: 0,
+    y: 0,
+  });
   setComponent(game.essence, playerEntity, Acceleration2, {
     x: 0,
     y: 0,
@@ -157,21 +165,32 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
   setComponent(game.essence, playerEntity, GroundDetection);
 
   // # Systems
+
   // ## Input
   registerSystem(game.essence, mapKeyboardInput(game));
   registerSystem(game.essence, mapMouseInput(game, map));
 
   // ## Previous invalidation
   registerSystem(game.essence, updatePrevious(game));
+  registerSystem(game.essence, resetMass(game.essence));
+
+  // ## Pre calcs
+  registerSystem(game.essence, addCollisionMassToMass(game));
+
+  // ## Gravity
+  // registerSystem(game.essence, applyGravityAsForce(game, { x: 0, y: 0.1 }));
+  registerSystem(game.essence, applyGravityAsImpulse(game, { x: 0, y: 0.1 }));
 
   // ## Move to new position
-  registerSystem(game.essence, addCollisionMassToMass(game));
-  registerSystem(game.essence, applyGravityAsForce(game, { x: 0, y: 0.1 }));
-  registerSystem(game.essence, applyRigidBodyForceToAccelerationQuery(game));
+  registerSystem(game.essence, applyRigidBodyForceToAcceleration(game));
+  registerSystem(game.essence, applyRigidBodyImpulseToVelocity(game));
   registerSystem(game.essence, applyRigidBodyAccelerationToVelocity(game));
   registerSystem(game.essence, applyRigidBodyFriction(game, 0.01));
   registerSystem(game.essence, applyRigidBodyVelocityToPosition(game));
+
+  // ## Reset physics props
   registerSystem(game.essence, resetForce(game));
+  registerSystem(game.essence, resetImpulse(game));
 
   // ## Game logic
   registerSystem(game.essence, () => {
@@ -183,7 +202,9 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
       return;
     }
 
+    // # Remove gravity if grounded
     removeComponent(game.essence, playerEntity, AffectedByGravity);
+    velocity.y = 0;
   });
 
   // ## Collision
@@ -194,13 +215,9 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
   registerSystem(game.essence, awakening(game));
   registerSystem(game.essence, checkNarrowCollisionSimple(game));
   registerSystem(game.essence, filterCollisionEvents(game));
-  registerSystem(game.essence, penetrationResolution(game));
 
   // ## Is grounded
   registerSystem(game.essence, isGrounded());
-
-  // ## Reset props
-  registerSystem(game.essence, resetMass(game.essence));
 
   // ## Render
   const viewContainer = new Container();
