@@ -8,19 +8,21 @@ import {
 } from 'libs/tecs/default-topics';
 import { Game } from '../game';
 
+export type DebugEventsOptions = {
+  entitySpawned?: boolean;
+  entityKilled?: boolean;
+  componentAdded?: boolean;
+  componentRemoved?: boolean;
+  componentUpdated?: boolean;
+};
+
 export function debugEvents(
   game: Game,
-  opts: {
-    entitySpawned?: boolean;
-    entityKilled?: boolean;
-    schemaAdded?: boolean;
-    schemaRemoved?: boolean;
-    componentUpdated?: boolean;
-  } = {
+  opts: DebugEventsOptions = {
     entitySpawned: true,
     entityKilled: true,
-    schemaAdded: true,
-    schemaRemoved: true,
+    componentAdded: true,
+    componentRemoved: true,
     componentUpdated: true,
   }
 ) {
@@ -30,10 +32,10 @@ export function debugEvents(
   if (opts.entityKilled) {
     registerTopic(game.essence, entityKilled);
   }
-  if (opts.schemaAdded) {
+  if (opts.componentAdded) {
     registerTopic(game.essence, componentAdded);
   }
-  if (opts.schemaRemoved) {
+  if (opts.componentRemoved) {
     registerTopic(game.essence, componentRemoved);
   }
   if (opts.componentUpdated) {
@@ -57,13 +59,13 @@ export function debugEvents(
       }
     }
 
-    if (opts.schemaAdded) {
+    if (opts.componentAdded) {
       for (const event of componentAdded) {
         events.push(event);
       }
     }
 
-    if (opts.schemaRemoved) {
+    if (opts.componentRemoved) {
       for (const event of componentRemoved) {
         events.push(event);
       }

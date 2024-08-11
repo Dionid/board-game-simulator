@@ -4,8 +4,7 @@ import { Schema, KindToType, SchemaId, $tag, $aos, $soa, Component } from './sch
 import { Internals } from './internals';
 import { ArrayContains } from './ts-types';
 import { safeGuard } from './switch';
-import { Topic } from './topic';
-import { componentUpdated, componentAdded, componentRemoved } from './default-topics';
+import { isEntityInArchetype } from '.';
 
 export type ArchetypeTableRow<S extends Schema> = KindToType<S>[];
 
@@ -318,6 +317,9 @@ export function tryComponent<S extends Schema>(
   entity: Entity,
   schema: S
 ): KindToType<S> | undefined {
+  if (!isEntityInArchetype(archetype, entity)) {
+    return undefined;
+  }
   const componentId = Internals.getSchemaId(schema);
   const componentIndex = archetype.entitiesSS.sparse[entity];
   const componentTable = archetype.table[componentId];

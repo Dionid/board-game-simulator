@@ -66,7 +66,6 @@ export const checkNarrowCollisionSimple = (game: Game, awakened: boolean = true)
       const colliderSetTB = table(bArchetype, ColliderBody);
 
       for (let a = 0; a < forCheckColliders.length; a++) {
-        const aArchetype = forCheckColliders[a].archetype;
         const entityA = forCheckColliders[a].entity;
         const colliderSetA = forCheckColliders[a].colliderSet;
 
@@ -116,14 +115,12 @@ export const checkNarrowCollisionSimple = (game: Game, awakened: boolean = true)
                 overlap: collision.overlap,
                 axis: collision.axis,
                 a: {
-                  archetype: aArchetype,
                   entity: entityA,
                   colliderSet: colliderSetA,
                   collider: collision.aCollider,
                   colliderId: collision.aColliderId,
                 },
                 b: {
-                  archetype: bArchetype,
                   entity: entityB,
                   colliderSet: colliderSetB,
                   collider: collision.bCollider,

@@ -2,7 +2,7 @@ import { registerSystem } from 'libs/tecs';
 import { Game } from '../game';
 import { DEBUG } from './core';
 import { drawDebug } from './render';
-import { debugEvents } from './events';
+import { debugEvents, DebugEventsOptions } from './events';
 
 export function activateDebugMode(
   game: Game,
@@ -14,13 +14,7 @@ export function activateDebugMode(
       velocity?: boolean;
       acceleration?: boolean;
     };
-    events?: {
-      entitySpawned?: boolean;
-      entityKilled?: boolean;
-      schemaAdded?: boolean;
-      schemaRemoved?: boolean;
-      componentUpdated?: boolean;
-    };
+    events?: DebugEventsOptions;
   } = {}
 ) {
   DEBUG.isActive = true;
