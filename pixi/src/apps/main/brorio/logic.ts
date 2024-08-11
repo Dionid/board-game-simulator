@@ -30,6 +30,7 @@ export const playerMovement = (game: Game, playerEntity: Entity, characterSize: 
 
   let lastGroundedTime = 0;
   let lastJumpTime = 0;
+  const skinWidth = 0.1;
 
   return ({ deltaTime, elapsedTime }) => {
     const acceleration = componentByEntity(game.essence, playerEntity, Acceleration2);
@@ -41,26 +42,30 @@ export const playerMovement = (game: Game, playerEntity: Entity, characterSize: 
       return;
     }
 
+    const groundYOffset = Math.max(velocity.y, 0.3);
+
     const groundCollision = castRayByQuery(
       colliderBodiesQ,
       {
         x: position.x,
-        y: position.y + characterSize.height / 2 + 0.1,
+        y: position.y + characterSize.height / 2 + skinWidth,
       },
       {
         x: position.x,
-        y: position.y + characterSize.height / 2 + 0.2,
+        y: position.y + characterSize.height / 2 + groundYOffset,
       },
       {
         width: characterSize.width - 2,
-        stopOnFirst: true,
       }
     );
 
-    const isGrounded = groundCollision.length > 0;
+    const solidGroundCollision = groundCollision.filter((c) => c.collider.type === 'solid');
+
+    const isGrounded = solidGroundCollision.length > 0;
 
     if (isGrounded) {
       lastGroundedTime = elapsedTime;
+      position.y = position.y + groundYOffset - solidGroundCollision[0].overlap;
     }
 
     // # Apply gravity
@@ -69,8 +74,6 @@ export const playerMovement = (game: Game, playerEntity: Entity, characterSize: 
     } else {
       velocity.y += 0.3 * deltaTime;
     }
-
-    // velocity.y += 0.3 * deltaTime;
 
     // # Jump + Coyote jump
     const jump = game.input.keyboard.keyDown['w'];
@@ -85,12 +88,15 @@ export const playerMovement = (game: Game, playerEntity: Entity, characterSize: 
       }
     }
 
+    // # Move X
     const directionX = getXDirection(game.input.keyboard);
 
     velocity.x = speed.value * directionX * deltaTime;
 
     if (velocity.x !== 0) {
-      const startX = position.x + (characterSize.width / 2 + 0.1) * directionX;
+      const velocitySign = Math.sign(velocity.x);
+
+      const startX = position.x + (characterSize.width / 2 + skinWidth) * velocitySign;
 
       const directionCollision = castRayByQuery(
         colliderBodiesQ,
@@ -103,12 +109,14 @@ export const playerMovement = (game: Game, playerEntity: Entity, characterSize: 
           y: position.y,
         },
         {
-          width: characterSize.height - 4,
-          stopOnFirst: true,
+          width: characterSize.height - 2,
         }
       );
 
-      if (directionCollision.length > 0) {
+      const solidDirectionCollision = directionCollision.filter((c) => c.collider.type === 'solid');
+
+      if (solidDirectionCollision.length > 0) {
+        position.x = position.x + velocity.x - solidDirectionCollision[0].overlap * velocitySign;
         velocity.x = 0;
       }
     }

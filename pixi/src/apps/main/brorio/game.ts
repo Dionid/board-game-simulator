@@ -1,14 +1,7 @@
 import { activateDebugMode } from 'libs/tengine/debug';
 import { newGame, initGame } from 'libs/tengine/game';
 import { Container } from 'pixi.js';
-import {
-  componentByEntity,
-  newQuery,
-  registerQuery,
-  registerSystem,
-  setComponent,
-  spawnEntity,
-} from 'libs/tecs';
+import { registerSystem, setComponent, spawnEntity } from 'libs/tecs';
 import {
   awakening,
   checkNarrowCollisionSimple,
@@ -63,7 +56,7 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
 
   activateDebugMode(game, {
     render: {
-      // collision: false,
+      collision: false,
       view: false,
       velocity: false,
       xy: false,

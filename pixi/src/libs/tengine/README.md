@@ -15,16 +15,14 @@
     1. Scale
 1. Collision
     1. Apply Scale
-    1. Shape casting
+    1. Ray & Shape casting (https://rapier.rs/docs/user_guides/rust/scene_queries/)
     1. Bounding Box
+    1. Colliders Index (all collider bodies, by types, etc.)
     1. Borrow phase
     1. CCD
-    1. Ray & Shape casting (https://rapier.rs/docs/user_guides/rust/scene_queries/)
-        1. Linear velocity
-        1. TOI + max TOI
+    1. Multiple iterations per one cycle
     1. Fix Circle anchor
     1. Separate concave to convex
-    1. Multiple iterations per one cycle
 1. Physics
     1. Forces & Impulse
     1. Angle + Angular velocity
