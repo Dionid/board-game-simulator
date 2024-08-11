@@ -1,5 +1,13 @@
-import { componentByEntity, Entity, newQuery, newTag, registerQuery, System } from 'libs/tecs';
-import { ColliderBody, castRayByQuery } from 'libs/tengine/collision';
+import {
+  componentByEntity,
+  Entity,
+  newQuery,
+  newTag,
+  newTopic,
+  registerQuery,
+  System,
+} from 'libs/tecs';
+import { ColliderBody, CollidingEvent, castRayByQuery } from 'libs/tengine/collision';
 import {
   KeyBoardInput,
   Acceleration2,
@@ -7,6 +15,7 @@ import {
   Position2,
   Speed,
   Size2,
+  Vector2,
 } from 'libs/tengine/core';
 import { Game } from 'libs/tengine/game';
 
@@ -25,7 +34,14 @@ const getXDirection = (keyboard: KeyBoardInput): number => {
   return 0;
 };
 
-export const playerMovement = (game: Game, playerEntity: Entity, characterSize: Size2): System => {
+export const playerCollisionStartedTopic = newTopic<CollidingEvent>();
+
+export const playerMovement = (
+  game: Game,
+  playerEntity: Entity,
+  characterSize: Size2,
+  initialPosition: Vector2
+): System => {
   const colliderBodiesQ = registerQuery(game.essence, newQuery(ColliderBody));
 
   let lastGroundedTime = 0;
@@ -42,7 +58,7 @@ export const playerMovement = (game: Game, playerEntity: Entity, characterSize: 
       return;
     }
 
-    const groundYOffset = Math.max(velocity.y, 0.3);
+    const groundYOffset = Math.max(velocity.y, 0.2);
 
     const groundCollision = castRayByQuery(
       colliderBodiesQ,
@@ -52,7 +68,7 @@ export const playerMovement = (game: Game, playerEntity: Entity, characterSize: 
       },
       {
         x: position.x,
-        y: position.y + characterSize.height / 2 + groundYOffset,
+        y: position.y + characterSize.height / 2 + skinWidth + groundYOffset,
       },
       {
         width: characterSize.width - 2,
@@ -118,6 +134,31 @@ export const playerMovement = (game: Game, playerEntity: Entity, characterSize: 
       if (solidDirectionCollision.length > 0) {
         position.x = position.x + velocity.x - solidDirectionCollision[0].overlap * velocitySign;
         velocity.x = 0;
+      }
+    }
+
+    for (const collision of playerCollisionStartedTopic) {
+      const { a, b } = collision;
+
+      const player = a.entity === playerEntity ? a : b;
+      const other = a.entity === playerEntity ? b : a;
+
+      if (!player) {
+        continue;
+      }
+
+      if (!player.collider.tags.includes('hitbox')) {
+        continue;
+      }
+
+      const deathZone = componentByEntity(game.essence, other.entity, DeathZone);
+
+      if (deathZone) {
+        console.log('DEATH');
+        position.x = initialPosition.x;
+        position.y = initialPosition.y;
+        lastGroundedTime = 0;
+        lastJumpTime = 0;
       }
     }
   };

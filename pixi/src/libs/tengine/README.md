@@ -17,7 +17,8 @@
     1. Apply Scale
     1. Ray & Shape casting (https://rapier.rs/docs/user_guides/rust/scene_queries/)
     1. Bounding Box
-    1. Colliders Index (all collider bodies, by types, etc.)
+    1. Colliders Index (all collider bodies, by types, collisions pairs, etc.)
+    1. Subscribe by entity / component
     1. Borrow phase
     1. CCD
     1. Multiple iterations per one cycle

@@ -1,13 +1,14 @@
 import { activateDebugMode } from 'libs/tengine/debug';
 import { newGame, initGame } from 'libs/tengine/game';
 import { Container } from 'pixi.js';
-import { registerSystem, setComponent, spawnEntity } from 'libs/tecs';
+import { emit, registerSystem, registerTopic, setComponent, spawnEntity } from 'libs/tecs';
 import {
   awakening,
   checkNarrowCollisionSimple,
   circleColliderComponent,
   ColliderBody,
   CollisionsMonitoring,
+  collisionStartedTopic,
   filterCollisionEvents,
   penetrationResolution,
   transformCollider,
@@ -23,7 +24,6 @@ import {
   applyRigidBodyFriction,
   applyRigidBodyImpulseToVelocity,
   applyRigidBodyVelocityToPosition,
-  Dynamic,
   dynamicRigidBodyCollisionResolution,
   Force2,
   Impulse2,
@@ -33,7 +33,7 @@ import {
   RigidBody,
 } from 'libs/tengine/physics';
 import { initMap } from './map';
-import { Player, playerMovement } from './logic';
+import { Player, playerCollisionStartedTopic, playerMovement } from './logic';
 import {
   Position2,
   Speed,
@@ -56,7 +56,7 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
 
   activateDebugMode(game, {
     render: {
-      collision: false,
+      // collision: false,
       view: false,
       velocity: false,
       xy: false,
@@ -140,6 +140,7 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
         radius: playerRadius,
         mass: 1,
         offset: { x: 0, y: playerRadius },
+        tags: ['hitbox'],
       }),
     ],
   });
@@ -157,6 +158,20 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
 
   // # Systems
 
+  // ## Event routing
+  registerTopic(game.essence, playerCollisionStartedTopic);
+  registerSystem(game.essence, () => {
+    for (const event of collisionStartedTopic) {
+      const { a, b } = event;
+
+      const player = a.entity === playerEntity ? a : b;
+
+      if (player) {
+        emit(playerCollisionStartedTopic, event);
+      }
+    }
+  });
+
   // ## Input
   registerSystem(game.essence, mapKeyboardInput(game));
   registerSystem(game.essence, mapMouseInput(game, map));
@@ -169,7 +184,10 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
   registerSystem(game.essence, addCollisionMassToMass(game));
 
   // ## Fixed Update
-  registerSystem(game.essence, playerMovement(game, playerEntity, characterSize));
+  registerSystem(
+    game.essence,
+    playerMovement(game, playerEntity, characterSize, initialPlayerPosition)
+  );
 
   // ## Physics
   // ### Gravity

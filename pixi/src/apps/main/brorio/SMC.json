@@ -334,6 +334,94 @@
                  "width":16,
                  "x":336,
                  "y":160
+                }, 
+                {
+                 "height":16,
+                 "id":17,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"isDeath",
+                         "type":"bool",
+                         "value":true
+                        }, 
+                        {
+                         "name":"isSolid",
+                         "type":"bool",
+                         "value":false
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":48,
+                 "x":352,
+                 "y":192
+                }, 
+                {
+                 "height":16,
+                 "id":18,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"isDeath",
+                         "type":"bool",
+                         "value":true
+                        }, 
+                        {
+                         "name":"isSolid",
+                         "type":"bool",
+                         "value":false
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":32,
+                 "x":288,
+                 "y":192
+                }, 
+                {
+                 "height":16,
+                 "id":19,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"isDeath",
+                         "type":"bool",
+                         "value":true
+                        }, 
+                        {
+                         "name":"isSolid",
+                         "type":"bool",
+                         "value":false
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":224,
+                 "y":192
+                }, 
+                {
+                 "height":16,
+                 "id":20,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"isDeath",
+                         "type":"bool",
+                         "value":true
+                        }, 
+                        {
+                         "name":"isSolid",
+                         "type":"bool",
+                         "value":false
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":256,
+                 "y":192
                 }],
          "opacity":1,
          "properties":[
@@ -406,7 +494,7 @@
          "y":0
         }],
  "nextlayerid":12,
- "nextobjectid":17,
+ "nextobjectid":21,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.11.0",
