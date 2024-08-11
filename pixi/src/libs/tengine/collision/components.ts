@@ -210,7 +210,11 @@ export function rectangleColliderComponentSE(opts: {
 
   const clampedCosTheta = Math.max(-1, Math.min(1, cosTheta));
 
-  angle -= Math.acos(clampedCosTheta);
+  if (end.x < start.x) {
+    angle += Math.acos(clampedCosTheta);
+  } else {
+    angle -= Math.acos(clampedCosTheta);
+  }
 
   mutRotateVertices2Around(colliderVertices, angle + parentAngle, start);
 

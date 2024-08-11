@@ -34,7 +34,6 @@ export const transformCollider = (game: Game): System => {
       const angleT = tryTable(archetype, Angle);
 
       for (let j = 0; j < archetype.entities.length; j++) {
-        const entity = archetype.entities[j];
         const colliderSet = colliderSetT[j];
         const position = positionT[j];
 
@@ -46,12 +45,12 @@ export const transformCollider = (game: Game): System => {
         };
 
         for (const collider of colliderSet.parts) {
-          const angleDelta = collider.angle - collider._prev.angle;
           collider._prev.angle = collider.angle;
+          const angleDelta = collider.angle - collider._prev.angle;
 
-          const offsetDelta = subV2(collider.offset, collider._prev.offset);
           collider._prev.offset.x = collider.offset.x;
           collider._prev.offset.y = collider.offset.y;
+          const offsetDelta = subV2(collider.offset, collider._prev.offset);
 
           // # Apply offset change
           positionDelta.x += offsetDelta.x;

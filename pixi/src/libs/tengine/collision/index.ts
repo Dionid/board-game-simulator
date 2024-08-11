@@ -6,4 +6,5 @@ export * from './collider-transform';
 export * from './pairs';
 export * from './penetration-resolution';
 export * from './resolvers';
+export * from './query';
 export * from './awakening';

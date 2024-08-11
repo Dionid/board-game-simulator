@@ -54,7 +54,7 @@ export const drawDebug = (
 
   globalDebugGraphics.zIndex = 1000;
 
-  const strokeWidth = 2;
+  const strokeWidth = 1;
 
   return () => {
     globalDebugGraphics.clear();

@@ -1,7 +1,14 @@
 import { activateDebugMode } from 'libs/tengine/debug';
 import { newGame, initGame } from 'libs/tengine/game';
 import { Container } from 'pixi.js';
-import { componentByEntity, registerSystem, setComponent, spawnEntity } from 'libs/tecs';
+import {
+  componentByEntity,
+  newQuery,
+  registerQuery,
+  registerSystem,
+  setComponent,
+  spawnEntity,
+} from 'libs/tecs';
 import {
   awakening,
   checkNarrowCollisionSimple,
@@ -10,7 +17,6 @@ import {
   CollisionsMonitoring,
   filterCollisionEvents,
   penetrationResolution,
-  rectangleColliderComponent,
   transformCollider,
 } from 'libs/tengine/collision';
 import { addNewViews, drawViews, View } from 'libs/tengine/render';
@@ -28,12 +34,13 @@ import {
   dynamicRigidBodyCollisionResolution,
   Force2,
   Impulse2,
+  Kinematic,
   resetForce,
   resetImpulse,
   RigidBody,
 } from 'libs/tengine/physics';
 import { initMap } from './map';
-import { Player } from './logic';
+import { Player, playerMovement } from './logic';
 import {
   Position2,
   Speed,
@@ -42,27 +49,9 @@ import {
   Velocity2,
   resetMass,
   Mass,
-  KeyBoardInput,
 } from 'libs/tengine/core';
-import {
-  COLLIDER_GROUND_DETECTOR_TAG,
-  GroundDetection,
-  IsGrounded,
-  isGrounded,
-} from 'libs/tengine/controls';
+import { GroundDetection } from 'libs/tengine/controls';
 import { addCollisionMassToMass } from 'libs/tengine/collision/mass';
-
-const getXDirection = (keyboard: KeyBoardInput): number => {
-  if (keyboard.keyDown['ArrowRight'] || keyboard.keyDown['d']) {
-    return 1;
-  }
-
-  if (keyboard.keyDown['ArrowLeft'] || keyboard.keyDown['a']) {
-    return -1;
-  }
-
-  return 0;
-};
 
 export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
   const game = newGame({
@@ -77,11 +66,12 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
       // collision: false,
       view: false,
       velocity: false,
+      xy: false,
     },
-    // events: {
-    //   componentAdded: false,
-    //   componentRemoved: false,
-    // },
+    events: {
+      //   componentAdded: false,
+      //   componentRemoved: false,
+    },
   });
 
   await initGame(game, {
@@ -97,7 +87,7 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
   setComponent(game.essence, playerEntity, Player);
   const characterSize = {
     width: 16,
-    height: 16,
+    height: 32,
   };
   // ## View
   setComponent(game.essence, playerEntity, View, {
@@ -156,20 +146,7 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
         parentPosition: playerPosition,
         radius: playerRadius,
         mass: 1,
-      }),
-      rectangleColliderComponent({
-        parentPosition: playerPosition,
-        offset: {
-          x: 0,
-          y: playerRadius,
-        },
-        mass: 0,
-        type: 'sensor',
-        size: {
-          width: playerRadius * 2 - 2,
-          height: 2,
-        },
-        tags: [COLLIDER_GROUND_DETECTOR_TAG],
+        offset: { x: 0, y: playerRadius },
       }),
     ],
   });
@@ -178,8 +155,8 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
     elasticity: 0,
     elasticityMode: 'min',
   });
-  // setComponent(game.essence, playerEntity, Kinematic);
-  setComponent(game.essence, playerEntity, Dynamic);
+  setComponent(game.essence, playerEntity, Kinematic);
+  // setComponent(game.essence, playerEntity, Dynamic);
   setComponent(game.essence, playerEntity, AffectedByGravity, {
     scale: 0,
   });
@@ -199,36 +176,10 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
   registerSystem(game.essence, addCollisionMassToMass(game));
 
   // ## Fixed Update
-  registerSystem(game.essence, ({ deltaTime }) => {
-    const isGrounded = componentByEntity(game.essence, playerEntity, IsGrounded);
-    const acceleration = componentByEntity(game.essence, playerEntity, Acceleration2);
-    const velocity = componentByEntity(game.essence, playerEntity, Velocity2);
-    const position = componentByEntity(game.essence, playerEntity, Position2);
-    const speed = componentByEntity(game.essence, playerEntity, Speed);
-
-    if (!velocity || !acceleration || !position || !speed) {
-      return;
-    }
-
-    // # Simple gravity
-    velocity.y += 0.3 * deltaTime;
-
-    if (game.input.keyboard.keyDown['w']) {
-      if (isGrounded) {
-        velocity.y = -3 * deltaTime;
-      }
-    }
-
-    const directionX = getXDirection(game.input.keyboard);
-
-    velocity.x = speed.value * directionX * deltaTime;
-  });
-
-  // ## Is grounded
-  registerSystem(game.essence, isGrounded());
+  registerSystem(game.essence, playerMovement(game, playerEntity, characterSize));
 
   // ## Physics
-  // ### Gravity (goes before RB applies)
+  // ### Gravity
   registerSystem(game.essence, applyGravity(game, { x: 0, y: 0.01 }));
 
   // ### Move to new position

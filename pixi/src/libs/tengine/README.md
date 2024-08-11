@@ -2,7 +2,6 @@
 
 1. Remove mass calculation and change it to Mass component
 1. Scale (Collider + View)
-1. Remove collider._position
 1. Shape casting
 1. ...
 
@@ -17,6 +16,7 @@
 1. Collision
     1. Apply Scale
     1. Shape casting
+    1. Bounding Box
     1. Borrow phase
     1. CCD
     1. Ray & Shape casting (https://rapier.rs/docs/user_guides/rust/scene_queries/)

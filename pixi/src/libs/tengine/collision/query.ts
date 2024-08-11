@@ -1,5 +1,5 @@
-import { SchemaToType } from 'libs/tecs';
-import { Axis2, Vector2, Vertices2 } from '../core';
+import { Query, SchemaToType, table } from 'libs/tecs';
+import { Axis2, Vector2 } from '../core';
 import { Collider, ColliderBody, rectangleColliderComponentSE } from './components';
 import { collides } from './collision';
 import { DEBUG, globalDebugGraphicsDeferred } from '../debug';
@@ -99,76 +99,32 @@ export function castRay(
   return result;
 }
 
-export function castShape(
-  bodies: SchemaToType<typeof ColliderBody>[] | SchemaToType<typeof ColliderBody>,
-  shape: Vertices2,
+export const castRayByQuery = (
+  query: Query<[typeof ColliderBody]>,
+  start: Vector2,
   end: Vector2,
   opts: {
+    width?: number;
     stopOnFirst?: boolean;
   } = {}
-): CastingResult[] {
-  const stopOnFirst = opts.stopOnFirst ?? false;
+): CastingResult[] => {
+  const results = [];
 
-  // if (DEBUG.isActive) {
-  //   globalDebugGraphicsDeferred.push((graphics) => {
-  //     for (let i = 0; i < rayCollider._vertices.length; i++) {
-  //       const start = rayCollider._vertices[i];
-  //       const end = rayCollider._vertices[(i + 1) % rayCollider._vertices.length];
+  for (let i = 0; i < query.archetypes.length; i++) {
+    const archetype = query.archetypes[i];
 
-  //       graphics.moveTo(start.x, start.y);
-  //       graphics.lineTo(end.x, end.y);
-  //     }
-  //     graphics.stroke({ color: 'green' });
-  //   });
-  // }
+    const colliderBodies = table(archetype, ColliderBody);
 
-  const result: CastingResult[] = [];
+    const result = castRay(colliderBodies, start, end, opts);
 
-  // if (!Array.isArray(bodies)) {
-  //   for (let j = 0; j < bodies.parts.length; j++) {
-  //     const part = bodies.parts[j];
+    if (result.length > 0) {
+      results.push(...result);
 
-  //     let collision = collides(rayCollider, part);
+      if (opts.stopOnFirst) {
+        return results;
+      }
+    }
+  }
 
-  //     if (collision) {
-  //       result.push({
-  //         colliderBody: bodies,
-  //         collider: part,
-  //         overlap: collision.overlap,
-  //         axis: collision.axis,
-  //       });
-
-  //       if (stopOnFirst) {
-  //         return result;
-  //       }
-  //     }
-  //   }
-
-  // return result;
-  // }
-
-  // for (let i = 0; i < bodies.length; i++) {
-  //   const body = bodies[i];
-
-  //   for (let j = 0; j < body.parts.length; j++) {
-  //     const part = body.parts[j];
-
-  //     let collision = collides(rayCollider, part);
-
-  //     if (collision) {
-  //       result.push({
-  //         colliderBody: body,
-  //         collider: part,
-  //         overlap: collision.overlap,
-  //         axis: collision.axis,
-  //       });
-
-  //       if (stopOnFirst) {
-  //         return result;
-  //       }
-  //     }
-  //   }
-  // }
-
-  return result;
-}
+  return results;
+};
