@@ -1,13 +1,5 @@
 import { newQuery, System, registerQuery, table, tryTable } from 'libs/tecs';
-import {
-  Acceleration2,
-  Velocity2,
-  Position2,
-  Friction,
-  DisableFriction,
-  Mass,
-  round,
-} from '../core';
+import { Acceleration2, Velocity2, Position2, Friction, DisableFriction, Mass } from '../core';
 import { Game } from '../game';
 import { Force2, Impulse2, RigidBody } from './components';
 
@@ -80,7 +72,7 @@ export const applyRigidBodyImpulseToVelocity = (game: Game): System => {
         velocity.x += impulse.x / mass;
         velocity.y += impulse.y / mass;
 
-        // TODO: MOVE
+        // QUESTION: maybe move to another system (like applyRestrictions)
         if (velocity.max > 0) {
           if (velocity.x > velocity.max) {
             velocity.x = velocity.max;
@@ -141,7 +133,7 @@ export const applyRigidBodyAccelerationToVelocity = (game: Game): System => {
         velocity.x += acceleration.x * deltaTime;
         velocity.y += acceleration.y * deltaTime;
 
-        // TODO: MOVE
+        // QUESTION: maybe move to another system (like applyRestrictions)
         if (velocity.max > 0) {
           if (velocity.x > velocity.max) {
             velocity.x = velocity.max;

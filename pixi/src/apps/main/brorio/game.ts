@@ -161,17 +161,13 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
         parentPosition: playerPosition,
         offset: {
           x: 0,
-          y: playerRadius + 5,
+          y: playerRadius,
         },
         mass: 0,
         type: 'sensor',
-        // anchor: {
-        //   x: 0.5,
-        //   y: 0,
-        // },
         size: {
           width: playerRadius * 2 - 2,
-          height: 10,
+          height: 2,
         },
         tags: [COLLIDER_GROUND_DETECTOR_TAG],
       }),
@@ -214,17 +210,13 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
       return;
     }
 
-    // # Apply gravity based on is player grounded
-    if (isGrounded) {
-      acceleration.y = 0;
-      velocity.y = 0;
+    // # Simple gravity
+    velocity.y += 0.3 * deltaTime;
 
-      if (game.input.keyboard.keyDown['w']) {
+    if (game.input.keyboard.keyDown['w']) {
+      if (isGrounded) {
         velocity.y = -3 * deltaTime;
       }
-    } else {
-      // # Simulate gravity
-      velocity.y += 0.3 * deltaTime;
     }
 
     const directionX = getXDirection(game.input.keyboard);
