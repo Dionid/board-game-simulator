@@ -36,6 +36,10 @@ export function resolvePenetration(
   const bInvertedMass = inverseMass(bTotalMass);
   const combinedInvertedMass = aInvertedMass + bInvertedMass;
 
+  if (combinedInvertedMass === 0) {
+    return;
+  }
+
   const resolution = multV2(axis, overlap / combinedInvertedMass);
 
   const aPrevPosition = {
@@ -47,24 +51,31 @@ export function resolvePenetration(
     y: bPosition.y,
   };
 
-  mutAddV2(aPosition, multV2(resolution, aInvertedMass));
-  mutSubV2(bPosition, multV2(resolution, bInvertedMass));
+  // # Apply changes to position
+  if (aTotalMass > 0) {
+    mutAddV2(aPosition, multV2(resolution, aInvertedMass));
 
-  const aPositionDelta = {
-    x: aPosition.x - aPrevPosition.x,
-    y: aPosition.y - aPrevPosition.y,
-  };
+    const aPositionDelta = {
+      x: aPosition.x - aPrevPosition.x,
+      y: aPosition.y - aPrevPosition.y,
+    };
 
-  const bPositionDelta = {
-    x: bPosition.x - bPrevPosition.x,
-    y: bPosition.y - bPrevPosition.y,
-  };
-
-  for (const collider of aColliderSet.parts) {
-    translateCollider(collider, aPositionDelta);
+    // # Apply changes to colliders
+    for (const collider of aColliderSet.parts) {
+      translateCollider(collider, aPositionDelta);
+    }
   }
 
-  for (const collider of bColliderSet.parts) {
-    translateCollider(collider, bPositionDelta);
+  if (bTotalMass > 0) {
+    mutSubV2(bPosition, multV2(resolution, bInvertedMass));
+
+    const bPositionDelta = {
+      x: bPosition.x - bPrevPosition.x,
+      y: bPosition.y - bPrevPosition.y,
+    };
+
+    for (const collider of bColliderSet.parts) {
+      translateCollider(collider, bPositionDelta);
+    }
   }
 }

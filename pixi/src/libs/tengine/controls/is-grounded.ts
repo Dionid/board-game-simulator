@@ -42,16 +42,6 @@ export function isGrounded(): System {
         continue;
       }
 
-      // # We can't check for having IsGrounded, because we will not be able
-      // to reset to new ground from previous ground
-      //   const aIsGrounded = tryComponent(a.archetype, a.entity, IsGrounded);
-      //   const bIsGrounded = tryComponent(b.archetype, b.entity, IsGrounded);
-
-      //   // # If already grounded, skip
-      //   if (aIsGrounded || bIsGrounded) {
-      //     continue;
-      //   }
-
       const aGroundDetection = tryComponent(a.archetype, a.entity, GroundDetection);
       const bGroundDetection = tryComponent(b.archetype, b.entity, GroundDetection);
 
@@ -70,8 +60,6 @@ export function isGrounded(): System {
 
       const groundDetection = aGroundDetection ? a : b;
       const ground = aGround ? a : b;
-
-      console.log('Adding is grounded');
 
       setComponent(essence, groundDetection.entity, IsGrounded, {
         entity: ground.entity,
@@ -112,8 +100,6 @@ export function isGrounded(): System {
       if (isGroundedComponent.entity !== ground.entity) {
         continue;
       }
-
-      console.log('Removing is grounded');
 
       // # Remove IsGrounded component
       removeComponent(essence, isGroundedCollision.entity, IsGrounded);

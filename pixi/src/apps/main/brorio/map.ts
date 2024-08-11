@@ -4,7 +4,7 @@ import {
   rectangleColliderComponent,
   ColliderBody,
 } from 'libs/tengine/collision';
-import { Position2 } from 'libs/tengine/core';
+import { Mass, Position2 } from 'libs/tengine/core';
 import { Game } from 'libs/tengine/game';
 import { Container, Assets, Texture, TilingSprite } from 'pixi.js';
 import { DeathZone } from './logic';
@@ -147,6 +147,7 @@ export const initMap = async (game: Game) => {
       setComponent(game.essence, colliderEntity, ColliderBody, {
         parts,
       });
+      setComponent(game.essence, colliderEntity, Mass, { value: 0 });
       setComponent(game.essence, colliderEntity, RigidBody);
       setComponent(game.essence, colliderEntity, Static);
 

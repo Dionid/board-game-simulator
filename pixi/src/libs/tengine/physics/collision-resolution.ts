@@ -10,7 +10,6 @@ import { safeGuard } from 'libs/tecs/switch';
 // # Resolve Dynamic bodies Collision
 
 export const dynamicRigidBodyCollisionResolution = (game: Game): System => {
-  // const topic = registerTopic(game.essence, unfilteredColliding);
   const topic = registerTopic(game.essence, internalColliding);
 
   return () => {
@@ -72,10 +71,23 @@ export const dynamicRigidBodyCollisionResolution = (game: Game): System => {
         continue;
       }
 
+      let aTotalMass = 0;
+      if (aDynamic) {
+        for (let i = 0; i < a.colliderSet.parts.length; i++) {
+          aTotalMass += a.colliderSet.parts[i].mass;
+        }
+      }
+      let bTotalMass = 0;
+      if (bDynamic) {
+        for (let i = 0; i < b.colliderSet.parts.length; i++) {
+          bTotalMass += b.colliderSet.parts[i].mass;
+        }
+      }
+
       // # Resolve penetration
       resolvePenetration(axis, overlap, a.colliderSet, aPosition, b.colliderSet, bPosition, {
-        aMass: aDynamic ? undefined : 0, // force 0 mass for not Dynamic
-        bMass: bDynamic ? undefined : 0, // force 0 mass for not Dynamic
+        aMass: aTotalMass,
+        bMass: bTotalMass,
       });
 
       let aVelocity = componentByEntity(game.essence, a.entity, Velocity2);
@@ -122,18 +134,6 @@ export const dynamicRigidBodyCollisionResolution = (game: Game): System => {
         continue;
       }
 
-      let aTotalMass = 0;
-      if (aDynamic) {
-        for (let i = 0; i < a.colliderSet.parts.length; i++) {
-          aTotalMass += a.colliderSet.parts[i].mass;
-        }
-      }
-      let bTotalMass = 0;
-      if (bDynamic) {
-        for (let i = 0; i < b.colliderSet.parts.length; i++) {
-          bTotalMass += b.colliderSet.parts[i].mass;
-        }
-      }
       const aInvertedTotalMass = inverseMass(aTotalMass);
       const bInvertedTotalMass = inverseMass(bTotalMass);
       const combinedInvertedMass = aTotalMass + bTotalMass;
