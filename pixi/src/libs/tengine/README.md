@@ -1,6 +1,7 @@
 # TODO
 
 1. Remove mass calculation and change it to Mass component
+1. ??? Do i need to have collider._position (also with joint case)
 1. ...
 
 # Roadmap

@@ -14,8 +14,12 @@ import {
   circleColliderComponent,
   ColliderBody,
   CollisionsMonitoring,
+  collisionStartedTopic,
   filterCollisionEvents,
+  Impenetrable,
+  penetrationResolution,
   rectangleColliderComponent,
+  resolvePenetration,
   transformCollider,
 } from 'libs/tengine/collision';
 import { addNewViews, drawViews, View } from 'libs/tengine/render';
@@ -29,6 +33,8 @@ import {
   applyRigidBodyFriction,
   applyRigidBodyImpulseToVelocity,
   applyRigidBodyVelocityToPosition,
+  Dynamic,
+  dynamicRigidBodyCollisionResolution,
   Force2,
   Impulse2,
   Kinematic,
@@ -63,7 +69,12 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
     },
   });
 
-  activateDebugMode(game);
+  activateDebugMode(game, {
+    render: {
+      collision: false,
+      view: false,
+    },
+  });
 
   await initGame(game, {
     backgroundColor: 0x000000,
@@ -108,7 +119,7 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
   };
   setComponent(game.essence, playerEntity, Position2, playerPosition);
   setComponent(game.essence, playerEntity, Mass, { value: 0 });
-  setComponent(game.essence, playerEntity, Speed, { value: 1 });
+  setComponent(game.essence, playerEntity, Speed, { value: 0 });
   setComponent(game.essence, playerEntity, Force2, {
     x: 0,
     y: 0,
@@ -136,6 +147,7 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
       circleColliderComponent({
         parentPosition: playerPosition,
         radius: playerRadius,
+        mass: 1,
       }),
       rectangleColliderComponent({
         parentPosition: playerPosition,
@@ -147,19 +159,21 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
         type: 'sensor',
         size: {
           width: playerRadius * 2,
-          height: 1,
+          height: 5,
         },
         tags: [COLLIDER_GROUND_DETECTOR_TAG],
       }),
     ],
   });
+  setComponent(game.essence, playerEntity, Impenetrable);
   setComponent(game.essence, playerEntity, RigidBody, {
     elasticity: 0,
-    elasticityMode: 'average',
+    elasticityMode: 'min',
   });
   setComponent(game.essence, playerEntity, Kinematic);
+  // setComponent(game.essence, playerEntity, Dynamic);
   setComponent(game.essence, playerEntity, AffectedByGravity, {
-    scale: 1,
+    scale: 0,
   });
   setComponent(game.essence, playerEntity, GroundDetection);
 
@@ -176,35 +190,42 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
   // ## Pre calcs
   registerSystem(game.essence, addCollisionMassToMass(game));
 
-  // ## Gravity
+  // ## Fixed Update
+  registerSystem(game.essence, () => {
+    const isGrounded = componentByEntity(game.essence, playerEntity, IsGrounded);
+    const acceleration = componentByEntity(game.essence, playerEntity, Acceleration2);
+    const velocity = componentByEntity(game.essence, playerEntity, Velocity2);
+    const position = componentByEntity(game.essence, playerEntity, Position2);
+
+    if (!velocity || !acceleration || !position) {
+      return;
+    }
+    // # Apply gravity based on is player grounded
+    if (isGrounded) {
+      acceleration.y = 0;
+      velocity.y = 0;
+    } else {
+      velocity.y = 3;
+    }
+  });
+
+  // ## Is grounded
+  registerSystem(game.essence, isGrounded());
+
+  // ## Physics
+  // ### Gravity
   registerSystem(game.essence, applyGravity(game, { x: 0, y: 0.01 }));
 
-  // ## Move to new position
+  // ### Move to new position
   registerSystem(game.essence, applyRigidBodyForceToAcceleration(game));
   registerSystem(game.essence, applyRigidBodyImpulseToVelocity(game));
   registerSystem(game.essence, applyRigidBodyAccelerationToVelocity(game));
   registerSystem(game.essence, applyRigidBodyFriction(game, 0.01));
   registerSystem(game.essence, applyRigidBodyVelocityToPosition(game));
 
-  // ## Reset physics props
+  // ### Reset physics props
   registerSystem(game.essence, resetForce(game));
   registerSystem(game.essence, resetImpulse(game));
-
-  // ## Game logic
-  registerSystem(game.essence, () => {
-    const isGroundedC = componentByEntity(game.essence, playerEntity, IsGrounded);
-    const acceleration = componentByEntity(game.essence, playerEntity, Acceleration2);
-    const velocity = componentByEntity(game.essence, playerEntity, Velocity2);
-
-    if (!isGroundedC || !acceleration || !velocity) {
-      return;
-    }
-
-    // # Remove gravity if grounded
-    removeComponent(game.essence, playerEntity, AffectedByGravity);
-    velocity.y = 0;
-    acceleration.y = 0;
-  });
 
   // ## Collision
   // ### Transform
@@ -214,9 +235,8 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
   registerSystem(game.essence, awakening(game));
   registerSystem(game.essence, checkNarrowCollisionSimple(game));
   registerSystem(game.essence, filterCollisionEvents(game));
-
-  // ## Is grounded
-  registerSystem(game.essence, isGrounded());
+  registerSystem(game.essence, penetrationResolution(game));
+  registerSystem(game.essence, dynamicRigidBodyCollisionResolution(game));
 
   // ## Render
   const viewContainer = new Container();

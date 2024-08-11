@@ -14,6 +14,11 @@ export const penetrationResolution = (game: Game): System => {
     for (const event of topic) {
       const { a, b, overlap } = event;
 
+      // # We only resolve penetration between solid objects
+      if (a.collider.type !== 'solid' && b.collider.type !== 'solid') {
+        continue;
+      }
+
       const index = [a, b]
         .sort((a, b) => {
           return a.entity - b.entity;
@@ -33,11 +38,6 @@ export const penetrationResolution = (game: Game): System => {
       const event = minOverlapCollisionEvents[eventInd];
 
       const { a, b, overlap, axis } = event;
-
-      // # We only resolve penetration between solid objects
-      if (a.collider.type !== 'solid' && b.collider.type !== 'solid') {
-        continue;
-      }
 
       const aImpenetrable = componentByEntity(game.essence, a.entity, Impenetrable);
       const bImpenetrable = componentByEntity(game.essence, b.entity, Impenetrable);
