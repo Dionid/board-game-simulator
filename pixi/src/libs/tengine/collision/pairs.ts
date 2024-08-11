@@ -3,17 +3,17 @@ import { Game } from '../game';
 import {
   collisionEndedTopic,
   collisionStartedTopic,
-  internalColliding,
+  immediateColliding,
   CollidingEvent,
-  internalUnfilteredColliding,
+  immediateUnfilteredColliding,
   colliding,
 } from './topics';
 
 export type CollidingPairsIndex = Record<string, CollidingEvent>;
 
 export const filterCollisionEvents = (game: Game): System => {
-  const unfilteredCollidingT = registerTopic(game.essence, internalUnfilteredColliding);
-  const internalCollidingT = registerTopic(game.essence, internalColliding);
+  const unfilteredCollidingT = registerTopic(game.essence, immediateUnfilteredColliding);
+  const internalCollidingT = registerTopic(game.essence, immediateColliding);
   const collidingT = registerTopic(game.essence, colliding);
   const collideStartedTopicT = registerTopic(game.essence, collisionStartedTopic);
   const collideEndedTopicT = registerTopic(game.essence, collisionEndedTopic);

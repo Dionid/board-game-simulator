@@ -1,12 +1,12 @@
 import { componentByEntity, registerTopic, System } from 'libs/tecs';
 import { Game } from '../game';
 import { Position2 } from '../core';
-import { CollidingEvent, internalColliding } from './topics';
+import { CollidingEvent, immediateColliding } from './topics';
 import { ColliderBody, Impenetrable } from './components';
 import { resolvePenetration } from './resolvers';
 
 export const penetrationResolution = (game: Game): System => {
-  const topic = registerTopic(game.essence, internalColliding);
+  const topic = registerTopic(game.essence, immediateColliding);
 
   return () => {
     const minOverlapCollisionEvents: Record<string, CollidingEvent> = {};

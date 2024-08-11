@@ -1,25 +1,16 @@
 import { activateDebugMode } from 'libs/tengine/debug';
 import { newGame, initGame } from 'libs/tengine/game';
 import { Container } from 'pixi.js';
-import {
-  componentByEntity,
-  registerSystem,
-  removeComponent,
-  setComponent,
-  spawnEntity,
-} from 'libs/tecs';
+import { componentByEntity, registerSystem, setComponent, spawnEntity } from 'libs/tecs';
 import {
   awakening,
   checkNarrowCollisionSimple,
   circleColliderComponent,
   ColliderBody,
   CollisionsMonitoring,
-  collisionStartedTopic,
   filterCollisionEvents,
-  Impenetrable,
   penetrationResolution,
   rectangleColliderComponent,
-  resolvePenetration,
   transformCollider,
 } from 'libs/tengine/collision';
 import { addNewViews, drawViews, View } from 'libs/tengine/render';
@@ -33,7 +24,6 @@ import {
   applyRigidBodyFriction,
   applyRigidBodyImpulseToVelocity,
   applyRigidBodyVelocityToPosition,
-  Dynamic,
   dynamicRigidBodyCollisionResolution,
   Force2,
   Impulse2,
@@ -158,14 +148,14 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
         mass: 0,
         type: 'sensor',
         size: {
-          width: playerRadius * 2,
-          height: 5,
+          width: playerRadius * 2 + 1,
+          height: 1,
         },
         tags: [COLLIDER_GROUND_DETECTOR_TAG],
       }),
     ],
   });
-  setComponent(game.essence, playerEntity, Impenetrable);
+  // setComponent(game.essence, playerEntity, Impenetrable);
   setComponent(game.essence, playerEntity, RigidBody, {
     elasticity: 0,
     elasticityMode: 'min',
@@ -205,7 +195,7 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
       acceleration.y = 0;
       velocity.y = 0;
     } else {
-      velocity.y = 3;
+      velocity.y = 2;
     }
   });
 

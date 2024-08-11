@@ -2,7 +2,7 @@ import { newQuery, registerQuery, Entity, KindToType, System, table, emit } from
 import { Position2 } from '../core/types';
 import { Game } from '../game';
 import { Awaken, Collider, ColliderBody, CollisionsMonitoring } from './components';
-import { internalUnfilteredColliding } from './topics';
+import { immediateUnfilteredColliding } from './topics';
 import { collides, CollisionResult } from './collision';
 import { Archetype } from 'libs/tecs/archetype';
 
@@ -110,7 +110,7 @@ export const checkNarrowCollisionSimple = (game: Game, awakened: boolean = true)
           for (let i = 0; i < partsCollisionList.length; i++) {
             const collision = partsCollisionList[i];
             emit(
-              internalUnfilteredColliding,
+              immediateUnfilteredColliding,
               {
                 name: 'colliding',
                 overlap: collision.overlap,

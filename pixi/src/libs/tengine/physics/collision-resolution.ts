@@ -1,16 +1,16 @@
 import { componentByEntity, registerTopic, System } from '../../tecs';
 import { Game } from '../game';
 import { Position2 } from '../core/types';
-import { Impenetrable, resolvePenetration, internalColliding } from '../collision';
+import { Impenetrable, resolvePenetration, immediateColliding } from '../collision';
 import { Dynamic, Kinematic, RigidBody, Static } from './components';
-import { dotV2, multV2, subV2, Velocity2 } from '../core';
+import { dotV2, Mass, multV2, subV2, Velocity2 } from '../core';
 import { inverseMass } from '../collision/math';
 import { safeGuard } from 'libs/tecs/switch';
 
 // # Resolve Dynamic bodies Collision
 
 export const dynamicRigidBodyCollisionResolution = (game: Game): System => {
-  const topic = registerTopic(game.essence, internalColliding);
+  const topic = registerTopic(game.essence, immediateColliding);
 
   return () => {
     for (const event of topic) {
@@ -71,23 +71,17 @@ export const dynamicRigidBodyCollisionResolution = (game: Game): System => {
         continue;
       }
 
-      let aTotalMass = 0;
-      if (aDynamic) {
-        for (let i = 0; i < a.colliderSet.parts.length; i++) {
-          aTotalMass += a.colliderSet.parts[i].mass;
-        }
-      }
-      let bTotalMass = 0;
-      if (bDynamic) {
-        for (let i = 0; i < b.colliderSet.parts.length; i++) {
-          bTotalMass += b.colliderSet.parts[i].mass;
-        }
+      const aTotalMass = componentByEntity(game.essence, a.entity, Mass);
+      const bTotalMass = componentByEntity(game.essence, b.entity, Mass);
+
+      if (!aTotalMass || !bTotalMass) {
+        continue;
       }
 
       // # Resolve penetration
       resolvePenetration(axis, overlap, a.colliderSet, aPosition, b.colliderSet, bPosition, {
-        aMass: aTotalMass,
-        bMass: bTotalMass,
+        aMass: aTotalMass.value,
+        bMass: bTotalMass.value,
       });
 
       let aVelocity = componentByEntity(game.essence, a.entity, Velocity2);
@@ -134,9 +128,11 @@ export const dynamicRigidBodyCollisionResolution = (game: Game): System => {
         continue;
       }
 
-      const aInvertedTotalMass = inverseMass(aTotalMass);
-      const bInvertedTotalMass = inverseMass(bTotalMass);
-      const combinedInvertedMass = aTotalMass + bTotalMass;
+      const aInvertedTotalMass = inverseMass(aTotalMass.value);
+      const bInvertedTotalMass = inverseMass(bTotalMass.value);
+      const combinedInvertedMass = aInvertedTotalMass + bInvertedTotalMass;
+
+      debugger;
 
       // # If both bodies have infinite mass, skip
       if (combinedInvertedMass === 0) {

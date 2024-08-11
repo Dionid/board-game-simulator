@@ -71,6 +71,14 @@ export function isGrounded(): System {
     for (const event of collisionEndedTopic) {
       const { a, b } = event;
 
+      // # If colliding collider is not ground detector, skip
+      if (
+        !a.collider.tags.some((t) => t === COLLIDER_GROUND_DETECTOR_TAG) &&
+        !b.collider.tags.some((t) => t === COLLIDER_GROUND_DETECTOR_TAG)
+      ) {
+        continue;
+      }
+
       const aIsGrounded = tryComponent(a.archetype, a.entity, IsGrounded);
       const bIsGrounded = tryComponent(b.archetype, b.entity, IsGrounded);
 

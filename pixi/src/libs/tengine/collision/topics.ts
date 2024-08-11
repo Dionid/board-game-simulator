@@ -24,10 +24,10 @@ export type CollidingEvent = {
 };
 
 // # Unfiltered colliding events
-export const internalUnfilteredColliding = newTopic<CollidingEvent>();
+export const immediateUnfilteredColliding = newTopic<CollidingEvent>();
 
 // # Deduped colliding events
-export const internalColliding = newTopic<CollidingEvent>();
+export const immediateColliding = newTopic<CollidingEvent>();
 
 // # Deduped colliding events
 export const colliding = newTopic<CollidingEvent>();
