@@ -1,4 +1,5 @@
 import {
+  immediately,
   newQuery,
   registerQuery,
   removeComponent,
@@ -18,7 +19,7 @@ export function awakening(game: Game): System {
 
   const awakenedIndex: number[] = [];
 
-  return () => {
+  return ({ essence }) => {
     for (let i = 0; i < query.archetypes.length; i++) {
       const archetype = query.archetypes[i];
 
@@ -58,14 +59,14 @@ export function awakening(game: Game): System {
           awakenedIndex[entity] = 1;
 
           if (!isAwake) {
-            setComponent(game.essence, entity, Awaken);
+            immediately(essence, () => setComponent(essence, entity, Awaken));
           }
 
           continue;
         }
 
         if (mustGoToSleep) {
-          removeComponent(game.essence, entity, Awaken);
+          immediately(essence, () => removeComponent(essence, entity, Awaken));
         }
       }
     }
