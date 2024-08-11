@@ -269,18 +269,21 @@ export function scoring(
     for (const event of collisionStartedTopic) {
       const { a, b } = event;
 
-      const aGoalsT = tryTable(a.archetype, Goals);
-      const aBallT = tryTable(a.archetype, Ball);
-      const bGoalsT = tryTable(b.archetype, Goals);
-      const bBallT = tryTable(b.archetype, Ball);
+      const aArchetype = archetypeByEntity(game.essence, a.entity);
+      const bArchetype = archetypeByEntity(game.essence, b.entity);
+
+      const aGoalsT = tryTable(aArchetype, Goals);
+      const aBallT = tryTable(aArchetype, Ball);
+      const bGoalsT = tryTable(bArchetype, Goals);
+      const bBallT = tryTable(bArchetype, Ball);
 
       // # If none are goals or ball, than ignore
       if ((aBallT && bGoalsT) || (aGoalsT && bBallT)) {
         const ball = aBallT ? a : b;
         const goals = aGoalsT ? a : b;
 
-        const isPlayerGoals = tryComponent(goals.archetype, goals.entity, PlayerGoals);
-        const isEnemyGoals = tryComponent(goals.archetype, goals.entity, EnemyGoals);
+        const isPlayerGoals = componentByEntity(game.essence, goals.entity, PlayerGoals);
+        const isEnemyGoals = componentByEntity(game.essence, goals.entity, EnemyGoals);
 
         if (isPlayerGoals) {
           uiState.set(scores, (prev) => {
@@ -345,8 +348,8 @@ export function scoring(
         }
 
         // # Reset ball
-        const ballVelocity = tryComponent(ball.archetype, ball.entity, Velocity2)!;
-        const ballAcceleration = tryComponent(ball.archetype, ball.entity, Acceleration2)!;
+        const ballVelocity = componentByEntity(game.essence, ball.entity, Velocity2)!;
+        const ballAcceleration = componentByEntity(game.essence, ball.entity, Acceleration2)!;
 
         // # Reset characters
         const playerVelocity = componentByEntity(game.essence, playerEntity, Velocity2)!;
@@ -602,8 +605,8 @@ export const ballPaddleCollided = (
         return;
       }
 
-      const characterVelocity = tryComponent(character.archetype, character.entity, Velocity2);
-      const ballVelocity = tryComponent(ball.archetype, ball.entity, Velocity2);
+      const characterVelocity = componentByEntity(game.essence, character.entity, Velocity2);
+      const ballVelocity = componentByEntity(game.essence, ball.entity, Velocity2);
 
       // # Add paddle y velocity to ball to make paddle movement more angular impactful
       if (characterVelocity && ballVelocity) {

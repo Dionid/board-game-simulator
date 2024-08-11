@@ -24,10 +24,10 @@ import {
   applyRigidBodyFriction,
   applyRigidBodyImpulseToVelocity,
   applyRigidBodyVelocityToPosition,
+  Dynamic,
   dynamicRigidBodyCollisionResolution,
   Force2,
   Impulse2,
-  Kinematic,
   resetForce,
   resetImpulse,
   RigidBody,
@@ -42,6 +42,7 @@ import {
   Velocity2,
   resetMass,
   Mass,
+  KeyBoardInput,
 } from 'libs/tengine/core';
 import {
   COLLIDER_GROUND_DETECTOR_TAG,
@@ -50,6 +51,18 @@ import {
   isGrounded,
 } from 'libs/tengine/controls';
 import { addCollisionMassToMass } from 'libs/tengine/collision/mass';
+
+const getXDirection = (keyboard: KeyBoardInput): number => {
+  if (keyboard.keyDown['ArrowRight'] || keyboard.keyDown['d']) {
+    return 1;
+  }
+
+  if (keyboard.keyDown['ArrowLeft'] || keyboard.keyDown['a']) {
+    return -1;
+  }
+
+  return 0;
+};
 
 export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
   const game = newGame({
@@ -61,9 +74,14 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
 
   activateDebugMode(game, {
     render: {
-      collision: false,
+      // collision: false,
       view: false,
+      velocity: false,
     },
+    // events: {
+    //   componentAdded: false,
+    //   componentRemoved: false,
+    // },
   });
 
   await initGame(game, {
@@ -100,7 +118,7 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
   // ## Position
   const initialPlayerPosition = {
     x: 50,
-    y: 100,
+    y: 50,
   };
   const playerPosition = {
     x: initialPlayerPosition.x,
@@ -109,7 +127,7 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
   };
   setComponent(game.essence, playerEntity, Position2, playerPosition);
   setComponent(game.essence, playerEntity, Mass, { value: 0 });
-  setComponent(game.essence, playerEntity, Speed, { value: 0 });
+  setComponent(game.essence, playerEntity, Speed, { value: 2 });
   setComponent(game.essence, playerEntity, Force2, {
     x: 0,
     y: 0,
@@ -143,13 +161,17 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
         parentPosition: playerPosition,
         offset: {
           x: 0,
-          y: playerRadius,
+          y: playerRadius + 5,
         },
         mass: 0,
         type: 'sensor',
+        // anchor: {
+        //   x: 0.5,
+        //   y: 0,
+        // },
         size: {
-          width: playerRadius * 2 + 1,
-          height: 1,
+          width: playerRadius * 2 - 2,
+          height: 10,
         },
         tags: [COLLIDER_GROUND_DETECTOR_TAG],
       }),
@@ -160,8 +182,8 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
     elasticity: 0,
     elasticityMode: 'min',
   });
-  setComponent(game.essence, playerEntity, Kinematic);
-  // setComponent(game.essence, playerEntity, Dynamic);
+  // setComponent(game.essence, playerEntity, Kinematic);
+  setComponent(game.essence, playerEntity, Dynamic);
   setComponent(game.essence, playerEntity, AffectedByGravity, {
     scale: 0,
   });
@@ -181,29 +203,40 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
   registerSystem(game.essence, addCollisionMassToMass(game));
 
   // ## Fixed Update
-  registerSystem(game.essence, () => {
+  registerSystem(game.essence, ({ deltaTime }) => {
     const isGrounded = componentByEntity(game.essence, playerEntity, IsGrounded);
     const acceleration = componentByEntity(game.essence, playerEntity, Acceleration2);
     const velocity = componentByEntity(game.essence, playerEntity, Velocity2);
     const position = componentByEntity(game.essence, playerEntity, Position2);
+    const speed = componentByEntity(game.essence, playerEntity, Speed);
 
-    if (!velocity || !acceleration || !position) {
+    if (!velocity || !acceleration || !position || !speed) {
       return;
     }
+
     // # Apply gravity based on is player grounded
     if (isGrounded) {
       acceleration.y = 0;
       velocity.y = 0;
+
+      if (game.input.keyboard.keyDown['w']) {
+        velocity.y = -3 * deltaTime;
+      }
     } else {
-      velocity.y = 2;
+      // # Simulate gravity
+      velocity.y += 0.3 * deltaTime;
     }
+
+    const directionX = getXDirection(game.input.keyboard);
+
+    velocity.x = speed.value * directionX * deltaTime;
   });
 
   // ## Is grounded
   registerSystem(game.essence, isGrounded());
 
   // ## Physics
-  // ### Gravity
+  // ### Gravity (goes before RB applies)
   registerSystem(game.essence, applyGravity(game, { x: 0, y: 0.01 }));
 
   // ### Move to new position

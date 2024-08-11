@@ -1,5 +1,13 @@
 import { newQuery, System, registerQuery, table, tryTable } from 'libs/tecs';
-import { Acceleration2, Velocity2, Position2, Friction, DisableFriction, Mass } from '../core';
+import {
+  Acceleration2,
+  Velocity2,
+  Position2,
+  Friction,
+  DisableFriction,
+  Mass,
+  round,
+} from '../core';
 import { Game } from '../game';
 import { Force2, Impulse2, RigidBody } from './components';
 
@@ -179,8 +187,8 @@ export const applyRigidBodyFriction = (game: Game, fixedFriction: number = 0): S
 
         const appliedFriction = calculatedFriction < 0 ? 0 : calculatedFriction;
 
-        velocity.x *= appliedFriction * deltaTime;
-        velocity.y *= appliedFriction * deltaTime;
+        velocity.x = velocity.x * appliedFriction * deltaTime;
+        velocity.y = velocity.y * appliedFriction * deltaTime;
       }
     }
   };

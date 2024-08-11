@@ -1,4 +1,5 @@
 import {
+  archetypeByEntity,
   newSchema,
   newTag,
   number,
@@ -30,6 +31,8 @@ export function isGrounded(): System {
     for (const event of collisionStartedTopic) {
       const { a, b } = event;
 
+      console.log('collisionStartedTopic', event);
+
       const aIsGroundDetectorCollider = a.collider.tags.some(
         (t) => t === COLLIDER_GROUND_DETECTOR_TAG
       );
@@ -42,16 +45,19 @@ export function isGrounded(): System {
         continue;
       }
 
-      const aGroundDetection = tryComponent(a.archetype, a.entity, GroundDetection);
-      const bGroundDetection = tryComponent(b.archetype, b.entity, GroundDetection);
+      const aArchetype = archetypeByEntity(essence, a.entity);
+      const bArchetype = archetypeByEntity(essence, b.entity);
+
+      const aGroundDetection = tryComponent(aArchetype, a.entity, GroundDetection);
+      const bGroundDetection = tryComponent(bArchetype, b.entity, GroundDetection);
 
       // # If non has ground detection or both has ground detection, skip
       if ((!aGroundDetection && !bGroundDetection) || (aGroundDetection && bGroundDetection)) {
         continue;
       }
 
-      const aGround = tryComponent(a.archetype, a.entity, Ground);
-      const bGround = tryComponent(b.archetype, b.entity, Ground);
+      const aGround = tryComponent(aArchetype, a.entity, Ground);
+      const bGround = tryComponent(bArchetype, b.entity, Ground);
 
       // # If both are ground or both are not ground, skip
       if ((aGround && bGround) || (!aGround && !bGround)) {
@@ -71,6 +77,8 @@ export function isGrounded(): System {
     for (const event of collisionEndedTopic) {
       const { a, b } = event;
 
+      console.log('collisionEndedTopic', event);
+
       // # If colliding collider is not ground detector, skip
       if (
         !a.collider.tags.some((t) => t === COLLIDER_GROUND_DETECTOR_TAG) &&
@@ -79,8 +87,11 @@ export function isGrounded(): System {
         continue;
       }
 
-      const aIsGrounded = tryComponent(a.archetype, a.entity, IsGrounded);
-      const bIsGrounded = tryComponent(b.archetype, b.entity, IsGrounded);
+      const aArchetype = archetypeByEntity(essence, a.entity);
+      const bArchetype = archetypeByEntity(essence, b.entity);
+
+      const aIsGrounded = tryComponent(aArchetype, a.entity, IsGrounded);
+      const bIsGrounded = tryComponent(bArchetype, b.entity, IsGrounded);
 
       // # If not already grounded, skip
       if (!aIsGrounded && !bIsGrounded) {
@@ -93,8 +104,8 @@ export function isGrounded(): System {
         continue;
       }
 
-      const aGround = tryComponent(a.archetype, a.entity, Ground);
-      const bGround = tryComponent(b.archetype, b.entity, Ground);
+      const aGround = tryComponent(aArchetype, a.entity, Ground);
+      const bGround = tryComponent(bArchetype, b.entity, Ground);
 
       // # If both are ground or both are not ground, skip
       if ((aGround && bGround) || (!aGround && !bGround)) {

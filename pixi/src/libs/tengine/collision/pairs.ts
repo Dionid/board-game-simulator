@@ -1,5 +1,6 @@
-import { registerTopic, System, Topic } from '../../tecs';
+import { componentByEntity, registerTopic, System, Topic } from '../../tecs';
 import { Game } from '../game';
+import { Awaken } from './components';
 import {
   collisionEndedTopic,
   collisionStartedTopic,
@@ -48,8 +49,15 @@ export const filterCollisionEvents = (game: Game): System => {
 
     for (const index in pairs) {
       if (!temp[index]) {
-        Topic.emit(collideEndedTopicT, pairs[index]);
-        delete pairs[index];
+        const { a, b } = pairs[index];
+
+        const aIsAwaken = componentByEntity(game.essence, a.entity, Awaken);
+        const bIsAwaken = componentByEntity(game.essence, b.entity, Awaken);
+
+        if (aIsAwaken || bIsAwaken) {
+          Topic.emit(collideEndedTopicT, pairs[index]);
+          delete pairs[index];
+        }
       }
     }
 

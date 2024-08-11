@@ -1,4 +1,3 @@
-import { Archetype } from 'libs/tecs/archetype';
 import { Entity, KindToType, newTopic } from '../../tecs';
 import { Vector2 } from '../core';
 import { Collider, ColliderBody } from './components';
@@ -8,14 +7,12 @@ export type CollidingEvent = {
   overlap: number;
   axis: Vector2;
   a: {
-    archetype: Archetype;
     entity: Entity;
     colliderSet: KindToType<typeof ColliderBody>;
     collider: KindToType<typeof Collider>;
     colliderId: number;
   };
   b: {
-    archetype: Archetype;
     entity: Entity;
     colliderSet: KindToType<typeof ColliderBody>;
     collider: KindToType<typeof Collider>;
