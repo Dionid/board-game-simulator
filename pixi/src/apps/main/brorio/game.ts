@@ -58,7 +58,8 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
 
   activateDebugMode(game, {
     render: {
-      // collision: false,
+      collision: false,
+      castings: false,
       view: false,
       velocity: false,
       xy: false,

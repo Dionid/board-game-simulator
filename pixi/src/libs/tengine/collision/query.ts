@@ -37,7 +37,7 @@ export function castRay(
 
   if (DEBUG.isActive) {
     globalDebugGraphicsDeferred.push((graphics, options) => {
-      if (options.collision) {
+      if (options.castings) {
         for (let i = 0; i < rayCollider._vertices.length; i++) {
           const start = rayCollider._vertices[i];
           const end = rayCollider._vertices[(i + 1) % rayCollider._vertices.length];

@@ -18,7 +18,7 @@ import {
   Vector2,
 } from 'libs/tengine/core';
 import { Game } from 'libs/tengine/game';
-import { castShapeAndTakeMaxOverlap } from './character-controller';
+import { castShapeAndTakeSolidMaxOverlap } from './character-controller';
 
 export const DeathZone = newTag();
 export const Player = newTag();
@@ -60,8 +60,12 @@ export const playerMovement = (
   const maxStairsHeight = 16;
   const minStairsWidth = 16;
 
+  // ## Snap to ground
+  const snapToGroundHeight = 16.1;
+
   // # Arcade physics
   // ## Coyote jump
+  let wasGrounded = false;
   let lastGroundedTime = 0;
   let lastJumpTime = 0;
 
@@ -88,7 +92,7 @@ export const playerMovement = (
         y: position.y + characterSize.height / 2 + skinWidth + groundYOffset,
       },
       {
-        width: characterSize.width - 2,
+        width: characterSize.width - skinWidth,
       }
     );
 
@@ -130,6 +134,32 @@ export const playerMovement = (
       }
     }
 
+    // # Snap to ground
+    if (snapToGroundHeight > 0 && !isGrounded && wasGrounded && velocity.y > 0) {
+      const [stgMaxOverlap] = castShapeAndTakeSolidMaxOverlap(
+        colliderBodiesQ,
+        {
+          x: position.x,
+          y: position.y + (characterSize.height / 2 + skinWidth) * -up.y,
+        },
+        {
+          x: position.x,
+          y: position.y + (characterSize.height / 2 + skinWidth + snapToGroundHeight) * -up.y,
+        },
+        {
+          width: characterSize.width - skinWidth,
+        }
+      );
+
+      console.log(stgMaxOverlap);
+
+      if (stgMaxOverlap !== 0) {
+        position.y += (snapToGroundHeight - skinWidth - stgMaxOverlap) * -up.y;
+        velocity.y = 0;
+        isGrounded = true;
+      }
+    }
+
     // # Move X
     const directionX = getXDirection(game.input.keyboard);
 
@@ -140,7 +170,7 @@ export const playerMovement = (
 
       const startX = position.x + (characterSize.width / 2 + skinWidth) * directionSign;
 
-      let [maxOverlap] = castShapeAndTakeMaxOverlap(
+      let [maxOverlap] = castShapeAndTakeSolidMaxOverlap(
         colliderBodiesQ,
         {
           x: startX,
@@ -196,6 +226,7 @@ export const playerMovement = (
         continue;
       }
 
+      // # Death zone
       if (!player.collider.tags.includes('hitbox')) {
         continue;
       }
@@ -210,5 +241,7 @@ export const playerMovement = (
         lastJumpTime = 0;
       }
     }
+
+    wasGrounded = isGrounded;
   };
 };

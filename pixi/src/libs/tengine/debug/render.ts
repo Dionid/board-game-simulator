@@ -29,6 +29,7 @@ export type DebugOptions = {
   view?: boolean;
   xy?: boolean;
   collision?: boolean;
+  castings?: boolean;
   velocity?: boolean;
   acceleration?: boolean;
 };
@@ -40,6 +41,7 @@ export const drawDebug = (game: Game, options: DebugOptions = {}): System => {
     collision: true,
     velocity: true,
     acceleration: true,
+    castings: true,
     ...options,
   };
 
