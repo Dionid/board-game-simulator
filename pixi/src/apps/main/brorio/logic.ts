@@ -44,24 +44,29 @@ export const playerMovement = (
   initialPosition: Vector2,
   options: {
     autostep?: boolean;
+    up?: Vector2;
+    skinWidth?: number;
+    maxStairsHeight?: number;
+    minStairsWidth?: number;
+    snapToGroundHeight?: number;
   } = {}
 ): System => {
   const colliderBodiesQ = registerQuery(game.essence, newQuery(ColliderBody));
 
   // # General char controller
   // ## UP vector
-  const up = { x: 0, y: -1 };
+  const up = options.up ?? { x: 0, y: -1 };
 
   // ## Skin
-  const skinWidth = 0.1;
+  const skinWidth = options.skinWidth ?? 0.1;
 
   // ## Stairs
-  const autostep = options.autostep ?? true;
-  const maxStairsHeight = 16;
-  const minStairsWidth = 16;
+  const autostep = options.autostep ?? false;
+  const maxStairsHeight = options.maxStairsHeight ?? 0;
+  const minStairsWidth = options.minStairsWidth ?? 0;
 
   // ## Snap to ground
-  const snapToGroundHeight = 16.1;
+  const snapToGroundHeight = options.snapToGroundHeight ?? 0;
 
   // # Arcade physics
   // ## Coyote jump
@@ -92,7 +97,7 @@ export const playerMovement = (
         y: position.y + characterSize.height / 2 + skinWidth + groundYOffset,
       },
       {
-        width: characterSize.width - skinWidth,
+        width: characterSize.width,
       }
     );
 
@@ -111,7 +116,7 @@ export const playerMovement = (
 
     if (maxOverlap !== 0) {
       lastGroundedTime = elapsedTime;
-      position.y = position.y + groundYOffset - maxOverlap;
+      position.y += -skinWidth + groundYOffset - maxOverlap;
     }
 
     // # Apply gravity
@@ -147,11 +152,9 @@ export const playerMovement = (
           y: position.y + (characterSize.height / 2 + skinWidth + snapToGroundHeight) * -up.y,
         },
         {
-          width: characterSize.width - skinWidth,
+          width: characterSize.width,
         }
       );
-
-      console.log(stgMaxOverlap);
 
       if (stgMaxOverlap !== 0) {
         position.y += (snapToGroundHeight - skinWidth - stgMaxOverlap) * -up.y;
@@ -168,7 +171,7 @@ export const playerMovement = (
     if (velocity.x !== 0) {
       const directionSign = Math.sign(velocity.x);
 
-      const startX = position.x + (characterSize.width / 2 + skinWidth) * directionSign;
+      const startX = position.x + (characterSize.width / 2) * directionSign;
 
       let [maxOverlap] = castShapeAndTakeSolidMaxOverlap(
         colliderBodiesQ,
@@ -181,7 +184,7 @@ export const playerMovement = (
           y: position.y,
         },
         {
-          width: characterSize.height - 2,
+          width: characterSize.height,
         }
       );
 
@@ -199,7 +202,7 @@ export const playerMovement = (
               y: position.y + (skinWidth + maxStairsHeight) * up.y,
             },
             {
-              width: characterSize.height - 2,
+              width: characterSize.height,
             }
           );
 
@@ -241,6 +244,8 @@ export const playerMovement = (
         lastJumpTime = 0;
       }
     }
+
+    // console.log('isGrounded', isGrounded, velocity.y);
 
     wasGrounded = isGrounded;
   };

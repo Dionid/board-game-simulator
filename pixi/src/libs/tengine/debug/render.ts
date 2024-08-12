@@ -1,10 +1,10 @@
 import { Graphics } from 'pixi.js';
-import { newQuery, registerQuery, System, table, tryTable } from '../../tecs';
+import { newQuery, registerQuery, System, table } from '../../tecs';
 import { Game } from '../game';
 import { Acceleration2, multV2, Position2, Velocity2 } from '../core';
-import { Map, Vector2 } from '../core';
+import { Vector2 } from '../core';
 import { ColliderBody } from '../collision';
-import { pView, View } from '../render/components';
+import { pView } from '../render/components';
 
 const drawLine = (
   globalGraphics: Graphics,
@@ -18,8 +18,9 @@ const drawLine = (
   globalGraphics.stroke({ width: strokeWidth, color });
 };
 
-const debugViewQuery = newQuery(View, Position2);
 const debugPositionQuery = newQuery(Position2);
+const debugAccelerationQuery = newQuery(Position2, Acceleration2);
+const debugVelocityQuery = newQuery(Position2, Velocity2);
 const debugPViewQuery = newQuery(pView);
 const debugCollisionSetQuery = newQuery(ColliderBody, Position2);
 
@@ -29,6 +30,7 @@ export type DebugOptions = {
   view?: boolean;
   xy?: boolean;
   collision?: boolean;
+  collisionPivot?: boolean;
   castings?: boolean;
   velocity?: boolean;
   acceleration?: boolean;
@@ -42,13 +44,15 @@ export const drawDebug = (game: Game, options: DebugOptions = {}): System => {
     velocity: true,
     acceleration: true,
     castings: true,
+    collisionPivot: true,
     ...options,
   };
 
-  const query = registerQuery(game.essence, debugViewQuery);
   const pQuery = registerQuery(game.essence, debugPViewQuery);
   const collisionQuery = registerQuery(game.essence, debugCollisionSetQuery);
   const positionQuery = registerQuery(game.essence, debugPositionQuery);
+  const accelerationQuery = registerQuery(game.essence, debugAccelerationQuery);
+  const velocityQuery = registerQuery(game.essence, debugVelocityQuery);
 
   const globalDebugGraphics = new Graphics();
   game.world.container.addChild(globalDebugGraphics);
@@ -101,8 +105,10 @@ export const drawDebug = (game: Game, options: DebugOptions = {}): System => {
               continue;
             }
 
-            globalDebugGraphics.circle(collider._position.x, collider._position.y, 3);
-            globalDebugGraphics.fill({ color: 'gray' });
+            if (options.collisionPivot) {
+              globalDebugGraphics.circle(collider._position.x, collider._position.y, 3);
+              globalDebugGraphics.fill({ color: 'gray' });
+            }
 
             globalDebugGraphics.beginPath();
             globalDebugGraphics.moveTo(collider._vertices[0].x, collider._vertices[0].y);
@@ -132,30 +138,32 @@ export const drawDebug = (game: Game, options: DebugOptions = {}): System => {
       }
     }
 
-    for (let i = 0; i < query.archetypes.length; i++) {
-      const archetype = query.archetypes[i];
-      const positionT = table(archetype, Position2);
+    if (options.acceleration) {
+      for (let i = 0; i < accelerationQuery.archetypes.length; i++) {
+        const archetype = accelerationQuery.archetypes[i];
+        const positionT = table(archetype, Position2);
+        const acceleration2T = table(archetype, Acceleration2);
 
-      const velocity2T = tryTable(archetype, Velocity2);
-      const acceleration2T = tryTable(archetype, Acceleration2);
+        for (let j = 0; j < archetype.entities.length; j++) {
+          drawLine(
+            globalDebugGraphics,
+            positionT[j],
+            multV2(acceleration2T[j], 2),
+            strokeWidth,
+            'yellow'
+          );
+        }
+      }
+    }
 
-      for (let j = 0; j < archetype.entities.length; j++) {
-        const position = positionT[j];
+    if (options.velocity) {
+      for (let i = 0; i < velocityQuery.archetypes.length; i++) {
+        const archetype = velocityQuery.archetypes[i];
+        const positionT = table(archetype, Position2);
+        const velocity2T = table(archetype, Velocity2);
 
-        // # Velocity and Acceleration
-        if (options.acceleration || options.velocity) {
-          if (options.acceleration && acceleration2T) {
-            drawLine(
-              globalDebugGraphics,
-              position,
-              multV2(acceleration2T[j], 2),
-              strokeWidth,
-              'yellow'
-            );
-          }
-          if (options.velocity && velocity2T) {
-            drawLine(globalDebugGraphics, position, velocity2T[j], strokeWidth, 'green');
-          }
+        for (let j = 0; j < archetype.entities.length; j++) {
+          drawLine(globalDebugGraphics, positionT[j], velocity2T[j], strokeWidth, 'green');
         }
       }
     }
