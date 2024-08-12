@@ -1,8 +1,11 @@
 # TODO
 
 1. Remove mass calculation and change it to Mass component
-1. Scale (Collider + View)
+1. Stairs
 1. Shape casting
+    1. Rectangle
+    1. Circle
+    1. Capsule
 1. ...
 
 # Roadmap
@@ -14,11 +17,10 @@
     1. View -> ViewSet
     1. Scale
 1. Collision
-    1. Apply Scale
     1. Ray & Shape casting (https://rapier.rs/docs/user_guides/rust/scene_queries/)
     1. Bounding Box
     1. Colliders Index (all collider bodies, by types, collisions pairs, etc.)
-    1. Subscribe by entity / component
+    1. Scale
     1. Borrow phase
     1. CCD
     1. Multiple iterations per one cycle

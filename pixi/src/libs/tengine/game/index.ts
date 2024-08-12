@@ -3,8 +3,6 @@ import { Size2 } from '../core/types';
 import { Camera, newCamera, NewCameraProps } from '../core/camera';
 import { KeyBoardInput, MouseInput, newMouseInput } from '../core/input';
 import { destroyEssence, Essence, newEssence, stepWithTicker } from '../../tecs';
-import { mutableEmpty } from 'libs/tecs/array';
-import { Sleep } from 'libs/sleep';
 
 export type GameCanvas = {
   parentElement: HTMLElement;
@@ -154,9 +152,14 @@ export function destroyGame(game: Game): void {
   (globalThis as any).__PIXI_APP__ = undefined;
 }
 
+export function setGlobalScale(game: Game, scale: number) {
+  game.world.container.scale.set(scale);
+}
+
 export const Game = {
   new: newGame,
   init: initGame,
   destroy: destroyGame,
   run,
+  setGlobalScale,
 };

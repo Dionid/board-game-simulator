@@ -1,5 +1,5 @@
 import { activateDebugMode } from 'libs/tengine/debug';
-import { newGame, initGame } from 'libs/tengine/game';
+import { newGame, initGame, setGlobalScale } from 'libs/tengine/game';
 import { Container } from 'pixi.js';
 import { emit, registerSystem, registerTopic, setComponent, spawnEntity } from 'libs/tecs';
 import {
@@ -54,16 +54,19 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
     },
   });
 
+  setGlobalScale(game, 2);
+
   activateDebugMode(game, {
     render: {
-      collision: false,
+      // collision: false,
       view: false,
       velocity: false,
       xy: false,
     },
     events: {
-      //   componentAdded: false,
-      //   componentRemoved: false,
+      componentAdded: false,
+      componentRemoved: false,
+      entitySpawned: false,
     },
   });
 

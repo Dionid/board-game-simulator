@@ -18,6 +18,7 @@ import {
   Vector2,
 } from 'libs/tengine/core';
 import { Game } from 'libs/tengine/game';
+import { castShapeAndTakeMaxOverlap } from './character-controller';
 
 export const DeathZone = newTag();
 export const Player = newTag();
@@ -40,13 +41,29 @@ export const playerMovement = (
   game: Game,
   playerEntity: Entity,
   characterSize: Size2,
-  initialPosition: Vector2
+  initialPosition: Vector2,
+  options: {
+    autostep?: boolean;
+  } = {}
 ): System => {
   const colliderBodiesQ = registerQuery(game.essence, newQuery(ColliderBody));
 
+  // # General char controller
+  // ## UP vector
+  const up = { x: 0, y: -1 };
+
+  // ## Skin
+  const skinWidth = 0.1;
+
+  // ## Stairs
+  const autostep = options.autostep ?? true;
+  const maxStairsHeight = 16;
+  const minStairsWidth = 16;
+
+  // # Arcade physics
+  // ## Coyote jump
   let lastGroundedTime = 0;
   let lastJumpTime = 0;
-  const skinWidth = 0.1;
 
   return ({ deltaTime, elapsedTime }) => {
     const acceleration = componentByEntity(game.essence, playerEntity, Acceleration2);
@@ -119,11 +136,11 @@ export const playerMovement = (
     velocity.x = speed.value * directionX * deltaTime;
 
     if (velocity.x !== 0) {
-      const velocitySign = Math.sign(velocity.x);
+      const directionSign = Math.sign(velocity.x);
 
-      const startX = position.x + (characterSize.width / 2 + skinWidth) * velocitySign;
+      const startX = position.x + (characterSize.width / 2 + skinWidth) * directionSign;
 
-      const directionCollision = castRayByQuery(
+      let [maxOverlap] = castShapeAndTakeMaxOverlap(
         colliderBodiesQ,
         {
           x: startX,
@@ -138,20 +155,34 @@ export const playerMovement = (
         }
       );
 
-      let maxOverlap = 0;
-
-      for (const collision of directionCollision) {
-        if (collision.collider.type !== 'solid') {
-          continue;
-        }
-        if (collision.overlap > maxOverlap) {
-          maxOverlap = collision.overlap;
-        }
-      }
-
       if (maxOverlap !== 0) {
-        position.x = position.x + velocity.x - maxOverlap * velocitySign;
-        velocity.x = 0;
+        // # Stairs
+        if (isGrounded && autostep) {
+          const stairsOverlap = castRayByQuery(
+            colliderBodiesQ,
+            {
+              x: startX,
+              y: position.y + (skinWidth + maxStairsHeight) * up.y,
+            },
+            {
+              x: startX + minStairsWidth * directionSign,
+              y: position.y + (skinWidth + maxStairsHeight) * up.y,
+            },
+            {
+              width: characterSize.height - 2,
+            }
+          );
+
+          if (stairsOverlap.length === 0) {
+            position.y -= maxStairsHeight + skinWidth;
+          } else {
+            position.x = position.x + velocity.x - maxOverlap * directionSign;
+            velocity.x = 0;
+          }
+        } else {
+          position.x = position.x + velocity.x - maxOverlap * directionSign;
+          velocity.x = 0;
+        }
       }
     }
 

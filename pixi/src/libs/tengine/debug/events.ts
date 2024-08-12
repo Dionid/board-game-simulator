@@ -16,16 +16,16 @@ export type DebugEventsOptions = {
   componentUpdated?: boolean;
 };
 
-export function debugEvents(
-  game: Game,
-  opts: DebugEventsOptions = {
+export function debugEvents(game: Game, opts: DebugEventsOptions = {}) {
+  opts = {
     entitySpawned: true,
     entityKilled: true,
     componentAdded: true,
     componentRemoved: true,
     componentUpdated: true,
-  }
-) {
+    ...opts,
+  };
+
   if (opts.entitySpawned) {
     registerTopic(game.essence, entitySpawned);
   }
