@@ -19,6 +19,7 @@ import {
 } from 'libs/tengine/core';
 import { Game } from 'libs/tengine/game';
 import { castShapeAndTakeSolidMaxOverlap } from './character-controller';
+import { editableInputTypes } from '@testing-library/user-event/dist/utils';
 
 export const DeathZone = newTag();
 export const Player = newTag();
@@ -84,9 +85,10 @@ export const playerMovement = (
       return;
     }
 
+    // # Grounded
     const groundYOffset = Math.max(velocity.y, 0.1);
 
-    const [maxOverlap] = castShapeAndTakeSolidMaxOverlap(
+    const [groundedMaxOverlap] = castShapeAndTakeSolidMaxOverlap(
       colliderBodiesQ,
       {
         x: position.x,
@@ -102,14 +104,14 @@ export const playerMovement = (
       }
     );
 
-    let isGrounded = maxOverlap > 0;
+    let isGrounded = groundedMaxOverlap > 0;
     if (isGrounded) {
       lastGroundedTime = elapsedTime;
     }
 
-    // # Resolve containment
-    if (maxOverlap > skinWidth + groundYOffset) {
-      position.y -= (skinWidth + groundYOffset - maxOverlap) * up.y;
+    // # Resolve ground containment
+    if (groundedMaxOverlap >= skinWidth + groundYOffset) {
+      position.y -= (groundYOffset - groundedMaxOverlap) * up.y;
     }
 
     // # Apply gravity
@@ -132,6 +134,30 @@ export const playerMovement = (
       }
     }
 
+    // # Ceiling
+    const ceilingYOffset = Math.max(Math.abs(velocity.y), 0.1);
+
+    const [ceilingMaxOverlap] = castShapeAndTakeSolidMaxOverlap(
+      colliderBodiesQ,
+      {
+        x: position.x,
+        y: position.y + (characterSize.height / 2 + skinWidth) * up.y,
+      },
+      {
+        x: position.x,
+        y: position.y + (characterSize.height / 2 + skinWidth + ceilingYOffset) * up.y,
+      },
+      {
+        width: characterSize.width,
+        notSelf: playerEntity,
+      }
+    );
+
+    if (ceilingMaxOverlap >= skinWidth + ceilingYOffset) {
+      position.y -= (ceilingYOffset - ceilingMaxOverlap) * -up.y;
+      velocity.y = 0;
+    }
+
     // # Snap to ground
     if (snapToGroundHeight > 0 && !isGrounded && wasGrounded && velocity.y > 0) {
       const [stgMaxOverlap] = castShapeAndTakeSolidMaxOverlap(
@@ -151,7 +177,7 @@ export const playerMovement = (
       );
 
       if (stgMaxOverlap !== 0) {
-        position.y += (snapToGroundHeight - skinWidth - stgMaxOverlap) * -up.y;
+        position.y += (snapToGroundHeight - stgMaxOverlap) * -up.y;
         velocity.y = 0;
         isGrounded = true;
       }
@@ -167,7 +193,7 @@ export const playerMovement = (
 
       const startX = position.x + (characterSize.width / 2 + skinWidth) * directionSign;
 
-      let [maxOverlap] = castShapeAndTakeSolidMaxOverlap(
+      let [xObstaclesMaxOverlap] = castShapeAndTakeSolidMaxOverlap(
         colliderBodiesQ,
         {
           x: startX,
@@ -183,7 +209,7 @@ export const playerMovement = (
         }
       );
 
-      if (maxOverlap !== 0) {
+      if (xObstaclesMaxOverlap !== 0) {
         // # Stairs
         if (isGrounded && autostep) {
           const stairsOverlap = castRayByQuery(
@@ -205,11 +231,11 @@ export const playerMovement = (
           if (stairsOverlap.length === 0) {
             position.y -= maxStairsHeight + skinWidth;
           } else {
-            position.x = position.x + velocity.x - maxOverlap * directionSign;
+            position.x = position.x + velocity.x - xObstaclesMaxOverlap * directionSign;
             velocity.x = 0;
           }
         } else {
-          position.x = position.x + velocity.x - maxOverlap * directionSign;
+          position.x = position.x + velocity.x - xObstaclesMaxOverlap * directionSign;
           velocity.x = 0;
         }
       }
