@@ -36,15 +36,17 @@ export function castRay(
   });
 
   if (DEBUG.isActive) {
-    globalDebugGraphicsDeferred.push((graphics) => {
-      for (let i = 0; i < rayCollider._vertices.length; i++) {
-        const start = rayCollider._vertices[i];
-        const end = rayCollider._vertices[(i + 1) % rayCollider._vertices.length];
+    globalDebugGraphicsDeferred.push((graphics, options) => {
+      if (options.collision) {
+        for (let i = 0; i < rayCollider._vertices.length; i++) {
+          const start = rayCollider._vertices[i];
+          const end = rayCollider._vertices[(i + 1) % rayCollider._vertices.length];
 
-        graphics.moveTo(start.x, start.y);
-        graphics.lineTo(end.x, end.y);
+          graphics.moveTo(start.x, start.y);
+          graphics.lineTo(end.x, end.y);
+        }
+        graphics.stroke({ color: 'green' });
       }
-      graphics.stroke({ color: 'green' });
     });
   }
 

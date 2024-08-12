@@ -1,19 +1,13 @@
 import { registerSystem } from 'libs/tecs';
 import { Game } from '../game';
 import { DEBUG } from './core';
-import { drawDebug } from './render';
+import { DebugOptions, drawDebug } from './render';
 import { debugEvents, DebugEventsOptions } from './events';
 
 export function activateDebugMode(
   game: Game,
   options: {
-    render?: {
-      view?: boolean;
-      xy?: boolean;
-      collision?: boolean;
-      velocity?: boolean;
-      acceleration?: boolean;
-    };
+    render?: DebugOptions;
     events?: DebugEventsOptions;
   } = {}
 ) {

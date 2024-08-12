@@ -23,18 +23,17 @@ const debugPositionQuery = newQuery(Position2);
 const debugPViewQuery = newQuery(pView);
 const debugCollisionSetQuery = newQuery(ColliderBody, Position2);
 
-export const globalDebugGraphicsDeferred: ((g: Graphics) => void)[] = [];
+export const globalDebugGraphicsDeferred: ((g: Graphics, options: DebugOptions) => void)[] = [];
 
-export const drawDebug = (
-  game: Game,
-  options: {
-    view?: boolean;
-    xy?: boolean;
-    collision?: boolean;
-    velocity?: boolean;
-    acceleration?: boolean;
-  } = {}
-): System => {
+export type DebugOptions = {
+  view?: boolean;
+  xy?: boolean;
+  collision?: boolean;
+  velocity?: boolean;
+  acceleration?: boolean;
+};
+
+export const drawDebug = (game: Game, options: DebugOptions = {}): System => {
   options = {
     view: true,
     xy: true,
@@ -62,7 +61,7 @@ export const drawDebug = (
 
     while (globalDebugGraphicsDeferred.length > 0) {
       const deferred = globalDebugGraphicsDeferred.pop()!;
-      deferred(globalDebugGraphics);
+      deferred(globalDebugGraphics, options);
     }
 
     if (options.view) {
