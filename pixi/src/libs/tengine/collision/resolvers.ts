@@ -9,29 +9,11 @@ export function resolvePenetration(
   overlap: number,
   aColliderSet: Component<typeof ColliderBody>,
   aPosition: Position2,
+  aTotalMass: number,
   bColliderSet: Component<typeof ColliderBody>,
   bPosition: Position2,
-  options: {
-    aMass?: number;
-    bMass?: number;
-  } = {}
+  bTotalMass: number
 ) {
-  let aTotalMass = options.aMass;
-  if (aTotalMass === undefined) {
-    aTotalMass = 0;
-    for (let i = 0; i < aColliderSet.parts.length; i++) {
-      aTotalMass += aColliderSet.parts[i].mass;
-    }
-  }
-
-  let bTotalMass = options.bMass;
-  if (bTotalMass === undefined) {
-    bTotalMass = 0;
-    for (let i = 0; i < bColliderSet.parts.length; i++) {
-      bTotalMass += bColliderSet.parts[i].mass;
-    }
-  }
-
   const aInvertedMass = inverseMass(aTotalMass);
   const bInvertedMass = inverseMass(bTotalMass);
   const combinedInvertedMass = aInvertedMass + bInvertedMass;

@@ -1,7 +1,6 @@
 # TODO
 
-1. Remove mass calculation and change it to Mass component
-1. Stairs
+1. Moving platforms
 1. Shape casting
     1. Rectangle
     1. Circle
@@ -69,6 +68,12 @@
     1. Ray casting
     1. Collision Resolution
 1. Events Monitoring
+1. Character Controller
+    1. Grounded
+    1. Stop at obstacles
+    1. Move and Slide
+        1. Stairs
+        1. ...
 
 # Entities
 

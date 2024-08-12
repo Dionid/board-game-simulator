@@ -79,10 +79,16 @@ export const dynamicRigidBodyCollisionResolution = (game: Game): System => {
       }
 
       // # Resolve penetration
-      resolvePenetration(axis, overlap, a.colliderSet, aPosition, b.colliderSet, bPosition, {
-        aMass: aTotalMass.value,
-        bMass: bTotalMass.value,
-      });
+      resolvePenetration(
+        axis,
+        overlap,
+        a.colliderSet,
+        aPosition,
+        aTotalMass.value,
+        b.colliderSet,
+        bPosition,
+        bTotalMass.value
+      );
 
       let aVelocity = componentByEntity(game.essence, a.entity, Velocity2);
       if (!aVelocity) {

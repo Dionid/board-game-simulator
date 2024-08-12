@@ -1,6 +1,6 @@
 import { componentByEntity, registerTopic, System } from 'libs/tecs';
 import { Game } from '../game';
-import { Position2 } from '../core';
+import { Mass, Position2 } from '../core';
 import { CollidingEvent, immediateColliding } from './topics';
 import { ColliderBody, Impenetrable } from './components';
 import { resolvePenetration } from './resolvers';
@@ -61,7 +61,23 @@ export const penetrationResolution = (game: Game): System => {
         continue;
       }
 
-      resolvePenetration(axis, overlap, a.colliderSet, aPosition, b.colliderSet, bPosition);
+      const aTotalMass = componentByEntity(game.essence, a.entity, Mass);
+      const bTotalMass = componentByEntity(game.essence, b.entity, Mass);
+
+      if (!aTotalMass || !bTotalMass) {
+        continue;
+      }
+
+      resolvePenetration(
+        axis,
+        overlap,
+        a.colliderSet,
+        aPosition,
+        aTotalMass.value,
+        b.colliderSet,
+        bPosition,
+        bTotalMass.value
+      );
 
       continue;
     }
