@@ -75,13 +75,22 @@ export const playerMovement = (
       }
     );
 
-    const solidGroundCollision = groundCollision.filter((c) => c.collider.type === 'solid');
+    let maxOverlap = 0;
+    let isGrounded = false;
 
-    const isGrounded = solidGroundCollision.length > 0;
+    for (const collision of groundCollision) {
+      if (collision.collider.type !== 'solid') {
+        continue;
+      }
+      isGrounded = true;
+      if (collision.overlap > maxOverlap) {
+        maxOverlap = collision.overlap;
+      }
+    }
 
-    if (isGrounded) {
+    if (maxOverlap !== 0) {
       lastGroundedTime = elapsedTime;
-      position.y = position.y + groundYOffset - solidGroundCollision[0].overlap;
+      position.y = position.y + groundYOffset - maxOverlap;
     }
 
     // # Apply gravity
@@ -129,10 +138,19 @@ export const playerMovement = (
         }
       );
 
-      const solidDirectionCollision = directionCollision.filter((c) => c.collider.type === 'solid');
+      let maxOverlap = 0;
 
-      if (solidDirectionCollision.length > 0) {
-        position.x = position.x + velocity.x - solidDirectionCollision[0].overlap * velocitySign;
+      for (const collision of directionCollision) {
+        if (collision.collider.type !== 'solid') {
+          continue;
+        }
+        if (collision.overlap > maxOverlap) {
+          maxOverlap = collision.overlap;
+        }
+      }
+
+      if (maxOverlap !== 0) {
+        position.x = position.x + velocity.x - maxOverlap * velocitySign;
         velocity.x = 0;
       }
     }
