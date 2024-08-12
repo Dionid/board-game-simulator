@@ -84,39 +84,32 @@ export const playerMovement = (
       return;
     }
 
-    const groundYOffset = Math.max(velocity.y, 0.2);
+    const groundYOffset = Math.max(velocity.y, 0.1);
 
-    const groundCollision = castRayByQuery(
+    const [maxOverlap] = castShapeAndTakeSolidMaxOverlap(
       colliderBodiesQ,
       {
         x: position.x,
-        y: position.y + characterSize.height / 2 + skinWidth,
+        y: position.y + (characterSize.height / 2 + skinWidth) * -up.y,
       },
       {
         x: position.x,
-        y: position.y + characterSize.height / 2 + skinWidth + groundYOffset,
+        y: position.y + (characterSize.height / 2 + skinWidth + groundYOffset) * -up.y,
       },
       {
         width: characterSize.width,
+        notSelf: playerEntity,
       }
     );
 
-    let maxOverlap = 0;
-    let isGrounded = false;
-
-    for (const collision of groundCollision) {
-      if (collision.collider.type !== 'solid') {
-        continue;
-      }
-      isGrounded = true;
-      if (collision.overlap > maxOverlap) {
-        maxOverlap = collision.overlap;
-      }
+    let isGrounded = maxOverlap > 0;
+    if (isGrounded) {
+      lastGroundedTime = elapsedTime;
     }
 
-    if (maxOverlap !== 0) {
-      lastGroundedTime = elapsedTime;
-      position.y += -skinWidth + groundYOffset - maxOverlap;
+    // # Resolve containment
+    if (maxOverlap > skinWidth + groundYOffset) {
+      position.y -= (skinWidth + groundYOffset - maxOverlap) * up.y;
     }
 
     // # Apply gravity
@@ -153,6 +146,7 @@ export const playerMovement = (
         },
         {
           width: characterSize.width,
+          notSelf: playerEntity,
         }
       );
 
@@ -171,7 +165,7 @@ export const playerMovement = (
     if (velocity.x !== 0) {
       const directionSign = Math.sign(velocity.x);
 
-      const startX = position.x + (characterSize.width / 2) * directionSign;
+      const startX = position.x + (characterSize.width / 2 + skinWidth) * directionSign;
 
       let [maxOverlap] = castShapeAndTakeSolidMaxOverlap(
         colliderBodiesQ,
@@ -185,6 +179,7 @@ export const playerMovement = (
         },
         {
           width: characterSize.height,
+          notSelf: playerEntity,
         }
       );
 
@@ -203,6 +198,7 @@ export const playerMovement = (
             },
             {
               width: characterSize.height,
+              notSelf: playerEntity,
             }
           );
 

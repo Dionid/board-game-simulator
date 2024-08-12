@@ -1,4 +1,4 @@
-import { Query } from 'libs/tecs';
+import { Entity, Query } from 'libs/tecs';
 import { CastingResult, castRayByQuery, ColliderBody } from 'libs/tengine/collision';
 import { Vector2 } from 'libs/tengine/core';
 
@@ -9,6 +9,7 @@ export function castShapeAndTakeSolidMaxOverlap(
   opts: {
     width?: number;
     stopOnFirst?: boolean;
+    notSelf?: Entity;
   } = {}
 ): [0, null, CastingResult[]] | [number, CastingResult, CastingResult[]] {
   const collisionsList = castRayByQuery(query, start, end, opts);

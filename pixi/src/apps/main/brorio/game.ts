@@ -140,7 +140,7 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
     parts: [
       circleColliderComponent({
         parentPosition: playerPosition,
-        radius: playerRadius,
+        radius: playerRadius - 1,
         mass: 1,
         offset: { x: 0, y: playerRadius },
         tags: ['hitbox'],
@@ -189,7 +189,15 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
   // ## Fixed Update
   registerSystem(
     game.essence,
-    playerMovement(game, playerEntity, characterSize, initialPlayerPosition)
+    playerMovement(
+      game,
+      playerEntity,
+      {
+        width: characterSize.width - 0.2,
+        height: characterSize.height - 0.2,
+      },
+      initialPlayerPosition
+    )
   );
 
   // ## Physics

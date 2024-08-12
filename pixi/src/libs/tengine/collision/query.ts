@@ -1,8 +1,9 @@
-import { Query, SchemaToType, table } from 'libs/tecs';
+import { Entity, Query, SchemaToType, table } from 'libs/tecs';
 import { Axis2, Vector2 } from '../core';
 import { Collider, ColliderBody, rectangleColliderComponentSE } from './components';
 import { collides } from './collision';
 import { DEBUG, globalDebugGraphicsDeferred } from '../debug';
+import { hasEntity } from 'libs/tecs/archetype';
 
 export type CastingResult = {
   colliderBody: SchemaToType<typeof ColliderBody>;
@@ -108,6 +109,7 @@ export const castRayByQuery = (
   opts: {
     width?: number;
     stopOnFirst?: boolean;
+    notSelf?: Entity;
   } = {}
 ): CastingResult[] => {
   const results = [];
@@ -115,7 +117,23 @@ export const castRayByQuery = (
   for (let i = 0; i < query.archetypes.length; i++) {
     const archetype = query.archetypes[i];
 
-    const colliderBodies = table(archetype, ColliderBody);
+    let colliderBodies = table(archetype, ColliderBody);
+
+    if (opts.notSelf !== undefined) {
+      const selfEntity = opts.notSelf;
+      if (hasEntity(archetype, selfEntity)) {
+        const entityIndex = archetype.entitiesSS.sparse[selfEntity];
+        const colliderBodiesT = table(archetype, ColliderBody);
+        colliderBodies = [];
+        for (let i = 0; i < colliderBodiesT.length; i++) {
+          if (i === entityIndex) {
+            continue;
+          }
+          const colliderBody = colliderBodiesT[i];
+          colliderBodies.push(colliderBody);
+        }
+      }
+    }
 
     const result = castRay(colliderBodies, start, end, opts);
 
