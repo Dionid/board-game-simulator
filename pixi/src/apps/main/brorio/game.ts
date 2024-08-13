@@ -62,7 +62,7 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
       // castings: false,
       collisionPivot: false,
       view: false,
-      velocity: false,
+      // velocity: false,
       xy: false,
     },
     events: {
@@ -85,7 +85,7 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
   setComponent(game.essence, playerEntity, Player);
   const characterSize = {
     width: 16,
-    height: 32,
+    height: 24,
   };
   // ## View
   setComponent(game.essence, playerEntity, View, {
@@ -195,8 +195,8 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
       game,
       playerEntity,
       {
-        width: characterSize.width - 0.2,
-        height: characterSize.height - 0.2,
+        width: characterSize.width - 1,
+        height: characterSize.height - 1,
       },
       initialPlayerPosition
     )

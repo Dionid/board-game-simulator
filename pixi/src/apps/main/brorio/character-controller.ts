@@ -2,7 +2,7 @@ import { Entity, Query } from 'libs/tecs';
 import { CastingResult, castRayByQuery, ColliderBody } from 'libs/tengine/collision';
 import { Vector2 } from 'libs/tengine/core';
 
-export function castShapeAndTakeSolidMaxOverlap(
+export function castRayAndTakeSolidMaxOverlap(
   query: Query<[typeof ColliderBody]>,
   start: Vector2,
   end: Vector2,
