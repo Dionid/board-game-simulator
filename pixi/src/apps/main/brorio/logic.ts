@@ -206,6 +206,9 @@ export const playerMovement = (
       );
 
       if (yObstaclesMaxOverlap !== 0) {
+        // if (velocity.y < 0) {
+        //   debugger;
+        // }
         position.y = position.y + velocity.y - yObstaclesMaxOverlap * directionSign;
         velocity.y = 0;
       }

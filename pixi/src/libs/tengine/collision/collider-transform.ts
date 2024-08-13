@@ -6,6 +6,8 @@ import {
   mutTranslateVertices2,
   Position2,
   subV2,
+  translateV2,
+  translateVertices2,
 } from '../core';
 import { Game } from '../game';
 import { Collider, ColliderBody } from './components';
@@ -17,6 +19,19 @@ export function translateCollider(collider: Component<typeof Collider>, position
   if (positionDelta.x !== 0 || positionDelta.y !== 0) {
     mutTranslateVertices2(collider._vertices, positionDelta.x, positionDelta.y);
   }
+}
+
+export function colliderTranslation(
+  collider: Component<typeof Collider>,
+  positionDelta: Position2
+) {
+  return {
+    _position: {
+      x: collider._position.x + positionDelta.x,
+      y: collider._position.y + positionDelta.y,
+    },
+    _vertices: collider._vertices.map((v) => translateV2(v, positionDelta.x, positionDelta.y)),
+  };
 }
 
 export const positionColliderSetQuery = newQuery(ColliderBody, Position2);
