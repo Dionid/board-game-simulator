@@ -1,5 +1,5 @@
 import { Entity, hasEntity, Query, SchemaToType, table } from 'libs/tecs';
-import { addV2, Axis2, multV2, subV2, translateV2, unitV2, Vector2, Vertices2 } from '../../core';
+import { Axis2, scaleV2, translateV2, unitV2, Vector2 } from '../../core';
 import { Collider, ColliderBody } from '.././components';
 import { collides } from '.././collision';
 import { DEBUG, globalDebugGraphicsDeferred } from '../../debug';
@@ -10,6 +10,7 @@ export type CastingResult = {
   collider: SchemaToType<typeof Collider>;
   overlap: number;
   axis: Axis2;
+  toi: number;
 };
 
 export function castShape(
@@ -17,25 +18,33 @@ export function castShape(
   shape: SchemaToType<typeof Collider>[],
   linearVelocity: Vector2,
   opts: {
-    stopOnFirst?: boolean;
+    maxToi?: number;
   } = {}
 ): CastingResult[] {
-  const stopOnFirst = opts.stopOnFirst ?? false;
+  const result: CastingResult[] = [];
+
+  const maxToi = opts.maxToi ?? 10;
 
   if (DEBUG.isActive) {
     globalDebugGraphicsDeferred.push((graphics, options) => {
       if (options.castings) {
-        for (const collider of shape) {
-          for (let i = 0; i < collider._vertices.length; i++) {
-            const start = translateV2(collider._vertices[i], linearVelocity.x, linearVelocity.y);
-            const end = translateV2(
-              collider._vertices[(i + 1) % collider._vertices.length],
-              linearVelocity.x,
-              linearVelocity.y
-            );
+        for (let toi = 1; toi < maxToi + 1; toi++) {
+          for (const collider of shape) {
+            for (let i = 0; i < collider._vertices.length; i++) {
+              const start = translateV2(
+                collider._vertices[i],
+                linearVelocity.x * toi,
+                linearVelocity.y * toi
+              );
+              const end = translateV2(
+                collider._vertices[(i + 1) % collider._vertices.length],
+                linearVelocity.x * toi,
+                linearVelocity.y * toi
+              );
 
-            graphics.moveTo(start.x, start.y);
-            graphics.lineTo(end.x, end.y);
+              graphics.moveTo(start.x, start.y);
+              graphics.lineTo(end.x, end.y);
+            }
           }
         }
         graphics.stroke({ color: 'green' });
@@ -43,37 +52,32 @@ export function castShape(
     });
   }
 
-  const result = [];
+  for (let toi = 1; toi < maxToi + 1; toi++) {
+    for (let i = 0; i < shape.length; i++) {
+      const shapeCollider = shape[i];
+      const newTranslation = colliderTranslation(shapeCollider, scaleV2(linearVelocity, toi));
+      const shapeColliderTranslated = {
+        ...shapeCollider,
+        _position: newTranslation._position,
+        _vertices: newTranslation._vertices,
+      };
 
-  const direction = unitV2(linearVelocity);
+      for (let i = 0; i < bodies.length; i++) {
+        const otherBody = bodies[i];
 
-  for (let i = 0; i < shape.length; i++) {
-    const shapeCollider = shape[i];
-    const newTranslation = colliderTranslation(shapeCollider, linearVelocity);
-    const shapeColliderTranslated = {
-      ...shapeCollider,
-      _position: newTranslation._position,
-      _vertices: newTranslation._vertices,
-    };
+        for (let j = 0; j < otherBody.parts.length; j++) {
+          const otherCollider = otherBody.parts[j];
 
-    for (let i = 0; i < bodies.length; i++) {
-      const otherBody = bodies[i];
+          let collision = collides(shapeColliderTranslated, otherCollider);
 
-      for (let j = 0; j < otherBody.parts.length; j++) {
-        const otherCollider = otherBody.parts[j];
-
-        let collision = collides(shapeColliderTranslated, otherCollider);
-
-        if (collision) {
-          result.push({
-            colliderBody: otherBody,
-            collider: otherCollider,
-            overlap: collision.overlap,
-            axis: collision.axis,
-          });
-
-          if (stopOnFirst) {
-            return result;
+          if (collision) {
+            result.push({
+              colliderBody: otherBody,
+              collider: otherCollider,
+              overlap: collision.overlap,
+              axis: collision.axis,
+              toi,
+            });
           }
         }
       }
@@ -88,8 +92,8 @@ export const castShapeByQuery = (
   shape: SchemaToType<typeof Collider>[],
   linearVelocity: Vector2,
   opts: {
-    stopOnFirst?: boolean;
     notSelf?: Entity;
+    maxToi?: number;
   } = {}
 ): CastingResult[] => {
   const results = [];
@@ -120,10 +124,6 @@ export const castShapeByQuery = (
 
     if (result.length > 0) {
       results.push(...result);
-
-      if (opts.stopOnFirst) {
-        return results;
-      }
     }
   }
 

@@ -1,7 +1,14 @@
 import { Entity, hasEntity, Query, SchemaToType, table } from 'libs/tecs';
 import { ColliderBody, Collider } from '../components';
-import { CastingResult } from './shape-cast';
 import { collides } from '../collision';
+import { Axis2 } from 'libs/tengine/core';
+
+export type IntersectionResult = {
+  colliderBody: SchemaToType<typeof ColliderBody>;
+  collider: SchemaToType<typeof Collider>;
+  overlap: number;
+  axis: Axis2;
+};
 
 export const shapeIntersection = (
   colliderBodies: SchemaToType<typeof ColliderBody>[],
@@ -10,7 +17,7 @@ export const shapeIntersection = (
     stopOnFirst?: boolean;
     notSelf?: Entity;
   } = {}
-): CastingResult[] => {
+): IntersectionResult[] => {
   const results = [];
 
   for (let i = 0; i < shape.length; i++) {
@@ -50,7 +57,7 @@ export const shapeIntersectionByQuery = (
     stopOnFirst?: boolean;
     notSelf?: Entity;
   } = {}
-): CastingResult[] => {
+): IntersectionResult[] => {
   const results = [];
 
   for (let i = 0; i < query.archetypes.length; i++) {

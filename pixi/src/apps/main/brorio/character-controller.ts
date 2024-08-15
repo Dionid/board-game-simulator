@@ -97,7 +97,7 @@ export function moveAndSlide(
     { x: 0, y: characterCurrentVelocity.y },
     {
       notSelf: characterEntity,
-      stopOnFirst: true,
+      maxToi: 5,
     }
   );
 

@@ -65,10 +65,12 @@
     1. Collision Response
 1. Collision
     1. Circles, Rectangles, Polygon and Convex Vertices
-    1. Compound
-    1. Narrow Collision Check (on SAT + Awakened)
-    1. Ray casting
+    1. Compound Colliders
+    1. Discrete collision detection
+    1. Broad Collision Check (Awakened)
+    1. Narrow Collision Check (SAT)
     1. Collision Resolution
+    1. Ray casting
 1. Events Monitoring
 1. Character Controller
     1. Grounded
