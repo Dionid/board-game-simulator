@@ -102,12 +102,12 @@ export function moveAndSlide(
     colliderBodiesQuery,
     [
       rectangleColliderComponent({
-        parentPosition: {
+        position: {
           x: characterCurrentPosition.x,
           y: characterCurrentPosition.y + characterSize.height / 2 + skinWidth,
         },
         anchor: { x: 0.5, y: 0 },
-        size: { width: characterSize.width, height: groundCheckZoneHeight },
+        size: { width: characterSize.width + skinWidth, height: groundCheckZoneHeight },
       }),
     ],
     { x: 0, y: characterCurrentVelocity.y },

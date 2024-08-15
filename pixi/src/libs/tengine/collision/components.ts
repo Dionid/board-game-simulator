@@ -61,7 +61,7 @@ export const Collider = newSchema(
 );
 
 export function rectangleColliderComponent(opts: {
-  parentPosition: Vector2; // TODO: remove this
+  position: Vector2; // TODO: remove this
   size: { width: number; height: number };
   parentAngle?: number; // TODO: remove this
   type?: 'solid' | 'sensor';
@@ -80,11 +80,11 @@ export function rectangleColliderComponent(opts: {
   const type = opts.type ?? 'solid';
 
   const origin = {
-    x: opts.parentPosition.x + offset.x,
-    y: opts.parentPosition.y + offset.y,
+    x: opts.position.x + offset.x,
+    y: opts.position.y + offset.y,
   };
 
-  mutRotateV2Around(origin, parentAngle, opts.parentPosition);
+  mutRotateV2Around(origin, parentAngle, opts.position);
 
   const verticesStartPosition = {
     x: origin.x - opts.size.width * anchor.x,
@@ -714,7 +714,7 @@ export function capsuleColliderComponent(opts: {
   };
 
   const rectangle = rectangleColliderComponent({
-    parentPosition: opts.parentPosition,
+    position: opts.parentPosition,
     parentAngle: opts.parentAngle,
     type,
     mass,

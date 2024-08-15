@@ -132,7 +132,7 @@ export const initMap = async (game: Game) => {
       } else {
         parts.push(
           rectangleColliderComponent({
-            parentPosition: position,
+            position: position,
             size: {
               width: object.width,
               height: object.height,

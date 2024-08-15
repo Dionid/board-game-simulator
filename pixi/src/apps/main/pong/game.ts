@@ -261,7 +261,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, playerEntity, ColliderBody, {
     parts: [
       rectangleColliderComponent({
-        parentPosition: playerPosition,
+        position: playerPosition,
         parentAngle: playerAngle,
         type: 'solid',
         mass: 1,
@@ -468,7 +468,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, playerGoals, ColliderBody, {
     parts: [
       rectangleColliderComponent({
-        parentPosition: playerGoalsPosition,
+        position: playerGoalsPosition,
         parentAngle: 0,
         type: 'sensor',
         mass: 1,
@@ -508,7 +508,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, enemyGoals, ColliderBody, {
     parts: [
       rectangleColliderComponent({
-        parentPosition: enemyGoalsPosition,
+        position: enemyGoalsPosition,
         parentAngle: 0,
         type: 'sensor',
         mass: 1,

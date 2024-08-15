@@ -201,7 +201,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, playerEntity, ColliderBody, {
     parts: [
       rectangleColliderComponent({
-        parentPosition: playerPosition,
+        position: playerPosition,
         parentAngle: playerAngle,
         type: 'solid',
         mass: 1,

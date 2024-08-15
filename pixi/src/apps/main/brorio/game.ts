@@ -149,7 +149,7 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
       //   tags: ['hitbox'],
       // }),
       rectangleColliderComponent({
-        parentPosition: playerPosition,
+        position: playerPosition,
         size: characterSize,
         mass: 1,
         offset: { x: 0, y: 0 },
