@@ -1,12 +1,15 @@
 # TODO
 
-1. Ray cast
+1. ~~Ray cast~~
 1. Shape casting
     1. Rectangle
     1. Circle
     1. Capsule
 1. Character Controller
+    1. FIX: if using rectangle and jumping near the edge, it pushes character to the side
+    instead of stopping
 1. Moving platforms
+1. Bounding box
 1. Separate tECS runtime types from schema
 1. ...
 

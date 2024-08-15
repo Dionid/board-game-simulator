@@ -5,7 +5,7 @@ import {
   ColliderBody,
   rectangleColliderComponent,
 } from 'libs/tengine/collision';
-import { Size2, Vector2 } from 'libs/tengine/core';
+import { Vector2 } from 'libs/tengine/core';
 import { bb2FromVert2List } from 'libs/tengine/core/bounding-box';
 
 export type CharacterController = {
@@ -16,6 +16,7 @@ export type CharacterController = {
   up: Vector2;
   skinWidth: number;
   groundCheckZoneHeight: number;
+  _initial: Omit<CharacterController, '_initial'>;
 };
 
 export function newCharacterController(
@@ -29,7 +30,7 @@ export function newCharacterController(
     lastGroundedTime?: number;
   } = {}
 ): CharacterController {
-  return {
+  const cc = {
     characterEntity,
     isGrounded: opts.isGrounded ?? false,
     wasGrounded: opts.wasGrounded ?? false,
@@ -38,6 +39,21 @@ export function newCharacterController(
     skinWidth: opts.skinWidth ?? 0.1,
     groundCheckZoneHeight: opts.groundCheckZoneHeight ?? 1,
   };
+
+  return {
+    ...cc,
+    _initial: { ...cc },
+  };
+}
+
+export function resetCharacterController(cc: CharacterController) {
+  const { _initial } = cc;
+  cc.isGrounded = _initial.isGrounded;
+  cc.wasGrounded = _initial.wasGrounded;
+  cc.lastGroundedTime = _initial.lastGroundedTime;
+  cc.up = _initial.up;
+  cc.skinWidth = _initial.skinWidth;
+  cc.groundCheckZoneHeight = _initial.groundCheckZoneHeight;
 }
 
 export function moveAndSlide(
@@ -65,11 +81,11 @@ export function moveAndSlide(
   };
 
   // # Ground check
-
   const shapeBb = bb2FromVert2List(characterShape.map((collider) => collider._vertices));
   const width = shapeBb.max.x - shapeBb.min.x;
   const height = shapeBb.max.y - shapeBb.min.y;
 
+  // QUESTION: maybe check by next position not current?
   const groundCollision = castShapeByQuery(
     colliderBodiesQuery,
     [
@@ -100,6 +116,7 @@ export function moveAndSlide(
   }
   cc.isGrounded = isGrounded;
 
+  // TODO: add skinWidth to shape
   // # Collisions check
   const collisions = castShapeByQuery(
     colliderBodiesQuery,
@@ -112,69 +129,13 @@ export function moveAndSlide(
     }
   );
 
+  // # Resolve penetration
   for (const collision of collisions) {
     correctedVelocity.x += collision.overlap * collision.axis.x;
     correctedVelocity.y += collision.overlap * collision.axis.y;
   }
 
-  // if (characterCurrentVelocity.x !== 0) {
-  // const xDirectionSign = Math.sign(characterCurrentVelocity.x);
-
-  // const startX =
-  //   characterCurrentPosition.x - (characterSize.width / 2 + skinWidth) * directionSign;
-  // const newX = startX + characterCurrentVelocity.x;
-
-  // let [xObstaclesMaxOverlap] = castRayAndTakeSolidMaxOverlap(
-  //   colliderBodiesQuery,
-  //   {
-  //     x: newX,
-  //     y: characterCurrentPosition.y,
-  //   },
-  //   {
-  //     x: newX,
-  //     y: characterCurrentPosition.y,
-  //   },
-  //   {
-  //     width: characterSize.height,
-  //     notSelf: characterEntity,
-  //   }
-  // );
-
-  // if (xObstaclesMaxOverlap !== 0) {
-  // # Stairs
-  // if (isGrounded && autostep) {
-  //   const stairsOverlap = castRayByQuery(
-  //     colliderBodiesQ,
-  //     {
-  //       x: startX,
-  //       y: characterCurrentPosition.y + (skinWidth + maxStairsHeight) * up.y,
-  //     },
-  //     {
-  //       x: startX + minStairsWidth * directionSign,
-  //       y: characterCurrentPosition.y + (skinWidth + maxStairsHeight) * up.y,
-  //     },
-  //     {
-  //       width: characterSize.height,
-  //       notSelf: playerEntity,
-  //     }
-  //   );
-
-  //   if (stairsOverlap.length === 0) {
-  //     characterCurrentPosition.y -= maxStairsHeight + skinWidth;
-  //   } else {
-  //     characterCurrentPosition.x = characterCurrentPosition.x + characterCurrentVelocity.x - xObstaclesMaxOverlap * directionSign;
-  //     characterCurrentVelocity.x = 0;
-  //   }
-  // } else {
-  // characterCurrentPosition.x =
-  //   characterCurrentPosition.x +
-  //   characterCurrentVelocity.x -
-  //   xObstaclesMaxOverlap * directionSign;
-  // characterCurrentVelocity.x = 0;
-  // }
-  // }
-  // }
-
+  // # Invalidate
   cc.wasGrounded = isGrounded;
 
   return correctedVelocity;

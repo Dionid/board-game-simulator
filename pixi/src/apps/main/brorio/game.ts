@@ -153,6 +153,7 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
         size: characterSize,
         mass: 1,
         offset: { x: 0, y: 0 },
+        tags: ['hitbox'],
       }),
     ],
   });

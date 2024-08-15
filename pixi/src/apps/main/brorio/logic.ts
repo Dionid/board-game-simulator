@@ -7,12 +7,10 @@ import {
   registerQuery,
   System,
 } from 'libs/tecs';
-import { ColliderBody, CollidingEvent, rectangleColliderComponent } from 'libs/tengine/collision';
-import { castRayClosestByQuery, castShapeByQuery } from 'libs/tengine/collision/query';
+import { ColliderBody, CollidingEvent } from 'libs/tengine/collision';
 import {
   Acceleration2,
   KeyBoardInput,
-  normalizeV2,
   Position2,
   Size2,
   Speed,
@@ -20,7 +18,11 @@ import {
   Velocity2,
 } from 'libs/tengine/core';
 import { Game } from 'libs/tengine/game';
-import { moveAndSlide, newCharacterController } from './character-controller';
+import {
+  moveAndSlide,
+  newCharacterController,
+  resetCharacterController,
+} from './character-controller';
 
 export const DeathZone = newTag();
 export const Player = newTag();
@@ -110,6 +112,33 @@ export const playerMovement = (
       }
     }
 
+    for (const collision of playerCollisionStartedTopic) {
+      const { a, b } = collision;
+
+      const player = a.entity === playerEntity ? a : b;
+      const other = a.entity === playerEntity ? b : a;
+
+      if (!player) {
+        continue;
+      }
+
+      // # Death zone
+      if (!player.collider.tags.includes('hitbox')) {
+        continue;
+      }
+
+      const deathZone = componentByEntity(game.essence, other.entity, DeathZone);
+
+      if (deathZone) {
+        position.x = initialPosition.x;
+        position.y = initialPosition.y;
+        lastJumpTime = 0;
+        resetCharacterController(charController);
+
+        return;
+      }
+    }
+
     const correctedVelocity = moveAndSlide(
       charController,
       elapsedTime,
@@ -171,78 +200,6 @@ export const playerMovement = (
 //       return;
 //     }
 
-//     // # Grounded
-//     const groundLength = 5;
-
-//     const [groundedMaxOverlap] = castRayAndTakeSolidMaxOverlap(
-//       colliderBodiesQ,
-//       {
-//         x: position.x,
-//         y: position.y + (characterSize.height / 2 + skinWidth) * -up.y,
-//       },
-//       {
-//         x: position.x,
-//         y: position.y + (characterSize.height / 2 + skinWidth + groundLength) * -up.y,
-//       },
-//       {
-//         width: characterSize.width,
-//         notSelf: playerEntity,
-//       }
-//     );
-
-//     let isGrounded = groundedMaxOverlap > 0;
-//     if (isGrounded) {
-//       lastGroundedTime = elapsedTime;
-//     }
-
-//     // ## Custom logic
-//     // # Apply gravity
-//     velocity.y += 0.5 * deltaTime;
-
-//     // # Jump + Coyote jump
-//     const jump = game.input.keyboard.keyDown['w'];
-//     if (jump) {
-//       lastJumpTime = elapsedTime;
-//     }
-
-//     // TODO: change to frame time not ms time
-//     if (jump || elapsedTime - lastJumpTime < 50) {
-//       if (isGrounded || (velocity.y > 0 && elapsedTime - lastGroundedTime < 75)) {
-//         velocity.y = -10 * deltaTime;
-//       }
-//     }
-
-//     // # Move X by input
-//     const directionX = getXDirection(game.input.keyboard);
-//     velocity.x = speed.value * directionX * deltaTime;
-
-//     for (const collision of playerCollisionStartedTopic) {
-//       const { a, b } = collision;
-
-//       const player = a.entity === playerEntity ? a : b;
-//       const other = a.entity === playerEntity ? b : a;
-
-//       if (!player) {
-//         continue;
-//       }
-
-//       // # Death zone
-//       if (!player.collider.tags.includes('hitbox')) {
-//         continue;
-//       }
-
-//       const deathZone = componentByEntity(game.essence, other.entity, DeathZone);
-
-//       if (deathZone) {
-//         position.x = initialPosition.x;
-//         position.y = initialPosition.y;
-//         lastGroundedTime = 0;
-//         lastJumpTime = 0;
-
-//         return;
-//       }
-//     }
-
 //     // # Move & Slide
 
 //     // # Snap to ground
@@ -267,34 +224,6 @@ export const playerMovement = (
 //         position.y += (snapToGroundHeight - stgMaxOverlap) * -up.y;
 //         velocity.y = 0;
 //         isGrounded = true;
-//       }
-//     }
-
-//     // # Move Y
-//     if (velocity.y !== 0) {
-//       const directionSign = Math.sign(velocity.y);
-
-//       const startY = position.y + (characterSize.height / 2 + skinWidth) * directionSign;
-
-//       let [yObstaclesMaxOverlap] = castRayAndTakeSolidMaxOverlap(
-//         colliderBodiesQ,
-//         {
-//           x: position.x,
-//           y: startY,
-//         },
-//         {
-//           x: position.x,
-//           y: startY + velocity.y,
-//         },
-//         {
-//           width: characterSize.width,
-//           notSelf: playerEntity,
-//         }
-//       );
-
-//       if (yObstaclesMaxOverlap !== 0) {
-//         position.y = position.y + velocity.y - yObstaclesMaxOverlap * directionSign;
-//         velocity.y = 0;
 //       }
 //     }
 
