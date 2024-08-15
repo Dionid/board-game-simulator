@@ -7,7 +7,6 @@ import {
   Position2,
   subV2,
   translateV2,
-  translateVertices2,
 } from '../core';
 import { Game } from '../game';
 import { Collider, ColliderBody } from './components';

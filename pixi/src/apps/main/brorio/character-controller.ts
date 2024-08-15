@@ -1,5 +1,10 @@
-import { Entity, Query } from 'libs/tecs';
-import { ColliderBody } from 'libs/tengine/collision';
+import { Entity, Query, SchemaToType } from 'libs/tecs';
+import {
+  castShapeByQuery,
+  Collider,
+  ColliderBody,
+  rectangleColliderComponent,
+} from 'libs/tengine/collision';
 import { Size2, Vector2 } from 'libs/tengine/core';
 
 // export function castShapeAndTakeSolidMaxOverlap(
@@ -56,11 +61,12 @@ export function newCharacterController(characterEntity: Entity): CharacterContro
   };
 }
 
-export function moveAndSlideRectangle(
+export function moveAndSlide(
   cc: CharacterController,
   deltaTime: number,
   elapsedTime: number,
   colliderBodiesQuery: Query<[typeof ColliderBody]>,
+  characterShape: SchemaToType<typeof Collider>[],
   characterSize: Size2,
   characterCurrentPosition: Vector2,
   characterCurrentVelocity: Vector2,
@@ -76,89 +82,102 @@ export function moveAndSlideRectangle(
   const groundCheckZoneHeight = opts.groundCheckZoneHeight ?? cc.groundCheckZoneHeight;
   const characterEntity = opts.characterEntity ?? cc.characterEntity;
 
-  // const [groundedMaxOverlap] = castRayAndTakeSolidMaxOverlap(
+  const groundCollision = castShapeByQuery(
+    colliderBodiesQuery,
+    [
+      rectangleColliderComponent({
+        parentPosition: {
+          x: characterCurrentPosition.x,
+          y: characterCurrentPosition.y + characterSize.height / 2 + skinWidth,
+        },
+        anchor: { x: 0.5, y: 0 },
+        size: { width: characterSize.width, height: groundCheckZoneHeight },
+      }),
+    ],
+    { x: 0, y: characterCurrentVelocity.y },
+    {
+      notSelf: characterEntity,
+      stopOnFirst: true,
+    }
+  );
+
+  const isGrounded = groundCollision.length > 0;
+  if (isGrounded) {
+    cc.lastGroundedTime = elapsedTime;
+  }
+  cc.isGrounded = isGrounded;
+
+  // const xDirectionSign = Math.sign(characterCurrentVelocity.x);
+  // const yDirectionSign = Math.sign(characterCurrentVelocity.y);
+
+  const collisions = castShapeByQuery(
+    colliderBodiesQuery,
+    characterShape,
+    characterCurrentVelocity,
+    {
+      notSelf: characterEntity,
+    }
+  );
+
+  // if (characterCurrentVelocity.x !== 0) {
+  // const xDirectionSign = Math.sign(characterCurrentVelocity.x);
+
+  // const startX =
+  //   characterCurrentPosition.x - (characterSize.width / 2 + skinWidth) * directionSign;
+  // const newX = startX + characterCurrentVelocity.x;
+
+  // let [xObstaclesMaxOverlap] = castRayAndTakeSolidMaxOverlap(
   //   colliderBodiesQuery,
   //   {
-  //     x: characterCurrentPosition.x,
-  //     y: characterCurrentPosition.y + (characterSize.height / 2 + skinWidth) * -up.y,
+  //     x: newX,
+  //     y: characterCurrentPosition.y,
   //   },
   //   {
-  //     x: characterCurrentPosition.x,
-  //     y:
-  //       characterCurrentPosition.y +
-  //       (characterSize.height / 2 + skinWidth + groundCheckZoneHeight) * -up.y,
+  //     x: newX,
+  //     y: characterCurrentPosition.y,
   //   },
   //   {
-  //     width: characterSize.width,
+  //     width: characterSize.height,
   //     notSelf: characterEntity,
   //   }
   // );
 
-  // let isGrounded = groundedMaxOverlap > 0;
-  // if (isGrounded) {
-  //   cc.lastGroundedTime = elapsedTime;
+  // if (xObstaclesMaxOverlap !== 0) {
+  // # Stairs
+  // if (isGrounded && autostep) {
+  //   const stairsOverlap = castRayByQuery(
+  //     colliderBodiesQ,
+  //     {
+  //       x: startX,
+  //       y: characterCurrentPosition.y + (skinWidth + maxStairsHeight) * up.y,
+  //     },
+  //     {
+  //       x: startX + minStairsWidth * directionSign,
+  //       y: characterCurrentPosition.y + (skinWidth + maxStairsHeight) * up.y,
+  //     },
+  //     {
+  //       width: characterSize.height,
+  //       notSelf: playerEntity,
+  //     }
+  //   );
+
+  //   if (stairsOverlap.length === 0) {
+  //     characterCurrentPosition.y -= maxStairsHeight + skinWidth;
+  //   } else {
+  //     characterCurrentPosition.x = characterCurrentPosition.x + characterCurrentVelocity.x - xObstaclesMaxOverlap * directionSign;
+  //     characterCurrentVelocity.x = 0;
+  //   }
+  // } else {
+  // characterCurrentPosition.x =
+  //   characterCurrentPosition.x +
+  //   characterCurrentVelocity.x -
+  //   xObstaclesMaxOverlap * directionSign;
+  // characterCurrentVelocity.x = 0;
   // }
-  // cc.isGrounded = isGrounded;
+  // }
+  // }
 
-  // ...
+  cc.wasGrounded = isGrounded;
 
-  if (characterCurrentVelocity.x !== 0) {
-    const directionSign = Math.sign(characterCurrentVelocity.x);
-
-    const startX =
-      characterCurrentPosition.x - (characterSize.width / 2 + skinWidth) * directionSign;
-    const newX = startX + characterCurrentVelocity.x;
-
-    // let [xObstaclesMaxOverlap] = castRayAndTakeSolidMaxOverlap(
-    //   colliderBodiesQuery,
-    //   {
-    //     x: newX,
-    //     y: characterCurrentPosition.y,
-    //   },
-    //   {
-    //     x: newX,
-    //     y: characterCurrentPosition.y,
-    //   },
-    //   {
-    //     width: characterSize.height,
-    //     notSelf: characterEntity,
-    //   }
-    // );
-
-    // if (xObstaclesMaxOverlap !== 0) {
-    // # Stairs
-    // if (isGrounded && autostep) {
-    //   const stairsOverlap = castRayByQuery(
-    //     colliderBodiesQ,
-    //     {
-    //       x: startX,
-    //       y: characterCurrentPosition.y + (skinWidth + maxStairsHeight) * up.y,
-    //     },
-    //     {
-    //       x: startX + minStairsWidth * directionSign,
-    //       y: characterCurrentPosition.y + (skinWidth + maxStairsHeight) * up.y,
-    //     },
-    //     {
-    //       width: characterSize.height,
-    //       notSelf: playerEntity,
-    //     }
-    //   );
-
-    //   if (stairsOverlap.length === 0) {
-    //     characterCurrentPosition.y -= maxStairsHeight + skinWidth;
-    //   } else {
-    //     characterCurrentPosition.x = characterCurrentPosition.x + characterCurrentVelocity.x - xObstaclesMaxOverlap * directionSign;
-    //     characterCurrentVelocity.x = 0;
-    //   }
-    // } else {
-    // characterCurrentPosition.x =
-    //   characterCurrentPosition.x +
-    //   characterCurrentVelocity.x -
-    //   xObstaclesMaxOverlap * directionSign;
-    // characterCurrentVelocity.x = 0;
-    // }
-    // }
-  }
-
-  // cc.wasGrounded = isGrounded;
+  return characterCurrentVelocity;
 }

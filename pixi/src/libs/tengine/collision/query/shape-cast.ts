@@ -1,10 +1,9 @@
-import { Entity, Query, SchemaToType, table } from 'libs/tecs';
-import { Axis2, Vector2 } from '../core';
-import { Collider, ColliderBody } from './components';
-import { collides } from './collision';
-import { DEBUG, globalDebugGraphicsDeferred } from '../debug';
-import { hasEntity } from 'libs/tecs/archetype';
-import { colliderTranslation } from './collider-transform';
+import { Entity, hasEntity, Query, SchemaToType, table } from 'libs/tecs';
+import { Axis2, Vector2 } from '../../core';
+import { Collider, ColliderBody } from '.././components';
+import { collides } from '.././collision';
+import { DEBUG, globalDebugGraphicsDeferred } from '../../debug';
+import { colliderTranslation } from '.././collider-transform';
 
 export type CastingResult = {
   colliderBody: SchemaToType<typeof ColliderBody>;
@@ -15,8 +14,8 @@ export type CastingResult = {
 
 export function castShape(
   bodies: SchemaToType<typeof ColliderBody>[],
-  shape: SchemaToType<typeof ColliderBody>,
-  velocity: Vector2,
+  shape: SchemaToType<typeof Collider>[],
+  translation: Vector2,
   opts: {
     stopOnFirst?: boolean;
   } = {}
@@ -26,7 +25,7 @@ export function castShape(
   if (DEBUG.isActive) {
     globalDebugGraphicsDeferred.push((graphics, options) => {
       if (options.castings) {
-        for (const collider of shape.parts) {
+        for (const collider of shape) {
           for (let i = 0; i < collider._vertices.length; i++) {
             const start = collider._vertices[i];
             const end = collider._vertices[(i + 1) % collider._vertices.length];
@@ -42,13 +41,13 @@ export function castShape(
 
   const result = [];
 
-  for (let i = 0; i < shape.parts.length; i++) {
-    const shapeCollider = shape.parts[i];
-    const translation = colliderTranslation(shapeCollider, velocity);
+  for (let i = 0; i < shape.length; i++) {
+    const shapeCollider = shape[i];
+    const newTranslation = colliderTranslation(shapeCollider, translation);
     const shapeColliderTranslated = {
       ...shapeCollider,
-      _position: translation._position,
-      _vertices: translation._vertices,
+      _position: newTranslation._position,
+      _vertices: newTranslation._vertices,
     };
 
     for (let i = 0; i < bodies.length; i++) {
@@ -80,7 +79,7 @@ export function castShape(
 
 export const castShapeByQuery = (
   query: Query<[typeof ColliderBody]>,
-  shape: SchemaToType<typeof ColliderBody>,
+  shape: SchemaToType<typeof Collider>[],
   velocity: Vector2,
   opts: {
     stopOnFirst?: boolean;
@@ -94,6 +93,7 @@ export const castShapeByQuery = (
 
     let colliderBodies = table(archetype, ColliderBody);
 
+    // TODO: improve this
     if (opts.notSelf !== undefined) {
       const selfEntity = opts.notSelf;
       if (hasEntity(archetype, selfEntity)) {

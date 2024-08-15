@@ -1,15 +1,15 @@
 import { Entity, hasEntity, Query, SchemaToType, table } from 'libs/tecs';
-import { dotV2, subV2, Vector2, Vertices2 } from '../core';
-import { Collider, ColliderBody } from './components';
-import { DEBUG, globalDebugGraphicsDeferred } from '../debug';
+import { dotV2, subV2, Vector2, Vertices2 } from '../../core';
+import { Collider, ColliderBody } from '../components';
+import { DEBUG, globalDebugGraphicsDeferred } from '../../debug';
 
 export type Ray = {
   origin: Vector2;
   direction: Vector2;
 };
 
-// # This is from ChatGpt and I still don't understand it
-// I will keep it to understand it later
+// # This is from ChatGpt and I still don't understand it,
+// will keep it to understand it later.
 
 // function intersectRayWithSegment(ray: Ray, p1: Vector2, p2: Vector2): boolean {
 //   const v1 = subV2(ray.origin, p1);
@@ -68,38 +68,6 @@ export function raySegmentIntersectionPoint(
     r,
   };
 }
-
-// export function rayCircleIntersectionPoint(
-//   ray: Ray,
-//   center: Vector2,
-//   radius: number
-// ): (Vector2 & { r: number }) | null {
-//   const oc = subV2(ray.origin, center);
-//   const a = dotV2(ray.direction, ray.direction);
-//   const b = 2 * dotV2(oc, ray.direction);
-//   const c = dotV2(oc, oc) - radius * radius;
-
-//   const discriminant = b * b - 4 * a * c;
-
-//   if (discriminant < 0) {
-//     return null;
-//   }
-
-//   const t1 = (-b + Math.sqrt(discriminant)) / (2 * a);
-//   const t2 = (-b - Math.sqrt(discriminant)) / (2 * a);
-
-//   if (t1 < 0 && t2 < 0) {
-//     return null;
-//   }
-
-//   const t = t1 < 0 ? t2 : t2 < 0 ? t1 : Math.min(t1, t2);
-
-//   return {
-//     x: ray.origin.x + ray.direction.x * t,
-//     y: ray.origin.y + ray.direction.y * t,
-//     r: t,
-//   };
-// }
 
 export function rayCircleIntersectionPoint(
   ray: Ray,

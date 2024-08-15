@@ -1,6 +1,14 @@
-import { componentByEntity, Entity, newQuery, newTag, newTopic, registerQuery } from 'libs/tecs';
-import { ColliderBody, CollidingEvent } from 'libs/tengine/collision';
-import { castRayClosestByQuery } from 'libs/tengine/collision/ray';
+import {
+  componentByEntity,
+  Entity,
+  newQuery,
+  newTag,
+  newTopic,
+  registerQuery,
+  System,
+} from 'libs/tecs';
+import { ColliderBody, CollidingEvent, rectangleColliderComponent } from 'libs/tengine/collision';
+import { castRayClosestByQuery, castShapeByQuery } from 'libs/tengine/collision/query';
 import {
   Acceleration2,
   KeyBoardInput,
@@ -12,6 +20,7 @@ import {
   Velocity2,
 } from 'libs/tengine/core';
 import { Game } from 'libs/tengine/game';
+import { moveAndSlide, newCharacterController } from './character-controller';
 
 export const DeathZone = newTag();
 export const Player = newTag();
@@ -43,40 +52,99 @@ export const playerMovement = (
     minStairsWidth?: number;
     snapToGroundHeight?: number;
   } = {}
-) => {
+): System => {
   const colliderBodiesQ = registerQuery(game.essence, newQuery(ColliderBody));
 
-  const up = options.up ?? { x: 0, y: -1 };
-  const skinWidth = options.skinWidth ?? 0.1;
+  const charController = newCharacterController(playerEntity);
 
-  return () => {
+  let lastJumpTime = 0;
+
+  return ({ deltaTime, elapsedTime }) => {
     const acceleration = componentByEntity(game.essence, playerEntity, Acceleration2);
     const velocity = componentByEntity(game.essence, playerEntity, Velocity2);
     const position = componentByEntity(game.essence, playerEntity, Position2);
     const speed = componentByEntity(game.essence, playerEntity, Speed);
+    const colliderBody = componentByEntity(game.essence, playerEntity, ColliderBody);
 
-    if (!velocity || !acceleration || !position || !speed) {
+    if (!velocity || !acceleration || !position || !speed || !colliderBody) {
       return;
     }
 
-    const leftRay = castRayClosestByQuery(
-      colliderBodiesQ,
-      {
-        origin: {
-          x: position.x - characterSize.width / 2 - skinWidth,
-          y: position.y + characterSize.height / 2 + skinWidth,
-        },
-        direction: normalizeV2({ x: -1, y: 0 }),
-      },
-      {
-        notSelf: playerEntity,
-        maxDistance: 50,
-      }
-    );
+    // const ray = castRayClosestByQuery(
+    //   colliderBodiesQ,
+    //   {
+    //     origin: {
+    //       x: position.x,
+    //       y: position.y + characterSize.height / 2 + skinWidth,
+    //     },
+    //     direction: normalizeV2({ x: 0, y: 1 }),
+    //   },
+    //   {
+    //     notSelf: playerEntity,
+    //     maxDistance: 50,
+    //   }
+    // );
 
-    if (leftRay) {
-      console.log('leftRay', leftRay);
+    // if (ray) {
+    //   console.log('ray', ray);
+    // }
+
+    const directionX = getXDirection(game.input.keyboard);
+    velocity.x = speed.value * directionX * deltaTime;
+
+    // # Ground
+    // const groundCollision = castShapeByQuery(
+    //   colliderBodiesQ,
+    //   [
+    //     rectangleColliderComponent({
+    //       parentPosition: {
+    //         x: position.x,
+    //         y: position.y + characterSize.height / 2,
+    //       },
+    //       anchor: { x: 0.5, y: 0 },
+    //       size: { width: characterSize.width, height: 5 },
+    //     }),
+    //   ],
+    //   { x: 0, y: velocity.y },
+    //   {
+    //     notSelf: playerEntity,
+    //     stopOnFirst: true,
+    //   }
+    // );
+
+    // const isGrounded = groundCollision.length > 0;
+
+    if (charController.isGrounded) {
+      velocity.y = 0;
+    } else {
+      velocity.y += 0.5;
     }
+
+    const jump = game.input.keyboard.keyDown['w'];
+    if (jump) {
+      lastJumpTime = elapsedTime;
+    }
+
+    // TODO: change to frame time not ms time
+    if (jump || elapsedTime - lastJumpTime < 50) {
+      if (
+        charController.isGrounded ||
+        (velocity.y > 0 && elapsedTime - charController.lastGroundedTime < 75)
+      ) {
+        velocity.y = -10 * deltaTime;
+      }
+    }
+
+    moveAndSlide(
+      charController,
+      deltaTime,
+      elapsedTime,
+      colliderBodiesQ,
+      colliderBody.parts,
+      characterSize,
+      position,
+      velocity
+    );
   };
 };
 

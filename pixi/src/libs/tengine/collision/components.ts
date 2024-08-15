@@ -46,6 +46,7 @@ export const Collider = newSchema(
     shape: ColliderShape,
     mass: number,
     tags: arrayOf(string),
+    // TODO: remove underscore
     _position: Vector2, // position of colliders center
     _vertices: Vertices2,
     _normalAxes: Axes2,
