@@ -1,10 +1,13 @@
 # TODO
 
-1. Moving platforms
+1. Ray cast
 1. Shape casting
     1. Rectangle
     1. Circle
     1. Capsule
+1. Character Controller
+1. Moving platforms
+1. Separate tECS runtime types from schema
 1. ...
 
 # Roadmap
@@ -20,30 +23,29 @@
     1. Bounding Box
     1. Colliders Index (all collider bodies, by types, collisions pairs, etc.)
     1. Scale
-    1. Borrow phase
+    1. Borrow phase (BVH)
     1. CCD
+    1. Layers
     1. Multiple iterations per one cycle
     1. Fix Circle anchor
     1. Separate concave to convex
-1. Physics
-    1. Forces & Impulse
-    1. Angle + Angular velocity
-    1. Joints
-    1. Apply gravity without friction
 1. Character controller
     1. ~~Is grounded~~
     1. Move and slide
+1. Physics
+    1. Angle + Angular velocity
+    1. Joints
+    1. Apply gravity without friction
+    1. Air friction
 1. ...
 1. Preload assets
 1. Culling
 1. ...
-1. Debug
-    1. ~~Subscribe on all default topics, to show all default events~~
-1. Simulate containment
-1. ...
 1. Top-down Tilemap
 1. ...
 1. Tweens
+1. ...
+1. Particles
 1. ...
 
 # Features
@@ -147,12 +149,6 @@ Most of other components will depend on these ones
 
 # Useful links
 
-1. Isometric
-    1. Rendering isometric map (https://melmouk.medium.com/algorithm-to-render-isometric-maps-3d86d1a49713)
-    1. Cartesian to Iso
-        1. https://codepen.io/StefanH/pen/qBgVPaQ
-        1. https://gist.github.com/jordwest/8a12196436ebcf8df98a2745251915b5
-        1. https://www.youtube.com/watch?v=04oQ2jOUjkU
 1. Collision
     1. https://www.youtube.com/playlist?list=PLo6lBZn6hgca1T7cNZXpiq4q395ljbEI_
     1. https://www.youtube.com/watch?v=eED4bSkYCB8
@@ -167,7 +163,22 @@ Most of other components will depend on these ones
 1. Engine
     1. https://developer.ibm.com/tutorials/wa-build2dphysicsengine/
     1. https://www.youtube.com/@simondev758
-
+1. Ray casting
+    1. https://sszczep.dev/blog/ray-casting-in-2d-game-engines
+    1. http://www.philliplemons.com/posts/ray-casting-algorithm
+    1. https://medium.com/@girishajmera/exploring-algorithms-to-determine-points-inside-or-outside-a-polygon-038952946f87#:~:text=Ray%2DCasting%20Algorithm,the%20edges%20of%20the%20polygon.
+1. Light and shadows
+    1. https://www.redblobgames.com/articles/visibility/
+    2. https://ncase.me/sight-and-light/
+    3. https://www.youtube.com/watch?v=TOEi6T2mtHo
+1. Isometric
+    1. Rendering isometric map (https://melmouk.medium.com/algorithm-to-render-isometric-maps-3d86d1a49713)
+    1. Cartesian to Iso
+        1. https://codepen.io/StefanH/pen/qBgVPaQ
+        1. https://gist.github.com/jordwest/8a12196436ebcf8df98a2745251915b5
+        1. https://www.youtube.com/watch?v=04oQ2jOUjkU
+1. Math
+    1. Dot product – https://www.youtube.com/watch?v=LyGKycYT2v0
 
 # Questions
 

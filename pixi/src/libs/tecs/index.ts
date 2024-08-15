@@ -12,6 +12,7 @@ export {
   component,
   componentsList,
   tryComponent,
+  hasEntity,
 } from './archetype';
 export * from './query';
 export * from './operations';

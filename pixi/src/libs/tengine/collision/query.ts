@@ -4,7 +4,7 @@ import { Collider, ColliderBody, rectangleColliderComponentSE } from './componen
 import { collides } from './collision';
 import { DEBUG, globalDebugGraphicsDeferred } from '../debug';
 import { hasEntity } from 'libs/tecs/archetype';
-import { colliderTranslation, translateCollider } from './collider-transform';
+import { colliderTranslation } from './collider-transform';
 
 export type CastingResult = {
   colliderBody: SchemaToType<typeof ColliderBody>;
