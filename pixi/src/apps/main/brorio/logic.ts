@@ -59,21 +59,23 @@ export const playerMovement = (
       return;
     }
 
-    const result = castRayClosestByQuery(
+    const leftRay = castRayClosestByQuery(
       colliderBodiesQ,
       {
-        origin: { x: position.x, y: position.y + characterSize.height / 2 + skinWidth },
-        direction: normalizeV2({ x: 0, y: 1 }),
+        origin: {
+          x: position.x - characterSize.width / 2 - skinWidth,
+          y: position.y + characterSize.height / 2 + skinWidth,
+        },
+        direction: normalizeV2({ x: -1, y: 0 }),
       },
       {
         notSelf: playerEntity,
-        maxDistance: 140,
+        maxDistance: 50,
       }
     );
 
-    if (result) {
-      console.log('result', result);
-      // debugger;
+    if (leftRay) {
+      console.log('leftRay', leftRay);
     }
   };
 };

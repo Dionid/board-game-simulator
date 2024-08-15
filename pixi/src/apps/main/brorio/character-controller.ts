@@ -1,38 +1,38 @@
-import { Entity, Query, SchemaToType } from 'libs/tecs';
-import { CastingResult, castShapeByQuery, ColliderBody } from 'libs/tengine/collision';
+import { Entity, Query } from 'libs/tecs';
+import { ColliderBody } from 'libs/tengine/collision';
 import { Size2, Vector2 } from 'libs/tengine/core';
 
-export function castShapeAndTakeSolidMaxOverlap(
-  query: Query<[typeof ColliderBody]>,
-  shape: SchemaToType<typeof ColliderBody>,
-  velocity: Vector2,
-  opts: {
-    width?: number;
-    stopOnFirst?: boolean;
-    notSelf?: Entity;
-  } = {}
-): [0, null, CastingResult[]] | [number, CastingResult, CastingResult[]] {
-  const collisionsList = castShapeByQuery(query, shape, velocity, opts);
+// export function castShapeAndTakeSolidMaxOverlap(
+//   query: Query<[typeof ColliderBody]>,
+//   shape: SchemaToType<typeof ColliderBody>,
+//   velocity: Vector2,
+//   opts: {
+//     width?: number;
+//     stopOnFirst?: boolean;
+//     notSelf?: Entity;
+//   } = {}
+// ): [0, null, CastingResult[]] | [number, CastingResult, CastingResult[]] {
+//   const collisionsList = castShapeByQuery(query, shape, velocity, opts);
 
-  let maxOverlap = 0;
-  let maxOverlapCollision = null;
+//   let maxOverlap = 0;
+//   let maxOverlapCollision = null;
 
-  for (const collision of collisionsList) {
-    if (collision.collider.type !== 'solid') {
-      continue;
-    }
-    if (collision.overlap > maxOverlap) {
-      maxOverlap = collision.overlap;
-      maxOverlapCollision = collision;
-    }
-  }
+//   for (const collision of collisionsList) {
+//     if (collision.collider.type !== 'solid') {
+//       continue;
+//     }
+//     if (collision.overlap > maxOverlap) {
+//       maxOverlap = collision.overlap;
+//       maxOverlapCollision = collision;
+//     }
+//   }
 
-  if (maxOverlap === 0 || maxOverlapCollision === null) {
-    return [0, null, collisionsList];
-  }
+//   if (maxOverlap === 0 || maxOverlapCollision === null) {
+//     return [0, null, collisionsList];
+//   }
 
-  return [maxOverlap, maxOverlapCollision, collisionsList];
-}
+//   return [maxOverlap, maxOverlapCollision, collisionsList];
+// }
 
 export type CharacterController = {
   characterEntity: Entity;

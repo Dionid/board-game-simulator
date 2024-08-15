@@ -1,5 +1,5 @@
 import { Entity, hasEntity, Query, SchemaToType, table } from 'libs/tecs';
-import { Vector2, Vertices2 } from '../core';
+import { dotV2, subV2, Vector2, Vertices2 } from '../core';
 import { Collider, ColliderBody } from './components';
 import { DEBUG, globalDebugGraphicsDeferred } from '../debug';
 
@@ -69,6 +69,86 @@ export function raySegmentIntersectionPoint(
   };
 }
 
+// export function rayCircleIntersectionPoint(
+//   ray: Ray,
+//   center: Vector2,
+//   radius: number
+// ): (Vector2 & { r: number }) | null {
+//   const oc = subV2(ray.origin, center);
+//   const a = dotV2(ray.direction, ray.direction);
+//   const b = 2 * dotV2(oc, ray.direction);
+//   const c = dotV2(oc, oc) - radius * radius;
+
+//   const discriminant = b * b - 4 * a * c;
+
+//   if (discriminant < 0) {
+//     return null;
+//   }
+
+//   const t1 = (-b + Math.sqrt(discriminant)) / (2 * a);
+//   const t2 = (-b - Math.sqrt(discriminant)) / (2 * a);
+
+//   if (t1 < 0 && t2 < 0) {
+//     return null;
+//   }
+
+//   const t = t1 < 0 ? t2 : t2 < 0 ? t1 : Math.min(t1, t2);
+
+//   return {
+//     x: ray.origin.x + ray.direction.x * t,
+//     y: ray.origin.y + ray.direction.y * t,
+//     r: t,
+//   };
+// }
+
+export function rayCircleIntersectionPoint(
+  ray: Ray,
+  center: Vector2,
+  radius: number
+): (Vector2 & { r: number }) | null {
+  // i = origin + direction * t
+  // r = Math.sqrt((i - center) ** 2)
+
+  // r**2 = (i - center) ** 2
+  // r**2 = (origin + direction * t - center) ** 2
+  // r**2 = ((origin - center) + direction * t) ** 2
+  // r**2 = (origin - center) ** 2 + 2 * (origin - center) * direction * t + (direction * t) ** 2
+  // 0 = direction ** 2 * t ** 2 + 2 * (origin - center) * direction * t + (origin - center) ** 2 - r ** 2
+
+  // CORRECT
+  // oc = origin - center
+  // a = direction * direction
+  // b = 2 * oc * direction
+  // c = oc * oc - r * r
+
+  // t = (-b +- sqrt(b ** 2 - 4 * a * c)) / 2 * a
+
+  // ---
+
+  // oc = origin - center
+  // b = oc * direction
+  // c = oc * oc - r * r
+  // t = -b - sqrt(b ** 2 - c)
+
+  const oc = subV2(ray.origin, center);
+  const b = dotV2(oc, ray.direction);
+  const c = dotV2(oc, oc) - radius * radius;
+
+  const discriminant = b * b - c;
+
+  if (discriminant < 0) {
+    return null;
+  }
+
+  const t = -b - Math.sqrt(discriminant);
+
+  return {
+    x: ray.origin.x + ray.direction.x * t,
+    y: ray.origin.y + ray.direction.y * t,
+    r: t,
+  };
+}
+
 export function doesRayIntersectsPolygon(
   ray: Ray,
   vertices: Vertices2,
@@ -91,6 +171,28 @@ export function doesRayIntersectsPolygon(
 }
 
 export function closestRaySegmentIntersectionPoint(
+  ray: Ray,
+  vertices: Vertices2,
+  maxDistance?: number
+): (Vector2 & { r: number }) | null {
+  let closest: (Vector2 & { r: number }) | null = null;
+  for (let i = 0; i < vertices.length; i++) {
+    const nextIndex = (i + 1) % vertices.length;
+    const point = raySegmentIntersectionPoint(
+      ray,
+      vertices[i],
+      vertices[nextIndex],
+      closest?.r,
+      maxDistance
+    );
+    if (point && (!closest || point.r < closest.r)) {
+      closest = point;
+    }
+  }
+  return closest;
+}
+
+export function closestRayCircleIntersectionPoint(
   ray: Ray,
   vertices: Vertices2,
   maxDistance?: number
@@ -157,13 +259,27 @@ export function castRayClosest(
     for (let j = 0; j < body.parts.length; j++) {
       const collider = body.parts[j];
 
-      // TODO: Add support for circle collision
-      const vertices = collider._vertices;
-      if (vertices.length < 2) {
+      if (opts.filterCollider && !opts.filterCollider(collider)) {
         continue;
       }
 
-      if (opts.filterCollider && !opts.filterCollider(collider)) {
+      if (collider.shape.type === 'circle') {
+        const point = rayCircleIntersectionPoint(ray, collider._position, collider.shape.radius);
+        if (point && (!closest || point.r < closest.point.r)) {
+          closest = {
+            point,
+            body,
+            collider,
+            bodyIndex: i,
+            colliderIndex: j,
+          };
+        }
+        continue;
+      }
+
+      // TODO: Add support for circle collision
+      const vertices = collider._vertices;
+      if (vertices.length < 2) {
         continue;
       }
 
@@ -200,11 +316,13 @@ export const castRayClosestByQuery = (
 
     let colliderBodies = table(archetype, ColliderBody);
 
+    // TODO: Find more efficient way to filter out notSelf entity
     if (opts.notSelf !== undefined) {
       const selfEntity = opts.notSelf;
       if (hasEntity(archetype, selfEntity)) {
         const entityIndex = archetype.entitiesSS.sparse[selfEntity];
         const colliderBodiesT = table(archetype, ColliderBody);
+        // # Empty colliderBodies and filter out notSelf entity
         colliderBodies = [];
         for (let i = 0; i < colliderBodiesT.length; i++) {
           if (i === entityIndex) {

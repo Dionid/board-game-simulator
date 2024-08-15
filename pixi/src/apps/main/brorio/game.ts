@@ -58,7 +58,7 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
 
   activateDebugMode(game, {
     render: {
-      collision: false,
+      // collision: false,
       // castings: false,
       collisionPivot: false,
       view: false,
@@ -105,7 +105,7 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
   });
   // ## Position
   const initialPlayerPosition = {
-    x: 50,
+    x: 60,
     y: 50,
   };
   const playerPosition = {
@@ -137,14 +137,14 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
     y: 0,
   });
   setComponent(game.essence, playerEntity, CollisionsMonitoring);
-  const playerRadius = 8;
+  const playerRadius = 7;
   setComponent(game.essence, playerEntity, ColliderBody, {
     parts: [
       circleColliderComponent({
         parentPosition: playerPosition,
         radius: playerRadius - 1,
         mass: 1,
-        offset: { x: 0, y: playerRadius },
+        offset: { x: 0, y: 0 },
         tags: ['hitbox'],
       }),
     ],
@@ -160,6 +160,25 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
     scale: 0,
   });
   setComponent(game.essence, playerEntity, GroundDetection);
+
+  // # Circle collision
+  const circleEntity = spawnEntity(game.essence);
+  const circlePosition = {
+    x: 30,
+    y: 60,
+    _prev: { x: 100, y: 100 },
+  };
+  setComponent(game.essence, circleEntity, Position2, circlePosition);
+  setComponent(game.essence, circleEntity, ColliderBody, {
+    parts: [
+      circleColliderComponent({
+        parentPosition: circlePosition,
+        radius: playerRadius - 1,
+        mass: 1,
+        offset: { x: 0, y: playerRadius },
+      }),
+    ],
+  });
 
   // # Systems
 
