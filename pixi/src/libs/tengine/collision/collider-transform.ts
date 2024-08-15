@@ -20,16 +20,13 @@ export function translateCollider(collider: Component<typeof Collider>, position
   }
 }
 
-export function colliderTranslation(
-  collider: Component<typeof Collider>,
-  positionDelta: Position2
-) {
+export function colliderTranslation(collider: Component<typeof Collider>, translation: Position2) {
   return {
     _position: {
-      x: collider._position.x + positionDelta.x,
-      y: collider._position.y + positionDelta.y,
+      x: collider._position.x + translation.x,
+      y: collider._position.y + translation.y,
     },
-    _vertices: collider._vertices.map((v) => translateV2(v, positionDelta.x, positionDelta.y)),
+    _vertices: collider._vertices.map((v) => translateV2(v, translation.x, translation.y)),
   };
 }
 

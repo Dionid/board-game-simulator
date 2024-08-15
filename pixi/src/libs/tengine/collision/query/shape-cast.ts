@@ -1,5 +1,5 @@
 import { Entity, hasEntity, Query, SchemaToType, table } from 'libs/tecs';
-import { Axis2, Vector2 } from '../../core';
+import { addV2, Axis2, multV2, subV2, translateV2, unitV2, Vector2, Vertices2 } from '../../core';
 import { Collider, ColliderBody } from '.././components';
 import { collides } from '.././collision';
 import { DEBUG, globalDebugGraphicsDeferred } from '../../debug';
@@ -15,7 +15,7 @@ export type CastingResult = {
 export function castShape(
   bodies: SchemaToType<typeof ColliderBody>[],
   shape: SchemaToType<typeof Collider>[],
-  translation: Vector2,
+  linearVelocity: Vector2,
   opts: {
     stopOnFirst?: boolean;
   } = {}
@@ -27,8 +27,12 @@ export function castShape(
       if (options.castings) {
         for (const collider of shape) {
           for (let i = 0; i < collider._vertices.length; i++) {
-            const start = collider._vertices[i];
-            const end = collider._vertices[(i + 1) % collider._vertices.length];
+            const start = translateV2(collider._vertices[i], linearVelocity.x, linearVelocity.y);
+            const end = translateV2(
+              collider._vertices[(i + 1) % collider._vertices.length],
+              linearVelocity.x,
+              linearVelocity.y
+            );
 
             graphics.moveTo(start.x, start.y);
             graphics.lineTo(end.x, end.y);
@@ -41,9 +45,11 @@ export function castShape(
 
   const result = [];
 
+  const direction = unitV2(linearVelocity);
+
   for (let i = 0; i < shape.length; i++) {
     const shapeCollider = shape[i];
-    const newTranslation = colliderTranslation(shapeCollider, translation);
+    const newTranslation = colliderTranslation(shapeCollider, linearVelocity);
     const shapeColliderTranslated = {
       ...shapeCollider,
       _position: newTranslation._position,
@@ -80,7 +86,7 @@ export function castShape(
 export const castShapeByQuery = (
   query: Query<[typeof ColliderBody]>,
   shape: SchemaToType<typeof Collider>[],
-  velocity: Vector2,
+  linearVelocity: Vector2,
   opts: {
     stopOnFirst?: boolean;
     notSelf?: Entity;
@@ -110,7 +116,7 @@ export const castShapeByQuery = (
       }
     }
 
-    const result = castShape(colliderBodies, shape, velocity, opts);
+    const result = castShape(colliderBodies, shape, linearVelocity, opts);
 
     if (result.length > 0) {
       results.push(...result);

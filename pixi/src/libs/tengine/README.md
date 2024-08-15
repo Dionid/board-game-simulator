@@ -180,15 +180,6 @@ Most of other components will depend on these ones
 1. Math
     1. Dot product – https://www.youtube.com/watch?v=LyGKycYT2v0
 
-# Questions
+## Shape Casting
 
-1. Units (https://rapier.rs/docs/user_guides/rust/common_mistakes#why-is-everything-moving-in-slow-motion)
-1. Depth Sorting
-1. Add Scene (world of one of the stages) to Game (like for multiple levels)
-1. ...
-
-## Problems
-
-1. Optimization
-    1. Если мне приходится каждый раз перерасчитывать все с 0, то я буду тратить
-    кучу ресурсов на это.
+Problem: 

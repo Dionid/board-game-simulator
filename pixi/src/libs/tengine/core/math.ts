@@ -26,6 +26,8 @@ export function multV2(v: Vector2, scalar: number): Vector2 {
   };
 }
 
+export const scaleV2 = multV2;
+
 export function mutMultV2(v: Vector2, scalar: number) {
   v.x *= scalar;
   v.y *= scalar;
