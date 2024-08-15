@@ -19,6 +19,9 @@ export function castShape(
   linearVelocity: Vector2,
   opts: {
     maxToi?: number;
+    onlySolid?: boolean;
+    filterBody?: (body: SchemaToType<typeof ColliderBody>) => boolean;
+    filterCollider?: (body: SchemaToType<typeof Collider>) => boolean;
   } = {}
 ): CastingResult[] {
   const result: CastingResult[] = [];
@@ -65,8 +68,20 @@ export function castShape(
       for (let i = 0; i < bodies.length; i++) {
         const otherBody = bodies[i];
 
+        if (opts.filterBody && !opts.filterBody(otherBody)) {
+          continue;
+        }
+
         for (let j = 0; j < otherBody.parts.length; j++) {
           const otherCollider = otherBody.parts[j];
+
+          if (opts.onlySolid && otherCollider.type !== 'solid') {
+            continue;
+          }
+
+          if (opts.filterCollider && !opts.filterCollider(otherCollider)) {
+            continue;
+          }
 
           let collision = collides(shapeColliderTranslated, otherCollider);
 
@@ -94,6 +109,9 @@ export const castShapeByQuery = (
   opts: {
     notSelf?: Entity;
     maxToi?: number;
+    onlySolid?: boolean;
+    filterBody?: (body: SchemaToType<typeof ColliderBody>) => boolean;
+    filterCollider?: (body: SchemaToType<typeof Collider>) => boolean;
   } = {}
 ): CastingResult[] => {
   const results = [];

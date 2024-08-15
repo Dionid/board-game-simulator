@@ -135,7 +135,7 @@ export const playerMovement = (
       }
     }
 
-    moveAndSlide(
+    const correctedVelocity = moveAndSlide(
       charController,
       deltaTime,
       elapsedTime,
@@ -145,6 +145,9 @@ export const playerMovement = (
       position,
       velocity
     );
+
+    velocity.x = correctedVelocity.x;
+    velocity.y = correctedVelocity.y;
   };
 };
 

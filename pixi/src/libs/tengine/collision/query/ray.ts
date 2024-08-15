@@ -196,6 +196,7 @@ export function castRayClosest(
   ray: Ray,
   opts: {
     maxDistance?: number;
+    onlySolid?: boolean;
     filterBody?: (body: SchemaToType<typeof ColliderBody>) => boolean;
     filterCollider?: (body: SchemaToType<typeof Collider>) => boolean;
   } = {}
@@ -217,26 +218,34 @@ export function castRayClosest(
   }
 
   for (let i = 0; i < bodies.length; i++) {
-    const body = bodies[i];
+    const otherBody = bodies[i];
 
-    if (opts.filterBody && !opts.filterBody(body)) {
+    if (opts.filterBody && !opts.filterBody(otherBody)) {
       continue;
     }
 
-    for (let j = 0; j < body.parts.length; j++) {
-      const collider = body.parts[j];
+    for (let j = 0; j < otherBody.parts.length; j++) {
+      const otherCollider = otherBody.parts[j];
 
-      if (opts.filterCollider && !opts.filterCollider(collider)) {
+      if (opts.filterCollider && !opts.filterCollider(otherCollider)) {
         continue;
       }
 
-      if (collider.shape.type === 'circle') {
-        const point = rayCircleIntersectionPoint(ray, collider._position, collider.shape.radius);
+      if (opts.onlySolid && otherCollider.type !== 'solid') {
+        continue;
+      }
+
+      if (otherCollider.shape.type === 'circle') {
+        const point = rayCircleIntersectionPoint(
+          ray,
+          otherCollider._position,
+          otherCollider.shape.radius
+        );
         if (point && (!closest || point.distance < closest.point.distance)) {
           closest = {
             point,
-            body,
-            collider,
+            body: otherBody,
+            collider: otherCollider,
             bodyIndex: i,
             colliderIndex: j,
           };
@@ -245,7 +254,7 @@ export function castRayClosest(
       }
 
       // TODO: Add support for circle collision
-      const vertices = collider._vertices;
+      const vertices = otherCollider._vertices;
       if (vertices.length < 2) {
         continue;
       }
@@ -254,8 +263,8 @@ export function castRayClosest(
       if (point && (!closest || point.distance < closest.point.distance)) {
         closest = {
           point,
-          body,
-          collider,
+          body: otherBody,
+          collider: otherCollider,
           bodyIndex: i,
           colliderIndex: j,
         };
@@ -272,6 +281,7 @@ export const castRayClosestByQuery = (
   opts: {
     notSelf?: Entity;
     maxDistance?: number;
+    onlySolid?: boolean;
     filterBody?: (body: SchemaToType<typeof ColliderBody>) => boolean;
     filterCollider?: (body: SchemaToType<typeof Collider>) => boolean;
   } = {}

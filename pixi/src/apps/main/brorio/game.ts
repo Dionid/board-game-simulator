@@ -11,6 +11,7 @@ import {
   collisionStartedTopic,
   filterCollisionEvents,
   penetrationResolution,
+  rectangleColliderComponent,
   transformCollider,
 } from 'libs/tengine/collision';
 import { addNewViews, drawViews, View } from 'libs/tengine/render';
@@ -140,12 +141,18 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
   const playerRadius = 7;
   setComponent(game.essence, playerEntity, ColliderBody, {
     parts: [
-      circleColliderComponent({
+      // circleColliderComponent({
+      //   parentPosition: playerPosition,
+      //   radius: playerRadius - 1,
+      //   mass: 1,
+      //   offset: { x: 0, y: 0 },
+      //   tags: ['hitbox'],
+      // }),
+      rectangleColliderComponent({
         parentPosition: playerPosition,
-        radius: playerRadius - 1,
+        size: characterSize,
         mass: 1,
         offset: { x: 0, y: 0 },
-        tags: ['hitbox'],
       }),
     ],
   });

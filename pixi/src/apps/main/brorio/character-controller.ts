@@ -97,7 +97,7 @@ export function moveAndSlide(
     { x: 0, y: characterCurrentVelocity.y },
     {
       notSelf: characterEntity,
-      maxToi: 5,
+      maxToi: 1,
     }
   );
 
@@ -116,8 +116,14 @@ export function moveAndSlide(
     characterCurrentVelocity,
     {
       notSelf: characterEntity,
+      maxToi: 1,
+      onlySolid: true,
     }
   );
+
+  // if (collisions.length) {
+  //   console.log('collisions', collisions);
+  // }
 
   // if (characterCurrentVelocity.x !== 0) {
   // const xDirectionSign = Math.sign(characterCurrentVelocity.x);
