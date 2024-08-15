@@ -33,7 +33,8 @@ export function raySegmentIntersectionPoint(
   ray: Ray,
   p1: Vector2,
   p2: Vector2,
-  smallestR?: number
+  smallestR?: number,
+  maxDistance?: number
 ): (Vector2 & { r: number }) | null {
   const ror = ray.origin;
   const rdr = ray.direction;
@@ -45,6 +46,10 @@ export function raySegmentIntersectionPoint(
 
   const r = ((p2.x - p1.x) * (ror.y - p1.y) - (ror.x - p1.x) * (p2.y - p1.y)) / denominator;
   if (r + eps < 0) {
+    return null;
+  }
+
+  if (maxDistance !== undefined && r - eps > maxDistance) {
     return null;
   }
 
@@ -64,10 +69,20 @@ export function raySegmentIntersectionPoint(
   };
 }
 
-export function doesRayIntersectsPolygon(ray: Ray, vertices: Vertices2): boolean {
+export function doesRayIntersectsPolygon(
+  ray: Ray,
+  vertices: Vertices2,
+  maxDistance?: number
+): boolean {
   for (let i = 0; i < vertices.length; i++) {
     const nextIndex = (i + 1) % vertices.length;
-    const point = raySegmentIntersectionPoint(ray, vertices[i], vertices[nextIndex]);
+    const point = raySegmentIntersectionPoint(
+      ray,
+      vertices[i],
+      vertices[nextIndex],
+      undefined,
+      maxDistance
+    );
     if (point) {
       return true;
     }
@@ -77,32 +92,24 @@ export function doesRayIntersectsPolygon(ray: Ray, vertices: Vertices2): boolean
 
 export function closestRaySegmentIntersectionPoint(
   ray: Ray,
-  vertices: Vertices2
+  vertices: Vertices2,
+  maxDistance?: number
 ): (Vector2 & { r: number }) | null {
   let closest: (Vector2 & { r: number }) | null = null;
   for (let i = 0; i < vertices.length; i++) {
     const nextIndex = (i + 1) % vertices.length;
-    const point = raySegmentIntersectionPoint(ray, vertices[i], vertices[nextIndex], closest?.r);
+    const point = raySegmentIntersectionPoint(
+      ray,
+      vertices[i],
+      vertices[nextIndex],
+      closest?.r,
+      maxDistance
+    );
     if (point && (!closest || point.r < closest.r)) {
       closest = point;
     }
   }
   return closest;
-}
-
-export function rayVerticesIntersectionPoint(
-  ray: Ray,
-  vertices: Vertices2
-): (Vector2 & { r: number })[] {
-  const result = [];
-  for (let i = 0; i < vertices.length; i++) {
-    const nextIndex = (i + 1) % vertices.length;
-    const point = raySegmentIntersectionPoint(ray, vertices[i], vertices[nextIndex]);
-    if (point) {
-      result.push(point);
-    }
-  }
-  return result;
 }
 
 type CastingResult = {
@@ -113,71 +120,13 @@ type CastingResult = {
   colliderIndex: number;
 };
 
-export function castRay(
-  bodies: SchemaToType<typeof ColliderBody>[],
-  ray: Ray,
-  opts: {
-    filterBody?: (body: SchemaToType<typeof ColliderBody>) => boolean;
-    filterCollider?: (body: SchemaToType<typeof Collider>) => boolean;
-  } = {}
-): CastingResult[] {
-  let result: CastingResult[] = [];
-
-  if (DEBUG.isActive) {
-    globalDebugGraphicsDeferred.push((graphics, options) => {
-      if (options.castings) {
-        graphics.moveTo(ray.origin.x, ray.origin.y);
-        graphics.lineTo(
-          ray.origin.x + ray.direction.x * 1000,
-          ray.origin.y + ray.direction.x * 1000
-        );
-        graphics.stroke({ color: 'green' });
-      }
-    });
-  }
-
-  for (let i = 0; i < bodies.length; i++) {
-    const body = bodies[i];
-
-    if (opts.filterBody && !opts.filterBody(body)) {
-      continue;
-    }
-
-    for (let j = 0; j < body.parts.length; j++) {
-      const collider = body.parts[j];
-
-      // TODO: Add support for circle collision
-      const vertices = collider._vertices;
-      if (vertices.length < 2) {
-        continue;
-      }
-
-      if (opts.filterCollider && !opts.filterCollider(collider)) {
-        continue;
-      }
-
-      const point = closestRaySegmentIntersectionPoint(ray, vertices);
-      if (point) {
-        result.push({
-          point,
-          body,
-          collider,
-          bodyIndex: i,
-          colliderIndex: j,
-        });
-      }
-    }
-  }
-
-  return result;
-}
-
 // # Cast Ray take Closest
 
 export function castRayClosest(
   bodies: SchemaToType<typeof ColliderBody>[],
   ray: Ray,
   opts: {
+    maxDistance?: number;
     filterBody?: (body: SchemaToType<typeof ColliderBody>) => boolean;
     filterCollider?: (body: SchemaToType<typeof Collider>) => boolean;
   } = {}
@@ -188,9 +137,10 @@ export function castRayClosest(
     globalDebugGraphicsDeferred.push((graphics, options) => {
       if (options.castings) {
         graphics.moveTo(ray.origin.x, ray.origin.y);
+        const maxDistance = opts.maxDistance ?? 1000;
         graphics.lineTo(
-          ray.origin.x + ray.direction.x * 1000,
-          ray.origin.y + ray.direction.y * 1000
+          ray.origin.x + ray.direction.x * maxDistance,
+          ray.origin.y + ray.direction.y * maxDistance
         );
         graphics.stroke({ color: 'green' });
       }
@@ -217,7 +167,7 @@ export function castRayClosest(
         continue;
       }
 
-      const point = closestRaySegmentIntersectionPoint(ray, vertices);
+      const point = closestRaySegmentIntersectionPoint(ray, vertices, opts.maxDistance);
       if (point && (!closest || point.r < closest.point.r)) {
         closest = {
           point,
@@ -238,6 +188,7 @@ export const castRayClosestByQuery = (
   ray: Ray,
   opts: {
     notSelf?: Entity;
+    maxDistance?: number;
     filterBody?: (body: SchemaToType<typeof ColliderBody>) => boolean;
     filterCollider?: (body: SchemaToType<typeof Collider>) => boolean;
   } = {}
