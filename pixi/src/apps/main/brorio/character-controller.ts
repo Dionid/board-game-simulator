@@ -6,38 +6,7 @@ import {
   rectangleColliderComponent,
 } from 'libs/tengine/collision';
 import { Size2, Vector2 } from 'libs/tengine/core';
-
-// export function castShapeAndTakeSolidMaxOverlap(
-//   query: Query<[typeof ColliderBody]>,
-//   shape: SchemaToType<typeof ColliderBody>,
-//   velocity: Vector2,
-//   opts: {
-//     width?: number;
-//     stopOnFirst?: boolean;
-//     notSelf?: Entity;
-//   } = {}
-// ): [0, null, CastingResult[]] | [number, CastingResult, CastingResult[]] {
-//   const collisionsList = castShapeByQuery(query, shape, velocity, opts);
-
-//   let maxOverlap = 0;
-//   let maxOverlapCollision = null;
-
-//   for (const collision of collisionsList) {
-//     if (collision.collider.type !== 'solid') {
-//       continue;
-//     }
-//     if (collision.overlap > maxOverlap) {
-//       maxOverlap = collision.overlap;
-//       maxOverlapCollision = collision;
-//     }
-//   }
-
-//   if (maxOverlap === 0 || maxOverlapCollision === null) {
-//     return [0, null, collisionsList];
-//   }
-
-//   return [maxOverlap, maxOverlapCollision, collisionsList];
-// }
+import { bb2FromVert2List } from 'libs/tengine/core/bounding-box';
 
 export type CharacterController = {
   characterEntity: Entity;
@@ -73,11 +42,9 @@ export function newCharacterController(
 
 export function moveAndSlide(
   cc: CharacterController,
-  deltaTime: number,
   elapsedTime: number,
   colliderBodiesQuery: Query<[typeof ColliderBody]>,
   characterShape: SchemaToType<typeof Collider>[],
-  characterSize: Size2,
   characterCurrentPosition: Vector2,
   characterCurrentVelocity: Vector2,
   opts: {
@@ -98,19 +65,29 @@ export function moveAndSlide(
   };
 
   // # Ground check
+
+  const shapeBb = bb2FromVert2List(characterShape.map((collider) => collider._vertices));
+  const width = shapeBb.max.x - shapeBb.min.x;
+  const height = shapeBb.max.y - shapeBb.min.y;
+
   const groundCollision = castShapeByQuery(
     colliderBodiesQuery,
     [
       rectangleColliderComponent({
         position: {
           x: characterCurrentPosition.x,
-          y: characterCurrentPosition.y + characterSize.height / 2 + skinWidth,
+          y: characterCurrentPosition.y + (height / 2 + skinWidth) * -up.y,
         },
-        anchor: { x: 0.5, y: 0 },
-        size: { width: characterSize.width + skinWidth, height: groundCheckZoneHeight },
+        size: {
+          width: width,
+          height: groundCheckZoneHeight,
+        },
       }),
     ],
-    { x: 0, y: characterCurrentVelocity.y },
+    {
+      x: -up.x * groundCheckZoneHeight,
+      y: -up.y * groundCheckZoneHeight,
+    },
     {
       notSelf: characterEntity,
       maxToi: 1,

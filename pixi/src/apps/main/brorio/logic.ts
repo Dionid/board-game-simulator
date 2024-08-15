@@ -112,11 +112,9 @@ export const playerMovement = (
 
     const correctedVelocity = moveAndSlide(
       charController,
-      deltaTime,
       elapsedTime,
       colliderBodiesQ,
       colliderBody.parts,
-      characterSize,
       position,
       velocity
     );
