@@ -49,15 +49,25 @@ export type CharacterController = {
   groundCheckZoneHeight: number;
 };
 
-export function newCharacterController(characterEntity: Entity): CharacterController {
+export function newCharacterController(
+  characterEntity: Entity,
+  opts: {
+    up?: Vector2;
+    skinWidth?: number;
+    groundCheckZoneHeight?: number;
+    isGrounded?: boolean;
+    wasGrounded?: boolean;
+    lastGroundedTime?: number;
+  } = {}
+): CharacterController {
   return {
     characterEntity,
-    isGrounded: false,
-    wasGrounded: false,
-    lastGroundedTime: 0,
-    up: { x: 0, y: -1 },
-    skinWidth: 0.1,
-    groundCheckZoneHeight: 5,
+    isGrounded: opts.isGrounded ?? false,
+    wasGrounded: opts.wasGrounded ?? false,
+    lastGroundedTime: opts.lastGroundedTime ?? 0,
+    up: opts.up ?? { x: 0, y: -1 },
+    skinWidth: opts.skinWidth ?? 0.1,
+    groundCheckZoneHeight: opts.groundCheckZoneHeight ?? 1,
   };
 }
 
@@ -82,6 +92,12 @@ export function moveAndSlide(
   const groundCheckZoneHeight = opts.groundCheckZoneHeight ?? cc.groundCheckZoneHeight;
   const characterEntity = opts.characterEntity ?? cc.characterEntity;
 
+  const correctedVelocity = {
+    x: characterCurrentVelocity.x,
+    y: characterCurrentVelocity.y,
+  };
+
+  // # Ground check
   const groundCollision = castShapeByQuery(
     colliderBodiesQuery,
     [
@@ -107,9 +123,7 @@ export function moveAndSlide(
   }
   cc.isGrounded = isGrounded;
 
-  // const xDirectionSign = Math.sign(characterCurrentVelocity.x);
-  // const yDirectionSign = Math.sign(characterCurrentVelocity.y);
-
+  // # Collisions check
   const collisions = castShapeByQuery(
     colliderBodiesQuery,
     characterShape,
@@ -121,9 +135,10 @@ export function moveAndSlide(
     }
   );
 
-  // if (collisions.length) {
-  //   console.log('collisions', collisions);
-  // }
+  for (const collision of collisions) {
+    correctedVelocity.x += collision.overlap * collision.axis.x;
+    correctedVelocity.y += collision.overlap * collision.axis.y;
+  }
 
   // if (characterCurrentVelocity.x !== 0) {
   // const xDirectionSign = Math.sign(characterCurrentVelocity.x);
@@ -185,5 +200,5 @@ export function moveAndSlide(
 
   cc.wasGrounded = isGrounded;
 
-  return characterCurrentVelocity;
+  return correctedVelocity;
 }

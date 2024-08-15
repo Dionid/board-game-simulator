@@ -92,33 +92,8 @@ export const playerMovement = (
     const directionX = getXDirection(game.input.keyboard);
     velocity.x = speed.value * directionX * deltaTime;
 
-    // # Ground
-    // const groundCollision = castShapeByQuery(
-    //   colliderBodiesQ,
-    //   [
-    //     rectangleColliderComponent({
-    //       parentPosition: {
-    //         x: position.x,
-    //         y: position.y + characterSize.height / 2,
-    //       },
-    //       anchor: { x: 0.5, y: 0 },
-    //       size: { width: characterSize.width, height: 5 },
-    //     }),
-    //   ],
-    //   { x: 0, y: velocity.y },
-    //   {
-    //     notSelf: playerEntity,
-    //     stopOnFirst: true,
-    //   }
-    // );
-
-    // const isGrounded = groundCollision.length > 0;
-
-    if (charController.isGrounded) {
-      velocity.y = 0;
-    } else {
-      velocity.y += 0.5;
-    }
+    // # Apply gravity
+    velocity.y += 0.5;
 
     const jump = game.input.keyboard.keyDown['w'];
     if (jump) {
