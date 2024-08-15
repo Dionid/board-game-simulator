@@ -95,7 +95,7 @@ export function moveAndSlide(
           y: characterCurrentPosition.y + (height / 2 + skinWidth) * -up.y,
         },
         size: {
-          width: width,
+          width: width - skinWidth * 2,
           height: groundCheckZoneHeight,
         },
       }),
