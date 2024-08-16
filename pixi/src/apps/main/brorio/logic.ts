@@ -95,7 +95,7 @@ export const playerMovement = (
     velocity.x = speed.value * directionX * deltaTime;
 
     // # Apply gravity
-    velocity.y += 0.5;
+    velocity.y += 0.5 * deltaTime;
 
     const jump = game.input.keyboard.keyDown['w'];
     if (jump) {
@@ -103,12 +103,19 @@ export const playerMovement = (
     }
 
     // TODO: change to frame time not ms time
-    if (jump || elapsedTime - lastJumpTime < 50) {
-      if (
-        charController.isGrounded ||
-        (velocity.y > 0 && elapsedTime - charController.lastGroundedTime < 75)
-      ) {
-        velocity.y = -10 * deltaTime;
+    // if (jump || elapsedTime - lastJumpTime < 50) {
+    //   if (
+    //     charController.isGrounded ||
+    //     (velocity.y > 0 && elapsedTime - charController.lastGroundedTime < 75)
+    //   ) {
+    //     velocity.y = -10 * deltaTime;
+    //   }
+    // }
+
+    if (jump) {
+      if (charController.isGrounded) {
+        console.log('jump');
+        velocity.y = -8 * deltaTime;
       }
     }
 

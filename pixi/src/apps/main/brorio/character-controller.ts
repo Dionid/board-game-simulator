@@ -85,14 +85,16 @@ export function moveAndSlide(
   const width = shapeBb.max.x - shapeBb.min.x;
   const height = shapeBb.max.y - shapeBb.min.y;
 
-  // QUESTION: maybe check by next position not current?
   const groundCollision = castShapeByQuery(
     colliderBodiesQuery,
     [
       rectangleColliderComponent({
         position: {
-          x: characterCurrentPosition.x,
-          y: characterCurrentPosition.y + (height / 2 + skinWidth) * -up.y,
+          x: characterCurrentPosition.x + characterCurrentVelocity.x,
+          y:
+            characterCurrentPosition.y +
+            (height / 2 + skinWidth) * -up.y +
+            characterCurrentVelocity.y,
         },
         size: {
           width: width - skinWidth * 2,
