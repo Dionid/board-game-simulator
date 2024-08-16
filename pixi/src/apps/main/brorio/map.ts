@@ -1,9 +1,5 @@
 import { spawnEntity, setComponent } from 'libs/tecs';
-import {
-  verticesColliderComponent,
-  rectangleColliderComponent,
-  ColliderBody,
-} from 'libs/tengine/collision';
+import { verticesCollider, rectangleCollider, ColliderBody } from 'libs/tengine/collision';
 import { Mass, Position2 } from 'libs/tengine/core';
 import { Game } from 'libs/tengine/game';
 import { Container, Assets, Texture, TilingSprite } from 'pixi.js';
@@ -121,7 +117,7 @@ export const initMap = async (game: Game) => {
 
       if ('polygon' in object) {
         parts.push(
-          verticesColliderComponent({
+          verticesCollider({
             parentPosition: position,
             vertices: object.polygon as any,
             anchor: { x: 0, y: 0 },
@@ -131,7 +127,7 @@ export const initMap = async (game: Game) => {
         );
       } else {
         parts.push(
-          rectangleColliderComponent({
+          rectangleCollider({
             position: position,
             size: {
               width: object.width,

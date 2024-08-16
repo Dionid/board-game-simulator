@@ -3,7 +3,7 @@ import {
   castShapeByQuery,
   Collider,
   ColliderBody,
-  rectangleColliderComponent,
+  rectangleCollider,
 } from 'libs/tengine/collision';
 import { Vector2 } from 'libs/tengine/core';
 import { bb2FromVert2List } from 'libs/tengine/core/bounding-box';
@@ -88,7 +88,7 @@ export function moveAndSlide(
   const groundCollision = castShapeByQuery(
     colliderBodiesQuery,
     [
-      rectangleColliderComponent({
+      rectangleCollider({
         position: {
           x: characterCurrentPosition.x + characterCurrentVelocity.x,
           y:

@@ -5,13 +5,13 @@ import { emit, registerSystem, registerTopic, setComponent, spawnEntity } from '
 import {
   awakening,
   checkNarrowCollisionSimple,
-  circleColliderComponent,
+  circleCollider,
   ColliderBody,
   CollisionsMonitoring,
   collisionStartedTopic,
   filterCollisionEvents,
   penetrationResolution,
-  rectangleColliderComponent,
+  rectangleCollider,
   transformCollider,
 } from 'libs/tengine/collision';
 import { addNewViews, drawViews, View } from 'libs/tengine/render';
@@ -148,7 +148,7 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
       //   offset: { x: 0, y: 0 },
       //   tags: ['hitbox'],
       // }),
-      rectangleColliderComponent({
+      rectangleCollider({
         position: playerPosition,
         size: characterSize,
         mass: 1,
@@ -179,7 +179,7 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
   setComponent(game.essence, circleEntity, Position2, circlePosition);
   setComponent(game.essence, circleEntity, ColliderBody, {
     parts: [
-      circleColliderComponent({
+      circleCollider({
         parentPosition: circlePosition,
         radius: playerRadius - 1,
         mass: 1,

@@ -29,16 +29,16 @@ import {
   transformCollider,
   checkNarrowCollisionSimple,
   ColliderBody,
-  rectangleColliderComponent,
+  rectangleCollider,
   Impenetrable,
-  circleColliderComponent,
-  verticesColliderComponent,
-  lineColliderComponent,
-  capsuleColliderComponent,
+  circleCollider,
+  verticesCollider,
+  lineCollider,
+  capsuleCollider,
   filterCollisionEvents,
-  isoscelesRightTriangleColliderComponent,
-  centroidTriangleColliderComponent,
-  polygonColliderComponent,
+  isoscelesRightTriangleCollider,
+  centroidTriangleCollider,
+  polygonCollider,
 } from 'libs/tengine/collision';
 import {
   applyRigidBodyAccelerationToVelocity,
@@ -122,7 +122,7 @@ export async function initPongGame(parentElement: HTMLElement) {
     // setComponent(game.essence, boundaryEntity, Impenetrable);
     setComponent(game.essence, boundaryEntity, ColliderBody, {
       parts: [
-        lineColliderComponent({
+        lineCollider({
           parentPosition: boundary,
           parentAngle: 0,
           type: 'solid',
@@ -200,7 +200,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   // setComponent(game.essence, playerEntity, Impenetrable);
   setComponent(game.essence, playerEntity, ColliderBody, {
     parts: [
-      rectangleColliderComponent({
+      rectangleCollider({
         position: playerPosition,
         parentAngle: playerAngle,
         type: 'solid',
@@ -277,7 +277,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   // setComponent(game.essence, enemyEntity, Impenetrable);
   setComponent(game.essence, enemyEntity, ColliderBody, {
     parts: [
-      verticesColliderComponent({
+      verticesCollider({
         parentPosition: enemyPosition,
         parentAngle: enemyAngle,
         type: 'solid',
@@ -317,7 +317,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, wallEntity, CollisionsMonitoring);
   setComponent(game.essence, wallEntity, ColliderBody, {
     parts: [
-      lineColliderComponent({
+      lineCollider({
         parentPosition: wallPosition,
         parentAngle: 0,
         type: 'solid',
@@ -390,7 +390,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   // setComponent(game.essence, ballEntity, Impenetrable);
   setComponent(game.essence, ballEntity, ColliderBody, {
     parts: [
-      circleColliderComponent({
+      circleCollider({
         parentPosition: ballPosition,
         parentAngle: 0,
         type: 'solid',
@@ -450,7 +450,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, capsuleEntity, CollisionsMonitoring);
   setComponent(game.essence, capsuleEntity, ColliderBody, {
     parts: [
-      ...capsuleColliderComponent({
+      ...capsuleCollider({
         parentPosition: capsulePosition,
         parentAngle: capsuleAngle,
         type: 'solid',
@@ -501,7 +501,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, isoscelesRightTriangleColliderEntity, CollisionsMonitoring);
   setComponent(game.essence, isoscelesRightTriangleColliderEntity, ColliderBody, {
     parts: [
-      isoscelesRightTriangleColliderComponent({
+      isoscelesRightTriangleCollider({
         parentPosition: isoscelesRightTriangleColliderPosition,
         parentAngle: isoscelesRightTriangleColliderAngle,
         type: 'solid',
@@ -549,7 +549,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, triangleEntity, CollisionsMonitoring);
   setComponent(game.essence, triangleEntity, ColliderBody, {
     parts: [
-      verticesColliderComponent({
+      verticesCollider({
         parentPosition: trianglePosition,
         parentAngle: triangleAngle,
         type: 'solid',
@@ -610,7 +610,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, centroidTriangleEntity, CollisionsMonitoring);
   setComponent(game.essence, centroidTriangleEntity, ColliderBody, {
     parts: [
-      centroidTriangleColliderComponent({
+      centroidTriangleCollider({
         parentPosition: centroidTrianglePosition,
         parentAngle: centroidTriangleAngle,
         type: 'solid',
@@ -634,7 +634,7 @@ export async function initPongGame(parentElement: HTMLElement) {
           y: 0.5,
         },
       }),
-      centroidTriangleColliderComponent({
+      centroidTriangleCollider({
         parentPosition: centroidTrianglePosition,
         parentAngle: centroidTriangleAngle,
         type: 'solid',
@@ -693,7 +693,7 @@ export async function initPongGame(parentElement: HTMLElement) {
   setComponent(game.essence, polygonEntity, CollisionsMonitoring);
   setComponent(game.essence, polygonEntity, ColliderBody, {
     parts: [
-      polygonColliderComponent({
+      polygonCollider({
         parentPosition: polygonPosition,
         parentAngle: polygonAngle,
         type: 'solid',

@@ -60,7 +60,7 @@ export const Collider = newSchema(
   }
 );
 
-export function rectangleColliderComponent(opts: {
+export function rectangleCollider(opts: {
   position: Vector2; // TODO: remove this
   size: { width: number; height: number };
   parentAngle?: number; // TODO: remove this
@@ -250,7 +250,7 @@ export function rectangleColliderComponentSE(opts: {
   return component;
 }
 
-export function lineColliderComponent(opts: {
+export function lineCollider(opts: {
   parentPosition: Vector2; // TODO: remove this
   length: number;
   parentAngle: number; // TODO: remove this
@@ -321,7 +321,7 @@ export function lineColliderComponent(opts: {
   return component;
 }
 
-export function isoscelesRightTriangleColliderComponent(opts: {
+export function isoscelesRightTriangleCollider(opts: {
   parentPosition: Vector2; // TODO: remove this
   length: number;
   parentAngle?: number; // TODO: remove this
@@ -399,7 +399,7 @@ export function isoscelesRightTriangleColliderComponent(opts: {
   return component;
 }
 
-export function centroidTriangleColliderComponent(opts: {
+export function centroidTriangleCollider(opts: {
   parentPosition: Vector2; // TODO: remove this
   a: Vertex2;
   b: Vertex2;
@@ -473,7 +473,7 @@ export function centroidTriangleColliderComponent(opts: {
   return component;
 }
 
-export function verticesColliderComponent(opts: {
+export function verticesCollider(opts: {
   parentPosition: Vector2; // TODO: remove this
   parentAngle?: number; // TODO: remove this
   type?: 'solid' | 'sensor';
@@ -562,7 +562,7 @@ export function verticesColliderComponent(opts: {
   return component;
 }
 
-export function circleColliderComponent(opts: {
+export function circleCollider(opts: {
   parentPosition: Vector2; // TODO: remove this
   radius: number;
   parentAngle?: number;
@@ -613,7 +613,7 @@ export function circleColliderComponent(opts: {
   };
 }
 
-export function polygonColliderComponent(opts: {
+export function polygonCollider(opts: {
   parentPosition: Vector2; // TODO: remove this
   radius: number;
   sides: number;
@@ -636,7 +636,7 @@ export function polygonColliderComponent(opts: {
   const { sides, radius } = opts;
 
   if (sides < 3) {
-    return circleColliderComponent(opts);
+    return circleCollider(opts);
   }
 
   const position = {
@@ -692,7 +692,7 @@ export function polygonColliderComponent(opts: {
   };
 }
 
-export function capsuleColliderComponent(opts: {
+export function capsuleCollider(opts: {
   parentPosition: Vector2; // TODO: remove this
   parentAngle?: number; // TODO: remove this
   type?: 'solid' | 'sensor';
@@ -713,7 +713,7 @@ export function capsuleColliderComponent(opts: {
     height: opts.length - opts.radius * 2,
   };
 
-  const rectangle = rectangleColliderComponent({
+  const rectangle = rectangleCollider({
     position: opts.parentPosition,
     parentAngle: opts.parentAngle,
     type,
@@ -730,7 +730,7 @@ export function capsuleColliderComponent(opts: {
   // # to make circles go a little deeper into rectangle
   const circleThreshold = 0.5;
 
-  const firstCircle = circleColliderComponent({
+  const firstCircle = circleCollider({
     parentPosition: opts.parentPosition,
     type,
     parentAngle,
@@ -743,7 +743,7 @@ export function capsuleColliderComponent(opts: {
     radius: opts.radius,
   });
 
-  const secondCircle = circleColliderComponent({
+  const secondCircle = circleCollider({
     parentPosition: opts.parentPosition,
     type,
     parentAngle,
