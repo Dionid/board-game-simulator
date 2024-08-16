@@ -26,6 +26,7 @@ import {
 
 export const DeathZone = newTag();
 export const Player = newTag();
+export const Ground = newTag();
 
 const getXDirection = (keyboard: KeyBoardInput): number => {
   if (keyboard.keyDown['ArrowRight'] || keyboard.keyDown['d']) {

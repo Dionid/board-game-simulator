@@ -44,7 +44,6 @@ import {
   resetMass,
   Mass,
 } from 'libs/tengine/core';
-import { GroundDetection } from 'libs/tengine/controls';
 import { addCollisionMassToMass } from 'libs/tengine/collision/mass';
 
 export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
@@ -167,7 +166,6 @@ export async function initSuperMarioLikeGame(parentElement: HTMLElement) {
   setComponent(game.essence, playerEntity, AffectedByGravity, {
     scale: 0,
   });
-  setComponent(game.essence, playerEntity, GroundDetection);
 
   // # Circle collision
   const circleEntity = spawnEntity(game.essence);

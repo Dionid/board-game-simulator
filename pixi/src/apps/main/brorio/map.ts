@@ -3,10 +3,9 @@ import { verticesCollider, rectangleCollider, ColliderBody } from 'libs/tengine/
 import { Mass, Position2 } from 'libs/tengine/core';
 import { Game } from 'libs/tengine/game';
 import { Container, Assets, Texture, TilingSprite } from 'pixi.js';
-import { DeathZone } from './logic';
+import { DeathZone, Ground } from './logic';
 import mapData from './SMC.json';
 import { RigidBody, Static } from 'libs/tengine/physics';
-import { Ground } from 'libs/tengine/controls';
 
 export const initMap = async (game: Game) => {
   const map = {
