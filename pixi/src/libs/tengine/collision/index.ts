@@ -8,4 +8,5 @@ export * from './penetration-resolution';
 export * from './resolvers';
 export * from './query';
 export * from './awakening';
+export * from './collider';
 // export * from './ray';

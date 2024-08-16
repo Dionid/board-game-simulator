@@ -11,7 +11,7 @@ import {
   Vector2,
   Vertices2,
 } from '../core';
-import { Collider } from './components';
+import { Collider } from './collider';
 
 export type SATShape = {
   vertices: Vector2[];

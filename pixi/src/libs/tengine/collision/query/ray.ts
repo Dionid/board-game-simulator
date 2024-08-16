@@ -1,6 +1,6 @@
 import { Entity, hasEntity, Query, SchemaToType, table } from 'libs/tecs';
 import { dotV2, subV2, Vector2, Vertices2 } from '../../core';
-import { Collider, ColliderBody } from '../components';
+import { Collider, ColliderBody } from '../';
 import { DEBUG, globalDebugGraphicsDeferred } from '../../debug';
 
 export type Ray = {

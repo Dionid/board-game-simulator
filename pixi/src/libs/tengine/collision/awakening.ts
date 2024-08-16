@@ -9,8 +9,9 @@ import {
   tryTable,
 } from 'libs/tecs';
 import { Game } from '../game';
-import { Awaken, ColliderBody } from './components';
+import { Awaken } from './components';
 import { Position2, Velocity2 } from '../core';
+import { ColliderBody } from './collider';
 
 export const awakeningQuery = newQuery(ColliderBody, Position2);
 

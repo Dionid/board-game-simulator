@@ -1,6 +1,6 @@
 import { Component } from 'libs/tecs';
 import { circlesCollision } from './checks';
-import { Collider } from './components';
+import { Collider } from './collider';
 import { safeGuard } from 'libs/tecs/switch';
 import { getCircleAxesAndVertices, sat } from './sat';
 import { Axis2 } from '../core';

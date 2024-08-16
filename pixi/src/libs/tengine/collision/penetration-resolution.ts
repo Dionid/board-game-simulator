@@ -2,8 +2,9 @@ import { componentByEntity, registerTopic, System } from 'libs/tecs';
 import { Game } from '../game';
 import { Mass, Position2 } from '../core';
 import { CollidingEvent, immediateColliding } from './topics';
-import { ColliderBody, Impenetrable } from './components';
+import { ColliderBody } from './collider';
 import { resolvePenetration } from './resolvers';
+import { Impenetrable } from './components';
 
 export const penetrationResolution = (game: Game): System => {
   const topic = registerTopic(game.essence, immediateColliding);

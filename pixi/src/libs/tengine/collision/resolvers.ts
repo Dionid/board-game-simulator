@@ -1,5 +1,5 @@
 import { Component } from 'libs/tecs';
-import { ColliderBody } from './components';
+import { ColliderBody } from './collider';
 import { inverseMass } from './math';
 import { Axis2, multV2, mutAddV2, mutSubV2, Position2 } from '../core';
 import { translateCollider } from './collider-transform';

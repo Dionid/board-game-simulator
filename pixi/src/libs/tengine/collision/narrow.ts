@@ -1,10 +1,11 @@
 import { newQuery, registerQuery, Entity, KindToType, System, table, emit } from '../../tecs';
 import { Position2 } from '../core/types';
 import { Game } from '../game';
-import { Awaken, Collider, ColliderBody, CollisionsMonitoring } from './components';
+import { Awaken, CollisionsMonitoring } from './components';
 import { immediateUnfilteredColliding } from './topics';
 import { collides, CollisionResult } from './collision';
 import { Archetype } from 'libs/tecs/archetype';
+import { ColliderBody, Collider } from './collider';
 
 // 1. Get all entities that have CollisionSource + ColliderSet + Position (+ Awaken)
 // 1. Calculate the next position based on the current position + velocity

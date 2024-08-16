@@ -1,5 +1,5 @@
 import { newQuery, registerQuery, System, table } from 'libs/tecs';
-import { ColliderBody } from './components';
+import { ColliderBody } from './collider';
 import { Mass } from '../core';
 import { Game } from '../game';
 

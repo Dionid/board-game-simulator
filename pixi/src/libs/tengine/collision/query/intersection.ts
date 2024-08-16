@@ -1,5 +1,5 @@
 import { Entity, hasEntity, Query, SchemaToType, table } from 'libs/tecs';
-import { ColliderBody, Collider } from '../components';
+import { ColliderBody, Collider } from '../';
 import { collides } from '../collision';
 import { Axis2 } from 'libs/tengine/core';
 

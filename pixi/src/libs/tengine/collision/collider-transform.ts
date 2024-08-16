@@ -9,7 +9,7 @@ import {
   translateV2,
 } from '../core';
 import { Game } from '../game';
-import { Collider, ColliderBody } from './components';
+import { Collider, ColliderBody } from './collider';
 
 export function translateCollider(collider: Component<typeof Collider>, positionDelta: Position2) {
   collider._position.x += positionDelta.x;

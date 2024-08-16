@@ -1,6 +1,6 @@
 import { Entity, KindToType, newTopic } from '../../tecs';
 import { Vector2 } from '../core';
-import { Collider, ColliderBody } from './components';
+import { Collider, ColliderBody } from './collider';
 
 export type CollidingEvent = {
   name: 'colliding';

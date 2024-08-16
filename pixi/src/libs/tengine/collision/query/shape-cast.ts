@@ -1,6 +1,6 @@
 import { Entity, hasEntity, Query, SchemaToType, table } from 'libs/tecs';
 import { Axis2, scaleV2, translateV2, unitV2, Vector2 } from '../../core';
-import { Collider, ColliderBody } from '.././components';
+import { Collider, ColliderBody } from '../';
 import { collides } from '.././collision';
 import { DEBUG, globalDebugGraphicsDeferred } from '../../debug';
 import { colliderTranslation } from '.././collider-transform';
